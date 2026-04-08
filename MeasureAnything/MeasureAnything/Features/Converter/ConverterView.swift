@@ -11,6 +11,8 @@ struct ConverterView: View {
     @FocusState private var valueFieldFocused: Bool
     @State private var showCustomUnitForm = false
     @State private var showFavorites = false
+    @State private var showShareSheet = false
+    @State private var shareActivityItems: [Any] = []
 
     var body: some View {
         NavigationStack {
@@ -64,10 +66,57 @@ struct ConverterView: View {
                     )
                 }
             }
+            .sheet(isPresented: $showShareSheet) {
+                ActivityView(activityItems: shareActivityItems)
+            }
             .task(id: customUnitsSyncToken) {
                 vm.sync(customUnits: customUnits)
             }
         }
+    }
+
+    private var canShareResult: Bool {
+        vm.conversionResult != nil
+            && vm.validationError == nil
+            && vm.fromUnit != nil
+            && vm.toUnit != nil
+    }
+
+    private func shareTextLine() -> String {
+        guard let r = vm.conversionResult,
+              let fromName = vm.fromUnit?.name,
+              let toName = vm.toUnit?.name else { return "" }
+        let input = vm.formatNumberForDisplay(r.inputValue)
+        let output = vm.formatNumberForDisplay(r.outputValue)
+        var s = "\(input) \(fromName) = \(output) \(toName)"
+        if let m = r.memeExplanation, !m.isEmpty {
+            s += "\n\n\(m)"
+        }
+        return s
+    }
+
+    private func presentShareText() {
+        let text = shareTextLine()
+        guard !text.isEmpty else { return }
+        shareActivityItems = [text]
+        showShareSheet = true
+    }
+
+    private func presentShareImage() {
+        guard let r = vm.conversionResult,
+              let fromName = vm.fromUnit?.name,
+              let toName = vm.toUnit?.name else { return }
+        let input = vm.formatNumberForDisplay(r.inputValue)
+        let output = vm.formatNumberForDisplay(r.outputValue)
+        guard let image = ShareImageRenderer.renderCard(
+            inputFormatted: input,
+            fromName: fromName,
+            outputFormatted: output,
+            toName: toName,
+            meme: r.memeExplanation
+        ) else { return }
+        shareActivityItems = [image]
+        showShareSheet = true
     }
 
     private var isCurrentPairAlreadyFavorite: Bool {
@@ -227,11 +276,28 @@ struct ConverterView: View {
 
     private var resultCard: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Result")
-                .font(.caption.weight(.semibold))
-                .foregroundStyle(.secondary)
-                .textCase(.uppercase)
-                .tracking(0.5)
+            HStack(alignment: .center) {
+                Text("Result")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(.secondary)
+                    .textCase(.uppercase)
+                    .tracking(0.5)
+                Spacer()
+                if canShareResult {
+                    Menu {
+                        Button("Share as Text") {
+                            presentShareText()
+                        }
+                        Button("Share as Image") {
+                            presentShareImage()
+                        }
+                    } label: {
+                        Image(systemName: "square.and.arrow.up")
+                            .font(.body.weight(.semibold))
+                    }
+                    .accessibilityLabel("Share result")
+                }
+            }
 
             if let err = vm.validationError {
                 Text(err)
@@ -243,24 +309,13 @@ struct ConverterView: View {
                 let input = vm.formatNumberForDisplay(result.inputValue)
                 let output = vm.formatNumberForDisplay(result.outputValue)
 
-                VStack(alignment: .leading, spacing: 6) {
-                    Text("\(input) \(fromName)")
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-                    Image(systemName: "arrow.down")
-                        .font(.caption.weight(.semibold))
-                        .foregroundStyle(.tertiary)
-                    Text("\(output) \(toName)")
-                        .font(.title2.weight(.semibold))
-                }
-
-                if let meme = result.memeExplanation, !meme.isEmpty {
-                    Divider()
-                    Text(meme)
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
+                ResultCardContent(
+                    inputFormatted: input,
+                    fromName: fromName,
+                    outputFormatted: output,
+                    toName: toName,
+                    meme: result.memeExplanation
+                )
             } else {
                 Text("Choose units and enter a value.")
                     .font(.body)
