@@ -16,26 +16,13 @@ struct ConverterModeDisplay: Equatable {
     var description: String?
 }
 
-/// Display payload for search/browse rows: full taxonomy path without exposing registry types.
-struct TaxonomySearchPathResult: Equatable, Sendable, Identifiable {
+/// One search/browse row: same shape as `TaxonomyPathResult` from the taxonomy package.
+typealias TaxonomyItemSearchResult = TaxonomyPathResult
+
+/// Domain filter option for taxonomy search (parallel to subgenre options).
+struct TaxonomyDomainFilterOption: Equatable, Identifiable, Sendable {
     let id: String
-    /// e.g. `"Measurement / Normal units / Meter"`
-    let pathLine: String
-    let domainTitle: String
-    let subgenreTitle: String
-    let itemTitle: String
-
-    static let pathComponentSeparator = " / "
-}
-
-/// One taxonomy item row returned from search (title + path + components).
-struct TaxonomyItemSearchResult: Equatable, Sendable, Identifiable {
-    var id: String { itemId }
-    let itemId: String
-    let itemTitle: String
-    let pathLine: String
-    let domainTitle: String
-    let subgenreTitle: String
+    let title: String
 }
 
 /// Subgenre choices for the taxonomy search filter menu.
@@ -64,37 +51,26 @@ struct TaxonomyConverterRoute: Equatable {
     }
 }
 
-// MARK: - Match ranking (lower = stronger)
-
-private enum TaxonomySearchMatchTier: Int, Comparable {
-    case exactTitle = 0
-    case prefixTitle = 1
-    case exactSynonym = 2
-    case prefixSynonym = 3
-    case exactTag = 4
-    case prefixTag = 5
-
-    static func < (lhs: TaxonomySearchMatchTier, rhs: TaxonomySearchMatchTier) -> Bool {
-        lhs.rawValue < rhs.rawValue
-    }
-}
-
 /// App-owned entry point for taxonomy: loads `TaxonomyRegistry` once and exposes converter picker data.
 ///
-/// Validation stays in `MeasureAnythingTaxonomy`; this type only reads resolved lists and surfaces load failures.
+/// Validation stays in `MeasureAnythingTaxonomy`; search uses `TaxonomySearchIndex` built from bundled items plus the live unit catalog.
 @MainActor
 final class AppTaxonomyStore: ObservableObject {
     @Published private(set) var loadFailureMessage: String?
 
     private let registry: TaxonomyRegistry?
+    private var searchIndex: TaxonomySearchIndex?
 
     /// Production: load bundled taxonomy.
     init() {
         do {
-            registry = try TaxonomyRegistry()
+            let reg = try TaxonomyRegistry()
+            registry = reg
+            searchIndex = TaxonomySearchIndex(registry: reg, unitCatalog: [])
             loadFailureMessage = nil
         } catch {
             registry = nil
+            searchIndex = nil
             loadFailureMessage = error.localizedDescription
         }
     }
@@ -103,6 +79,20 @@ final class AppTaxonomyStore: ObservableObject {
     init(injectedRegistry: TaxonomyRegistry?, loadFailureMessage: String?) {
         self.registry = injectedRegistry
         self.loadFailureMessage = loadFailureMessage
+        if let reg = injectedRegistry {
+            searchIndex = TaxonomySearchIndex(registry: reg, unitCatalog: [])
+        } else {
+            searchIndex = nil
+        }
+    }
+
+    /// Rebuilds the search index with taxonomy items plus every unit in the conversion registry (deduped by `converterUnitId`).
+    func attachUnitCatalog(_ units: [UnitDefinition]) {
+        guard let reg = registry else {
+            searchIndex = nil
+            return
+        }
+        searchIndex = TaxonomySearchIndex(registry: reg, unitCatalog: units)
     }
 
     /// Category tabs, ordered as in `converterNavigation` (or `UnitCategory.allCases` if absent or load failed).
@@ -134,6 +124,14 @@ final class AppTaxonomyStore: ObservableObject {
         let allowed = Set(UnitCategory.customAllowed)
         let ordered = converterCategories.filter { allowed.contains($0) }
         return ordered.isEmpty ? Array(UnitCategory.customAllowed) : ordered
+    }
+
+    /// Domains for optional search filtering (empty when taxonomy did not load).
+    var searchDomainFilterOptions: [TaxonomyDomainFilterOption] {
+        guard let reg = registry else { return [] }
+        return reg.domains
+            .map { TaxonomyDomainFilterOption(id: $0.id, title: $0.name) }
+            .sorted { $0.title.localizedStandardCompare($1.title) == .orderedAscending }
     }
 
     /// Subgenres available for optional search filtering (empty when taxonomy did not load).
@@ -182,27 +180,71 @@ final class AppTaxonomyStore: ObservableObject {
         return ConverterModeDisplay(displayName: name, description: desc.isEmpty ? nil : desc)
     }
 
-    /// Resolves `Domain / Subgenre / Item` titles for a taxonomy item id. `nil` if registry is missing or ids are unknown.
-    func searchPathResult(forItemId itemId: String) -> TaxonomySearchPathResult? {
-        guard let reg = registry,
-              let item = reg.itemById[itemId],
-              let domain = reg.domainById[item.domainId],
-              let sub = reg.subgenreById[item.subgenreId] else {
-            return nil
-        }
-        return Self.makePathResult(itemId: itemId, item: item, domain: domain, sub: sub)
+    /// Resolves `Domain / Subgenre / Item` titles for an id (bundled item or synthetic `unit:…` row).
+    func searchPathResult(forItemId itemId: String) -> TaxonomyPathResult? {
+        searchIndex?.pathResult(forItemId: itemId)
     }
 
-    /// Maps a taxonomy item to converter pickers and optional primary unit id. Returns `nil` for unknown item ids or missing registry.
+    /// Maps a taxonomy or catalog search id to converter pickers and optional primary unit id.
     func converterRoute(forTaxonomyItemId itemId: String) -> TaxonomyConverterRoute? {
-        guard let reg = registry, let item = reg.itemById[itemId] else { return nil }
+        guard let reg = registry else { return nil }
 
+        if let item = reg.itemById[itemId] {
+            return Self.converterRoute(item: item, registry: reg)
+        }
+
+        guard let entry = searchIndex?.searchableItem(forItemId: itemId),
+              let uid = entry.converterUnitId?.trimmingCharacters(in: .whitespacesAndNewlines),
+              !uid.isEmpty else {
+            return nil
+        }
+
+        let category = entry.unitCategoryRaw.flatMap { UnitCategory(rawValue: $0) }
+        let resolvedCategory = category != nil
+        var mode: UnitRegistry.Mode?
+        var resolvedMode = false
+        if let nav = reg.converterNavigation,
+           let row = nav.modes.first(where: { $0.subgenreId == entry.subcategoryId }),
+           let m = UnitRegistry.Mode(rawValue: row.modeRaw) {
+            mode = m
+            resolvedMode = true
+        }
+
+        return TaxonomyConverterRoute(
+            category: category,
+            mode: mode,
+            preferredFromUnitId: uid,
+            resolvedCategory: resolvedCategory,
+            resolvedMode: resolvedMode,
+            hasConverterUnitMapping: true
+        )
+    }
+
+    /// Ranked search over bundled taxonomy items and indexed units. Returns `[]` when query is blank or taxonomy failed to load.
+    func searchItems(
+        query: String,
+        domainIdFilter: String? = nil,
+        subgenreIdFilter: String? = nil,
+        unitCategoryFilter: UnitCategory? = nil,
+        limit: Int = 50
+    ) -> [TaxonomyItemSearchResult] {
+        guard let index = searchIndex else { return [] }
+        return index.search(
+            query: query,
+            categoryId: domainIdFilter,
+            subcategoryId: subgenreIdFilter,
+            unitCategoryRaw: unitCategoryFilter?.rawValue,
+            limit: limit
+        )
+    }
+
+    private static func converterRoute(item: Item, registry: TaxonomyRegistry) -> TaxonomyConverterRoute {
         let category = item.unitCategoryRaw.flatMap { UnitCategory(rawValue: $0) }
         let resolvedCategory = category != nil
 
         var mode: UnitRegistry.Mode?
         var resolvedMode = false
-        if let nav = reg.converterNavigation,
+        if let nav = registry.converterNavigation,
            let row = nav.modes.first(where: { $0.subgenreId == item.subgenreId }),
            let m = UnitRegistry.Mode(rawValue: row.modeRaw) {
             mode = m
@@ -220,115 +262,5 @@ final class AppTaxonomyStore: ObservableObject {
             resolvedMode: resolvedMode,
             hasConverterUnitMapping: unitId != nil
         )
-    }
-
-    /// Search taxonomy items by title, synonyms, and tags. Ranking: exact title → prefix title → exact synonym → prefix synonym → exact tag → prefix tag.
-    /// Returns `[]` when the query is empty, taxonomy failed to load, or nothing matches.
-    func searchItems(
-        query: String,
-        unitCategoryFilter: UnitCategory? = nil,
-        subgenreIdFilter: String? = nil,
-        limit: Int = 50
-    ) -> [TaxonomyItemSearchResult] {
-        guard let reg = registry else { return [] }
-        let q = query.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
-        guard !q.isEmpty else { return [] }
-
-        struct Scored {
-            let tier: TaxonomySearchMatchTier
-            let result: TaxonomyItemSearchResult
-        }
-
-        var scored: [Scored] = []
-        scored.reserveCapacity(reg.items.count)
-
-        for item in reg.items {
-            guard passesSearchFilters(item: item, unitCategory: unitCategoryFilter, subgenreId: subgenreIdFilter) else {
-                continue
-            }
-            guard let tier = matchTier(item: item, normalizedQuery: q) else { continue }
-            guard let path = Self.makePathResult(
-                itemId: item.id,
-                item: item,
-                domain: reg.domainById[item.domainId],
-                sub: reg.subgenreById[item.subgenreId]
-            ) else { continue }
-
-            let row = TaxonomyItemSearchResult(
-                itemId: path.id,
-                itemTitle: path.itemTitle,
-                pathLine: path.pathLine,
-                domainTitle: path.domainTitle,
-                subgenreTitle: path.subgenreTitle
-            )
-            scored.append(Scored(tier: tier, result: row))
-        }
-
-        scored.sort { a, b in
-            if a.tier != b.tier { return a.tier < b.tier }
-            return a.result.itemTitle.localizedStandardCompare(b.result.itemTitle) == .orderedAscending
-        }
-
-        if scored.count <= limit {
-            return scored.map(\.result)
-        }
-        return Array(scored.prefix(limit).map(\.result))
-    }
-
-    private static func makePathResult(
-        itemId: String,
-        item: Item,
-        domain: Domain?,
-        sub: Subgenre?
-    ) -> TaxonomySearchPathResult? {
-        guard let domain, let sub else { return nil }
-        let domainTitle = domain.name.trimmingCharacters(in: .whitespacesAndNewlines)
-        let subgenreTitle = sub.name.trimmingCharacters(in: .whitespacesAndNewlines)
-        let itemTitle = item.name.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !domainTitle.isEmpty, !subgenreTitle.isEmpty, !itemTitle.isEmpty else {
-            return nil
-        }
-        let pathLine = [domainTitle, subgenreTitle, itemTitle].joined(separator: TaxonomySearchPathResult.pathComponentSeparator)
-        return TaxonomySearchPathResult(
-            id: itemId,
-            pathLine: pathLine,
-            domainTitle: domainTitle,
-            subgenreTitle: subgenreTitle,
-            itemTitle: itemTitle
-        )
-    }
-
-    private func passesSearchFilters(
-        item: Item,
-        unitCategory: UnitCategory?,
-        subgenreId: String?
-    ) -> Bool {
-        if let sid = subgenreId, !sid.isEmpty, item.subgenreId != sid {
-            return false
-        }
-        if let cat = unitCategory {
-            guard let raw = item.unitCategoryRaw, raw == cat.rawValue else {
-                return false
-            }
-        }
-        return true
-    }
-
-    private func matchTier(item: Item, normalizedQuery q: String) -> TaxonomySearchMatchTier? {
-        let title = item.name.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
-        if title == q { return .exactTitle }
-        if title.hasPrefix(q) { return .prefixTitle }
-
-        for s in item.synonyms {
-            let sl = s.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
-            if sl == q { return .exactSynonym }
-            if sl.hasPrefix(q) { return .prefixSynonym }
-        }
-        for t in item.tags {
-            let tl = t.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
-            if tl == q { return .exactTag }
-            if tl.hasPrefix(q) { return .prefixTag }
-        }
-        return nil
     }
 }

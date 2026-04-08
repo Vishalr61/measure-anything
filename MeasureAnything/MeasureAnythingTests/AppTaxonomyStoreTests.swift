@@ -147,8 +147,8 @@ struct AppTaxonomyStoreTests {
         let store = AppTaxonomyStore(injectedRegistry: reg, loadFailureMessage: nil)
         let rows = store.searchItems(query: "uniquequerytoken")
         #expect(rows.count == 2)
-        #expect(rows[0].itemId == "item.a")
-        #expect(rows[1].itemId == "item.b")
+        #expect(rows[0].id == "item.a")
+        #expect(rows[1].id == "item.b")
     }
 
     @Test func searchPrefixTitleRanksBeforeExactSynonym() throws {
@@ -192,8 +192,8 @@ struct AppTaxonomyStoreTests {
         let store = AppTaxonomyStore(injectedRegistry: reg, loadFailureMessage: nil)
         let rows = store.searchItems(query: "alpha")
         #expect(rows.count == 2)
-        #expect(rows[0].itemId == "item.pre")
-        #expect(rows[1].itemId == "item.syn")
+        #expect(rows[0].id == "item.pre")
+        #expect(rows[1].id == "item.syn")
     }
 
     @Test func searchCategoryFilterExcludesOtherCategories() throws {
@@ -240,7 +240,7 @@ struct AppTaxonomyStoreTests {
         let store = AppTaxonomyStore(injectedRegistry: reg, loadFailureMessage: nil)
         let rows = store.searchItems(query: "findme", unitCategoryFilter: .length)
         #expect(rows.count == 1)
-        #expect(rows[0].itemId == "item.len")
+        #expect(rows[0].id == "item.len")
     }
 
     @Test func searchResultPathMatchesSearchPathResult() throws {
@@ -248,9 +248,28 @@ struct AppTaxonomyStoreTests {
         let store = AppTaxonomyStore(injectedRegistry: reg, loadFailureMessage: nil)
         let rows = store.searchItems(query: "meter")
         let path = store.searchPathResult(forItemId: "item.measurement.normal.meter")
-        let match = rows.first { $0.itemId == "item.measurement.normal.meter" }
+        let match = rows.first { $0.id == "item.measurement.normal.meter" }
         #expect(match != nil)
         #expect(match?.pathLine == path?.pathLine)
+    }
+
+    @Test func searchWithAttachedCatalogIncludesSeedUnits() throws {
+        let reg = try TaxonomyRegistry()
+        let store = AppTaxonomyStore(injectedRegistry: reg, loadFailureMessage: nil)
+        store.attachUnitCatalog(try UnitRegistry.v1Default().allUnits)
+        let rows = store.searchItems(query: "fahrenheit")
+        #expect(rows.contains { $0.id == "unit:fahrenheit" })
+    }
+
+    @Test func converterRouteForSyntheticUnitId() throws {
+        let reg = try TaxonomyRegistry()
+        let store = AppTaxonomyStore(injectedRegistry: reg, loadFailureMessage: nil)
+        store.attachUnitCatalog(try UnitRegistry.v1Default().allUnits)
+        let r = store.converterRoute(forTaxonomyItemId: "unit:hour")
+        #expect(r?.category == .time)
+        #expect(r?.preferredFromUnitId == "hour")
+        #expect(r?.resolvedMode == true)
+        #expect(r?.mode == .normal)
     }
 
     @Test func searchExactTagRanksAfterPrefixTitle() throws {
@@ -294,8 +313,8 @@ struct AppTaxonomyStoreTests {
         let store = AppTaxonomyStore(injectedRegistry: reg, loadFailureMessage: nil)
         let rows = store.searchItems(query: "findx")
         #expect(rows.count == 2)
-        #expect(rows[0].itemId == "item.tit")
-        #expect(rows[1].itemId == "item.tag")
+        #expect(rows[0].id == "item.tit")
+        #expect(rows[1].id == "item.tag")
     }
 
     @Test func converterCategoriesFallbackWhenRowsDoNotMapToEnums() throws {

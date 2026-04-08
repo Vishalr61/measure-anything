@@ -67,6 +67,7 @@ final class ConverterViewModel: ObservableObject {
         let pair = Self.makeRegistry(customUnits: [])
         self.registry = pair.registry
         self.engine = pair.engine
+        taxonomy.attachUnitCatalog(pair.registry.allUnits)
         let cats = taxonomy.converterCategories
         if !cats.isEmpty, !cats.contains(selectedCategory) {
             selectedCategory = cats[0]
@@ -84,6 +85,7 @@ final class ConverterViewModel: ObservableObject {
         let pair = Self.makeRegistry(customUnits: customUnits)
         registry = pair.registry
         engine = pair.engine
+        taxonomy.attachUnitCatalog(pair.registry.allUnits)
         reconcileSelectionsAfterModeChange()
         recompute()
     }

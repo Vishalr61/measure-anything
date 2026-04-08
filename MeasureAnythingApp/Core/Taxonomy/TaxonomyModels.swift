@@ -74,6 +74,13 @@ public struct Item: Hashable, Sendable, Identifiable {
 
 extension Item: Codable {}
 
+extension Item {
+    /// Domain id (same as `domainId`); search filters use this as “category”.
+    public var categoryId: Domain.ID { domainId }
+    /// Subgenre id (same as `subgenreId`); search filters use this as “subcategory”.
+    public var subcategoryId: Subgenre.ID { subgenreId }
+}
+
 /// Binds the converter’s `UnitCategory` / `Mode` pickers to taxonomy rows (order + subgenre anchors).
 ///
 /// Validated by `TaxonomyRegistry` when present: domain and subgenre IDs must exist and subgenres must

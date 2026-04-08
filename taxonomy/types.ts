@@ -23,9 +23,9 @@ export interface Subgenre {
 
 export interface Item {
   readonly id: ItemId;
-  /** Must match an existing Domain.id and align with Subgenre.domainId */
+  /** Must match an existing Domain.id (Swift: also `categoryId` for search filters). */
   readonly domainId: DomainId;
-  /** Must match an existing Subgenre.id whose domainId equals this item's domainId */
+  /** Must match an existing Subgenre.id in the same domain (Swift: also `subcategoryId`). */
   readonly subgenreId: SubgenreId;
   readonly name: string;
   readonly description: string;

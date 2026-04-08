@@ -21,6 +21,7 @@ let package = Package(
         ),
         .target(
             name: "MeasureAnythingTaxonomy",
+            dependencies: ["MeasureAnythingCore"],
             path: "MeasureAnythingApp/Core/Taxonomy",
             resources: [
                 .process("Resources")

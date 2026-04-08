@@ -58,6 +58,12 @@ public struct UnitRegistry: Sendable {
             .sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
     }
 
+    /// All definitions in the registry (e.g. for taxonomy search indexing).
+    public var allUnits: [UnitDefinition] {
+        byID.values
+            .sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
+    }
+
     /// Mode behavior helper:
     /// - Normal: normal only
     /// - Absurd: normal + absurd

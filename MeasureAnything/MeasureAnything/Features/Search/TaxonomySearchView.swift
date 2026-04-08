@@ -1,5 +1,6 @@
 import SwiftUI
 import MeasureAnythingCore
+import MeasureAnythingTaxonomy
 
 /// Browse taxonomy items by title, synonym, or tag; selecting a row applies converter state via `onPick`.
 struct TaxonomySearchView: View {
@@ -9,6 +10,7 @@ struct TaxonomySearchView: View {
     @EnvironmentObject private var taxonomyStore: AppTaxonomyStore
 
     @State private var query = ""
+    @State private var domainFilter: String?
     @State private var categoryFilter: UnitCategory?
     @State private var subgenreFilter: String?
 
@@ -25,7 +27,7 @@ struct TaxonomySearchView: View {
                     List {
                         ForEach(searchResults) { row in
                             Button {
-                                onPick(row.itemId)
+                                onPick(row.id)
                                 dismiss()
                             } label: {
                                 VStack(alignment: .leading, spacing: 4) {
@@ -44,7 +46,13 @@ struct TaxonomySearchView: View {
                             .accessibilityHint("Apply this taxonomy item in the converter")
                         }
                     }
-                    .searchable(text: $query, prompt: "Title, synonym, or tag")
+                    .overlay {
+                        let q = query.trimmingCharacters(in: .whitespacesAndNewlines)
+                        if !q.isEmpty, searchResults.isEmpty {
+                            ContentUnavailableView.search(text: query)
+                        }
+                    }
+                    .searchable(text: $query, prompt: "Units, titles, synonyms, tags")
                 }
             }
             .navigationTitle("Search taxonomy")
@@ -55,8 +63,18 @@ struct TaxonomySearchView: View {
                 }
                 ToolbarItem(placement: .primaryAction) {
                     Menu {
-                        Section("Category") {
-                            Button("All categories") {
+                        Section("Domain") {
+                            Button("All domains") {
+                                domainFilter = nil
+                            }
+                            ForEach(taxonomyStore.searchDomainFilterOptions) { opt in
+                                Button(opt.title) {
+                                    domainFilter = opt.id
+                                }
+                            }
+                        }
+                        Section("Unit category") {
+                            Button("All unit categories") {
                                 categoryFilter = nil
                             }
                             ForEach(UnitCategory.allCases, id: \.self) { cat in
@@ -87,8 +105,9 @@ struct TaxonomySearchView: View {
     private var searchResults: [TaxonomyItemSearchResult] {
         taxonomyStore.searchItems(
             query: query,
-            unitCategoryFilter: categoryFilter,
+            domainIdFilter: domainFilter,
             subgenreIdFilter: subgenreFilter,
+            unitCategoryFilter: categoryFilter,
             limit: 100
         )
     }
