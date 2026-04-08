@@ -30,9 +30,30 @@ public struct Item: Codable, Hashable, Sendable, Identifiable {
     public var description: String
 }
 
+/// Binds the converter’s `UnitCategory` / `Mode` pickers to taxonomy rows (order + subgenre anchors).
+///
+/// Validated by `TaxonomyRegistry` when present: domain and subgenre IDs must exist and subgenres must
+/// belong to `measurementDomainId`. The app resolves `unitCategoryRaw` / `modeRaw` to core enums.
+public struct ConverterNavigation: Codable, Hashable, Sendable {
+    public var measurementDomainId: Domain.ID
+    public var categories: [CategoryRow]
+    public var modes: [ModeRow]
+
+    public struct CategoryRow: Codable, Hashable, Sendable {
+        public var unitCategoryRaw: String
+    }
+
+    public struct ModeRow: Codable, Hashable, Sendable {
+        public var modeRaw: String
+        public var subgenreId: Subgenre.ID
+    }
+}
+
 /// JSON envelope for `taxonomy.json`.
 public struct TaxonomyBundle: Codable, Hashable, Sendable {
     public var domains: [Domain]
     public var subgenres: [Subgenre]
     public var items: [Item]
+    /// When omitted, apps fall back to `CaseIterable` ordering for categories and modes.
+    public var converterNavigation: ConverterNavigation?
 }

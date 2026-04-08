@@ -6,6 +6,7 @@ import MeasureAnythingCore
 struct CustomUnitFormView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
+    @EnvironmentObject private var appTaxonomy: AppTaxonomyStore
 
     @State private var name: String = ""
     @State private var category: UnitCategory = .length
@@ -126,5 +127,6 @@ struct CustomUnitFormView: View {
 
 #Preview {
     CustomUnitFormView()
+        .environmentObject(AppTaxonomyStore())
         .modelContainer(for: CustomUnit.self, inMemory: true)
 }

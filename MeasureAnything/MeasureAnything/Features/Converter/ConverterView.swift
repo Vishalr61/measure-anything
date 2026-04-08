@@ -6,8 +6,9 @@ struct ConverterView: View {
     @Query(sort: \CustomUnit.name) private var customUnits: [CustomUnit]
     @Query(sort: \FavoriteConversion.createdAt, order: .reverse) private var favorites: [FavoriteConversion]
     @Environment(\.modelContext) private var modelContext
+    @EnvironmentObject private var taxonomyStore: AppTaxonomyStore
 
-    @StateObject private var vm = ConverterViewModel()
+    @ObservedObject var vm: ConverterViewModel
     @FocusState private var valueFieldFocused: Bool
     @State private var showCustomUnitForm = false
     @State private var showFavorites = false
@@ -18,6 +19,13 @@ struct ConverterView: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: ConverterLayout.sectionSpacing) {
+                    if let msg = taxonomyStore.loadFailureMessage {
+                        Text("Couldn’t load taxonomy (\(msg)). Using built-in category and mode order.")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .fixedSize(horizontal: false, vertical: true)
+                            .accessibilityLabel("Taxonomy load warning: \(msg)")
+                    }
                     header
                     inputs
                     if vm.selectedMode == .custom {
@@ -59,6 +67,7 @@ struct ConverterView: View {
             }
             .sheet(isPresented: $showCustomUnitForm) {
                 CustomUnitFormView()
+                    .environmentObject(taxonomyStore)
             }
             .sheet(isPresented: $showFavorites) {
                 FavoritesListView(registry: vm.currentRegistry) { fav in
@@ -400,6 +409,8 @@ struct ConverterView: View {
 }
 
 #Preview {
-    ConverterView()
+    let taxonomy = AppTaxonomyStore()
+    ConverterView(vm: ConverterViewModel(taxonomy: taxonomy))
+        .environmentObject(taxonomy)
         .modelContainer(for: [CustomUnit.self, FavoriteConversion.self], inMemory: true)
 }

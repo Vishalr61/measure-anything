@@ -73,5 +73,20 @@
       "name": "Coffee break",
       "description": "A nominal break-sized slice of time."
     }
-  ]
+  ],
+  "converterNavigation": {
+    "measurementDomainId": "measurement",
+    "categories": [
+      { "unitCategoryRaw": "length" },
+      { "unitCategoryRaw": "mass" },
+      { "unitCategoryRaw": "time" },
+      { "unitCategoryRaw": "temperature" },
+      { "unitCategoryRaw": "volume" }
+    ],
+    "modes": [
+      { "modeRaw": "normal", "subgenreId": "measurement.normal" },
+      { "modeRaw": "absurd", "subgenreId": "measurement.absurd" },
+      { "modeRaw": "custom", "subgenreId": "measurement.custom" }
+    ]
+  }
 }

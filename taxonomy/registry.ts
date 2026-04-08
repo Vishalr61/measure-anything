@@ -69,7 +69,60 @@ export function validateTaxonomy(bundle: TaxonomyBundle): TaxonomyBundle {
     }
   }
 
+  if (bundle.converterNavigation) {
+    validateConverterNavigation(bundle.converterNavigation, bundle);
+  }
+
   return bundle;
+}
+
+function validateConverterNavigation(
+  nav: NonNullable<TaxonomyBundle["converterNavigation"]>,
+  bundle: TaxonomyBundle,
+): void {
+  if (!bundle.domains.some((d) => d.id === nav.measurementDomainId)) {
+    throw new TaxonomyValidationError(
+      `converterNavigation.measurementDomainId "${nav.measurementDomainId}" is not a domain id`,
+    );
+  }
+  if (nav.categories.length === 0) {
+    throw new TaxonomyValidationError("converterNavigation.categories must not be empty");
+  }
+  if (nav.modes.length === 0) {
+    throw new TaxonomyValidationError("converterNavigation.modes must not be empty");
+  }
+
+  const seenCat = new Set<string>();
+  for (const row of nav.categories) {
+    if (seenCat.has(row.unitCategoryRaw)) {
+      throw new TaxonomyValidationError(
+        `Duplicate converterNavigation category: ${row.unitCategoryRaw}`,
+      );
+    }
+    seenCat.add(row.unitCategoryRaw);
+  }
+
+  const subgenreById = new Map<SubgenreId, Subgenre>(
+    bundle.subgenres.map((s) => [s.id, s]),
+  );
+  const seenMode = new Set<string>();
+  for (const row of nav.modes) {
+    if (seenMode.has(row.modeRaw)) {
+      throw new TaxonomyValidationError(`Duplicate converterNavigation mode: ${row.modeRaw}`);
+    }
+    seenMode.add(row.modeRaw);
+    const sg = subgenreById.get(row.subgenreId);
+    if (!sg) {
+      throw new TaxonomyValidationError(
+        `converterNavigation mode "${row.modeRaw}" references unknown subgenreId "${row.subgenreId}"`,
+      );
+    }
+    if (sg.domainId !== nav.measurementDomainId) {
+      throw new TaxonomyValidationError(
+        `converterNavigation: subgenre "${row.subgenreId}" must belong to domain "${nav.measurementDomainId}" (is "${sg.domainId}")`,
+      );
+    }
+  }
 }
 
 export function buildRegistry(bundle: TaxonomyBundle): TaxonomyRegistry {

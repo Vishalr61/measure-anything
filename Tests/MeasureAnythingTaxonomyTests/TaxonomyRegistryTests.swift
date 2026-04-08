@@ -12,5 +12,8 @@ final class TaxonomyRegistryTests: XCTestCase {
         let meter = registry.itemById["item.measurement.normal.meter"]
         XCTAssertEqual(meter?.domainId, "measurement")
         XCTAssertEqual(meter?.subgenreId, "measurement.normal")
+        XCTAssertEqual(registry.converterNavigation?.measurementDomainId, "measurement")
+        XCTAssertEqual(registry.converterNavigation?.categories.count, 5)
+        XCTAssertEqual(registry.converterNavigation?.modes.count, 3)
     }
 }

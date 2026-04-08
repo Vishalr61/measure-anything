@@ -11,6 +11,12 @@ public struct TaxonomyRegistry: Sendable {
         case itemUnknownSubgenre(itemId: String, subgenreId: String)
         case itemDomainMismatch(itemId: String, itemDomainId: String, subgenreId: String, subgenreDomainId: String)
         case resourceNotFound(String)
+        case converterUnknownMeasurementDomain(String)
+        case converterUnknownSubgenre(String)
+        case converterSubgenreWrongDomain(subgenreId: String, expectedDomain: String, actualDomain: String)
+        case converterDuplicateCategoryRaw(String)
+        case converterDuplicateModeRaw(String)
+        case converterEmptyNavigation(field: String)
 
         public var errorDescription: String? {
             switch self {
@@ -23,6 +29,13 @@ public struct TaxonomyRegistry: Sendable {
             case .itemDomainMismatch(let i, let idom, let s, let sdom):
                 "Item \(i) domainId \(idom) does not match subgenre \(s) domainId \(sdom)"
             case .resourceNotFound(let name): "Missing bundled resource: \(name)"
+            case .converterUnknownMeasurementDomain(let id): "converterNavigation references unknown domain \(id)"
+            case .converterUnknownSubgenre(let id): "converterNavigation references unknown subgenre \(id)"
+            case .converterSubgenreWrongDomain(let s, let exp, let act):
+                "converterNavigation: subgenre \(s) must belong to domain \(exp) (is \(act))"
+            case .converterDuplicateCategoryRaw(let raw): "Duplicate converterNavigation category \(raw)"
+            case .converterDuplicateModeRaw(let raw): "Duplicate converterNavigation mode \(raw)"
+            case .converterEmptyNavigation(let field): "converterNavigation.\(field) must not be empty"
             }
         }
     }
@@ -30,6 +43,8 @@ public struct TaxonomyRegistry: Sendable {
     public let domains: [Domain]
     public let subgenres: [Subgenre]
     public let items: [Item]
+    /// Parsed optional bridge for converter UI ordering; `nil` if absent from JSON.
+    public let converterNavigation: ConverterNavigation?
 
     public let domainById: [Domain.ID: Domain]
     public let subgenreById: [Subgenre.ID: Subgenre]
@@ -54,6 +69,7 @@ public struct TaxonomyRegistry: Sendable {
         self.domains = bundleDecoded.domains
         self.subgenres = bundleDecoded.subgenres
         self.items = bundleDecoded.items
+        self.converterNavigation = bundleDecoded.converterNavigation
 
         var dMap: [Domain.ID: Domain] = [:]
         for d in domains {
@@ -117,6 +133,47 @@ public struct TaxonomyRegistry: Sendable {
                     itemDomainId: item.domainId,
                     subgenreId: sg.id,
                     subgenreDomainId: sg.domainId
+                )
+            }
+        }
+
+        if let nav = bundle.converterNavigation {
+            try validateConverterNavigation(nav, bundle: bundle)
+        }
+    }
+
+    private static func validateConverterNavigation(_ nav: ConverterNavigation, bundle: TaxonomyBundle) throws {
+        guard bundle.domains.contains(where: { $0.id == nav.measurementDomainId }) else {
+            throw RegistryError.converterUnknownMeasurementDomain(nav.measurementDomainId)
+        }
+        guard !nav.categories.isEmpty else {
+            throw RegistryError.converterEmptyNavigation(field: "categories")
+        }
+        guard !nav.modes.isEmpty else {
+            throw RegistryError.converterEmptyNavigation(field: "modes")
+        }
+
+        var seenCategories = Set<String>()
+        for row in nav.categories {
+            guard seenCategories.insert(row.unitCategoryRaw).inserted else {
+                throw RegistryError.converterDuplicateCategoryRaw(row.unitCategoryRaw)
+            }
+        }
+
+        let subgenreById = Dictionary(uniqueKeysWithValues: bundle.subgenres.map { ($0.id, $0) })
+        var seenModes = Set<String>()
+        for row in nav.modes {
+            guard seenModes.insert(row.modeRaw).inserted else {
+                throw RegistryError.converterDuplicateModeRaw(row.modeRaw)
+            }
+            guard let sg = subgenreById[row.subgenreId] else {
+                throw RegistryError.converterUnknownSubgenre(row.subgenreId)
+            }
+            guard sg.domainId == nav.measurementDomainId else {
+                throw RegistryError.converterSubgenreWrongDomain(
+                    subgenreId: row.subgenreId,
+                    expectedDomain: nav.measurementDomainId,
+                    actualDomain: sg.domainId
                 )
             }
         }

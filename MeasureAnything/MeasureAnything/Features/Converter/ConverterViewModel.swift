@@ -50,6 +50,7 @@ final class ConverterViewModel: ObservableObject {
 
     private var registry: UnitRegistry
     private var engine: ConverterEngine
+    private let taxonomy: AppTaxonomyStore
 
     private let displayFormatter: NumberFormatter = {
         let f = NumberFormatter()
@@ -61,10 +62,19 @@ final class ConverterViewModel: ObservableObject {
         return f
     }()
 
-    init() {
+    init(taxonomy: AppTaxonomyStore) {
+        self.taxonomy = taxonomy
         let pair = Self.makeRegistry(customUnits: [])
         self.registry = pair.registry
         self.engine = pair.engine
+        let cats = taxonomy.converterCategories
+        if !cats.isEmpty, !cats.contains(selectedCategory) {
+            selectedCategory = cats[0]
+        }
+        let modes = taxonomy.converterModes
+        if !modes.isEmpty, !modes.contains(selectedMode) {
+            selectedMode = modes[0]
+        }
         applyDefaultsAfterCategoryChange()
         recompute()
     }
@@ -89,8 +99,8 @@ final class ConverterViewModel: ObservableObject {
         }
     }
 
-    var categories: [UnitCategory] { UnitCategory.allCases }
-    var modes: [UnitRegistry.Mode] { UnitRegistry.Mode.allCases }
+    var categories: [UnitCategory] { taxonomy.converterCategories }
+    var modes: [UnitRegistry.Mode] { taxonomy.converterModes }
 
     var availableUnits: [UnitDefinition] {
         registry.units(in: selectedCategory, includeKinds: selectedMode.includedKinds)

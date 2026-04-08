@@ -31,11 +31,21 @@ export interface Item {
   readonly description: string;
 }
 
+export interface ConverterNavigation {
+  readonly measurementDomainId: DomainId;
+  readonly categories: readonly { readonly unitCategoryRaw: string }[];
+  readonly modes: readonly {
+    readonly modeRaw: string;
+    readonly subgenreId: SubgenreId;
+  }[];
+}
+
 /** Full bundle loaded from the central registry JSON */
 export interface TaxonomyBundle {
   readonly domains: readonly Domain[];
   readonly subgenres: readonly Subgenre[];
   readonly items: readonly Item[];
+  readonly converterNavigation?: ConverterNavigation;
 }
 
 export interface TaxonomyRegistry extends TaxonomyBundle {
