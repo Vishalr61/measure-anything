@@ -14,6 +14,7 @@ struct ConverterView: View {
     @State private var showFavorites = false
     @State private var showShareSheet = false
     @State private var shareActivityItems: [Any] = []
+    @State private var showTaxonomySearch = false
 
     var body: some View {
         NavigationStack {
@@ -49,6 +50,14 @@ struct ConverterView: View {
                 }
                 ToolbarItemGroup(placement: .topBarTrailing) {
                     Button {
+                        Haptics.tap()
+                        showTaxonomySearch = true
+                    } label: {
+                        Image(systemName: "magnifyingglass")
+                    }
+                    .accessibilityLabel("Search taxonomy")
+
+                    Button {
                         saveCurrentPairAsFavorite()
                     } label: {
                         Image(systemName: isCurrentPairAlreadyFavorite ? "star.fill" : "star")
@@ -64,6 +73,10 @@ struct ConverterView: View {
                         .accessibilityLabel("Add custom unit")
                     }
                 }
+            }
+            .sheet(isPresented: $showTaxonomySearch) {
+                TaxonomySearchView()
+                    .environmentObject(taxonomyStore)
             }
             .sheet(isPresented: $showCustomUnitForm) {
                 CustomUnitFormView()

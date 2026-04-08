@@ -20,7 +20,7 @@ public struct Subgenre: Codable, Hashable, Sendable, Identifiable {
 }
 
 /// Leaf content node. References exactly one domain and one subgenre in that domain.
-public struct Item: Codable, Hashable, Sendable, Identifiable {
+public struct Item: Hashable, Sendable, Identifiable {
     public typealias ID = String
 
     public let id: ID
@@ -28,7 +28,47 @@ public struct Item: Codable, Hashable, Sendable, Identifiable {
     public var subgenreId: Subgenre.ID
     public var name: String
     public var description: String
+    /// Alternate names for search (optional in JSON; defaults to empty).
+    public var synonyms: [String]
+    /// Free-form labels for search (optional in JSON; defaults to empty).
+    public var tags: [String]
+    /// When set, enables `UnitCategory`-based filtering in app search (`UnitCategory.rawValue`).
+    public var unitCategoryRaw: String?
+
+    enum CodingKeys: String, CodingKey {
+        case id, domainId, subgenreId, name, description, synonyms, tags, unitCategoryRaw
+    }
+
+    public init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        id = try c.decode(ID.self, forKey: .id)
+        domainId = try c.decode(Domain.ID.self, forKey: .domainId)
+        subgenreId = try c.decode(Subgenre.ID.self, forKey: .subgenreId)
+        name = try c.decode(String.self, forKey: .name)
+        description = try c.decode(String.self, forKey: .description)
+        synonyms = try c.decodeIfPresent([String].self, forKey: .synonyms) ?? []
+        tags = try c.decodeIfPresent([String].self, forKey: .tags) ?? []
+        unitCategoryRaw = try c.decodeIfPresent(String.self, forKey: .unitCategoryRaw)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var c = encoder.container(keyedBy: CodingKeys.self)
+        try c.encode(id, forKey: .id)
+        try c.encode(domainId, forKey: .domainId)
+        try c.encode(subgenreId, forKey: .subgenreId)
+        try c.encode(name, forKey: .name)
+        try c.encode(description, forKey: .description)
+        if !synonyms.isEmpty {
+            try c.encode(synonyms, forKey: .synonyms)
+        }
+        if !tags.isEmpty {
+            try c.encode(tags, forKey: .tags)
+        }
+        try c.encodeIfPresent(unitCategoryRaw, forKey: .unitCategoryRaw)
+    }
 }
+
+extension Item: Codable {}
 
 /// Binds the converter’s `UnitCategory` / `Mode` pickers to taxonomy rows (order + subgenre anchors).
 ///

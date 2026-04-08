@@ -29,6 +29,10 @@ export interface Item {
   readonly subgenreId: SubgenreId;
   readonly name: string;
   readonly description: string;
+  readonly synonyms?: readonly string[];
+  readonly tags?: readonly string[];
+  /** Optional `UnitCategory.rawValue` for app-side search filtering */
+  readonly unitCategoryRaw?: string;
 }
 
 export interface ConverterNavigation {

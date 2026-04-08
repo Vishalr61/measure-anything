@@ -28,6 +28,37 @@ struct TaxonomySearchPathResult: Equatable, Sendable, Identifiable {
     static let pathComponentSeparator = " / "
 }
 
+/// One taxonomy item row returned from search (title + path + components).
+struct TaxonomyItemSearchResult: Equatable, Sendable, Identifiable {
+    var id: String { itemId }
+    let itemId: String
+    let itemTitle: String
+    let pathLine: String
+    let domainTitle: String
+    let subgenreTitle: String
+}
+
+/// Subgenre choices for the taxonomy search filter menu.
+struct TaxonomySubgenreFilterOption: Equatable, Identifiable, Sendable {
+    let id: String
+    let title: String
+}
+
+// MARK: - Match ranking (lower = stronger)
+
+private enum TaxonomySearchMatchTier: Int, Comparable {
+    case exactTitle = 0
+    case prefixTitle = 1
+    case exactSynonym = 2
+    case prefixSynonym = 3
+    case exactTag = 4
+    case prefixTag = 5
+
+    static func < (lhs: TaxonomySearchMatchTier, rhs: TaxonomySearchMatchTier) -> Bool {
+        lhs.rawValue < rhs.rawValue
+    }
+}
+
 /// App-owned entry point for taxonomy: loads `TaxonomyRegistry` once and exposes converter picker data.
 ///
 /// Validation stays in `MeasureAnythingTaxonomy`; this type only reads resolved lists and surfaces load failures.
@@ -85,6 +116,14 @@ final class AppTaxonomyStore: ObservableObject {
         return ordered.isEmpty ? Array(UnitCategory.customAllowed) : ordered
     }
 
+    /// Subgenres available for optional search filtering (empty when taxonomy did not load).
+    var searchSubgenreFilterOptions: [TaxonomySubgenreFilterOption] {
+        guard let reg = registry else { return [] }
+        return reg.subgenres
+            .map { TaxonomySubgenreFilterOption(id: $0.id, title: $0.name) }
+            .sorted { $0.title.localizedStandardCompare($1.title) == .orderedAscending }
+    }
+
     /// Display metadata for a category row: optional JSON overrides, else `rawValue.capitalized`.
     func categoryDisplay(for category: UnitCategory) -> ConverterCategoryDisplay {
         let fallbackName = category.rawValue.capitalized
@@ -131,6 +170,69 @@ final class AppTaxonomyStore: ObservableObject {
               let sub = reg.subgenreById[item.subgenreId] else {
             return nil
         }
+        return Self.makePathResult(itemId: itemId, item: item, domain: domain, sub: sub)
+    }
+
+    /// Search taxonomy items by title, synonyms, and tags. Ranking: exact title → prefix title → exact synonym → prefix synonym → exact tag → prefix tag.
+    /// Returns `[]` when the query is empty, taxonomy failed to load, or nothing matches.
+    func searchItems(
+        query: String,
+        unitCategoryFilter: UnitCategory? = nil,
+        subgenreIdFilter: String? = nil,
+        limit: Int = 50
+    ) -> [TaxonomyItemSearchResult] {
+        guard let reg = registry else { return [] }
+        let q = query.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        guard !q.isEmpty else { return [] }
+
+        struct Scored {
+            let tier: TaxonomySearchMatchTier
+            let result: TaxonomyItemSearchResult
+        }
+
+        var scored: [Scored] = []
+        scored.reserveCapacity(reg.items.count)
+
+        for item in reg.items {
+            guard passesSearchFilters(item: item, unitCategory: unitCategoryFilter, subgenreId: subgenreIdFilter) else {
+                continue
+            }
+            guard let tier = matchTier(item: item, normalizedQuery: q) else { continue }
+            guard let path = Self.makePathResult(
+                itemId: item.id,
+                item: item,
+                domain: reg.domainById[item.domainId],
+                sub: reg.subgenreById[item.subgenreId]
+            ) else { continue }
+
+            let row = TaxonomyItemSearchResult(
+                itemId: path.id,
+                itemTitle: path.itemTitle,
+                pathLine: path.pathLine,
+                domainTitle: path.domainTitle,
+                subgenreTitle: path.subgenreTitle
+            )
+            scored.append(Scored(tier: tier, result: row))
+        }
+
+        scored.sort { a, b in
+            if a.tier != b.tier { return a.tier < b.tier }
+            return a.result.itemTitle.localizedStandardCompare(b.result.itemTitle) == .orderedAscending
+        }
+
+        if scored.count <= limit {
+            return scored.map(\.result)
+        }
+        return Array(scored.prefix(limit).map(\.result))
+    }
+
+    private static func makePathResult(
+        itemId: String,
+        item: Item,
+        domain: Domain?,
+        sub: Subgenre?
+    ) -> TaxonomySearchPathResult? {
+        guard let domain, let sub else { return nil }
         let domainTitle = domain.name.trimmingCharacters(in: .whitespacesAndNewlines)
         let subgenreTitle = sub.name.trimmingCharacters(in: .whitespacesAndNewlines)
         let itemTitle = item.name.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -145,5 +247,39 @@ final class AppTaxonomyStore: ObservableObject {
             subgenreTitle: subgenreTitle,
             itemTitle: itemTitle
         )
+    }
+
+    private func passesSearchFilters(
+        item: Item,
+        unitCategory: UnitCategory?,
+        subgenreId: String?
+    ) -> Bool {
+        if let sid = subgenreId, !sid.isEmpty, item.subgenreId != sid {
+            return false
+        }
+        if let cat = unitCategory {
+            guard let raw = item.unitCategoryRaw, raw == cat.rawValue else {
+                return false
+            }
+        }
+        return true
+    }
+
+    private func matchTier(item: Item, normalizedQuery q: String) -> TaxonomySearchMatchTier? {
+        let title = item.name.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        if title == q { return .exactTitle }
+        if title.hasPrefix(q) { return .prefixTitle }
+
+        for s in item.synonyms {
+            let sl = s.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+            if sl == q { return .exactSynonym }
+            if sl.hasPrefix(q) { return .prefixSynonym }
+        }
+        for t in item.tags {
+            let tl = t.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+            if tl == q { return .exactTag }
+            if tl.hasPrefix(q) { return .prefixTag }
+        }
+        return nil
     }
 }

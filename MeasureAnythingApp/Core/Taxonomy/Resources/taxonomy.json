@@ -43,35 +43,49 @@
       "domainId": "measurement",
       "subgenreId": "measurement.normal",
       "name": "Meter",
-      "description": "Canonical length base unit."
+      "description": "Canonical length base unit.",
+      "synonyms": ["Metre", "m"],
+      "tags": ["si", "length", "distance"],
+      "unitCategoryRaw": "length"
     },
     {
       "id": "item.measurement.normal.kilogram",
       "domainId": "measurement",
       "subgenreId": "measurement.normal",
       "name": "Kilogram",
-      "description": "Canonical mass base unit."
+      "description": "Canonical mass base unit.",
+      "synonyms": ["kg", "kilo"],
+      "tags": ["si", "mass"],
+      "unitCategoryRaw": "mass"
     },
     {
       "id": "item.measurement.absurd.banana",
       "domainId": "measurement",
       "subgenreId": "measurement.absurd",
       "name": "Banana (length)",
-      "description": "Approximate average banana length."
+      "description": "Approximate average banana length.",
+      "synonyms": ["yellow fruit ruler"],
+      "tags": ["meme", "length"],
+      "unitCategoryRaw": "length"
     },
     {
       "id": "item.measurement.absurd.elephant",
       "domainId": "measurement",
       "subgenreId": "measurement.absurd",
       "name": "Elephant (mass)",
-      "description": "Approximate adult elephant mass."
+      "description": "Approximate adult elephant mass.",
+      "tags": ["meme", "mass"],
+      "unitCategoryRaw": "mass"
     },
     {
       "id": "item.lifestyle.time.coffee-break",
       "domainId": "lifestyle",
       "subgenreId": "lifestyle.time-blocks",
       "name": "Coffee break",
-      "description": "A nominal break-sized slice of time."
+      "description": "A nominal break-sized slice of time.",
+      "synonyms": ["coffee pause"],
+      "tags": ["break", "time"],
+      "unitCategoryRaw": "time"
     }
   ],
   "converterNavigation": {
