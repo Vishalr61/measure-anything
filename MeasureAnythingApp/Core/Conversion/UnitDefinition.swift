@@ -15,15 +15,23 @@ public struct UnitDefinition: Identifiable, Codable, Hashable, Sendable {
     public var name: String
     public var category: UnitCategory
     /// Canonical base unit name for the category (e.g., "meter").
-    /// For non-temperature categories, this must match `category.canonicalBaseUnit`.
+    /// Must match `category.canonicalBaseUnit` for all categories in v1 (including temperature).
     public var baseUnit: String
     public var kind: UnitKind
+
+    /// Controls which conversion path is used for this unit.
+    ///
+    /// - `.multiplicative`: uses `factor` with the canonical base unit
+    /// - `.temperature`: participates in temperature conversion via `TemperatureConverter`
+    public var conversionStyle: ConversionStyle
 
     /// Multiplicative factor to convert *this* unit into the category base unit.
     /// Example: if `category = length` and `baseUnit = "meter"`:
     /// - kilometer.factor = 1000
     /// - banana.factor = 0.19
-    public var factor: Double
+    ///
+    /// Required when `conversionStyle == .multiplicative`. Ignored for temperature units.
+    public var factor: Double?
 
     /// Optional SF Symbol name or app asset name for display layers.
     public var iconName: String?
@@ -38,7 +46,8 @@ public struct UnitDefinition: Identifiable, Codable, Hashable, Sendable {
         category: UnitCategory,
         baseUnit: String,
         kind: UnitKind,
-        factor: Double,
+        conversionStyle: ConversionStyle = .multiplicative,
+        factor: Double? = nil,
         iconName: String? = nil,
         description: String? = nil,
         exampleMeme: String? = nil
@@ -48,6 +57,7 @@ public struct UnitDefinition: Identifiable, Codable, Hashable, Sendable {
         self.category = category
         self.baseUnit = baseUnit
         self.kind = kind
+        self.conversionStyle = conversionStyle
         self.factor = factor
         self.iconName = iconName
         self.description = description
@@ -61,8 +71,9 @@ public extension UnitDefinition {
     enum ValidationError: Error, Equatable, LocalizedError {
         case emptyID
         case emptyName
+        case missingFactorForMultiplicative
         case nonPositiveFactor(Double)
-        case temperatureNotAllowedInMultiplicativeDefinition
+        case invalidStyleForCategory(expected: ConversionStyle, actual: ConversionStyle)
         case baseUnitMismatch(expected: String, actual: String)
 
         public var errorDescription: String? {
@@ -71,10 +82,12 @@ public extension UnitDefinition {
                 "UnitDefinition.id must not be empty."
             case .emptyName:
                 "UnitDefinition.name must not be empty."
+            case .missingFactorForMultiplicative:
+                "UnitDefinition.factor is required for multiplicative units."
             case .nonPositiveFactor(let factor):
                 "UnitDefinition.factor must be > 0 (got \(factor))."
-            case .temperatureNotAllowedInMultiplicativeDefinition:
-                "Temperature units must be handled via a dedicated conversion path (not UnitDefinition.factor)."
+            case .invalidStyleForCategory(let expected, let actual):
+                "UnitDefinition.conversionStyle mismatch (expected \(expected), got \(actual))."
             case .baseUnitMismatch(let expected, let actual):
                 "UnitDefinition.baseUnit mismatch (expected '\(expected)', got '\(actual)')."
             }
@@ -89,13 +102,17 @@ public extension UnitDefinition {
         if name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
             throw ValidationError.emptyName
         }
-        guard factor > 0 else {
-            throw ValidationError.nonPositiveFactor(factor)
+        let expectedStyle: ConversionStyle = (category == .temperature) ? .temperature : .multiplicative
+        if conversionStyle != expectedStyle {
+            throw ValidationError.invalidStyleForCategory(expected: expectedStyle, actual: conversionStyle)
         }
-
-        // Temperature is intentionally excluded from the multiplicative unit system.
-        if category == .temperature {
-            throw ValidationError.temperatureNotAllowedInMultiplicativeDefinition
+        if conversionStyle == .multiplicative {
+            guard let factor else {
+                throw ValidationError.missingFactorForMultiplicative
+            }
+            guard factor > 0 else {
+                throw ValidationError.nonPositiveFactor(factor)
+            }
         }
 
         if let expected = category.canonicalBaseUnit, expected != baseUnit {

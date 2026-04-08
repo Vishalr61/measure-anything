@@ -8,7 +8,9 @@ public struct ConversionResult: Equatable, Hashable, Sendable {
     public let fromUnitID: String
     public let toUnitID: String
 
-    /// Value expressed in the category's canonical base unit (non-temperature categories only).
+    /// Value expressed in the category's canonical base unit.
+    ///
+    /// For temperature, this is expected to be Kelvin.
     public let baseValue: Double
     public let outputValue: Double
 

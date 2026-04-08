@@ -20,7 +20,7 @@ public extension UnitCategory {
         case .mass: "kilogram"
         case .time: "second"
         case .volume: "liter"
-        case .temperature: nil
+        case .temperature: "kelvin"
         }
     }
 }
