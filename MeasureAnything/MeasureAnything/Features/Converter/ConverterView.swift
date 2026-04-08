@@ -15,6 +15,7 @@ struct ConverterView: View {
     @State private var showShareSheet = false
     @State private var shareActivityItems: [Any] = []
     @State private var showTaxonomySearch = false
+    @State private var swapRotation: Double = 0
 
     var body: some View {
         NavigationStack {
@@ -222,10 +223,26 @@ struct ConverterView: View {
 
                 taxonomySelectionContextLines
 
-                Toggle("Explain like a meme", isOn: $vm.isMemeExplanationEnabled)
-                    .font(.subheadline)
+                memeOutputStyleControl
             }
         }
+    }
+
+    /// Compact output-style control (same binding as former meme toggle).
+    private var memeOutputStyleControl: some View {
+        VStack(alignment: .leading, spacing: ConverterLayout.rhythm8) {
+            Text("Result tone")
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(.secondary)
+            Picker("Explanation style", selection: $vm.isMemeExplanationEnabled) {
+                Text("Standard").tag(false)
+                Text("Meme").tag(true)
+            }
+            .pickerStyle(.segmented)
+        }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("Result explanation style")
+        .accessibilityHint("Standard keeps the result concise. Meme adds a playful explanation when available.")
     }
 
     /// Block 2: amount and unit pickers (secondary surface).
@@ -292,12 +309,22 @@ struct ConverterView: View {
                     }
                 }
 
-            HStack(alignment: .center, spacing: ConverterLayout.rhythm12) {
-                unitPickerColumn(title: "From", selection: $vm.selectedFromUnitID)
-                swapButton
-                unitPickerColumn(title: "To", selection: $vm.selectedToUnitID)
-            }
+            conversionUnitRow
         }
+    }
+
+    /// Single horizontal conversion control: source pill, swap, target pill.
+    private var conversionUnitRow: some View {
+        HStack(alignment: .center, spacing: ConverterLayout.rhythm8) {
+            unitPickerPill(accessibilityTitle: "From unit", selection: $vm.selectedFromUnitID)
+            swapButton
+            unitPickerPill(accessibilityTitle: "To unit", selection: $vm.selectedToUnitID)
+        }
+        .animation(.easeOut(duration: 0.22), value: unitSelectionAnimationKey)
+    }
+
+    private var unitSelectionAnimationKey: String {
+        "\(vm.selectedFromUnitID)|\(vm.selectedToUnitID)"
     }
 
     private var customUnitsSection: some View {
@@ -360,56 +387,67 @@ struct ConverterView: View {
     private var swapButton: some View {
         Button {
             Haptics.tap()
-            vm.swapUnits()
+            withAnimation(.spring(response: 0.34, dampingFraction: 0.82)) {
+                swapRotation += 180
+                vm.swapUnits()
+            }
         } label: {
             Image(systemName: "arrow.left.arrow.right")
-                .font(.headline)
-                .frame(width: 44, height: 44)
-                .background(.thinMaterial, in: RoundedRectangle(cornerRadius: ConverterLayout.insetCornerRadius, style: .continuous))
+                .font(.system(size: 15, weight: .semibold))
+                .foregroundStyle(.secondary)
+                .frame(width: 40, height: 40)
+                .background(.thinMaterial, in: Circle())
+                .rotationEffect(.degrees(swapRotation))
         }
         .buttonStyle(.plain)
         .accessibilityLabel("Swap from and to units")
     }
 
-    private func unitPickerColumn(title: String, selection: Binding<UnitDefinition.ID>) -> some View {
-        VStack(alignment: .leading, spacing: ConverterLayout.rhythm8) {
-            Text(title)
-                .font(.caption.weight(.semibold))
-                .foregroundStyle(.secondary)
-            Picker(title, selection: selection) {
-                ForEach(vm.availableUnits, id: \.id) { unit in
-                    Text(unit.name).tag(unit.id)
-                }
+    private func unitPickerPill(accessibilityTitle: String, selection: Binding<UnitDefinition.ID>) -> some View {
+        let name = vm.availableUnits.first { $0.id == selection.wrappedValue }?.name ?? "—"
+        return Picker(selection: selection) {
+            ForEach(vm.availableUnits, id: \.id) { unit in
+                Text(unit.name).tag(unit.id)
             }
-            .pickerStyle(.menu)
-            .frame(maxWidth: .infinity, alignment: .leading)
+        } label: {
+            HStack(spacing: 6) {
+                Text(name)
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(.primary)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.72)
+                Image(systemName: "chevron.down")
+                    .font(.caption2.weight(.semibold))
+                    .foregroundStyle(.tertiary)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 12)
+            .padding(.horizontal, 14)
+            .background(
+                Capsule(style: .continuous)
+                    .fill(Color(.systemBackground).opacity(0.42))
+            )
+            .overlay(
+                Capsule(style: .continuous)
+                    .strokeBorder(Color.primary.opacity(0.1), lineWidth: 1)
+            )
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
+        .pickerStyle(.menu)
+        .accessibilityLabel("\(accessibilityTitle), \(name)")
+        .accessibilityHint("Opens a menu to choose a unit")
     }
 
     /// Block 3: conversion output (primary elevated surface).
     private var resultCard: some View {
         VStack(alignment: .leading, spacing: ConverterLayout.rhythm16) {
-            HStack(alignment: .center) {
+            ZStack(alignment: .topTrailing) {
                 Text("Result")
                     .font(.subheadline.weight(.semibold))
                     .foregroundStyle(.secondary)
-                Spacer(minLength: ConverterLayout.rhythm8)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+
                 if canShareResult {
-                    Menu {
-                        Button("Share as Text") {
-                            presentShareText()
-                        }
-                        Button("Share as Image") {
-                            presentShareImage()
-                        }
-                    } label: {
-                        Image(systemName: "square.and.arrow.up")
-                            .font(.body.weight(.semibold))
-                            .frame(minWidth: 44, minHeight: 44)
-                            .contentShape(Rectangle())
-                    }
-                    .accessibilityLabel("Share result")
+                    shareMenuDiminutive
                 }
             }
 
@@ -428,12 +466,14 @@ struct ConverterView: View {
                         outputFormatted: output,
                         toName: toName,
                         meme: result.memeExplanation,
-                        prominent: true
+                        prominent: true,
+                        equivalenceLine: equivalenceLine(result: result, fromName: fromName, toName: toName)
                     )
                 } else {
                     resultEmptyPlaceholder
                 }
             }
+            .animation(.easeOut(duration: 0.24), value: resultBodyAnimationKey)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(ConverterLayout.resultHeroPadding)
@@ -446,6 +486,43 @@ struct ConverterView: View {
                 .strokeBorder(Color.primary.opacity(0.1), lineWidth: 1)
         )
         .shadow(color: .black.opacity(0.14), radius: 20, x: 0, y: 8)
+    }
+
+    private var resultBodyAnimationKey: String {
+        if let err = vm.validationError { return "e:\(err)" }
+        if let r = vm.conversionResult {
+            return "r:\(r.outputValue):\(r.inputValue):\(vm.inputText):\(vm.isMemeExplanationEnabled):\(r.memeExplanation ?? "")"
+        }
+        return "empty"
+    }
+
+    private var shareMenuDiminutive: some View {
+        Menu {
+            Button("Share as Text") {
+                presentShareText()
+            }
+            Button("Share as Image") {
+                presentShareImage()
+            }
+        } label: {
+            Image(systemName: "square.and.arrow.up")
+                .font(.caption.weight(.medium))
+                .foregroundStyle(.tertiary)
+                .frame(width: 44, height: 44)
+                .contentShape(Rectangle())
+        }
+        .accessibilityLabel("Share result")
+    }
+
+    /// Linear factor line; omitted for temperature and degenerate cases.
+    private func equivalenceLine(result: ConversionResult, fromName: String, toName: String) -> String? {
+        guard result.category != .temperature,
+              result.fromUnitID != result.toUnitID else { return nil }
+        let inp = result.inputValue
+        guard inp != 0, abs(inp) > 1e-12 else { return nil }
+        let ratio = result.outputValue / inp
+        let r = vm.formatNumberForDisplay(ratio)
+        return "1 \(fromName) ≈ \(r) \(toName)"
     }
 
     private func sectionLabel(_ title: String) -> some View {

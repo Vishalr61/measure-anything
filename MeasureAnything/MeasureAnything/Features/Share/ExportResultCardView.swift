@@ -9,32 +9,88 @@ struct ResultCardContent: View {
     let meme: String?
     /// Larger type on the live converter; export keeps the default.
     var prominent: Bool = false
+    /// Optional factor line (e.g. linear conversions); omitted for export.
+    var equivalenceLine: String? = nil
 
     var body: some View {
-        VStack(alignment: .leading, spacing: prominent ? ConverterLayout.rhythm12 : ConverterLayout.tightSpacing) {
+        if prominent {
+            prominentLayout
+        } else {
+            exportLayout
+        }
+    }
+
+    private var exportLayout: some View {
+        VStack(alignment: .leading, spacing: ConverterLayout.tightSpacing) {
             Text("\(inputFormatted) \(fromName)")
-                .font(prominent ? .subheadline : .callout)
+                .font(.callout)
                 .foregroundStyle(.secondary)
 
             Image(systemName: "arrow.down")
                 .font(.caption.weight(.bold))
                 .foregroundStyle(.tertiary)
-                .padding(.vertical, prominent ? 4 : 2)
+                .padding(.vertical, 2)
 
             Text("\(outputFormatted) \(toName)")
-                .font(prominent ? .title2.weight(.bold) : .title3.weight(.bold))
+                .font(.title3)
+                .fontWeight(.bold)
                 .foregroundStyle(.primary)
                 .monospacedDigit()
 
-            if let meme, !meme.isEmpty {
-                Divider()
-                    .padding(.vertical, 4)
-                Text(meme)
-                    .font(prominent ? .body : .callout)
-                    .foregroundStyle(.secondary)
-                    .italic()
-                    .fixedSize(horizontal: false, vertical: true)
+            memeBlock(font: .callout)
+        }
+    }
+
+    private var prominentLayout: some View {
+        VStack(alignment: .leading, spacing: ConverterLayout.rhythm12) {
+            Text("\(inputFormatted) \(fromName)")
+                .font(.caption)
+                .foregroundStyle(.tertiary)
+                .lineLimit(2)
+                .minimumScaleFactor(0.88)
+
+            if let equivalenceLine, !equivalenceLine.isEmpty {
+                Text(equivalenceLine)
+                    .font(.caption2)
+                    .foregroundStyle(.quaternary)
+                    .lineLimit(2)
+                    .minimumScaleFactor(0.85)
             }
+
+            prominentOutputText
+
+            memeBlock(font: .subheadline)
+        }
+    }
+
+    @ViewBuilder
+    private var prominentOutputText: some View {
+        let text = Text("\(outputFormatted) \(toName)")
+            .font(.largeTitle)
+            .fontWeight(.bold)
+            .foregroundStyle(.primary)
+            .monospacedDigit()
+            .minimumScaleFactor(0.45)
+            .lineLimit(3)
+            .multilineTextAlignment(.leading)
+
+        if #available(iOS 17.0, *) {
+            text.contentTransition(.numericText())
+        } else {
+            text
+        }
+    }
+
+    @ViewBuilder
+    private func memeBlock(font: Font) -> some View {
+        if let meme, !meme.isEmpty {
+            Divider()
+                .padding(.vertical, ConverterLayout.rhythm8)
+            Text(meme)
+                .font(font)
+                .foregroundStyle(.secondary)
+                .italic()
+                .fixedSize(horizontal: false, vertical: true)
         }
     }
 }
