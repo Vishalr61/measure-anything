@@ -41,6 +41,10 @@ public struct ConverterNavigation: Codable, Hashable, Sendable {
 
     public struct CategoryRow: Codable, Hashable, Sendable {
         public var unitCategoryRaw: String
+        /// When set, shown instead of `unitCategoryRaw.capitalized`.
+        public var displayName: String?
+        /// Optional picker hint or accessibility detail.
+        public var description: String?
     }
 
     public struct ModeRow: Codable, Hashable, Sendable {

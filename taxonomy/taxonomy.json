@@ -77,7 +77,7 @@
   "converterNavigation": {
     "measurementDomainId": "measurement",
     "categories": [
-      { "unitCategoryRaw": "length" },
+      { "unitCategoryRaw": "length", "description": "Distance, height, and similar scales." },
       { "unitCategoryRaw": "mass" },
       { "unitCategoryRaw": "time" },
       { "unitCategoryRaw": "temperature" },

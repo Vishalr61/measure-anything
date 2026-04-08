@@ -168,7 +168,8 @@ struct ConverterView: View {
         VStack(alignment: .leading, spacing: ConverterLayout.blockSpacing) {
             Picker("Category", selection: $vm.selectedCategory) {
                 ForEach(vm.categories, id: \.self) { category in
-                    Text(category.rawValue.capitalized).tag(category)
+                    let d = taxonomyStore.categoryDisplay(for: category)
+                    Text(d.displayName).tag(category)
                 }
             }
             .pickerStyle(.segmented)
@@ -176,7 +177,8 @@ struct ConverterView: View {
             VStack(alignment: .leading, spacing: 12) {
                 Picker("Mode", selection: $vm.selectedMode) {
                     ForEach(vm.modes, id: \.self) { mode in
-                        Text(mode.rawValue.capitalized).tag(mode)
+                        let d = taxonomyStore.modeDisplay(for: mode)
+                        Text(d.displayName).tag(mode)
                     }
                 }
                 .pickerStyle(.segmented)

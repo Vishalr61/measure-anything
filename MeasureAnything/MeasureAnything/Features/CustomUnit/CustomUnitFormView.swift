@@ -31,8 +31,9 @@ struct CustomUnitFormView: View {
 
                 Section {
                     Picker("Category", selection: $category) {
-                        ForEach(UnitCategory.customAllowed, id: \.self) { cat in
-                            Text(cat.rawValue.capitalized).tag(cat)
+                        ForEach(appTaxonomy.customFormCategories, id: \.self) { cat in
+                            let d = appTaxonomy.categoryDisplay(for: cat)
+                            Text(d.displayName).tag(cat)
                         }
                     }
                     HStack {

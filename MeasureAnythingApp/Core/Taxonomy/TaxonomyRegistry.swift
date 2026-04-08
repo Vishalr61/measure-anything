@@ -63,9 +63,17 @@ public struct TaxonomyRegistry: Sendable {
             throw RegistryError.resourceNotFound("taxonomy.json")
         }
         let data = try Data(contentsOf: url)
-        let decoder = JSONDecoder()
-        let bundleDecoded = try decoder.decode(TaxonomyBundle.self, from: data)
+        try self.init(jsonData: data)
+    }
+
+    /// Decodes and validates taxonomy JSON (for tests, tooling, or alternate sources).
+    public init(jsonData: Data) throws {
+        let bundleDecoded = try JSONDecoder().decode(TaxonomyBundle.self, from: jsonData)
         try Self.validate(bundleDecoded)
+        self.init(populatingFrom: bundleDecoded)
+    }
+
+    private init(populatingFrom bundleDecoded: TaxonomyBundle) {
         self.domains = bundleDecoded.domains
         self.subgenres = bundleDecoded.subgenres
         self.items = bundleDecoded.items

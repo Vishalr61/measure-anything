@@ -33,7 +33,11 @@ export interface Item {
 
 export interface ConverterNavigation {
   readonly measurementDomainId: DomainId;
-  readonly categories: readonly { readonly unitCategoryRaw: string }[];
+  readonly categories: readonly {
+    readonly unitCategoryRaw: string;
+    readonly displayName?: string;
+    readonly description?: string;
+  }[];
   readonly modes: readonly {
     readonly modeRaw: string;
     readonly subgenreId: SubgenreId;
