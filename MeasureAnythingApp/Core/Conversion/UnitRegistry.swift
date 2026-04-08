@@ -5,7 +5,7 @@ import Foundation
 /// v1 composition:
 /// - Normal units: built-in (`SeedNormalUnits`)
 /// - Absurd units: shipped JSON (`AbsurdUnitStore`)
-/// - Custom units: intentionally not included yet (SwiftData later)
+/// - Custom units: supplied by the app (SwiftData) as `UnitDefinition`s with `kind == .custom`
 public struct UnitRegistry: Sendable {
     public enum RegistryError: Error, LocalizedError, Equatable {
         case duplicateUnitID(String)
@@ -38,10 +38,13 @@ public struct UnitRegistry: Sendable {
         self.byID = map
     }
 
-    public static func v1Default(absurdStore: AbsurdUnitStore = AbsurdUnitStore()) throws -> UnitRegistry {
+    public static func v1Default(
+        absurdStore: AbsurdUnitStore = AbsurdUnitStore(),
+        customUnits: [UnitDefinition] = []
+    ) throws -> UnitRegistry {
         let normals = SeedNormalUnits.all
         let absurd = try absurdStore.loadAll()
-        return try UnitRegistry(units: normals + absurd)
+        return try UnitRegistry(units: normals + absurd + customUnits)
     }
 
     public func unit(id: UnitDefinition.ID) throws -> UnitDefinition {

@@ -1,9 +1,14 @@
 import SwiftUI
+import SwiftData
 import MeasureAnythingCore
 
 struct ConverterView: View {
+    @Query(sort: \CustomUnit.name) private var customUnits: [CustomUnit]
+    @Environment(\.modelContext) private var modelContext
+
     @StateObject private var vm = ConverterViewModel()
     @FocusState private var valueFieldFocused: Bool
+    @State private var showCustomUnitForm = false
 
     var body: some View {
         NavigationStack {
@@ -11,6 +16,9 @@ struct ConverterView: View {
                 VStack(alignment: .leading, spacing: 20) {
                     header
                     inputs
+                    if vm.selectedMode == .custom {
+                        customUnitsSection
+                    }
                     resultCard
                 }
                 .padding()
@@ -18,7 +26,31 @@ struct ConverterView: View {
             .navigationTitle("Measure Anything")
             .navigationBarTitleDisplayMode(.inline)
             .scrollDismissesKeyboard(.interactively)
+            .toolbar {
+                if vm.selectedMode == .custom {
+                    ToolbarItem(placement: .primaryAction) {
+                        Button("Add unit", systemImage: "plus") {
+                            showCustomUnitForm = true
+                        }
+                        .accessibilityLabel("Add custom unit")
+                    }
+                }
+            }
+            .sheet(isPresented: $showCustomUnitForm) {
+                CustomUnitFormView()
+            }
+            .task(id: customUnitsSyncToken) {
+                vm.sync(customUnits: customUnits)
+            }
         }
+    }
+
+    /// Changes when rows are inserted, updated, or deleted.
+    private var customUnitsSyncToken: String {
+        customUnits
+            .map { "\($0.id)|\($0.factor)|\($0.name)|\($0.categoryRaw)" }
+            .sorted()
+            .joined(separator: ";")
     }
 
     private var header: some View {
@@ -70,6 +102,51 @@ struct ConverterView: View {
                 unitPickerColumn(title: "To", selection: $vm.selectedToUnitID)
             }
         }
+    }
+
+    private var customUnitsSection: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("My custom units")
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(.secondary)
+
+            if customUnits.isEmpty {
+                Text("None yet. Tap + to create one for this device.")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+            } else {
+                ForEach(customUnits) { unit in
+                    HStack(alignment: .center) {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(unit.name)
+                                .font(.body.weight(.medium))
+                            Text(unit.categoryRaw.capitalized)
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                        Spacer()
+                        Button(role: .destructive) {
+                            modelContext.delete(unit)
+                        } label: {
+                            Image(systemName: "trash")
+                                .font(.body.weight(.medium))
+                                .foregroundStyle(.red)
+                                .frame(minWidth: 44, minHeight: 44)
+                                .contentShape(Rectangle())
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityLabel("Delete \(unit.name)")
+                    }
+                    .padding(.vertical, 4)
+                }
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(12)
+        .background(
+            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                .fill(Color(.tertiarySystemBackground))
+        )
     }
 
     private var swapButton: some View {
@@ -157,4 +234,5 @@ struct ConverterView: View {
 
 #Preview {
     ConverterView()
+        .modelContainer(for: CustomUnit.self, inMemory: true)
 }

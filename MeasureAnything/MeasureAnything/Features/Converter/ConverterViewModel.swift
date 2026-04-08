@@ -37,10 +37,9 @@ final class ConverterViewModel: ObservableObject {
     @Published private(set) var conversionResult: ConversionResult?
     @Published private(set) var validationError: String?
 
-    private let registry: UnitRegistry
-    private let engine: ConverterEngine
+    private var registry: UnitRegistry
+    private var engine: ConverterEngine
 
-    /// Cached formatters (locale-aware grouping, stable rules).
     private let displayFormatter: NumberFormatter = {
         let f = NumberFormatter()
         f.numberStyle = .decimal
@@ -52,18 +51,31 @@ final class ConverterViewModel: ObservableObject {
     }()
 
     init() {
-        let loadedRegistry: UnitRegistry
-        do {
-            loadedRegistry = try UnitRegistry.v1Default()
-        } catch {
-            loadedRegistry = (try? UnitRegistry(units: SeedNormalUnits.all)) ?? (try! UnitRegistry(units: []))
-        }
-
-        self.registry = loadedRegistry
-        self.engine = ConverterEngine(registry: loadedRegistry)
-
+        let pair = Self.makeRegistry(customUnits: [])
+        self.registry = pair.registry
+        self.engine = pair.engine
         applyDefaultsAfterCategoryChange()
         recompute()
+    }
+
+    /// Rebuilds engine + registry when SwiftData custom rows change.
+    func sync(customUnits: [CustomUnit]) {
+        let pair = Self.makeRegistry(customUnits: customUnits)
+        registry = pair.registry
+        engine = pair.engine
+        reconcileSelectionsAfterModeChange()
+        recompute()
+    }
+
+    private static func makeRegistry(customUnits: [CustomUnit]) -> (registry: UnitRegistry, engine: ConverterEngine) {
+        let defs = customUnits.compactMap { try? $0.toUnitDefinition() }
+        do {
+            let reg = try UnitRegistry.v1Default(customUnits: defs)
+            return (reg, ConverterEngine(registry: reg))
+        } catch {
+            let fallback = (try? UnitRegistry.v1Default()) ?? (try! UnitRegistry(units: SeedNormalUnits.all))
+            return (fallback, ConverterEngine(registry: fallback))
+        }
     }
 
     var categories: [UnitCategory] { UnitCategory.allCases }
@@ -84,7 +96,6 @@ final class ConverterViewModel: ObservableObject {
 
     // MARK: - Defaults & selection safety
 
-    /// Preferred (from, to) for each category when both exist in the current unit list.
     private func preferredDefaultPair(for category: UnitCategory) -> (from: UnitDefinition.ID, to: UnitDefinition.ID) {
         switch category {
         case .length: ("meter", "kilometer")
@@ -139,7 +150,6 @@ final class ConverterViewModel: ObservableObject {
             return
         }
 
-        // Mode removed previously valid units (e.g. absurd → normal): fall back to category defaults.
         applyDefaultsAfterCategoryChange()
     }
 
@@ -161,7 +171,6 @@ final class ConverterViewModel: ObservableObject {
         let trimmed = inputText.trimmingCharacters(in: .whitespacesAndNewlines)
         if trimmed.isEmpty { return nil }
 
-        // Accept locale decimal separator and plain ASCII dot.
         let normalized = trimmed.replacingOccurrences(of: ",", with: ".")
         guard let value = Double(normalized), value.isFinite else { return nil }
         return value
@@ -187,7 +196,6 @@ final class ConverterViewModel: ObservableObject {
             return
         }
 
-        // Defensive: registry and UI should stay aligned; avoid engine throw.
         guard fromUnit.category == selectedCategory, toUnit.category == selectedCategory else {
             validationError = "Units don’t match the selected category."
             return
@@ -206,7 +214,6 @@ final class ConverterViewModel: ObservableObject {
         }
     }
 
-    /// Formats values for the result card: trims noise, caps decimals sensibly, uses grouping for large numbers.
     func formatNumberForDisplay(_ value: Double) -> String {
         guard value.isFinite else { return "—" }
         if value == 0 { return "0" }
@@ -225,7 +232,6 @@ final class ConverterViewModel: ObservableObject {
             f.maximumFractionDigits = 4
             f.minimumFractionDigits = 0
         default:
-            // Very small numbers: a few significant digits without going full scientific.
             f.maximumFractionDigits = 6
             f.minimumFractionDigits = 0
         }
