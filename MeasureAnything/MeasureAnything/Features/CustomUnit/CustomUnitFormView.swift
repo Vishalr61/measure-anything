@@ -34,6 +34,7 @@ struct CustomUnitFormView: View {
                         ForEach(appTaxonomy.customFormCategories, id: \.self) { cat in
                             let d = appTaxonomy.categoryDisplay(for: cat)
                             Text(d.displayName).tag(cat)
+                                .taxonomyPickerSegmentAccessibility(displayName: d.displayName, description: d.description)
                         }
                     }
                     HStack {
@@ -47,7 +48,16 @@ struct CustomUnitFormView: View {
                 } header: {
                     Text("Measurement")
                 } footer: {
-                    Text("Factor is how many \(canonicalBase) equal **one** of your unit (same rule as built-in absurd units).")
+                    VStack(alignment: .leading, spacing: 8) {
+                        if let desc = appTaxonomy.categoryDisplay(for: category).description, !desc.isEmpty {
+                            Text(desc)
+                                .font(.footnote)
+                                .foregroundStyle(.secondary)
+                                .fixedSize(horizontal: false, vertical: true)
+                                .accessibilityLabel("Category description: \(desc)")
+                        }
+                        Text("Factor is how many \(canonicalBase) equal **one** of your unit (same rule as built-in absurd units).")
+                    }
                 }
 
                 Section {

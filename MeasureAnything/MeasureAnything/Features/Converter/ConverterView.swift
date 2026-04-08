@@ -170,6 +170,7 @@ struct ConverterView: View {
                 ForEach(vm.categories, id: \.self) { category in
                     let d = taxonomyStore.categoryDisplay(for: category)
                     Text(d.displayName).tag(category)
+                        .taxonomyPickerSegmentAccessibility(displayName: d.displayName, description: d.description)
                 }
             }
             .pickerStyle(.segmented)
@@ -179,14 +180,40 @@ struct ConverterView: View {
                     ForEach(vm.modes, id: \.self) { mode in
                         let d = taxonomyStore.modeDisplay(for: mode)
                         Text(d.displayName).tag(mode)
+                            .taxonomyPickerSegmentAccessibility(displayName: d.displayName, description: d.description)
                     }
                 }
                 .pickerStyle(.segmented)
+
+                taxonomySelectionContextLines
 
                 Toggle("Explain like a meme", isOn: $vm.isMemeExplanationEnabled)
                     .font(.subheadline)
             }
         }
+    }
+
+    /// Minimal on-screen context for the current category and mode when taxonomy supplies descriptions.
+    private var taxonomySelectionContextLines: some View {
+        let cat = taxonomyStore.categoryDisplay(for: vm.selectedCategory)
+        let mode = taxonomyStore.modeDisplay(for: vm.selectedMode)
+        return VStack(alignment: .leading, spacing: 4) {
+            if let t = cat.description, !t.isEmpty {
+                Text(t)
+                    .font(.caption)
+                    .foregroundStyle(.tertiary)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .accessibilityLabel("Category: \(t)")
+            }
+            if let t = mode.description, !t.isEmpty {
+                Text(t)
+                    .font(.caption)
+                    .foregroundStyle(.tertiary)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .accessibilityLabel("Mode: \(t)")
+            }
+        }
+        .accessibilityElement(children: .combine)
     }
 
     private var inputs: some View {

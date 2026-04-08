@@ -16,6 +16,18 @@ struct ConverterModeDisplay: Equatable {
     var description: String?
 }
 
+/// Display payload for search/browse rows: full taxonomy path without exposing registry types.
+struct TaxonomySearchPathResult: Equatable, Sendable, Identifiable {
+    let id: String
+    /// e.g. `"Measurement / Normal units / Meter"`
+    let pathLine: String
+    let domainTitle: String
+    let subgenreTitle: String
+    let itemTitle: String
+
+    static let pathComponentSeparator = " / "
+}
+
 /// App-owned entry point for taxonomy: loads `TaxonomyRegistry` once and exposes converter picker data.
 ///
 /// Validation stays in `MeasureAnythingTaxonomy`; this type only reads resolved lists and surfaces load failures.
@@ -109,5 +121,29 @@ final class AppTaxonomyStore: ObservableObject {
         let name = subName.isEmpty ? fallbackName : subName
         let desc = sub.description.trimmingCharacters(in: .whitespacesAndNewlines)
         return ConverterModeDisplay(displayName: name, description: desc.isEmpty ? nil : desc)
+    }
+
+    /// Resolves `Domain / Subgenre / Item` titles for a taxonomy item id. `nil` if registry is missing or ids are unknown.
+    func searchPathResult(forItemId itemId: String) -> TaxonomySearchPathResult? {
+        guard let reg = registry,
+              let item = reg.itemById[itemId],
+              let domain = reg.domainById[item.domainId],
+              let sub = reg.subgenreById[item.subgenreId] else {
+            return nil
+        }
+        let domainTitle = domain.name.trimmingCharacters(in: .whitespacesAndNewlines)
+        let subgenreTitle = sub.name.trimmingCharacters(in: .whitespacesAndNewlines)
+        let itemTitle = item.name.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !domainTitle.isEmpty, !subgenreTitle.isEmpty, !itemTitle.isEmpty else {
+            return nil
+        }
+        let pathLine = [domainTitle, subgenreTitle, itemTitle].joined(separator: TaxonomySearchPathResult.pathComponentSeparator)
+        return TaxonomySearchPathResult(
+            id: itemId,
+            pathLine: pathLine,
+            domainTitle: domainTitle,
+            subgenreTitle: subgenreTitle,
+            itemTitle: itemTitle
+        )
     }
 }

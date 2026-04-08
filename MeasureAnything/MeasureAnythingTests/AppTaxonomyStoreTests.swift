@@ -59,6 +59,42 @@ struct AppTaxonomyStoreTests {
         #expect(d.description == "Test override")
     }
 
+    @Test func bundledCategoryDescriptionForLength() throws {
+        let reg = try TaxonomyRegistry()
+        let store = AppTaxonomyStore(injectedRegistry: reg, loadFailureMessage: nil)
+        let d = store.categoryDisplay(for: .length)
+        #expect(d.description == "Distance, height, and similar scales.")
+    }
+
+    @Test func bundledModeDescriptionForAbsurd() throws {
+        let reg = try TaxonomyRegistry()
+        let store = AppTaxonomyStore(injectedRegistry: reg, loadFailureMessage: nil)
+        let d = store.modeDisplay(for: .absurd)
+        #expect(d.description == "Meme-friendly units backed by approximate real factors.")
+    }
+
+    @Test func searchPathResultFormatsDomainSubgenreItem() throws {
+        let reg = try TaxonomyRegistry()
+        let store = AppTaxonomyStore(injectedRegistry: reg, loadFailureMessage: nil)
+        let r = store.searchPathResult(forItemId: "item.measurement.normal.meter")
+        #expect(r != nil)
+        #expect(r?.pathLine == "Measurement / Normal units / Meter")
+        #expect(r?.domainTitle == "Measurement")
+        #expect(r?.subgenreTitle == "Normal units")
+        #expect(r?.itemTitle == "Meter")
+    }
+
+    @Test func searchPathResultNilWhenRegistryMissing() {
+        let store = AppTaxonomyStore(injectedRegistry: nil, loadFailureMessage: "x")
+        #expect(store.searchPathResult(forItemId: "item.measurement.normal.meter") == nil)
+    }
+
+    @Test func searchPathResultNilForUnknownItem() throws {
+        let reg = try TaxonomyRegistry()
+        let store = AppTaxonomyStore(injectedRegistry: reg, loadFailureMessage: nil)
+        #expect(store.searchPathResult(forItemId: "item.unknown") == nil)
+    }
+
     @Test func converterCategoriesFallbackWhenRowsDoNotMapToEnums() throws {
         let json = """
         {
