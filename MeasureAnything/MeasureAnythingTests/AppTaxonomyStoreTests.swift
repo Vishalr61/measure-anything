@@ -100,10 +100,10 @@ struct AppTaxonomyStoreTests {
         #expect(store.searchItems(query: "meter").isEmpty)
     }
 
-    @Test func searchItemsReturnsEmptyForBlankQuery() throws {
+    @Test func searchItemsBlankQueryReturnsBrowseList() throws {
         let reg = try TaxonomyRegistry()
         let store = AppTaxonomyStore(injectedRegistry: reg, loadFailureMessage: nil)
-        #expect(store.searchItems(query: "   ").isEmpty)
+        #expect(!store.searchItems(query: "   ").isEmpty)
     }
 
     @Test func searchExactTitleRanksBeforeExactSynonym() throws {
@@ -238,7 +238,7 @@ struct AppTaxonomyStoreTests {
         """
         let reg = try TaxonomyRegistry(jsonData: Data(json.utf8))
         let store = AppTaxonomyStore(injectedRegistry: reg, loadFailureMessage: nil)
-        let rows = store.searchItems(query: "findme", unitCategoryFilter: .length)
+        let rows = store.searchItems(query: "findme", filters: TaxonomySearchFilters(unitCategory: .length))
         #expect(rows.count == 1)
         #expect(rows[0].id == "item.len")
     }

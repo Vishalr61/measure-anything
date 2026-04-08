@@ -31,6 +31,19 @@ struct TaxonomySubgenreFilterOption: Equatable, Identifiable, Sendable {
     let title: String
 }
 
+/// Filters applied to both browse (empty query) and search modes.
+struct TaxonomySearchFilters: Equatable {
+    var domainId: String?
+    var unitCategory: UnitCategory?
+    var subgenreId: String?
+
+    init(domainId: String? = nil, unitCategory: UnitCategory? = nil, subgenreId: String? = nil) {
+        self.domainId = domainId
+        self.unitCategory = unitCategory
+        self.subgenreId = subgenreId
+    }
+}
+
 /// Bridge from a taxonomy item id to converter-facing state (`MeasureAnythingCore` enums + optional unit id).
 struct TaxonomyConverterRoute: Equatable {
     let category: UnitCategory?
@@ -220,20 +233,27 @@ final class AppTaxonomyStore: ObservableObject {
         )
     }
 
-    /// Ranked search over bundled taxonomy items and indexed units. Returns `[]` when query is blank or taxonomy failed to load.
+    /// Browse when `query` is blank/whitespace (filtered, title-sorted); ranked search when non-empty. Same index as path/route APIs.
     func searchItems(
         query: String,
-        domainIdFilter: String? = nil,
-        subgenreIdFilter: String? = nil,
-        unitCategoryFilter: UnitCategory? = nil,
-        limit: Int = 50
+        filters: TaxonomySearchFilters = TaxonomySearchFilters(),
+        limit: Int = 100
     ) -> [TaxonomyItemSearchResult] {
         guard let index = searchIndex else { return [] }
+        let trimmed = query.trimmingCharacters(in: .whitespacesAndNewlines)
+        if trimmed.isEmpty {
+            return index.browse(
+                categoryId: filters.domainId,
+                subcategoryId: filters.subgenreId,
+                unitCategoryRaw: filters.unitCategory?.rawValue,
+                limit: limit
+            )
+        }
         return index.search(
             query: query,
-            categoryId: domainIdFilter,
-            subcategoryId: subgenreIdFilter,
-            unitCategoryRaw: unitCategoryFilter?.rawValue,
+            categoryId: filters.domainId,
+            subcategoryId: filters.subgenreId,
+            unitCategoryRaw: filters.unitCategory?.rawValue,
             limit: limit
         )
     }

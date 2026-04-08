@@ -2,7 +2,7 @@ import SwiftUI
 import MeasureAnythingCore
 import MeasureAnythingTaxonomy
 
-/// Browse taxonomy items by title, synonym, or tag; selecting a row applies converter state via `onPick`.
+/// Browse filtered taxonomy/catalog rows or search when typing; same rows and `onPick` for both.
 struct TaxonomySearchView: View {
     let onPick: (String) -> Void
 
@@ -10,9 +10,15 @@ struct TaxonomySearchView: View {
     @EnvironmentObject private var taxonomyStore: AppTaxonomyStore
 
     @State private var query = ""
-    @State private var domainFilter: String?
-    @State private var categoryFilter: UnitCategory?
-    @State private var subgenreFilter: String?
+    @State private var filters = TaxonomySearchFilters()
+
+    private var trimmedQuery: String {
+        query.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    private var isSearchMode: Bool {
+        !trimmedQuery.isEmpty
+    }
 
     var body: some View {
         NavigationStack {
@@ -21,7 +27,7 @@ struct TaxonomySearchView: View {
                     ContentUnavailableView(
                         "Taxonomy unavailable",
                         systemImage: "magnifyingglass",
-                        description: Text("Search needs a loaded taxonomy registry.")
+                        description: Text("Browse and search need a loaded taxonomy registry.")
                     )
                 } else {
                     List {
@@ -47,15 +53,20 @@ struct TaxonomySearchView: View {
                         }
                     }
                     .overlay {
-                        let q = query.trimmingCharacters(in: .whitespacesAndNewlines)
-                        if !q.isEmpty, searchResults.isEmpty {
+                        if isSearchMode, searchResults.isEmpty {
                             ContentUnavailableView.search(text: query)
+                        } else if !isSearchMode, searchResults.isEmpty {
+                            ContentUnavailableView(
+                                "No items",
+                                systemImage: "line.3.horizontal.decrease.circle",
+                                description: Text("Nothing matches the current filters. Clear filters or pick another domain, category, or subgenre.")
+                            )
                         }
                     }
-                    .searchable(text: $query, prompt: "Units, titles, synonyms, tags")
+                    .searchable(text: $query, prompt: "Search or browse with filters")
                 }
             }
-            .navigationTitle("Search taxonomy")
+            .navigationTitle("Browse & search")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -65,31 +76,43 @@ struct TaxonomySearchView: View {
                     Menu {
                         Section("Domain") {
                             Button("All domains") {
-                                domainFilter = nil
+                                var f = filters
+                                f.domainId = nil
+                                filters = f
                             }
                             ForEach(taxonomyStore.searchDomainFilterOptions) { opt in
                                 Button(opt.title) {
-                                    domainFilter = opt.id
+                                    var f = filters
+                                    f.domainId = opt.id
+                                    filters = f
                                 }
                             }
                         }
                         Section("Unit category") {
                             Button("All unit categories") {
-                                categoryFilter = nil
+                                var f = filters
+                                f.unitCategory = nil
+                                filters = f
                             }
                             ForEach(UnitCategory.allCases, id: \.self) { cat in
                                 Button(cat.rawValue.capitalized) {
-                                    categoryFilter = cat
+                                    var f = filters
+                                    f.unitCategory = cat
+                                    filters = f
                                 }
                             }
                         }
                         Section("Subgenre") {
                             Button("All subgenres") {
-                                subgenreFilter = nil
+                                var f = filters
+                                f.subgenreId = nil
+                                filters = f
                             }
                             ForEach(taxonomyStore.searchSubgenreFilterOptions) { opt in
                                 Button(opt.title) {
-                                    subgenreFilter = opt.id
+                                    var f = filters
+                                    f.subgenreId = opt.id
+                                    filters = f
                                 }
                             }
                         }
@@ -103,13 +126,7 @@ struct TaxonomySearchView: View {
     }
 
     private var searchResults: [TaxonomyItemSearchResult] {
-        taxonomyStore.searchItems(
-            query: query,
-            domainIdFilter: domainFilter,
-            subgenreIdFilter: subgenreFilter,
-            unitCategoryFilter: categoryFilter,
-            limit: 100
-        )
+        taxonomyStore.searchItems(query: query, filters: filters, limit: 200)
     }
 }
 

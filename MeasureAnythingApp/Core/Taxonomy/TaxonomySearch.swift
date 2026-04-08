@@ -32,6 +32,11 @@ public struct SearchableItem: Sendable {
     public let pathSubgenreTitle: String
     /// When set, selecting this row maps to this engine unit id (dedupe + routing).
     public let converterUnitId: String?
+
+    /// Same as `categoryId` (domain id from taxonomy JSON).
+    public var domainId: String { categoryId }
+    /// Same as `subcategoryId` (subgenre id from taxonomy JSON).
+    public var subgenreId: String { subcategoryId }
 }
 
 // MARK: - Match tier (lower = stronger)
@@ -186,7 +191,25 @@ public struct TaxonomySearchIndex: Sendable {
         byId[itemId]
     }
 
-    /// Ranked search; blank / whitespace-only query yields no results.
+    /// Filtered browse list (no query), sorted by item title. Same filter semantics as `search`.
+    public func browse(
+        categoryId: String? = nil,
+        subcategoryId: String? = nil,
+        unitCategoryRaw: String? = nil,
+        limit: Int = 500
+    ) -> [TaxonomyPathResult] {
+        let filtered = entries.filter {
+            Self.passesFilters($0, categoryId: categoryId, subcategoryId: subcategoryId, unitCategoryRaw: unitCategoryRaw)
+        }
+        let sorted = filtered.sorted {
+            $0.title.localizedStandardCompare($1.title) == .orderedAscending
+        }
+        let paths = sorted.map { TaxonomyPathBuilder.pathResult(for: $0) }
+        if paths.count <= limit { return paths }
+        return Array(paths.prefix(limit))
+    }
+
+    /// Ranked search; use `browse` when the query is empty.
     public func search(
         query: String,
         categoryId: String? = nil,
@@ -206,9 +229,9 @@ public struct TaxonomySearchIndex: Sendable {
         scored.reserveCapacity(min(entries.count, 32))
 
         for e in entries {
-            if let cid = categoryId, !cid.isEmpty, e.categoryId != cid { continue }
-            if let sid = subcategoryId, !sid.isEmpty, e.subcategoryId != sid { continue }
-            if let ucr = unitCategoryRaw, e.unitCategoryRaw != ucr { continue }
+            guard Self.passesFilters(e, categoryId: categoryId, subcategoryId: subcategoryId, unitCategoryRaw: unitCategoryRaw) else {
+                continue
+            }
             guard let tier = Self.matchTier(entry: e, normalizedQuery: q) else { continue }
             scored.append(Scored(tier: tier, path: TaxonomyPathBuilder.pathResult(for: e)))
         }
@@ -226,6 +249,18 @@ public struct TaxonomySearchIndex: Sendable {
 
     private static func normalizeQuery(_ query: String) -> String {
         query.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+    }
+
+    private static func passesFilters(
+        _ e: SearchableItem,
+        categoryId: String?,
+        subcategoryId: String?,
+        unitCategoryRaw: String?
+    ) -> Bool {
+        if let cid = categoryId, !cid.isEmpty, e.categoryId != cid { return false }
+        if let sid = subcategoryId, !sid.isEmpty, e.subcategoryId != sid { return false }
+        if let ucr = unitCategoryRaw, e.unitCategoryRaw != ucr { return false }
+        return true
     }
 
     private static func matchTier(entry: SearchableItem, normalizedQuery q: String) -> TaxonomySearchMatchTier? {

@@ -209,4 +209,57 @@ final class TaxonomySearchTests: XCTestCase {
         XCTAssertFalse(index.search(query: "l").isEmpty)
         XCTAssertFalse(index.search(query: "ng").isEmpty)
     }
+
+    func testBrowseReturnsFilteredTitleSorted() throws {
+        let items = """
+        [
+          {
+            "id":"item.z",
+            "domainId":"measurement",
+            "subgenreId":"measurement.normal",
+            "name":"Zebra",
+            "description":"d",
+            "tags":["t"]
+          },
+          {
+            "id":"item.a",
+            "domainId":"measurement",
+            "subgenreId":"measurement.normal",
+            "name":"Alpha",
+            "description":"d",
+            "tags":["t"]
+          }
+        ]
+        """
+        let reg = try TaxonomyRegistry(jsonData: Data(minimalBundleJSON(extraItems: items).utf8))
+        let index = TaxonomySearchIndex(registry: reg, unitCatalog: [])
+        let rows = index.browse()
+        XCTAssertEqual(rows.map(\.id), ["item.a", "item.z"])
+    }
+
+    func testBrowseRespectsDomainFilter() throws {
+        let items = """
+        [
+          {
+            "id":"item.m",
+            "domainId":"measurement",
+            "subgenreId":"measurement.normal",
+            "name":"M",
+            "description":"d"
+          },
+          {
+            "id":"item.l",
+            "domainId":"lifestyle",
+            "subgenreId":"lifestyle.blocks",
+            "name":"L",
+            "description":"d"
+          }
+        ]
+        """
+        let reg = try TaxonomyRegistry(jsonData: Data(minimalBundleJSON(extraItems: items).utf8))
+        let index = TaxonomySearchIndex(registry: reg, unitCatalog: [])
+        let rows = index.browse(categoryId: "lifestyle")
+        XCTAssertEqual(rows.count, 1)
+        XCTAssertEqual(rows[0].id, "item.l")
+    }
 }
