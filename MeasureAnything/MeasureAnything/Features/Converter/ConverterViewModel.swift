@@ -4,37 +4,54 @@ import MeasureAnythingCore
 
 @MainActor
 final class ConverterViewModel: ObservableObject {
-    // Inputs (owned by VM)
     @Published var selectedCategory: UnitCategory = .length {
-        didSet { handleCategoryOrModeChanged() }
+        didSet {
+            guard oldValue != selectedCategory else { return }
+            applyDefaultsAfterCategoryChange()
+        }
     }
+
     @Published var selectedMode: UnitRegistry.Mode = .normal {
-        didSet { handleCategoryOrModeChanged() }
+        didSet {
+            guard oldValue != selectedMode else { return }
+            reconcileSelectionsAfterModeChange()
+        }
     }
+
     @Published var inputText: String = "1" {
         didSet { recompute() }
     }
+
     @Published var selectedFromUnitID: UnitDefinition.ID = "meter" {
         didSet { recompute() }
     }
+
     @Published var selectedToUnitID: UnitDefinition.ID = "kilometer" {
         didSet { recompute() }
     }
+
     @Published var isMemeExplanationEnabled: Bool = false {
         didSet { recompute() }
     }
 
-    // Outputs
     @Published private(set) var conversionResult: ConversionResult?
     @Published private(set) var validationError: String?
 
-    // Engine
     private let registry: UnitRegistry
     private let engine: ConverterEngine
 
+    /// Cached formatters (locale-aware grouping, stable rules).
+    private let displayFormatter: NumberFormatter = {
+        let f = NumberFormatter()
+        f.numberStyle = .decimal
+        f.locale = .current
+        f.usesGroupingSeparator = true
+        f.roundingMode = .halfUp
+        f.minimumFractionDigits = 0
+        return f
+    }()
+
     init() {
-        // Prefer full registry (normal + absurd). If resources fail to load,
-        // fall back to normal-only so the app remains usable.
         let loadedRegistry: UnitRegistry
         do {
             loadedRegistry = try UnitRegistry.v1Default()
@@ -45,8 +62,7 @@ final class ConverterViewModel: ObservableObject {
         self.registry = loadedRegistry
         self.engine = ConverterEngine(registry: loadedRegistry)
 
-        // Ensure safe defaults for initial category/mode
-        applyDefaultsForCurrentCategory()
+        applyDefaultsAfterCategoryChange()
         recompute()
     }
 
@@ -66,68 +82,114 @@ final class ConverterViewModel: ObservableObject {
         selectedToUnitID = tmp
     }
 
-    // MARK: - Internal
+    // MARK: - Defaults & selection safety
 
-    private func handleCategoryOrModeChanged() {
-        // If the current selection becomes incompatible, reset to safe defaults.
-        let validIDs = Set(availableUnits.map(\.id))
-        if !validIDs.contains(selectedFromUnitID) || !validIDs.contains(selectedToUnitID) {
-            applyDefaultsForCurrentCategory()
-        } else {
-            // Keep selections but recompute result because the mode might have changed
-            recompute()
+    /// Preferred (from, to) for each category when both exist in the current unit list.
+    private func preferredDefaultPair(for category: UnitCategory) -> (from: UnitDefinition.ID, to: UnitDefinition.ID) {
+        switch category {
+        case .length: ("meter", "kilometer")
+        case .mass: ("kilogram", "pound")
+        case .time: ("hour", "minute")
+        case .volume: ("liter", "milliliter")
+        case .temperature: ("celsius", "fahrenheit")
         }
     }
 
-    private func applyDefaultsForCurrentCategory() {
+    private func applyDefaultsAfterCategoryChange() {
         let units = availableUnits
-
-        // Prefer canonical base unit as "from", and a sensible second unit as "to".
-        if let baseID = selectedCategory.canonicalBaseUnit,
-           units.contains(where: { $0.id == baseID }) {
-            selectedFromUnitID = baseID
-        } else {
-            selectedFromUnitID = units.first?.id ?? selectedFromUnitID
+        guard !units.isEmpty else {
+            validationError = "No units for this category and mode."
+            conversionResult = nil
+            return
         }
 
-        selectedToUnitID = defaultToUnitID(for: selectedCategory, from: selectedFromUnitID, units: units)
+        let ids = Set(units.map(\.id))
+        let preferred = preferredDefaultPair(for: selectedCategory)
+
+        if ids.contains(preferred.from), ids.contains(preferred.to) {
+            selectedFromUnitID = preferred.from
+            selectedToUnitID = preferred.to
+        } else if let base = selectedCategory.canonicalBaseUnit, ids.contains(base) {
+            selectedFromUnitID = base
+            selectedToUnitID = firstDistinctToUnit(from: base, in: units)
+        } else {
+            selectedFromUnitID = units[0].id
+            selectedToUnitID = firstDistinctToUnit(from: units[0].id, in: units)
+        }
+
+        ensureDistinctFromTo(in: units)
         recompute()
     }
 
-    private func defaultToUnitID(for category: UnitCategory, from fromID: UnitDefinition.ID, units: [UnitDefinition]) -> UnitDefinition.ID {
-        // App-launch requested defaults: length meter -> kilometer
-        if category == .length, fromID == "meter", units.contains(where: { $0.id == "kilometer" }) {
-            return "kilometer"
+    private func reconcileSelectionsAfterModeChange() {
+        let units = availableUnits
+        guard !units.isEmpty else {
+            validationError = "No units for this category and mode."
+            conversionResult = nil
+            return
         }
 
-        // Category-specific “nice” defaults when available.
-        let preferred: [UnitCategory: UnitDefinition.ID] = [
-            .mass: "pound",
-            .time: "minute",
-            .volume: "milliliter",
-            .temperature: "fahrenheit"
-        ]
-        if let preferredID = preferred[category],
-           preferredID != fromID,
-           units.contains(where: { $0.id == preferredID }) {
-            return preferredID
+        let ids = Set(units.map(\.id))
+        let fromOK = ids.contains(selectedFromUnitID)
+        let toOK = ids.contains(selectedToUnitID)
+
+        if fromOK, toOK {
+            ensureDistinctFromTo(in: units)
+            recompute()
+            return
         }
 
-        // Otherwise pick the first unit that isn’t the from-unit.
-        return units.first(where: { $0.id != fromID })?.id ?? fromID
+        // Mode removed previously valid units (e.g. absurd → normal): fall back to category defaults.
+        applyDefaultsAfterCategoryChange()
+    }
+
+    private func firstDistinctToUnit(from fromID: UnitDefinition.ID, in units: [UnitDefinition]) -> UnitDefinition.ID {
+        if let other = units.first(where: { $0.id != fromID }) {
+            return other.id
+        }
+        return fromID
+    }
+
+    private func ensureDistinctFromTo(in units: [UnitDefinition]) {
+        guard units.count > 1, selectedFromUnitID == selectedToUnitID else { return }
+        selectedToUnitID = firstDistinctToUnit(from: selectedFromUnitID, in: units)
+    }
+
+    // MARK: - Parsing & conversion
+
+    private func parsedInput() -> Double? {
+        let trimmed = inputText.trimmingCharacters(in: .whitespacesAndNewlines)
+        if trimmed.isEmpty { return nil }
+
+        // Accept locale decimal separator and plain ASCII dot.
+        let normalized = trimmed.replacingOccurrences(of: ",", with: ".")
+        guard let value = Double(normalized), value.isFinite else { return nil }
+        return value
     }
 
     private func recompute() {
         validationError = nil
         conversionResult = nil
 
-        guard let inputValue = Double(inputText.trimmingCharacters(in: .whitespacesAndNewlines)) else {
+        let trimmed = inputText.trimmingCharacters(in: .whitespacesAndNewlines)
+        if trimmed.isEmpty {
             validationError = "Enter a number."
             return
         }
 
-        guard let toUnit else {
-            validationError = "Pick a target unit."
+        guard let inputValue = parsedInput() else {
+            validationError = "That doesn’t look like a valid number."
+            return
+        }
+
+        guard let fromUnit, let toUnit else {
+            validationError = "Pick units to convert."
+            return
+        }
+
+        // Defensive: registry and UI should stay aligned; avoid engine throw.
+        guard fromUnit.category == selectedCategory, toUnit.category == selectedCategory else {
+            validationError = "Units don’t match the selected category."
             return
         }
 
@@ -140,15 +202,34 @@ final class ConverterViewModel: ObservableObject {
                 includeMemeExplanation: includeMeme
             )
         } catch {
-            validationError = "Conversion failed."
+            validationError = "Conversion couldn’t be completed."
         }
     }
 
-    func formatNumber(_ value: Double, maxFractionDigits: Int = 3) -> String {
-        let f = NumberFormatter()
-        f.numberStyle = .decimal
-        f.minimumFractionDigits = 0
-        f.maximumFractionDigits = maxFractionDigits
-        return f.string(from: NSNumber(value: value)) ?? String(value)
+    /// Formats values for the result card: trims noise, caps decimals sensibly, uses grouping for large numbers.
+    func formatNumberForDisplay(_ value: Double) -> String {
+        guard value.isFinite else { return "—" }
+        if value == 0 { return "0" }
+
+        let magnitude = abs(value)
+        let f = displayFormatter
+
+        switch magnitude {
+        case let m where m >= 10_000_000:
+            f.maximumFractionDigits = 2
+            f.minimumFractionDigits = 0
+        case let m where m >= 1:
+            f.maximumFractionDigits = magnitude < 10 ? 3 : 2
+            f.minimumFractionDigits = 0
+        case let m where m >= 0.0001:
+            f.maximumFractionDigits = 4
+            f.minimumFractionDigits = 0
+        default:
+            // Very small numbers: a few significant digits without going full scientific.
+            f.maximumFractionDigits = 6
+            f.minimumFractionDigits = 0
+        }
+
+        return f.string(from: NSNumber(value: value)) ?? String(format: "%g", value)
     }
 }
