@@ -1,0 +1,51 @@
+[
+  {
+    "id": "coffee_break",
+    "name": "Coffee break",
+    "category": "time",
+    "baseUnit": "second",
+    "kind": "absurd",
+    "conversionStyle": "multiplicative",
+    "factor": 900.0,
+    "iconName": "cup.and.saucer",
+    "description": "Coffee break ≈ 15 minutes.",
+    "exampleMeme": "Time spent thinking, \"one more sip.\""
+  },
+  {
+    "id": "gym_session",
+    "name": "Gym session",
+    "category": "time",
+    "baseUnit": "second",
+    "kind": "absurd",
+    "conversionStyle": "multiplicative",
+    "factor": 3600.0,
+    "iconName": "figure.strengthtraining.traditional",
+    "description": "Gym session ≈ 60 minutes.",
+    "exampleMeme": "One session closer to being mysterious."
+  },
+  {
+    "id": "one_episode",
+    "name": "One episode",
+    "category": "time",
+    "baseUnit": "second",
+    "kind": "absurd",
+    "conversionStyle": "multiplicative",
+    "factor": 2700.0,
+    "iconName": "play.rectangle",
+    "description": "Typical episode runtime ≈ 45 minutes.",
+    "exampleMeme": "\"Just one more\" is never one more."
+  },
+  {
+    "id": "bad_meeting",
+    "name": "Bad meeting",
+    "category": "time",
+    "baseUnit": "second",
+    "kind": "absurd",
+    "conversionStyle": "multiplicative",
+    "factor": 5400.0,
+    "iconName": "calendar.badge.clock",
+    "description": "Bad meeting ≈ 90 minutes.",
+    "exampleMeme": "This could have been a message."
+  }
+]
+

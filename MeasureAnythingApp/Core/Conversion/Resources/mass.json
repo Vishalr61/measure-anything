@@ -1,0 +1,51 @@
+[
+  {
+    "id": "cat",
+    "name": "Cat",
+    "category": "mass",
+    "baseUnit": "kilogram",
+    "kind": "absurd",
+    "conversionStyle": "multiplicative",
+    "factor": 4.5,
+    "iconName": "pawprint",
+    "description": "Average adult domestic cat mass ≈ 4.5 kg.",
+    "exampleMeme": "Heavier than it looks when it lands on your chest."
+  },
+  {
+    "id": "bowling_ball",
+    "name": "Bowling ball",
+    "category": "mass",
+    "baseUnit": "kilogram",
+    "kind": "absurd",
+    "conversionStyle": "multiplicative",
+    "factor": 6.8,
+    "iconName": "circle.fill",
+    "description": "Typical bowling ball mass ≈ 6.8 kg (15 lb).",
+    "exampleMeme": "Dense, like the group chat replies."
+  },
+  {
+    "id": "microwave",
+    "name": "Microwave",
+    "category": "mass",
+    "baseUnit": "kilogram",
+    "kind": "absurd",
+    "conversionStyle": "multiplicative",
+    "factor": 12.0,
+    "iconName": "wave.3.right",
+    "description": "Countertop microwave mass ≈ 12 kg.",
+    "exampleMeme": "Perfect for reheating and rethinking."
+  },
+  {
+    "id": "elephant",
+    "name": "Elephant",
+    "category": "mass",
+    "baseUnit": "kilogram",
+    "kind": "absurd",
+    "conversionStyle": "multiplicative",
+    "factor": 6000.0,
+    "iconName": "pawprint",
+    "description": "Approximate adult elephant mass ≈ 6,000 kg.",
+    "exampleMeme": "Heavier than most bad decisions."
+  }
+]
+

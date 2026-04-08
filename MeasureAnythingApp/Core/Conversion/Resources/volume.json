@@ -1,0 +1,51 @@
+[
+  {
+    "id": "soda_can",
+    "name": "Soda can",
+    "category": "volume",
+    "baseUnit": "liter",
+    "kind": "absurd",
+    "conversionStyle": "multiplicative",
+    "factor": 0.355,
+    "iconName": "takeoutbag.and.cup.and.straw",
+    "description": "Standard can volume ≈ 355 mL.",
+    "exampleMeme": "Hydration, but with consequences."
+  },
+  {
+    "id": "wine_glass",
+    "name": "Wine glass",
+    "category": "volume",
+    "baseUnit": "liter",
+    "kind": "absurd",
+    "conversionStyle": "multiplicative",
+    "factor": 0.15,
+    "iconName": "wineglass",
+    "description": "Typical pour ≈ 150 mL.",
+    "exampleMeme": "A responsible amount (until it isn't)."
+  },
+  {
+    "id": "bathtub",
+    "name": "Bathtub",
+    "category": "volume",
+    "baseUnit": "liter",
+    "kind": "absurd",
+    "conversionStyle": "multiplicative",
+    "factor": 150.0,
+    "iconName": "drop",
+    "description": "Typical bathtub fill ≈ 150 L.",
+    "exampleMeme": "A suspiciously specific amount of water."
+  },
+  {
+    "id": "bucket",
+    "name": "Bucket",
+    "category": "volume",
+    "baseUnit": "liter",
+    "kind": "absurd",
+    "conversionStyle": "multiplicative",
+    "factor": 10.0,
+    "iconName": "shippingbox",
+    "description": "Common bucket volume ≈ 10 L.",
+    "exampleMeme": "Bucket-based engineering."
+  }
+]
+

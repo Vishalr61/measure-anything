@@ -1,0 +1,51 @@
+[
+  {
+    "id": "banana",
+    "name": "Banana",
+    "category": "length",
+    "baseUnit": "meter",
+    "kind": "absurd",
+    "conversionStyle": "multiplicative",
+    "factor": 0.19,
+    "iconName": "leaf",
+    "description": "Average banana length ≈ 19 cm.",
+    "exampleMeme": "That is a lot of bananas."
+  },
+  {
+    "id": "fridge",
+    "name": "Fridge",
+    "category": "length",
+    "baseUnit": "meter",
+    "kind": "absurd",
+    "conversionStyle": "multiplicative",
+    "factor": 1.7,
+    "iconName": "refrigerator",
+    "description": "Typical fridge height ≈ 1.7 m.",
+    "exampleMeme": "Roughly fridge-sized, emotionally and physically."
+  },
+  {
+    "id": "bus",
+    "name": "Bus",
+    "category": "length",
+    "baseUnit": "meter",
+    "kind": "absurd",
+    "conversionStyle": "multiplicative",
+    "factor": 12.0,
+    "iconName": "bus",
+    "description": "Typical city bus length ≈ 12 m.",
+    "exampleMeme": "Long enough to miss your stop twice."
+  },
+  {
+    "id": "blue_whale",
+    "name": "Blue whale",
+    "category": "length",
+    "baseUnit": "meter",
+    "kind": "absurd",
+    "conversionStyle": "multiplicative",
+    "factor": 24.0,
+    "iconName": "water.waves",
+    "description": "Adult blue whale length ≈ 24 m (order-of-magnitude).",
+    "exampleMeme": "Ocean-grade distance."
+  }
+]
+

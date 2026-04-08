@@ -24,9 +24,20 @@ public struct AbsurdUnitStore: Sendable {
 
     /// `resourceFolder` is kept for future flexibility (e.g. subfolders),
     /// but v1 uses plain resource names like `length.json`.
-    public init(bundle: Bundle = .main, decoder: JSONDecoder = JSONDecoder()) {
+    public init(bundle: Bundle = AbsurdUnitStore.defaultBundle, decoder: JSONDecoder = JSONDecoder()) {
         self.bundle = bundle
         self.decoder = decoder
+    }
+
+    /// Default bundle selection:
+    /// - Swift Package: `Bundle.module` (so tests can load packaged JSON resources)
+    /// - App target: `.main`
+    public static var defaultBundle: Bundle {
+#if SWIFT_PACKAGE
+        .module
+#else
+        .main
+#endif
     }
 
     public func loadAll() throws -> [UnitDefinition] {
@@ -48,34 +59,38 @@ public struct AbsurdUnitStore: Sendable {
 
         do {
             let data = try Data(contentsOf: url)
-            let decoded = try decoder.decode([UnitDefinition].self, from: data)
-
-            // Enforce v1 invariants regardless of JSON correctness.
-            var validated: [UnitDefinition] = []
-            validated.reserveCapacity(decoded.count)
-
-            for unit in decoded {
-                do {
-                    var u = unit
-                    u.kind = .absurd
-                    u.category = category
-                    u.conversionStyle = .multiplicative
-                    try u.validate()
-                    validated.append(u)
-                } catch {
-                    throw StoreError.invalidUnit(
-                        category: category,
-                        id: unit.id,
-                        underlying: String(describing: error)
-                    )
-                }
-            }
-            return validated
+            return try decodeAndValidate(data: data, category: category)
         } catch let error as StoreError {
             throw error
         } catch {
             throw StoreError.decodeFailed(category: category, underlying: String(describing: error))
         }
+    }
+
+    func decodeAndValidate(data: Data, category: UnitCategory) throws -> [UnitDefinition] {
+        let decoded = try decoder.decode([UnitDefinition].self, from: data)
+
+        // Enforce v1 invariants regardless of JSON correctness.
+        var validated: [UnitDefinition] = []
+        validated.reserveCapacity(decoded.count)
+
+        for unit in decoded {
+            do {
+                var u = unit
+                u.kind = .absurd
+                u.category = category
+                u.conversionStyle = .multiplicative
+                try u.validate()
+                validated.append(u)
+            } catch {
+                throw StoreError.invalidUnit(
+                    category: category,
+                    id: unit.id,
+                    underlying: String(describing: error)
+                )
+            }
+        }
+        return validated
     }
 }
 
