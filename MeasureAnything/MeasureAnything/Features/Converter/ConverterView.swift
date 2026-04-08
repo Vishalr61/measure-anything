@@ -19,23 +19,30 @@ struct ConverterView: View {
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(alignment: .leading, spacing: ConverterLayout.sectionSpacing) {
+                VStack(alignment: .leading, spacing: 0) {
                     if let msg = taxonomyStore.loadFailureMessage {
                         Text("Couldn’t load taxonomy (\(msg)). Using built-in category and mode order.")
                             .font(.caption)
                             .foregroundStyle(.secondary)
                             .fixedSize(horizontal: false, vertical: true)
                             .accessibilityLabel("Taxonomy load warning: \(msg)")
+                            .padding(.bottom, ConverterLayout.rhythm12)
                     }
-                    header
-                    inputs
-                    if vm.selectedMode == .custom {
-                        customUnitsSection
-                    }
+
+                    categoryModeBlock
+
+                    Spacer()
+                        .frame(height: ConverterLayout.majorBlockSpacing)
+
+                    conversionInputBlock
+
+                    Spacer()
+                        .frame(height: ConverterLayout.majorBlockSpacing)
+
                     resultCard
                 }
                 .padding(.horizontal, ConverterLayout.horizontalInset)
-                .padding(.vertical, 8)
+                .padding(.vertical, ConverterLayout.rhythm16)
             }
             .navigationTitle("Measure Anything")
             .navigationBarTitleDisplayMode(.inline)
@@ -182,8 +189,18 @@ struct ConverterView: View {
             .joined(separator: ";")
     }
 
-    private var header: some View {
-        VStack(alignment: .leading, spacing: ConverterLayout.blockSpacing) {
+    /// Block 1: category and mode (secondary surface).
+    private var categoryModeBlock: some View {
+        secondarySurface {
+            VStack(alignment: .leading, spacing: ConverterLayout.rhythm12) {
+                sectionLabel("Category & mode")
+                categoryModeContent
+            }
+        }
+    }
+
+    private var categoryModeContent: some View {
+        VStack(alignment: .leading, spacing: ConverterLayout.rhythm16) {
             Picker("Category", selection: $vm.selectedCategory) {
                 ForEach(vm.categories, id: \.self) { category in
                     let d = taxonomyStore.categoryDisplay(for: category)
@@ -193,7 +210,7 @@ struct ConverterView: View {
             }
             .pickerStyle(.segmented)
 
-            VStack(alignment: .leading, spacing: 12) {
+            VStack(alignment: .leading, spacing: ConverterLayout.rhythm12) {
                 Picker("Mode", selection: $vm.selectedMode) {
                     ForEach(vm.modes, id: \.self) { mode in
                         let d = taxonomyStore.modeDisplay(for: mode)
@@ -211,11 +228,33 @@ struct ConverterView: View {
         }
     }
 
+    /// Block 2: amount and unit pickers (secondary surface).
+    private var conversionInputBlock: some View {
+        secondarySurface {
+            VStack(alignment: .leading, spacing: ConverterLayout.rhythm16) {
+                inputs
+                if vm.selectedMode == .custom {
+                    customUnitsSection
+                }
+            }
+        }
+    }
+
+    private func secondarySurface<Content: View>(@ViewBuilder content: () -> Content) -> some View {
+        content()
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(ConverterLayout.secondaryBlockPadding)
+            .background(
+                RoundedRectangle(cornerRadius: ConverterLayout.secondaryBlockCornerRadius, style: .continuous)
+                    .fill(Color(.tertiarySystemBackground))
+            )
+    }
+
     /// Minimal on-screen context for the current category and mode when taxonomy supplies descriptions.
     private var taxonomySelectionContextLines: some View {
         let cat = taxonomyStore.categoryDisplay(for: vm.selectedCategory)
         let mode = taxonomyStore.modeDisplay(for: vm.selectedMode)
-        return VStack(alignment: .leading, spacing: 4) {
+        return VStack(alignment: .leading, spacing: ConverterLayout.rhythm8) {
             if let t = cat.description, !t.isEmpty {
                 Text(t)
                     .font(.caption)
@@ -235,7 +274,7 @@ struct ConverterView: View {
     }
 
     private var inputs: some View {
-        VStack(alignment: .leading, spacing: ConverterLayout.blockSpacing) {
+        VStack(alignment: .leading, spacing: ConverterLayout.rhythm12) {
             sectionLabel("Amount")
 
             TextField("e.g. 10 or 3.5", text: $vm.inputText)
@@ -253,7 +292,7 @@ struct ConverterView: View {
                     }
                 }
 
-            HStack(alignment: .center, spacing: 12) {
+            HStack(alignment: .center, spacing: ConverterLayout.rhythm12) {
                 unitPickerColumn(title: "From", selection: $vm.selectedFromUnitID)
                 swapButton
                 unitPickerColumn(title: "To", selection: $vm.selectedToUnitID)
@@ -262,7 +301,8 @@ struct ConverterView: View {
     }
 
     private var customUnitsSection: some View {
-        VStack(alignment: .leading, spacing: ConverterLayout.tightSpacing) {
+        VStack(alignment: .leading, spacing: ConverterLayout.rhythm12) {
+            Divider()
             sectionLabel("My custom units")
 
             if customUnits.isEmpty {
@@ -270,7 +310,7 @@ struct ConverterView: View {
             } else {
                 ForEach(customUnits) { unit in
                     HStack(alignment: .center) {
-                        VStack(alignment: .leading, spacing: 4) {
+                        VStack(alignment: .leading, spacing: ConverterLayout.rhythm8) {
                             Text(unit.name)
                                 .font(.body.weight(.medium))
                             Text(unit.categoryRaw.capitalized)
@@ -296,20 +336,16 @@ struct ConverterView: View {
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(ConverterLayout.cardPadding - 4)
-        .background(
-            RoundedRectangle(cornerRadius: ConverterLayout.insetCornerRadius, style: .continuous)
-                .fill(Color(.tertiarySystemBackground))
-        )
+        .padding(.top, ConverterLayout.rhythm8)
     }
 
     private var emptyCustomUnitsPlaceholder: some View {
-        HStack(alignment: .top, spacing: 12) {
+        HStack(alignment: .top, spacing: ConverterLayout.rhythm12) {
             Image(systemName: "square.dashed")
                 .font(.title2)
                 .foregroundStyle(.tertiary)
                 .frame(width: 28)
-            VStack(alignment: .leading, spacing: 4) {
+            VStack(alignment: .leading, spacing: ConverterLayout.rhythm8) {
                 Text("No custom units yet")
                     .font(.subheadline.weight(.medium))
                 Text("Tap + above to add one. It will appear in Custom mode for that category.")
@@ -336,7 +372,7 @@ struct ConverterView: View {
     }
 
     private func unitPickerColumn(title: String, selection: Binding<UnitDefinition.ID>) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: ConverterLayout.rhythm8) {
             Text(title)
                 .font(.caption.weight(.semibold))
                 .foregroundStyle(.secondary)
@@ -351,11 +387,14 @@ struct ConverterView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 
+    /// Block 3: conversion output (primary elevated surface).
     private var resultCard: some View {
-        VStack(alignment: .leading, spacing: ConverterLayout.blockSpacing) {
+        VStack(alignment: .leading, spacing: ConverterLayout.rhythm16) {
             HStack(alignment: .center) {
-                sectionLabel("Result")
-                Spacer(minLength: 8)
+                Text("Result")
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(.secondary)
+                Spacer(minLength: ConverterLayout.rhythm8)
                 if canShareResult {
                     Menu {
                         Button("Share as Text") {
@@ -388,7 +427,8 @@ struct ConverterView: View {
                         fromName: fromName,
                         outputFormatted: output,
                         toName: toName,
-                        meme: result.memeExplanation
+                        meme: result.memeExplanation,
+                        prominent: true
                     )
                 } else {
                     resultEmptyPlaceholder
@@ -396,16 +436,16 @@ struct ConverterView: View {
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(ConverterLayout.cardPadding)
+        .padding(ConverterLayout.resultHeroPadding)
         .background(
-            RoundedRectangle(cornerRadius: ConverterLayout.cardCornerRadius, style: .continuous)
-                .fill(Color(.secondarySystemBackground))
+            RoundedRectangle(cornerRadius: ConverterLayout.resultHeroCornerRadius, style: .continuous)
+                .fill(Color(.systemBackground))
         )
         .overlay(
-            RoundedRectangle(cornerRadius: ConverterLayout.cardCornerRadius, style: .continuous)
-                .strokeBorder(Color.primary.opacity(0.07), lineWidth: 1)
+            RoundedRectangle(cornerRadius: ConverterLayout.resultHeroCornerRadius, style: .continuous)
+                .strokeBorder(Color.primary.opacity(0.1), lineWidth: 1)
         )
-        .shadow(color: .black.opacity(0.06), radius: 12, x: 0, y: 4)
+        .shadow(color: .black.opacity(0.14), radius: 20, x: 0, y: 8)
     }
 
     private func sectionLabel(_ title: String) -> some View {
@@ -417,7 +457,7 @@ struct ConverterView: View {
     }
 
     private func validationErrorView(message: String) -> some View {
-        HStack(alignment: .top, spacing: 10) {
+        HStack(alignment: .top, spacing: ConverterLayout.rhythm12) {
             Image(systemName: "exclamationmark.circle.fill")
                 .font(.body)
                 .foregroundStyle(.red.opacity(0.9))
@@ -427,21 +467,21 @@ struct ConverterView: View {
                 .foregroundStyle(.primary)
                 .fixedSize(horizontal: false, vertical: true)
         }
-        .padding(12)
+        .padding(ConverterLayout.rhythm12)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(
-            RoundedRectangle(cornerRadius: 12, style: .continuous)
+            RoundedRectangle(cornerRadius: ConverterLayout.rhythm12, style: .continuous)
                 .fill(Color.red.opacity(0.08))
         )
     }
 
     private var resultEmptyPlaceholder: some View {
-        HStack(alignment: .top, spacing: 12) {
+        HStack(alignment: .top, spacing: ConverterLayout.rhythm12) {
             Image(systemName: "function")
                 .font(.title2)
                 .foregroundStyle(.tertiary)
                 .frame(width: 28)
-            VStack(alignment: .leading, spacing: 4) {
+            VStack(alignment: .leading, spacing: ConverterLayout.rhythm8) {
                 Text("No result yet")
                     .font(.subheadline.weight(.medium))
                     .foregroundStyle(.secondary)

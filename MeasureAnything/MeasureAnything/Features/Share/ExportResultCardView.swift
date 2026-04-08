@@ -7,20 +7,22 @@ struct ResultCardContent: View {
     let outputFormatted: String
     let toName: String
     let meme: String?
+    /// Larger type on the live converter; export keeps the default.
+    var prominent: Bool = false
 
     var body: some View {
-        VStack(alignment: .leading, spacing: ConverterLayout.tightSpacing) {
+        VStack(alignment: .leading, spacing: prominent ? ConverterLayout.rhythm12 : ConverterLayout.tightSpacing) {
             Text("\(inputFormatted) \(fromName)")
-                .font(.callout)
+                .font(prominent ? .subheadline : .callout)
                 .foregroundStyle(.secondary)
 
             Image(systemName: "arrow.down")
                 .font(.caption.weight(.bold))
                 .foregroundStyle(.tertiary)
-                .padding(.vertical, 2)
+                .padding(.vertical, prominent ? 4 : 2)
 
             Text("\(outputFormatted) \(toName)")
-                .font(.title3.weight(.bold))
+                .font(prominent ? .title2.weight(.bold) : .title3.weight(.bold))
                 .foregroundStyle(.primary)
                 .monospacedDigit()
 
@@ -28,7 +30,7 @@ struct ResultCardContent: View {
                 Divider()
                     .padding(.vertical, 4)
                 Text(meme)
-                    .font(.callout)
+                    .font(prominent ? .body : .callout)
                     .foregroundStyle(.secondary)
                     .italic()
                     .fixedSize(horizontal: false, vertical: true)
