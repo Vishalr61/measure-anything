@@ -9,21 +9,28 @@ struct ResultCardContent: View {
     let meme: String?
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
+        VStack(alignment: .leading, spacing: ConverterLayout.tightSpacing) {
             Text("\(inputFormatted) \(fromName)")
-                .font(.subheadline)
+                .font(.callout)
                 .foregroundStyle(.secondary)
+
             Image(systemName: "arrow.down")
-                .font(.caption.weight(.semibold))
+                .font(.caption.weight(.bold))
                 .foregroundStyle(.tertiary)
+                .padding(.vertical, 2)
+
             Text("\(outputFormatted) \(toName)")
-                .font(.title2.weight(.semibold))
+                .font(.title3.weight(.bold))
+                .foregroundStyle(.primary)
+                .monospacedDigit()
 
             if let meme, !meme.isEmpty {
                 Divider()
+                    .padding(.vertical, 4)
                 Text(meme)
-                    .font(.subheadline)
+                    .font(.callout)
                     .foregroundStyle(.secondary)
+                    .italic()
                     .fixedSize(horizontal: false, vertical: true)
             }
         }
@@ -39,12 +46,12 @@ struct ExportResultCardView: View {
     let meme: String?
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: ConverterLayout.blockSpacing) {
             Text("Result")
                 .font(.caption.weight(.semibold))
                 .foregroundStyle(.secondary)
                 .textCase(.uppercase)
-                .tracking(0.5)
+                .tracking(0.6)
 
             ResultCardContent(
                 inputFormatted: inputFormatted,
@@ -55,14 +62,14 @@ struct ExportResultCardView: View {
             )
         }
         .frame(maxWidth: 360, alignment: .leading)
-        .padding(16)
+        .padding(ConverterLayout.cardPadding)
         .background(
-            RoundedRectangle(cornerRadius: 16, style: .continuous)
+            RoundedRectangle(cornerRadius: ConverterLayout.cardCornerRadius, style: .continuous)
                 .fill(Color(.secondarySystemBackground))
         )
         .overlay(
-            RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .strokeBorder(Color.primary.opacity(0.06), lineWidth: 1)
+            RoundedRectangle(cornerRadius: ConverterLayout.cardCornerRadius, style: .continuous)
+                .strokeBorder(Color.primary.opacity(0.07), lineWidth: 1)
         )
     }
 }

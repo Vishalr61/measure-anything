@@ -25,6 +25,7 @@ struct FavoritesListView: View {
                         ForEach(favorites) { fav in
                             Button {
                                 if fav.isRestorable(registry: registry) {
+                                    Haptics.tap()
                                     onSelect(fav)
                                     dismiss()
                                 }
@@ -49,6 +50,7 @@ struct FavoritesListView: View {
                             .disabled(!fav.isRestorable(registry: registry))
                             .swipeActions(edge: .trailing, allowsFullSwipe: true) {
                                 Button(role: .destructive) {
+                                    Haptics.tap()
                                     modelContext.delete(fav)
                                 } label: {
                                     Label("Delete", systemImage: "trash")
@@ -56,6 +58,7 @@ struct FavoritesListView: View {
                             }
                         }
                     }
+                    .listStyle(.insetGrouped)
                 }
             }
             .navigationTitle("Favorites")
