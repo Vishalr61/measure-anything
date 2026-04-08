@@ -4,7 +4,7 @@ import MeasureAnythingCore
 // MARK: - Path (single breadcrumb builder)
 
 /// Breadcrumb for a taxonomy or catalog row (`Domain / Subgenre / Title`).
-public struct TaxonomyPathResult: Equatable, Sendable, Identifiable {
+public struct TaxonomyPathResult: Equatable, Hashable, Sendable, Identifiable {
     public let id: String
     public let pathLine: String
     public let domainTitle: String
@@ -12,6 +12,21 @@ public struct TaxonomyPathResult: Equatable, Sendable, Identifiable {
     public let itemTitle: String
 
     public static let pathComponentSeparator = " / "
+}
+
+/// One subgenre (or mode bucket) under browse: section title is the subgenre name, subtitle the domain.
+public struct TaxonomyBrowseSection: Identifiable, Hashable, Sendable {
+    public let id: String
+    public let title: String
+    public let subtitle: String?
+    public let items: [TaxonomyPathResult]
+
+    public init(id: String, title: String, subtitle: String?, items: [TaxonomyPathResult]) {
+        self.id = id
+        self.title = title
+        self.subtitle = subtitle
+        self.items = items
+    }
 }
 
 // MARK: - Normalized search row
@@ -191,22 +206,70 @@ public struct TaxonomySearchIndex: Sendable {
         byId[itemId]
     }
 
-    /// Filtered browse list (no query), sorted by item title. Same filter semantics as `search`.
+    /// Hierarchical browse: groups rows by subgenre (`id` = subgenre id, `title` = subgenre display name, `subtitle` = domain name).
+    public func browseSections(
+        categoryId: String? = nil,
+        subcategoryId: String? = nil,
+        unitCategoryRaw: String? = nil,
+        limitPerSection: Int = 200,
+        maxSections: Int = 100
+    ) -> [TaxonomyBrowseSection] {
+        let filtered = entries.filter {
+            Self.passesFilters($0, categoryId: categoryId, subcategoryId: subcategoryId, unitCategoryRaw: unitCategoryRaw)
+        }
+        let grouped = Dictionary(grouping: filtered, by: \.subcategoryId)
+        var sections: [TaxonomyBrowseSection] = []
+        sections.reserveCapacity(grouped.count)
+        for (subId, group) in grouped {
+            guard let first = group.first else { continue }
+            let sorted = group.sorted {
+                $0.title.localizedStandardCompare($1.title) == .orderedAscending
+            }
+            let paths = sorted.map { TaxonomyPathBuilder.pathResult(for: $0) }
+            let capped = paths.count > limitPerSection ? Array(paths.prefix(limitPerSection)) : paths
+            sections.append(
+                TaxonomyBrowseSection(
+                    id: subId,
+                    title: first.pathSubgenreTitle,
+                    subtitle: first.pathDomainTitle,
+                    items: capped
+                )
+            )
+        }
+        sections.sort { a, b in
+            let domainCmp = (a.subtitle ?? "").localizedStandardCompare(b.subtitle ?? "")
+            if domainCmp != .orderedSame { return domainCmp == .orderedAscending }
+            return a.title.localizedStandardCompare(b.title) == .orderedAscending
+        }
+        if sections.count > maxSections {
+            return Array(sections.prefix(maxSections))
+        }
+        return sections
+    }
+
+    /// Flattened browse (section order, then title order), capped at `limit` total rows.
     public func browse(
         categoryId: String? = nil,
         subcategoryId: String? = nil,
         unitCategoryRaw: String? = nil,
         limit: Int = 500
     ) -> [TaxonomyPathResult] {
-        let filtered = entries.filter {
-            Self.passesFilters($0, categoryId: categoryId, subcategoryId: subcategoryId, unitCategoryRaw: unitCategoryRaw)
+        let sections = browseSections(
+            categoryId: categoryId,
+            subcategoryId: subcategoryId,
+            unitCategoryRaw: unitCategoryRaw,
+            limitPerSection: limit,
+            maxSections: 100
+        )
+        var out: [TaxonomyPathResult] = []
+        out.reserveCapacity(min(limit, 64))
+        outer: for s in sections {
+            for p in s.items {
+                if out.count >= limit { break outer }
+                out.append(p)
+            }
         }
-        let sorted = filtered.sorted {
-            $0.title.localizedStandardCompare($1.title) == .orderedAscending
-        }
-        let paths = sorted.map { TaxonomyPathBuilder.pathResult(for: $0) }
-        if paths.count <= limit { return paths }
-        return Array(paths.prefix(limit))
+        return out
     }
 
     /// Ranked search; use `browse` when the query is empty.

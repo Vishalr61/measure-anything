@@ -233,7 +233,23 @@ final class AppTaxonomyStore: ObservableObject {
         )
     }
 
-    /// Browse when `query` is blank/whitespace (filtered, title-sorted); ranked search when non-empty. Same index as path/route APIs.
+    /// Subgenre-grouped browse (same filters as search). Empty when taxonomy did not load.
+    func browseSections(
+        filters: TaxonomySearchFilters = TaxonomySearchFilters(),
+        limitPerSection: Int = 200,
+        maxSections: Int = 50
+    ) -> [TaxonomyBrowseSection] {
+        guard let index = searchIndex else { return [] }
+        return index.browseSections(
+            categoryId: filters.domainId,
+            subcategoryId: filters.subgenreId,
+            unitCategoryRaw: filters.unitCategory?.rawValue,
+            limitPerSection: limitPerSection,
+            maxSections: maxSections
+        )
+    }
+
+    /// Browse when `query` is blank/whitespace (flattened section order); ranked search when non-empty.
     func searchItems(
         query: String,
         filters: TaxonomySearchFilters = TaxonomySearchFilters(),

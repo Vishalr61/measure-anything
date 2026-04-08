@@ -20,6 +20,18 @@ struct TaxonomySearchView: View {
         !trimmedQuery.isEmpty
     }
 
+    private var browseSections: [TaxonomyBrowseSection] {
+        taxonomyStore.browseSections(filters: filters, limitPerSection: 200, maxSections: 50)
+    }
+
+    private var searchResults: [TaxonomyItemSearchResult] {
+        taxonomyStore.searchItems(query: query, filters: filters, limit: 200)
+    }
+
+    private var browseIsEmpty: Bool {
+        browseSections.isEmpty || browseSections.allSatisfy { $0.items.isEmpty }
+    }
+
     var body: some View {
         NavigationStack {
             Group {
@@ -31,31 +43,36 @@ struct TaxonomySearchView: View {
                     )
                 } else {
                     List {
-                        ForEach(searchResults) { row in
-                            Button {
-                                onPick(row.id)
-                                dismiss()
-                            } label: {
-                                VStack(alignment: .leading, spacing: 4) {
-                                    Text(row.itemTitle)
-                                        .font(.body.weight(.semibold))
-                                        .foregroundStyle(.primary)
-                                    Text(row.pathLine)
-                                        .font(.caption)
-                                        .foregroundStyle(.secondary)
-                                }
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                                .contentShape(Rectangle())
+                        if isSearchMode {
+                            ForEach(searchResults) { row in
+                                taxonomyRow(row)
                             }
-                            .buttonStyle(.plain)
-                            .accessibilityLabel("\(row.itemTitle), \(row.pathLine)")
-                            .accessibilityHint("Apply this taxonomy item in the converter")
+                        } else {
+                            ForEach(browseSections) { section in
+                                Section {
+                                    ForEach(section.items) { row in
+                                        taxonomyRow(row)
+                                    }
+                                } header: {
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        Text(section.title)
+                                            .font(.subheadline.weight(.semibold))
+                                        if let subtitle = section.subtitle {
+                                            Text(subtitle)
+                                                .font(.caption)
+                                                .foregroundStyle(.secondary)
+                                        }
+                                    }
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    .textCase(nil)
+                                }
+                            }
                         }
                     }
                     .overlay {
                         if isSearchMode, searchResults.isEmpty {
                             ContentUnavailableView.search(text: query)
-                        } else if !isSearchMode, searchResults.isEmpty {
+                        } else if !isSearchMode, browseIsEmpty {
                             ContentUnavailableView(
                                 "No items",
                                 systemImage: "line.3.horizontal.decrease.circle",
@@ -125,8 +142,26 @@ struct TaxonomySearchView: View {
         }
     }
 
-    private var searchResults: [TaxonomyItemSearchResult] {
-        taxonomyStore.searchItems(query: query, filters: filters, limit: 200)
+    @ViewBuilder
+    private func taxonomyRow(_ row: TaxonomyPathResult) -> some View {
+        Button {
+            onPick(row.id)
+            dismiss()
+        } label: {
+            VStack(alignment: .leading, spacing: 4) {
+                Text(row.itemTitle)
+                    .font(.body.weight(.semibold))
+                    .foregroundStyle(.primary)
+                Text(row.pathLine)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("\(row.itemTitle), \(row.pathLine)")
+        .accessibilityHint("Apply this taxonomy item in the converter")
     }
 }
 

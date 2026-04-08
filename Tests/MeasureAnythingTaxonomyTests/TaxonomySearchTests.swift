@@ -233,8 +233,39 @@ final class TaxonomySearchTests: XCTestCase {
         """
         let reg = try TaxonomyRegistry(jsonData: Data(minimalBundleJSON(extraItems: items).utf8))
         let index = TaxonomySearchIndex(registry: reg, unitCatalog: [])
-        let rows = index.browse()
-        XCTAssertEqual(rows.map(\.id), ["item.a", "item.z"])
+        let sections = index.browseSections()
+        XCTAssertEqual(sections.count, 1)
+        XCTAssertEqual(sections[0].id, "measurement.normal")
+        XCTAssertEqual(sections[0].items.map(\.id), ["item.a", "item.z"])
+        let flat = index.browse()
+        XCTAssertEqual(flat.map(\.id), ["item.a", "item.z"])
+    }
+
+    func testBrowseSectionsSplitBySubgenre() throws {
+        let items = """
+        [
+          {
+            "id":"item.norm",
+            "domainId":"measurement",
+            "subgenreId":"measurement.normal",
+            "name":"N",
+            "description":"d"
+          },
+          {
+            "id":"item.abs",
+            "domainId":"measurement",
+            "subgenreId":"measurement.absurd",
+            "name":"A",
+            "description":"d"
+          }
+        ]
+        """
+        let reg = try TaxonomyRegistry(jsonData: Data(minimalBundleJSON(extraItems: items).utf8))
+        let index = TaxonomySearchIndex(registry: reg, unitCatalog: [])
+        let sections = index.browseSections()
+        XCTAssertEqual(sections.count, 2)
+        let ids = Set(sections.map(\.id))
+        XCTAssertEqual(ids, Set(["measurement.normal", "measurement.absurd"]))
     }
 
     func testBrowseRespectsDomainFilter() throws {
