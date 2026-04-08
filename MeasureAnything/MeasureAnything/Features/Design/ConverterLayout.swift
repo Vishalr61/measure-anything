@@ -26,4 +26,10 @@ enum ConverterLayout {
     static let cardCornerRadius: CGFloat = 16
     static let insetCornerRadius: CGFloat = 12
     static let horizontalInset: CGFloat = 20
+
+    // Strokes (systemic: pills ≈ card hairline; emphasis uses accent + same line width)
+    static let strokeHairline: CGFloat = 1
+    static let strokeOpacitySubtle: Double = 0.08
+    static let strokeOpacityMedium: Double = 0.14
+    static let accentBarWidth: CGFloat = 3
 }

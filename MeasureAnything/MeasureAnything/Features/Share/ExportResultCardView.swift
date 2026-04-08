@@ -11,6 +11,8 @@ struct ResultCardContent: View {
     var prominent: Bool = false
     /// Optional factor line (e.g. linear conversions); omitted for export.
     var equivalenceLine: String? = nil
+    /// Live converter: subtle tint behind meme copy when present.
+    var categoryAccent: Color? = nil
 
     var body: some View {
         if prominent {
@@ -52,14 +54,16 @@ struct ResultCardContent: View {
             if let equivalenceLine, !equivalenceLine.isEmpty {
                 Text(equivalenceLine)
                     .font(.caption2)
-                    .foregroundStyle(.quaternary)
+                    .foregroundStyle(
+                        categoryAccent.map { $0.opacity(0.48) } ?? Color.secondary.opacity(0.55)
+                    )
                     .lineLimit(2)
                     .minimumScaleFactor(0.85)
             }
 
             prominentOutputText
 
-            memeBlock(font: .subheadline)
+            prominentMemeBlock
         }
     }
 
@@ -91,6 +95,34 @@ struct ResultCardContent: View {
                 .foregroundStyle(.secondary)
                 .italic()
                 .fixedSize(horizontal: false, vertical: true)
+        }
+    }
+
+    @ViewBuilder
+    private var prominentMemeBlock: some View {
+        if let meme, !meme.isEmpty {
+            VStack(alignment: .leading, spacing: 0) {
+                Divider()
+                    .padding(.vertical, ConverterLayout.rhythm8)
+                Text(meme)
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .italic()
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .padding(ConverterLayout.rhythm12)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(
+                RoundedRectangle(cornerRadius: ConverterLayout.secondaryBlockCornerRadius, style: .continuous)
+                    .fill((categoryAccent ?? .clear).opacity(categoryAccent != nil ? 0.11 : 0))
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: ConverterLayout.secondaryBlockCornerRadius, style: .continuous)
+                    .strokeBorder(
+                        (categoryAccent ?? .clear).opacity(categoryAccent != nil ? 0.22 : 0),
+                        lineWidth: ConverterLayout.strokeHairline
+                    )
+            )
         }
     }
 }
@@ -127,7 +159,7 @@ struct ExportResultCardView: View {
         )
         .overlay(
             RoundedRectangle(cornerRadius: ConverterLayout.cardCornerRadius, style: .continuous)
-                .strokeBorder(Color.primary.opacity(0.07), lineWidth: 1)
+                .strokeBorder(Color.primary.opacity(ConverterLayout.strokeOpacitySubtle), lineWidth: ConverterLayout.strokeHairline)
         )
     }
 }
