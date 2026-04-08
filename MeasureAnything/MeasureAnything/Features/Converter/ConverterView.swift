@@ -75,8 +75,13 @@ struct ConverterView: View {
                 }
             }
             .sheet(isPresented: $showTaxonomySearch) {
-                TaxonomySearchView()
-                    .environmentObject(taxonomyStore)
+                TaxonomySearchView { itemId in
+                    if let route = taxonomyStore.converterRoute(forTaxonomyItemId: itemId) {
+                        vm.applyTaxonomyRoute(route)
+                    }
+                    showTaxonomySearch = false
+                }
+                .environmentObject(taxonomyStore)
             }
             .sheet(isPresented: $showCustomUnitForm) {
                 CustomUnitFormView()

@@ -44,6 +44,26 @@ struct TaxonomySubgenreFilterOption: Equatable, Identifiable, Sendable {
     let title: String
 }
 
+/// Bridge from a taxonomy item id to converter-facing state (`MeasureAnythingCore` enums + optional unit id).
+struct TaxonomyConverterRoute: Equatable {
+    let category: UnitCategory?
+    let mode: UnitRegistry.Mode?
+    let preferredFromUnitId: String?
+    /// `UnitCategory(rawValue: item.unitCategoryRaw)` succeeded.
+    let resolvedCategory: Bool
+    /// A `converterNavigation.modes` row matched `item.subgenreId`.
+    let resolvedMode: Bool
+    /// Item carried a non-empty `converterUnitId` in JSON (existence in the live registry is checked in `ConverterViewModel`).
+    let hasConverterUnitMapping: Bool
+
+    /// `true` when `applyTaxonomyRoute` should run: category and/or unit id, or a mode that is anchored to a resolved category.
+    var hasAnyResolvableInput: Bool {
+        category != nil
+            || preferredFromUnitId != nil
+            || (mode != nil && resolvedCategory)
+    }
+}
+
 // MARK: - Match ranking (lower = stronger)
 
 private enum TaxonomySearchMatchTier: Int, Comparable {
@@ -171,6 +191,35 @@ final class AppTaxonomyStore: ObservableObject {
             return nil
         }
         return Self.makePathResult(itemId: itemId, item: item, domain: domain, sub: sub)
+    }
+
+    /// Maps a taxonomy item to converter pickers and optional primary unit id. Returns `nil` for unknown item ids or missing registry.
+    func converterRoute(forTaxonomyItemId itemId: String) -> TaxonomyConverterRoute? {
+        guard let reg = registry, let item = reg.itemById[itemId] else { return nil }
+
+        let category = item.unitCategoryRaw.flatMap { UnitCategory(rawValue: $0) }
+        let resolvedCategory = category != nil
+
+        var mode: UnitRegistry.Mode?
+        var resolvedMode = false
+        if let nav = reg.converterNavigation,
+           let row = nav.modes.first(where: { $0.subgenreId == item.subgenreId }),
+           let m = UnitRegistry.Mode(rawValue: row.modeRaw) {
+            mode = m
+            resolvedMode = true
+        }
+
+        let trimmedUnit = item.converterUnitId?.trimmingCharacters(in: .whitespacesAndNewlines)
+        let unitId = (trimmedUnit?.isEmpty == false) ? trimmedUnit : nil
+
+        return TaxonomyConverterRoute(
+            category: category,
+            mode: mode,
+            preferredFromUnitId: unitId,
+            resolvedCategory: resolvedCategory,
+            resolvedMode: resolvedMode,
+            hasConverterUnitMapping: unitId != nil
+        )
     }
 
     /// Search taxonomy items by title, synonyms, and tags. Ranking: exact title → prefix title → exact synonym → prefix synonym → exact tag → prefix tag.

@@ -46,7 +46,8 @@
       "description": "Canonical length base unit.",
       "synonyms": ["Metre", "m"],
       "tags": ["si", "length", "distance"],
-      "unitCategoryRaw": "length"
+      "unitCategoryRaw": "length",
+      "converterUnitId": "meter"
     },
     {
       "id": "item.measurement.normal.kilogram",
@@ -56,7 +57,8 @@
       "description": "Canonical mass base unit.",
       "synonyms": ["kg", "kilo"],
       "tags": ["si", "mass"],
-      "unitCategoryRaw": "mass"
+      "unitCategoryRaw": "mass",
+      "converterUnitId": "kilogram"
     },
     {
       "id": "item.measurement.absurd.banana",
@@ -66,7 +68,8 @@
       "description": "Approximate average banana length.",
       "synonyms": ["yellow fruit ruler"],
       "tags": ["meme", "length"],
-      "unitCategoryRaw": "length"
+      "unitCategoryRaw": "length",
+      "converterUnitId": "banana"
     },
     {
       "id": "item.measurement.absurd.elephant",
@@ -75,7 +78,8 @@
       "name": "Elephant (mass)",
       "description": "Approximate adult elephant mass.",
       "tags": ["meme", "mass"],
-      "unitCategoryRaw": "mass"
+      "unitCategoryRaw": "mass",
+      "converterUnitId": "elephant"
     },
     {
       "id": "item.lifestyle.time.coffee-break",
@@ -85,7 +89,8 @@
       "description": "A nominal break-sized slice of time.",
       "synonyms": ["coffee pause"],
       "tags": ["break", "time"],
-      "unitCategoryRaw": "time"
+      "unitCategoryRaw": "time",
+      "converterUnitId": "coffee_break"
     }
   ],
   "converterNavigation": {

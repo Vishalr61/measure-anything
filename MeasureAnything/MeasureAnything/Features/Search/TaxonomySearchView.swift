@@ -1,8 +1,10 @@
 import SwiftUI
 import MeasureAnythingCore
 
-/// Browse taxonomy items by title, synonym, or tag. Does not change converter selection.
+/// Browse taxonomy items by title, synonym, or tag; selecting a row applies converter state via `onPick`.
 struct TaxonomySearchView: View {
+    let onPick: (String) -> Void
+
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var taxonomyStore: AppTaxonomyStore
 
@@ -22,15 +24,24 @@ struct TaxonomySearchView: View {
                 } else {
                     List {
                         ForEach(searchResults) { row in
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text(row.itemTitle)
-                                    .font(.body.weight(.semibold))
-                                Text(row.pathLine)
-                                    .font(.caption)
-                                    .foregroundStyle(.secondary)
+                            Button {
+                                onPick(row.itemId)
+                                dismiss()
+                            } label: {
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text(row.itemTitle)
+                                        .font(.body.weight(.semibold))
+                                        .foregroundStyle(.primary)
+                                    Text(row.pathLine)
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
+                                }
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .contentShape(Rectangle())
                             }
-                            .accessibilityElement(children: .combine)
+                            .buttonStyle(.plain)
                             .accessibilityLabel("\(row.itemTitle), \(row.pathLine)")
+                            .accessibilityHint("Apply this taxonomy item in the converter")
                         }
                     }
                     .searchable(text: $query, prompt: "Title, synonym, or tag")
@@ -84,6 +95,6 @@ struct TaxonomySearchView: View {
 }
 
 #Preview {
-    TaxonomySearchView()
+    TaxonomySearchView { _ in }
         .environmentObject(AppTaxonomyStore())
 }

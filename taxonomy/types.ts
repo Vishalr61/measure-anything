@@ -33,6 +33,8 @@ export interface Item {
   readonly tags?: readonly string[];
   /** Optional `UnitCategory.rawValue` for app-side search filtering */
   readonly unitCategoryRaw?: string;
+  /** Optional `UnitDefinition.id` in the conversion engine */
+  readonly converterUnitId?: string;
 }
 
 export interface ConverterNavigation {

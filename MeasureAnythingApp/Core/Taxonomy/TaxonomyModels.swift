@@ -34,9 +34,11 @@ public struct Item: Hashable, Sendable, Identifiable {
     public var tags: [String]
     /// When set, enables `UnitCategory`-based filtering in app search (`UnitCategory.rawValue`).
     public var unitCategoryRaw: String?
+    /// When set, maps this taxonomy item to a `UnitDefinition.id` in the conversion engine.
+    public var converterUnitId: String?
 
     enum CodingKeys: String, CodingKey {
-        case id, domainId, subgenreId, name, description, synonyms, tags, unitCategoryRaw
+        case id, domainId, subgenreId, name, description, synonyms, tags, unitCategoryRaw, converterUnitId
     }
 
     public init(from decoder: Decoder) throws {
@@ -49,6 +51,7 @@ public struct Item: Hashable, Sendable, Identifiable {
         synonyms = try c.decodeIfPresent([String].self, forKey: .synonyms) ?? []
         tags = try c.decodeIfPresent([String].self, forKey: .tags) ?? []
         unitCategoryRaw = try c.decodeIfPresent(String.self, forKey: .unitCategoryRaw)
+        converterUnitId = try c.decodeIfPresent(String.self, forKey: .converterUnitId)
     }
 
     public func encode(to encoder: Encoder) throws {
@@ -65,6 +68,7 @@ public struct Item: Hashable, Sendable, Identifiable {
             try c.encode(tags, forKey: .tags)
         }
         try c.encodeIfPresent(unitCategoryRaw, forKey: .unitCategoryRaw)
+        try c.encodeIfPresent(converterUnitId, forKey: .converterUnitId)
     }
 }
 

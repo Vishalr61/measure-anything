@@ -139,6 +139,54 @@ final class ConverterViewModel: ObservableObject {
         recompute()
     }
 
+    /// Applies taxonomy search selection: category/mode from taxonomy JSON, optional `converterUnitId` when that unit exists for the current registry.
+    func applyTaxonomyRoute(_ route: TaxonomyConverterRoute) {
+        guard route.hasAnyResolvableInput else { return }
+        isApplyingFavoriteRestore = true
+        defer {
+            isApplyingFavoriteRestore = false
+            reconcileSelectionsAfterModeChange()
+            recompute()
+        }
+
+        var targetCategory = route.category
+        if targetCategory == nil, let uid = route.preferredFromUnitId, let def = try? registry.unit(id: uid) {
+            targetCategory = def.category
+        }
+        if let c = targetCategory {
+            selectedCategory = c
+        }
+
+        var targetMode = route.mode
+        if targetMode == nil, let uid = route.preferredFromUnitId {
+            let cat = targetCategory ?? selectedCategory
+            targetMode = inferredModeSupportingUnit(category: cat, unitId: uid)
+        }
+        if let m = targetMode {
+            selectedMode = m
+        }
+
+        let units = registry.units(in: selectedCategory, includeKinds: selectedMode.includedKinds)
+        if let uid = route.preferredFromUnitId, units.contains(where: { $0.id == uid }) {
+            selectedFromUnitID = uid
+            selectedToUnitID = firstDistinctToUnit(from: uid, in: units)
+        } else {
+            applyDefaultsAfterCategoryChange()
+        }
+        let refreshed = registry.units(in: selectedCategory, includeKinds: selectedMode.includedKinds)
+        ensureDistinctFromTo(in: refreshed)
+    }
+
+    private func inferredModeSupportingUnit(category: UnitCategory, unitId: String) -> UnitRegistry.Mode? {
+        for mode in taxonomy.converterModes {
+            let list = registry.units(in: category, includeKinds: mode.includedKinds)
+            if list.contains(where: { $0.id == unitId }) {
+                return mode
+            }
+        }
+        return nil
+    }
+
     // MARK: - Defaults & selection safety
 
     private func preferredDefaultPair(for category: UnitCategory) -> (from: UnitDefinition.ID, to: UnitDefinition.ID) {
