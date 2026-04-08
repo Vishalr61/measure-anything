@@ -19,19 +19,19 @@ struct ConverterModeDisplay: Equatable {
 /// One search/browse row: same shape as `TaxonomyPathResult` from the taxonomy package.
 typealias TaxonomyItemSearchResult = TaxonomyPathResult
 
-/// Domain filter option for taxonomy search (parallel to subgenre options).
-struct TaxonomyDomainFilterOption: Equatable, Identifiable, Sendable {
+/// Explicit navigation depth for taxonomy browsing (independent of search query).
+enum TaxonomyBrowseLevel: Equatable {
+    case root
+    case domain(String)
+}
+
+/// Filter option id + label (domains, subgenres).
+struct TaxonomyFilterOption: Equatable, Identifiable, Sendable {
     let id: String
     let title: String
 }
 
-/// Subgenre choices for the taxonomy search filter menu.
-struct TaxonomySubgenreFilterOption: Equatable, Identifiable, Sendable {
-    let id: String
-    let title: String
-}
-
-/// Filters applied to both browse (empty query) and search modes.
+/// Filters applied to search and to domain-scoped browse.
 struct TaxonomySearchFilters: Equatable {
     var domainId: String?
     var unitCategory: UnitCategory?
@@ -49,14 +49,10 @@ struct TaxonomyConverterRoute: Equatable {
     let category: UnitCategory?
     let mode: UnitRegistry.Mode?
     let preferredFromUnitId: String?
-    /// `UnitCategory(rawValue: item.unitCategoryRaw)` succeeded.
     let resolvedCategory: Bool
-    /// A `converterNavigation.modes` row matched `item.subgenreId`.
     let resolvedMode: Bool
-    /// Item carried a non-empty `converterUnitId` in JSON (existence in the live registry is checked in `ConverterViewModel`).
     let hasConverterUnitMapping: Bool
 
-    /// `true` when `applyTaxonomyRoute` should run: category and/or unit id, or a mode that is anchored to a resolved category.
     var hasAnyResolvableInput: Bool {
         category != nil
             || preferredFromUnitId != nil
@@ -65,8 +61,6 @@ struct TaxonomyConverterRoute: Equatable {
 }
 
 /// App-owned entry point for taxonomy: loads `TaxonomyRegistry` once and exposes converter picker data.
-///
-/// Validation stays in `MeasureAnythingTaxonomy`; search uses `TaxonomySearchIndex` built from bundled items plus the live unit catalog.
 @MainActor
 final class AppTaxonomyStore: ObservableObject {
     @Published private(set) var loadFailureMessage: String?
@@ -74,7 +68,6 @@ final class AppTaxonomyStore: ObservableObject {
     private let registry: TaxonomyRegistry?
     private var searchIndex: TaxonomySearchIndex?
 
-    /// Production: load bundled taxonomy.
     init() {
         do {
             let reg = try TaxonomyRegistry()
@@ -88,7 +81,6 @@ final class AppTaxonomyStore: ObservableObject {
         }
     }
 
-    /// Tests and previews: inject a registry or simulate load failure without reading the bundle.
     init(injectedRegistry: TaxonomyRegistry?, loadFailureMessage: String?) {
         self.registry = injectedRegistry
         self.loadFailureMessage = loadFailureMessage
@@ -99,7 +91,6 @@ final class AppTaxonomyStore: ObservableObject {
         }
     }
 
-    /// Rebuilds the search index with taxonomy items plus every unit in the conversion registry (deduped by `converterUnitId`).
     func attachUnitCatalog(_ units: [UnitDefinition]) {
         guard let reg = registry else {
             searchIndex = nil
@@ -108,7 +99,6 @@ final class AppTaxonomyStore: ObservableObject {
         searchIndex = TaxonomySearchIndex(registry: reg, unitCatalog: units)
     }
 
-    /// Category tabs, ordered as in `converterNavigation` (or `UnitCategory.allCases` if absent or load failed).
     var converterCategories: [UnitCategory] {
         guard let nav = registry?.converterNavigation else {
             return Array(UnitCategory.allCases)
@@ -120,7 +110,6 @@ final class AppTaxonomyStore: ObservableObject {
         return parsed
     }
 
-    /// Mode tabs, ordered as in `converterNavigation` (or `Mode.allCases` if absent, invalid rows, or load failed).
     var converterModes: [UnitRegistry.Mode] {
         guard let nav = registry?.converterNavigation else {
             return Array(UnitRegistry.Mode.allCases)
@@ -132,30 +121,68 @@ final class AppTaxonomyStore: ObservableObject {
         return parsed
     }
 
-    /// Custom-unit form categories: `customAllowed` members in taxonomy category order.
     var customFormCategories: [UnitCategory] {
         let allowed = Set(UnitCategory.customAllowed)
         let ordered = converterCategories.filter { allowed.contains($0) }
         return ordered.isEmpty ? Array(UnitCategory.customAllowed) : ordered
     }
 
-    /// Domains for optional search filtering (empty when taxonomy did not load).
-    var searchDomainFilterOptions: [TaxonomyDomainFilterOption] {
+    /// Domains from taxonomy JSON order (for root + menus).
+    func availableDomains() -> [TaxonomyFilterOption] {
         guard let reg = registry else { return [] }
         return reg.domains
-            .map { TaxonomyDomainFilterOption(id: $0.id, title: $0.name) }
-            .sorted { $0.title.localizedStandardCompare($1.title) == .orderedAscending }
+            .map { TaxonomyFilterOption(id: $0.id, title: $0.name) }
     }
 
-    /// Subgenres available for optional search filtering (empty when taxonomy did not load).
-    var searchSubgenreFilterOptions: [TaxonomySubgenreFilterOption] {
+    /// Subgenres belonging to `domainId` when set; otherwise all subgenres.
+    func availableSubgenres(for domainId: String?) -> [TaxonomyFilterOption] {
         guard let reg = registry else { return [] }
-        return reg.subgenres
-            .map { TaxonomySubgenreFilterOption(id: $0.id, title: $0.name) }
+        let subs: [Subgenre]
+        if let did = domainId, !did.isEmpty {
+            subs = reg.subgenres.filter { $0.domainId == did }
+        } else {
+            subs = reg.subgenres
+        }
+        return subs
+            .map { TaxonomyFilterOption(id: $0.id, title: $0.name) }
             .sorted { $0.title.localizedStandardCompare($1.title) == .orderedAscending }
     }
 
-    /// Display metadata for a category row: optional JSON overrides, else `rawValue.capitalized`.
+    /// Unit categories present on indexed items for `domainId`. When nil, returns converter navigation order of all categories.
+    func availableUnitCategories(for domainId: String?) -> [UnitCategory] {
+        guard let index = searchIndex else { return Array(UnitCategory.allCases) }
+        guard let did = domainId, !did.isEmpty else {
+            return converterCategories
+        }
+        let raws = Set(index.entries(in: did).compactMap(\.unitCategoryRaw))
+        let cats = raws.compactMap { UnitCategory(rawValue: $0) }
+        let ordered = converterCategories.filter { cats.contains($0) }
+        return ordered.isEmpty ? cats.sorted { $0.rawValue < $1.rawValue } : ordered
+    }
+
+    /// Clears subgenre / unit category when they cannot apply to the current domain or index.
+    func normalizedFilters(_ filters: TaxonomySearchFilters) -> TaxonomySearchFilters {
+        guard let reg = registry, let index = searchIndex else { return filters }
+        var f = filters
+
+        if let sid = f.subgenreId, !sid.isEmpty {
+            if let sub = reg.subgenreById[sid] {
+                if let did = f.domainId, !did.isEmpty, sub.domainId != did {
+                    f.subgenreId = nil
+                }
+            } else {
+                f.subgenreId = nil
+            }
+        }
+
+        if let did = f.domainId, !did.isEmpty, let uc = f.unitCategory {
+            let has = index.entries(in: did).contains { $0.unitCategoryRaw == uc.rawValue }
+            if !has { f.unitCategory = nil }
+        }
+
+        return f
+    }
+
     func categoryDisplay(for category: UnitCategory) -> ConverterCategoryDisplay {
         let fallbackName = category.rawValue.capitalized
         guard let nav = registry?.converterNavigation else {
@@ -175,7 +202,6 @@ final class AppTaxonomyStore: ObservableObject {
         return ConverterCategoryDisplay(displayName: name, description: description)
     }
 
-    /// Display metadata for a mode tab: resolved via `converterNavigation` → `subgenreId` → `Subgenre` name/description.
     func modeDisplay(for mode: UnitRegistry.Mode) -> ConverterModeDisplay {
         let fallbackName = mode.rawValue.capitalized
         guard let nav = registry?.converterNavigation, let reg = registry else {
@@ -193,12 +219,10 @@ final class AppTaxonomyStore: ObservableObject {
         return ConverterModeDisplay(displayName: name, description: desc.isEmpty ? nil : desc)
     }
 
-    /// Resolves `Domain / Subgenre / Item` titles for an id (bundled item or synthetic `unit:…` row).
     func searchPathResult(forItemId itemId: String) -> TaxonomyPathResult? {
         searchIndex?.pathResult(forItemId: itemId)
     }
 
-    /// Maps a taxonomy or catalog search id to converter pickers and optional primary unit id.
     func converterRoute(forTaxonomyItemId itemId: String) -> TaxonomyConverterRoute? {
         guard let reg = registry else { return nil }
 
@@ -233,46 +257,62 @@ final class AppTaxonomyStore: ObservableObject {
         )
     }
 
-    /// Subgenre-grouped browse (same filters as search). Empty when taxonomy did not load.
+    // MARK: - Browse (hierarchical)
+
+    func browseDomains() -> [TaxonomyDomainSection] {
+        searchIndex?.browseDomains() ?? []
+    }
+
+    /// Sections inside one domain (subgenre / unit category / flat), after filter normalization.
     func browseSections(
+        in domainId: String,
         filters: TaxonomySearchFilters = TaxonomySearchFilters(),
         limitPerSection: Int = 200,
-        maxSections: Int = 50
+        maxSections: Int = 100
     ) -> [TaxonomyBrowseSection] {
         guard let index = searchIndex else { return [] }
+        var merged = filters
+        merged.domainId = domainId
+        let nf = normalizedFilters(merged)
         return index.browseSections(
-            categoryId: filters.domainId,
-            subcategoryId: filters.subgenreId,
-            unitCategoryRaw: filters.unitCategory?.rawValue,
+            inDomain: domainId,
+            subcategoryId: nf.subgenreId,
+            unitCategoryRaw: nf.unitCategory?.rawValue,
             limitPerSection: limitPerSection,
             maxSections: maxSections
         )
     }
 
-    /// Browse when `query` is blank/whitespace (flattened section order); ranked search when non-empty.
+    /// Ranked search and flattened browse use the same normalized filters.
     func searchItems(
         query: String,
         filters: TaxonomySearchFilters = TaxonomySearchFilters(),
         limit: Int = 100
     ) -> [TaxonomyItemSearchResult] {
         guard let index = searchIndex else { return [] }
+        let nf = normalizedFilters(filters)
         let trimmed = query.trimmingCharacters(in: .whitespacesAndNewlines)
         if trimmed.isEmpty {
             return index.browse(
-                categoryId: filters.domainId,
-                subcategoryId: filters.subgenreId,
-                unitCategoryRaw: filters.unitCategory?.rawValue,
+                categoryId: nf.domainId,
+                subcategoryId: nf.subgenreId,
+                unitCategoryRaw: nf.unitCategory?.rawValue,
                 limit: limit
             )
         }
         return index.search(
             query: query,
-            categoryId: filters.domainId,
-            subcategoryId: filters.subgenreId,
-            unitCategoryRaw: filters.unitCategory?.rawValue,
+            categoryId: nf.domainId,
+            subcategoryId: nf.subgenreId,
+            unitCategoryRaw: nf.unitCategory?.rawValue,
             limit: limit
         )
     }
+
+    // MARK: - Legacy filter option names (call sites)
+
+    var searchDomainFilterOptions: [TaxonomyFilterOption] { availableDomains() }
+    var searchSubgenreFilterOptions: [TaxonomyFilterOption] { availableSubgenres(for: nil) }
 
     private static func converterRoute(item: Item, registry: TaxonomyRegistry) -> TaxonomyConverterRoute {
         let category = item.unitCategoryRaw.flatMap { UnitCategory(rawValue: $0) }

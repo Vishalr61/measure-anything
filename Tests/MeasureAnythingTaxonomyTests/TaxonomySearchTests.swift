@@ -233,9 +233,9 @@ final class TaxonomySearchTests: XCTestCase {
         """
         let reg = try TaxonomyRegistry(jsonData: Data(minimalBundleJSON(extraItems: items).utf8))
         let index = TaxonomySearchIndex(registry: reg, unitCatalog: [])
-        let sections = index.browseSections()
+        let sections = index.browseSections(inDomain: "measurement")
         XCTAssertEqual(sections.count, 1)
-        XCTAssertEqual(sections[0].id, "measurement.normal")
+        XCTAssertEqual(sections[0].id, "measurement.all")
         XCTAssertEqual(sections[0].items.map(\.id), ["item.a", "item.z"])
         let flat = index.browse()
         XCTAssertEqual(flat.map(\.id), ["item.a", "item.z"])
@@ -262,10 +262,42 @@ final class TaxonomySearchTests: XCTestCase {
         """
         let reg = try TaxonomyRegistry(jsonData: Data(minimalBundleJSON(extraItems: items).utf8))
         let index = TaxonomySearchIndex(registry: reg, unitCatalog: [])
-        let sections = index.browseSections()
+        let sections = index.browseSections(inDomain: "measurement")
         XCTAssertEqual(sections.count, 2)
         let ids = Set(sections.map(\.id))
-        XCTAssertEqual(ids, Set(["measurement.normal", "measurement.absurd"]))
+        XCTAssertEqual(ids, Set(["measurement.sub.measurement.normal", "measurement.sub.measurement.absurd"]))
+    }
+
+    func testBrowseDomainsAggregatesCounts() throws {
+        let items = """
+        [
+          {"id":"a","domainId":"measurement","subgenreId":"measurement.normal","name":"A","description":"d"},
+          {"id":"b","domainId":"measurement","subgenreId":"measurement.normal","name":"B","description":"d"},
+          {"id":"c","domainId":"lifestyle","subgenreId":"lifestyle.blocks","name":"C","description":"d"}
+        ]
+        """
+        let reg = try TaxonomyRegistry(jsonData: Data(minimalBundleJSON(extraItems: items).utf8))
+        let index = TaxonomySearchIndex(registry: reg, unitCatalog: [])
+        let domains = index.browseDomains()
+        XCTAssertEqual(domains.count, 2)
+        let m = domains.first { $0.id == "measurement" }
+        XCTAssertEqual(m?.itemCount, 2)
+        XCTAssertEqual(domains.first { $0.id == "lifestyle" }?.itemCount, 1)
+    }
+
+    func testBrowseSingleSubgenreMultipleUnitCategoriesGroupsByCategory() throws {
+        let items = """
+        [
+          {"id":"len","domainId":"measurement","subgenreId":"measurement.normal","name":"L","description":"d","unitCategoryRaw":"length"},
+          {"id":"mass","domainId":"measurement","subgenreId":"measurement.normal","name":"M","description":"d","unitCategoryRaw":"mass"}
+        ]
+        """
+        let reg = try TaxonomyRegistry(jsonData: Data(minimalBundleJSON(extraItems: items).utf8))
+        let index = TaxonomySearchIndex(registry: reg, unitCatalog: [])
+        let sections = index.browseSections(inDomain: "measurement")
+        XCTAssertEqual(sections.count, 2)
+        let titles = Set(sections.map(\.title))
+        XCTAssertEqual(titles, Set(["Length", "Mass"]))
     }
 
     func testBrowseRespectsDomainFilter() throws {

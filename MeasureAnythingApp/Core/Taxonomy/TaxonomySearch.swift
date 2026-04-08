@@ -14,17 +14,34 @@ public struct TaxonomyPathResult: Equatable, Hashable, Sendable, Identifiable {
     public static let pathComponentSeparator = " / "
 }
 
-/// One subgenre (or mode bucket) under browse: section title is the subgenre name, subtitle the domain.
+/// Root-level domain row with counts.
+public struct TaxonomyDomainSection: Identifiable, Hashable, Sendable {
+    public let id: String
+    public let title: String
+    public let subtitle: String?
+    public let itemCount: Int
+
+    public init(id: String, title: String, subtitle: String?, itemCount: Int) {
+        self.id = id
+        self.title = title
+        self.subtitle = subtitle
+        self.itemCount = itemCount
+    }
+}
+
+/// Grouped rows inside a domain (subgenre, unit category, or one flat bucket).
 public struct TaxonomyBrowseSection: Identifiable, Hashable, Sendable {
     public let id: String
     public let title: String
     public let subtitle: String?
+    public let itemCount: Int
     public let items: [TaxonomyPathResult]
 
-    public init(id: String, title: String, subtitle: String?, items: [TaxonomyPathResult]) {
+    public init(id: String, title: String, subtitle: String?, itemCount: Int, items: [TaxonomyPathResult]) {
         self.id = id
         self.title = title
         self.subtitle = subtitle
+        self.itemCount = itemCount
         self.items = items
     }
 }
@@ -174,6 +191,8 @@ public enum TaxonomyPathBuilder {
 public struct TaxonomySearchIndex: Sendable {
     private let entries: [SearchableItem]
     private let byId: [String: SearchableItem]
+    /// Domain ids in taxonomy JSON order (for browse root + stable sorting).
+    private let orderedDomainIds: [String]
 
     public init(registry: TaxonomyRegistry, unitCatalog: [UnitDefinition] = []) {
         var list: [SearchableItem] = []
@@ -195,6 +214,77 @@ public struct TaxonomySearchIndex: Sendable {
 
         self.entries = list
         self.byId = Dictionary(uniqueKeysWithValues: list.map { ($0.id, $0) })
+        self.orderedDomainIds = registry.domains.map(\.id)
+    }
+
+    /// Items in a domain (for filter validation in the app layer).
+    public func entries(in domainId: String) -> [SearchableItem] {
+        entries.filter { $0.categoryId == domainId }
+    }
+
+    /// Root: one row per domain with item counts (order follows `registry.domains` at index build).
+    public func browseDomains() -> [TaxonomyDomainSection] {
+        let grouped = Dictionary(grouping: entries, by: \.categoryId)
+        var result: [TaxonomyDomainSection] = []
+        result.reserveCapacity(grouped.count)
+        for id in orderedDomainIds {
+            guard let group = grouped[id], let first = group.first else { continue }
+            result.append(
+                TaxonomyDomainSection(
+                    id: id,
+                    title: first.pathDomainTitle,
+                    subtitle: nil,
+                    itemCount: group.count
+                )
+            )
+        }
+        let known = Set(orderedDomainIds)
+        let extras = grouped.keys.filter { !known.contains($0) }.sorted()
+        for id in extras {
+            guard let group = grouped[id], let first = group.first else { continue }
+            result.append(
+                TaxonomyDomainSection(
+                    id: id,
+                    title: first.pathDomainTitle,
+                    subtitle: nil,
+                    itemCount: group.count
+                )
+            )
+        }
+        return result
+    }
+
+    /// Inside one domain: group by subgenre when multiple subgenres exist; else by unit category when multiple; else one section.
+    public func browseSections(
+        inDomain domainId: String,
+        subcategoryId: String? = nil,
+        unitCategoryRaw: String? = nil,
+        limitPerSection: Int = 200,
+        maxSections: Int = 100
+    ) -> [TaxonomyBrowseSection] {
+        var filtered = entries.filter { $0.categoryId == domainId }
+        filtered = filtered.filter {
+            Self.passesFilters($0, categoryId: nil, subcategoryId: subcategoryId, unitCategoryRaw: unitCategoryRaw)
+        }
+        guard !filtered.isEmpty else { return [] }
+
+        let distinctSub = Set(filtered.map(\.subcategoryId))
+        let distinctUnits = Set(filtered.compactMap(\.unitCategoryRaw))
+
+        let sections: [TaxonomyBrowseSection]
+        if distinctSub.count > 1 {
+            sections = Self.sectionsGroupedBySubgenre(filtered: filtered, domainId: domainId, limitPerSection: limitPerSection)
+        } else if distinctUnits.count > 1 {
+            sections = Self.sectionsGroupedByUnitCategory(filtered: filtered, domainId: domainId, limitPerSection: limitPerSection)
+        } else {
+            sections = [
+                Self.singleFlatSection(filtered: filtered, domainId: domainId, limitPerSection: limitPerSection)
+            ]
+        }
+        if sections.count > maxSections {
+            return Array(sections.prefix(maxSections))
+        }
+        return sections
     }
 
     public func pathResult(forItemId itemId: String) -> TaxonomyPathResult? {
@@ -206,73 +296,46 @@ public struct TaxonomySearchIndex: Sendable {
         byId[itemId]
     }
 
-    /// Hierarchical browse: groups rows by subgenre (`id` = subgenre id, `title` = subgenre display name, `subtitle` = domain name).
-    public func browseSections(
-        categoryId: String? = nil,
-        subcategoryId: String? = nil,
-        unitCategoryRaw: String? = nil,
-        limitPerSection: Int = 200,
-        maxSections: Int = 100
-    ) -> [TaxonomyBrowseSection] {
-        let filtered = entries.filter {
-            Self.passesFilters($0, categoryId: categoryId, subcategoryId: subcategoryId, unitCategoryRaw: unitCategoryRaw)
-        }
-        let grouped = Dictionary(grouping: filtered, by: \.subcategoryId)
-        var sections: [TaxonomyBrowseSection] = []
-        sections.reserveCapacity(grouped.count)
-        for (subId, group) in grouped {
-            guard let first = group.first else { continue }
-            let sorted = group.sorted {
-                $0.title.localizedStandardCompare($1.title) == .orderedAscending
-            }
-            let paths = sorted.map { TaxonomyPathBuilder.pathResult(for: $0) }
-            let capped = paths.count > limitPerSection ? Array(paths.prefix(limitPerSection)) : paths
-            sections.append(
-                TaxonomyBrowseSection(
-                    id: subId,
-                    title: first.pathSubgenreTitle,
-                    subtitle: first.pathDomainTitle,
-                    items: capped
-                )
-            )
-        }
-        sections.sort { a, b in
-            let domainCmp = (a.subtitle ?? "").localizedStandardCompare(b.subtitle ?? "")
-            if domainCmp != .orderedSame { return domainCmp == .orderedAscending }
-            return a.title.localizedStandardCompare(b.title) == .orderedAscending
-        }
-        if sections.count > maxSections {
-            return Array(sections.prefix(maxSections))
-        }
-        return sections
-    }
-
-    /// Flattened browse (section order, then title order), capped at `limit` total rows.
+    /// Flattened browse: if `categoryId` is set, that domain only; else walks domains in taxonomy order. Capped at `limit` total rows.
     public func browse(
         categoryId: String? = nil,
         subcategoryId: String? = nil,
         unitCategoryRaw: String? = nil,
         limit: Int = 500
     ) -> [TaxonomyPathResult] {
-        let sections = browseSections(
-            categoryId: categoryId,
-            subcategoryId: subcategoryId,
-            unitCategoryRaw: unitCategoryRaw,
-            limitPerSection: limit,
-            maxSections: 100
-        )
+        if let cid = categoryId, !cid.isEmpty {
+            return Self.flattenSections(
+                browseSections(
+                    inDomain: cid,
+                    subcategoryId: subcategoryId,
+                    unitCategoryRaw: unitCategoryRaw,
+                    limitPerSection: limit,
+                    maxSections: 100
+                ),
+                limit: limit
+            )
+        }
         var out: [TaxonomyPathResult] = []
         out.reserveCapacity(min(limit, 64))
-        outer: for s in sections {
-            for p in s.items {
-                if out.count >= limit { break outer }
-                out.append(p)
+        outer: for d in orderedDomainIds {
+            let sections = browseSections(
+                inDomain: d,
+                subcategoryId: subcategoryId,
+                unitCategoryRaw: unitCategoryRaw,
+                limitPerSection: limit,
+                maxSections: 100
+            )
+            for s in sections {
+                for p in s.items {
+                    if out.count >= limit { break outer }
+                    out.append(p)
+                }
             }
         }
         return out
     }
 
-    /// Ranked search; use `browse` when the query is empty.
+    /// Ranked search; blank query yields no results (use `browse` / `browseSections`).
     public func search(
         query: String,
         categoryId: String? = nil,
@@ -308,6 +371,110 @@ public struct TaxonomySearchIndex: Sendable {
             return scored.map(\.path)
         }
         return Array(scored.prefix(limit).map(\.path))
+    }
+
+    private static func flattenSections(_ sections: [TaxonomyBrowseSection], limit: Int) -> [TaxonomyPathResult] {
+        var out: [TaxonomyPathResult] = []
+        out.reserveCapacity(min(limit, 64))
+        outer: for s in sections {
+            for p in s.items {
+                if out.count >= limit { break outer }
+                out.append(p)
+            }
+        }
+        return out
+    }
+
+    private static func sectionsGroupedBySubgenre(
+        filtered: [SearchableItem],
+        domainId: String,
+        limitPerSection: Int
+    ) -> [TaxonomyBrowseSection] {
+        let grouped = Dictionary(grouping: filtered, by: \.subcategoryId)
+        var sections: [TaxonomyBrowseSection] = []
+        sections.reserveCapacity(grouped.count)
+        for (subId, group) in grouped {
+            guard let first = group.first else { continue }
+            let sorted = group.sorted {
+                $0.title.localizedStandardCompare($1.title) == .orderedAscending
+            }
+            let paths = sorted.map { TaxonomyPathBuilder.pathResult(for: $0) }
+            let capped = paths.count > limitPerSection ? Array(paths.prefix(limitPerSection)) : paths
+            sections.append(
+                TaxonomyBrowseSection(
+                    id: "\(domainId).sub.\(subId)",
+                    title: first.pathSubgenreTitle,
+                    subtitle: first.pathDomainTitle,
+                    itemCount: capped.count,
+                    items: capped
+                )
+            )
+        }
+        sections.sort { $0.title.localizedStandardCompare($1.title) == .orderedAscending }
+        return sections
+    }
+
+    private static func sectionsGroupedByUnitCategory(
+        filtered: [SearchableItem],
+        domainId: String,
+        limitPerSection: Int
+    ) -> [TaxonomyBrowseSection] {
+        let grouped = Dictionary(grouping: filtered) { $0.unitCategoryRaw ?? "__none__" }
+        var sections: [TaxonomyBrowseSection] = []
+        sections.reserveCapacity(grouped.count)
+        for (uRaw, group) in grouped {
+            guard let first = group.first else { continue }
+            let sorted = group.sorted {
+                $0.title.localizedStandardCompare($1.title) == .orderedAscending
+            }
+            let paths = sorted.map { TaxonomyPathBuilder.pathResult(for: $0) }
+            let capped = paths.count > limitPerSection ? Array(paths.prefix(limitPerSection)) : paths
+            let title: String
+            if uRaw == "__none__" {
+                title = "Other"
+            } else {
+                title = uRaw.capitalized
+            }
+            sections.append(
+                TaxonomyBrowseSection(
+                    id: "\(domainId).cat.\(uRaw)",
+                    title: title,
+                    subtitle: first.pathDomainTitle,
+                    itemCount: capped.count,
+                    items: capped
+                )
+            )
+        }
+        sections.sort { $0.title.localizedStandardCompare($1.title) == .orderedAscending }
+        return sections
+    }
+
+    private static func singleFlatSection(
+        filtered: [SearchableItem],
+        domainId: String,
+        limitPerSection: Int
+    ) -> TaxonomyBrowseSection {
+        let sorted = filtered.sorted {
+            $0.title.localizedStandardCompare($1.title) == .orderedAscending
+        }
+        let paths = sorted.map { TaxonomyPathBuilder.pathResult(for: $0) }
+        let capped = paths.count > limitPerSection ? Array(paths.prefix(limitPerSection)) : paths
+        guard let first = filtered.first else {
+            return TaxonomyBrowseSection(
+                id: "\(domainId).all",
+                title: "All items",
+                subtitle: nil,
+                itemCount: 0,
+                items: []
+            )
+        }
+        return TaxonomyBrowseSection(
+            id: "\(domainId).all",
+            title: "All items",
+            subtitle: first.pathDomainTitle,
+            itemCount: capped.count,
+            items: capped
+        )
     }
 
     private static func normalizeQuery(_ query: String) -> String {
