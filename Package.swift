@@ -8,7 +8,8 @@ let package = Package(
         .macOS(.v14)
     ],
     products: [
-        .library(name: "MeasureAnythingCore", targets: ["MeasureAnythingCore"])
+        .library(name: "MeasureAnythingCore", targets: ["MeasureAnythingCore"]),
+        .library(name: "MeasureAnythingTaxonomy", targets: ["MeasureAnythingTaxonomy"])
     ],
     targets: [
         .target(
@@ -18,9 +19,20 @@ let package = Package(
                 .process("Resources")
             ]
         ),
+        .target(
+            name: "MeasureAnythingTaxonomy",
+            path: "MeasureAnythingApp/Core/Taxonomy",
+            resources: [
+                .process("Resources")
+            ]
+        ),
         .testTarget(
             name: "MeasureAnythingCoreTests",
             dependencies: ["MeasureAnythingCore"]
+        ),
+        .testTarget(
+            name: "MeasureAnythingTaxonomyTests",
+            dependencies: ["MeasureAnythingTaxonomy"]
         )
     ]
 )

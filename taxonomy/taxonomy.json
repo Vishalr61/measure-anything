@@ -1,0 +1,77 @@
+{
+  "domains": [
+    {
+      "id": "measurement",
+      "name": "Measurement",
+      "description": "Physical quantities: length, mass, time, volume, temperature."
+    },
+    {
+      "id": "lifestyle",
+      "name": "Lifestyle",
+      "description": "Informal or humor-oriented ways to describe everyday scales."
+    }
+  ],
+  "subgenres": [
+    {
+      "id": "measurement.normal",
+      "domainId": "measurement",
+      "name": "Normal units",
+      "description": "Standard SI and common imperial units."
+    },
+    {
+      "id": "measurement.absurd",
+      "domainId": "measurement",
+      "name": "Absurd units",
+      "description": "Meme-friendly units backed by approximate real factors."
+    },
+    {
+      "id": "measurement.custom",
+      "domainId": "measurement",
+      "name": "Custom units",
+      "description": "User-defined multiplicative units in Custom mode."
+    },
+    {
+      "id": "lifestyle.time-blocks",
+      "domainId": "lifestyle",
+      "name": "Time blocks",
+      "description": "Chunked time metaphors (breaks, episodes, sessions)."
+    }
+  ],
+  "items": [
+    {
+      "id": "item.measurement.normal.meter",
+      "domainId": "measurement",
+      "subgenreId": "measurement.normal",
+      "name": "Meter",
+      "description": "Canonical length base unit."
+    },
+    {
+      "id": "item.measurement.normal.kilogram",
+      "domainId": "measurement",
+      "subgenreId": "measurement.normal",
+      "name": "Kilogram",
+      "description": "Canonical mass base unit."
+    },
+    {
+      "id": "item.measurement.absurd.banana",
+      "domainId": "measurement",
+      "subgenreId": "measurement.absurd",
+      "name": "Banana (length)",
+      "description": "Approximate average banana length."
+    },
+    {
+      "id": "item.measurement.absurd.elephant",
+      "domainId": "measurement",
+      "subgenreId": "measurement.absurd",
+      "name": "Elephant (mass)",
+      "description": "Approximate adult elephant mass."
+    },
+    {
+      "id": "item.lifestyle.time.coffee-break",
+      "domainId": "lifestyle",
+      "subgenreId": "lifestyle.time-blocks",
+      "name": "Coffee break",
+      "description": "A nominal break-sized slice of time."
+    }
+  ]
+}

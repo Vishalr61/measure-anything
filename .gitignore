@@ -9,3 +9,6 @@ DerivedData/
 
 # macOS
 .DS_Store
+
+# taxonomy (TypeScript)
+taxonomy/node_modules/

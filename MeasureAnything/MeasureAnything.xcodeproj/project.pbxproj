@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		E2AA454E2F86AD20006E2A9B /* MeasureAnythingCore in Frameworks */ = {isa = PBXBuildFile; productRef = E2AA454D2F86AD20006E2A9B /* MeasureAnythingCore */; };
+		E2AA45512F86AD20006E2A9B /* MeasureAnythingTaxonomy in Frameworks */ = {isa = PBXBuildFile; productRef = E2AA45502F86AD20006E2A9B /* MeasureAnythingTaxonomy */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -57,6 +58,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				E2AA454E2F86AD20006E2A9B /* MeasureAnythingCore in Frameworks */,
+				E2AA45512F86AD20006E2A9B /* MeasureAnythingTaxonomy in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -118,6 +120,7 @@
 			name = MeasureAnything;
 			packageProductDependencies = (
 				E2AA454D2F86AD20006E2A9B /* MeasureAnythingCore */,
+				E2AA45502F86AD20006E2A9B /* MeasureAnythingTaxonomy */,
 			);
 			productName = MeasureAnything;
 			productReference = E2AA45222F86AB89006E2A9B /* MeasureAnything.app */;
@@ -600,6 +603,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = E2AA454C2F86AD1F006E2A9B /* XCLocalSwiftPackageReference ".." */;
 			productName = MeasureAnythingCore;
+		};
+		E2AA45502F86AD20006E2A9B /* MeasureAnythingTaxonomy */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = E2AA454C2F86AD1F006E2A9B /* XCLocalSwiftPackageReference ".." */;
+			productName = MeasureAnythingTaxonomy;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
