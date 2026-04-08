@@ -64,6 +64,14 @@ struct TaxonomySearchView: View {
         }
     }
 
+    private func domainAccessibilityLabel(_ domain: TaxonomyDomainSection) -> String {
+        var parts = ["\(domain.title), \(domain.itemCount) items"]
+        if let sub = domain.subtitle, !sub.isEmpty {
+            parts.append(sub)
+        }
+        return parts.joined(separator: ". ")
+    }
+
     var body: some View {
         NavigationStack {
             Group {
@@ -89,29 +97,39 @@ struct TaxonomySearchView: View {
                                         f.domainId = domain.id
                                         filters = taxonomyStore.normalizedFilters(f)
                                     } label: {
-                                        HStack {
-                                            VStack(alignment: .leading, spacing: 4) {
+                                        HStack(alignment: .firstTextBaseline, spacing: 12) {
+                                            VStack(alignment: .leading, spacing: 3) {
                                                 Text(domain.title)
                                                     .font(.body.weight(.semibold))
                                                     .foregroundStyle(.primary)
                                                 if let sub = domain.subtitle {
                                                     Text(sub)
-                                                        .font(.caption)
+                                                        .font(.footnote)
                                                         .foregroundStyle(.secondary)
+                                                        .lineLimit(3)
+                                                        .multilineTextAlignment(.leading)
+                                                        .fixedSize(horizontal: false, vertical: true)
                                                 }
                                             }
-                                            Spacer()
-                                            Text("\(domain.itemCount)")
-                                                .font(.subheadline)
-                                                .foregroundStyle(.secondary)
-                                            Image(systemName: "chevron.right")
-                                                .font(.caption.weight(.semibold))
-                                                .foregroundStyle(.tertiary)
+                                            .frame(maxWidth: .infinity, alignment: .leading)
+                                            HStack(spacing: 6) {
+                                                Text("\(domain.itemCount)")
+                                                    .font(.caption.weight(.semibold))
+                                                    .monospacedDigit()
+                                                    .foregroundStyle(.secondary)
+                                                    .padding(.horizontal, 8)
+                                                    .padding(.vertical, 4)
+                                                    .background(Color.secondary.opacity(0.12))
+                                                    .clipShape(Capsule())
+                                                Image(systemName: "chevron.right")
+                                                    .font(.caption.weight(.semibold))
+                                                    .foregroundStyle(.tertiary)
+                                            }
                                         }
                                         .contentShape(Rectangle())
                                     }
                                     .buttonStyle(.plain)
-                                    .accessibilityLabel("\(domain.title), \(domain.itemCount) items")
+                                    .accessibilityLabel(domainAccessibilityLabel(domain))
                                 }
                             case .domain:
                                 ForEach(domainScopedSections) { section in
@@ -120,20 +138,26 @@ struct TaxonomySearchView: View {
                                             taxonomyRow(row)
                                         }
                                     } header: {
-                                        VStack(alignment: .leading, spacing: 2) {
-                                            HStack {
+                                        HStack(alignment: .firstTextBaseline, spacing: 8) {
+                                            VStack(alignment: .leading, spacing: 2) {
                                                 Text(section.title)
                                                     .font(.subheadline.weight(.semibold))
-                                                Spacer()
-                                                Text("\(section.itemCount)")
-                                                    .font(.caption)
-                                                    .foregroundStyle(.secondary)
+                                                if let subtitle = section.subtitle {
+                                                    Text(subtitle)
+                                                        .font(.caption)
+                                                        .foregroundStyle(.secondary)
+                                                        .lineLimit(2)
+                                                }
                                             }
-                                            if let subtitle = section.subtitle {
-                                                Text(subtitle)
-                                                    .font(.caption)
-                                                    .foregroundStyle(.secondary)
-                                            }
+                                            .frame(maxWidth: .infinity, alignment: .leading)
+                                            Text("\(section.itemCount)")
+                                                .font(.caption.weight(.semibold))
+                                                .monospacedDigit()
+                                                .foregroundStyle(.secondary)
+                                                .padding(.horizontal, 7)
+                                                .padding(.vertical, 3)
+                                                .background(Color.secondary.opacity(0.1))
+                                                .clipShape(Capsule())
                                         }
                                         .frame(maxWidth: .infinity, alignment: .leading)
                                         .textCase(nil)

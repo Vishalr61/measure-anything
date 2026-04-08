@@ -233,7 +233,7 @@ public struct TaxonomySearchIndex: Sendable {
                 TaxonomyDomainSection(
                     id: id,
                     title: first.pathDomainTitle,
-                    subtitle: nil,
+                    subtitle: Self.domainPreviewSubtitle(for: group),
                     itemCount: group.count
                 )
             )
@@ -246,7 +246,7 @@ public struct TaxonomySearchIndex: Sendable {
                 TaxonomyDomainSection(
                     id: id,
                     title: first.pathDomainTitle,
-                    subtitle: nil,
+                    subtitle: Self.domainPreviewSubtitle(for: group),
                     itemCount: group.count
                 )
             )
@@ -404,7 +404,7 @@ public struct TaxonomySearchIndex: Sendable {
                 TaxonomyBrowseSection(
                     id: "\(domainId).sub.\(subId)",
                     title: first.pathSubgenreTitle,
-                    subtitle: first.pathDomainTitle,
+                    subtitle: nil,
                     itemCount: capped.count,
                     items: capped
                 )
@@ -423,7 +423,7 @@ public struct TaxonomySearchIndex: Sendable {
         var sections: [TaxonomyBrowseSection] = []
         sections.reserveCapacity(grouped.count)
         for (uRaw, group) in grouped {
-            guard let first = group.first else { continue }
+            guard !group.isEmpty else { continue }
             let sorted = group.sorted {
                 $0.title.localizedStandardCompare($1.title) == .orderedAscending
             }
@@ -439,7 +439,7 @@ public struct TaxonomySearchIndex: Sendable {
                 TaxonomyBrowseSection(
                     id: "\(domainId).cat.\(uRaw)",
                     title: title,
-                    subtitle: first.pathDomainTitle,
+                    subtitle: nil,
                     itemCount: capped.count,
                     items: capped
                 )
@@ -459,7 +459,7 @@ public struct TaxonomySearchIndex: Sendable {
         }
         let paths = sorted.map { TaxonomyPathBuilder.pathResult(for: $0) }
         let capped = paths.count > limitPerSection ? Array(paths.prefix(limitPerSection)) : paths
-        guard let first = filtered.first else {
+        guard !filtered.isEmpty else {
             return TaxonomyBrowseSection(
                 id: "\(domainId).all",
                 title: "All items",
@@ -471,10 +471,67 @@ public struct TaxonomySearchIndex: Sendable {
         return TaxonomyBrowseSection(
             id: "\(domainId).all",
             title: "All items",
-            subtitle: first.pathDomainTitle,
+            subtitle: nil,
             itemCount: capped.count,
             items: capped
         )
+    }
+
+    /// Short line for root domain rows: top subgenres when several exist; otherwise top unit categories; else primary subgenre name.
+    private static func domainPreviewSubtitle(for items: [SearchableItem]) -> String? {
+        guard !items.isEmpty else { return nil }
+        let bySubgenre = Dictionary(grouping: items, by: \.subcategoryId)
+        if bySubgenre.count > 1 {
+            var merged: [String: Int] = [:]
+            for (_, group) in bySubgenre {
+                guard let first = group.first else { continue }
+                let title = first.pathSubgenreTitle.trimmingCharacters(in: .whitespacesAndNewlines)
+                guard !title.isEmpty else { continue }
+                merged[title, default: 0] += group.count
+            }
+            let ranked = merged
+                .map { ($0.key, $0.value) }
+                .sorted { a, b in
+                    if a.1 != b.1 { return a.1 > b.1 }
+                    return a.0.localizedStandardCompare(b.0) == .orderedAscending
+                }
+            return joinDomainPreviewLabels(ranked.map(\.0), maxShown: 4)
+        }
+
+        let categoryRaws = items.compactMap(\.unitCategoryRaw).map {
+            $0.trimmingCharacters(in: .whitespacesAndNewlines)
+        }.filter { !$0.isEmpty }
+        if !categoryRaws.isEmpty {
+            let byCat = Dictionary(grouping: categoryRaws) { $0 }
+            if byCat.count > 1 {
+                let ranked = byCat
+                    .map { ($0.key, $0.value.count) }
+                    .sorted { a, b in
+                        if a.1 != b.1 { return a.1 > b.1 }
+                        return a.0.localizedStandardCompare(b.0) == .orderedAscending
+                    }
+                return joinDomainPreviewLabels(ranked.map { displayUnitCategoryLabel($0.0) }, maxShown: 4)
+            }
+            return displayUnitCategoryLabel(byCat.keys.first!)
+        }
+
+        let subTitle = items.first?.pathSubgenreTitle.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        return subTitle.isEmpty ? nil : subTitle
+    }
+
+    private static func displayUnitCategoryLabel(_ raw: String) -> String {
+        raw.trimmingCharacters(in: .whitespacesAndNewlines).capitalized
+    }
+
+    private static func joinDomainPreviewLabels(_ labels: [String], maxShown: Int) -> String? {
+        let cleaned = labels.map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }.filter { !$0.isEmpty }
+        guard !cleaned.isEmpty else { return nil }
+        if cleaned.count <= maxShown {
+            return cleaned.joined(separator: " · ")
+        }
+        let head = Array(cleaned.prefix(maxShown))
+        let more = cleaned.count - maxShown
+        return head.joined(separator: " · ") + " +\(more) more"
     }
 
     private static func normalizeQuery(_ query: String) -> String {

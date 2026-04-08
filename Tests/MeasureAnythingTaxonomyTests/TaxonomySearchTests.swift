@@ -282,7 +282,38 @@ final class TaxonomySearchTests: XCTestCase {
         XCTAssertEqual(domains.count, 2)
         let m = domains.first { $0.id == "measurement" }
         XCTAssertEqual(m?.itemCount, 2)
-        XCTAssertEqual(domains.first { $0.id == "lifestyle" }?.itemCount, 1)
+        XCTAssertEqual(m?.subtitle, "Normal")
+        let life = domains.first { $0.id == "lifestyle" }
+        XCTAssertEqual(life?.itemCount, 1)
+        XCTAssertEqual(life?.subtitle, "Blocks")
+    }
+
+    func testBrowseDomainsSubtitleListsTopSubgenres() throws {
+        let items = """
+        [
+          {"id":"n1","domainId":"measurement","subgenreId":"measurement.normal","name":"A","description":"d"},
+          {"id":"n2","domainId":"measurement","subgenreId":"measurement.normal","name":"B","description":"d"},
+          {"id":"n3","domainId":"measurement","subgenreId":"measurement.normal","name":"C","description":"d"},
+          {"id":"ab","domainId":"measurement","subgenreId":"measurement.absurd","name":"Z","description":"d"}
+        ]
+        """
+        let reg = try TaxonomyRegistry(jsonData: Data(minimalBundleJSON(extraItems: items).utf8))
+        let index = TaxonomySearchIndex(registry: reg, unitCatalog: [])
+        let sub = index.browseDomains().first { $0.id == "measurement" }?.subtitle
+        XCTAssertEqual(sub, "Normal · Absurd")
+    }
+
+    func testBrowseDomainsSubtitleUsesUnitCategoriesWhenSingleSubgenre() throws {
+        let items = """
+        [
+          {"id":"len","domainId":"measurement","subgenreId":"measurement.normal","name":"L","description":"d","unitCategoryRaw":"length"},
+          {"id":"mass","domainId":"measurement","subgenreId":"measurement.normal","name":"M","description":"d","unitCategoryRaw":"mass"}
+        ]
+        """
+        let reg = try TaxonomyRegistry(jsonData: Data(minimalBundleJSON(extraItems: items).utf8))
+        let index = TaxonomySearchIndex(registry: reg, unitCatalog: [])
+        let sub = index.browseDomains().first { $0.id == "measurement" }?.subtitle
+        XCTAssertEqual(sub, "Length · Mass")
     }
 
     func testBrowseSingleSubgenreMultipleUnitCategoriesGroupsByCategory() throws {
