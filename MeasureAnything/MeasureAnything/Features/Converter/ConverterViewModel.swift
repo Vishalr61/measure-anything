@@ -4,9 +4,13 @@ import MeasureAnythingCore
 
 @MainActor
 final class ConverterViewModel: ObservableObject {
+    /// Skips category/mode defaulting and per-field `recompute` while applying a saved favorite.
+    private var isApplyingFavoriteRestore = false
+
     @Published var selectedCategory: UnitCategory = .length {
         didSet {
             guard oldValue != selectedCategory else { return }
+            guard !isApplyingFavoriteRestore else { return }
             applyDefaultsAfterCategoryChange()
         }
     }
@@ -14,6 +18,7 @@ final class ConverterViewModel: ObservableObject {
     @Published var selectedMode: UnitRegistry.Mode = .normal {
         didSet {
             guard oldValue != selectedMode else { return }
+            guard !isApplyingFavoriteRestore else { return }
             reconcileSelectionsAfterModeChange()
         }
     }
@@ -23,11 +28,17 @@ final class ConverterViewModel: ObservableObject {
     }
 
     @Published var selectedFromUnitID: UnitDefinition.ID = "meter" {
-        didSet { recompute() }
+        didSet {
+            guard !isApplyingFavoriteRestore else { return }
+            recompute()
+        }
     }
 
     @Published var selectedToUnitID: UnitDefinition.ID = "kilometer" {
-        didSet { recompute() }
+        didSet {
+            guard !isApplyingFavoriteRestore else { return }
+            recompute()
+        }
     }
 
     @Published var isMemeExplanationEnabled: Bool = false {
@@ -88,10 +99,34 @@ final class ConverterViewModel: ObservableObject {
     var fromUnit: UnitDefinition? { try? registry.unit(id: selectedFromUnitID) }
     var toUnit: UnitDefinition? { try? registry.unit(id: selectedToUnitID) }
 
+    /// Exposed for favorites UI (read-only snapshot of the live registry).
+    var currentRegistry: UnitRegistry { registry }
+
     func swapUnits() {
         let tmp = selectedFromUnitID
         selectedFromUnitID = selectedToUnitID
         selectedToUnitID = tmp
+    }
+
+    /// Whether the current from/to pair can be stored as a favorite (pair metadata only).
+    var canSaveCurrentPairAsFavorite: Bool {
+        guard selectedFromUnitID != selectedToUnitID else { return false }
+        guard let f = fromUnit, let t = toUnit else { return false }
+        return f.category == selectedCategory && t.category == selectedCategory
+    }
+
+    /// Restores category, mode, and unit IDs when both units still exist in the registry.
+    func applyFavoriteRestore(categoryRaw: String, fromID: String, toID: String) {
+        guard let category = UnitCategory(rawValue: categoryRaw) else { return }
+        guard let mode = FavoriteConversion.minimumMode(registry: registry, category: category, fromID: fromID, toID: toID) else { return }
+        isApplyingFavoriteRestore = true
+        selectedCategory = category
+        selectedMode = mode
+        selectedFromUnitID = fromID
+        selectedToUnitID = toID
+        isApplyingFavoriteRestore = false
+        reconcileSelectionsAfterModeChange()
+        recompute()
     }
 
     // MARK: - Defaults & selection safety

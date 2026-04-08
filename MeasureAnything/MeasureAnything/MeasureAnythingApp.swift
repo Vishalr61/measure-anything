@@ -14,6 +14,6 @@ struct MeasureAnythingApp: App {
         WindowGroup {
             ConverterView()
         }
-        .modelContainer(for: CustomUnit.self)
+        .modelContainer(for: [CustomUnit.self, FavoriteConversion.self])
     }
 }

@@ -4,11 +4,13 @@ import MeasureAnythingCore
 
 struct ConverterView: View {
     @Query(sort: \CustomUnit.name) private var customUnits: [CustomUnit]
+    @Query(sort: \FavoriteConversion.createdAt, order: .reverse) private var favorites: [FavoriteConversion]
     @Environment(\.modelContext) private var modelContext
 
     @StateObject private var vm = ConverterViewModel()
     @FocusState private var valueFieldFocused: Bool
     @State private var showCustomUnitForm = false
+    @State private var showFavorites = false
 
     var body: some View {
         NavigationStack {
@@ -27,8 +29,22 @@ struct ConverterView: View {
             .navigationBarTitleDisplayMode(.inline)
             .scrollDismissesKeyboard(.interactively)
             .toolbar {
-                if vm.selectedMode == .custom {
-                    ToolbarItem(placement: .primaryAction) {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button("Favorites", systemImage: "list.star") {
+                        showFavorites = true
+                    }
+                    .accessibilityLabel("View favorites")
+                }
+                ToolbarItemGroup(placement: .topBarTrailing) {
+                    Button {
+                        saveCurrentPairAsFavorite()
+                    } label: {
+                        Image(systemName: isCurrentPairAlreadyFavorite ? "star.fill" : "star")
+                    }
+                    .disabled(!canSaveFavoriteTap)
+                    .accessibilityLabel(isCurrentPairAlreadyFavorite ? "Already a favorite" : "Save as favorite")
+
+                    if vm.selectedMode == .custom {
                         Button("Add unit", systemImage: "plus") {
                             showCustomUnitForm = true
                         }
@@ -39,10 +55,42 @@ struct ConverterView: View {
             .sheet(isPresented: $showCustomUnitForm) {
                 CustomUnitFormView()
             }
+            .sheet(isPresented: $showFavorites) {
+                FavoritesListView(registry: vm.currentRegistry) { fav in
+                    vm.applyFavoriteRestore(
+                        categoryRaw: fav.categoryRaw,
+                        fromID: fav.fromUnitID,
+                        toID: fav.toUnitID
+                    )
+                }
+            }
             .task(id: customUnitsSyncToken) {
                 vm.sync(customUnits: customUnits)
             }
         }
+    }
+
+    private var isCurrentPairAlreadyFavorite: Bool {
+        favorites.contains {
+            $0.categoryRaw == vm.selectedCategory.rawValue
+                && $0.fromUnitID == vm.selectedFromUnitID
+                && $0.toUnitID == vm.selectedToUnitID
+        }
+    }
+
+    private var canSaveFavoriteTap: Bool {
+        vm.canSaveCurrentPairAsFavorite && !isCurrentPairAlreadyFavorite
+    }
+
+    private func saveCurrentPairAsFavorite() {
+        guard vm.canSaveCurrentPairAsFavorite, !isCurrentPairAlreadyFavorite else { return }
+        let fav = FavoriteConversion(
+            categoryRaw: vm.selectedCategory.rawValue,
+            fromUnitID: vm.selectedFromUnitID,
+            toUnitID: vm.selectedToUnitID
+        )
+        modelContext.insert(fav)
+        try? modelContext.save()
     }
 
     /// Changes when rows are inserted, updated, or deleted.
@@ -234,5 +282,5 @@ struct ConverterView: View {
 
 #Preview {
     ConverterView()
-        .modelContainer(for: CustomUnit.self, inMemory: true)
+        .modelContainer(for: [CustomUnit.self, FavoriteConversion.self], inMemory: true)
 }
