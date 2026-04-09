@@ -3,6 +3,9 @@ import SwiftData
 import MeasureAnythingCore
 
 struct ConverterView: View {
+    /// When `true`, this view is shown inside a parent `NavigationStack` (e.g. from `HomeView`) so navigation and the back button work.
+    var embedsInParentNavigationStack: Bool = false
+
     @Query(sort: \CustomUnit.name) private var customUnits: [CustomUnit]
     @Query(sort: \FavoriteConversion.createdAt, order: .reverse) private var favorites: [FavoriteConversion]
     @Environment(\.modelContext) private var modelContext
@@ -18,116 +21,127 @@ struct ConverterView: View {
     @State private var swapRotation: Double = 0
 
     var body: some View {
-        NavigationStack {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 0) {
-                    if let msg = taxonomyStore.loadFailureMessage {
-                        Text("Couldn’t load taxonomy (\(msg)). Using built-in category and mode order.")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                            .fixedSize(horizontal: false, vertical: true)
-                            .accessibilityLabel("Taxonomy load warning: \(msg)")
-                            .padding(.bottom, ConverterLayout.rhythm12)
-                    }
-
-                    categoryModeBlock
-
-                    Spacer()
-                        .frame(height: ConverterLayout.majorBlockSpacing)
-
-                    conversionInputBlock
-
-                    Spacer()
-                        .frame(height: ConverterLayout.majorBlockSpacing)
-
-                    resultCard
-                }
-                .padding(.horizontal, ConverterLayout.horizontalInset)
-                .padding(.vertical, ConverterLayout.rhythm16)
-            }
-            .navigationTitle("Measure Anything")
-            .navigationBarTitleDisplayMode(.inline)
-            .scrollDismissesKeyboard(.interactively)
-            .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
-            .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    Button {
-                        Haptics.tap()
-                        showFavorites = true
-                    } label: {
-                        Image(systemName: "list.star")
-                            .font(.body.weight(.regular))
-                            .imageScale(.medium)
-                    }
-                    .buttonStyle(ConverterPressingButtonStyle())
-                    .accessibilityLabel("View favorites")
-                }
-                ToolbarItemGroup(placement: .topBarTrailing) {
-                    Button {
-                        Haptics.tap()
-                        showTaxonomySearch = true
-                    } label: {
-                        Image(systemName: "magnifyingglass")
-                            .font(.body.weight(.regular))
-                            .imageScale(.medium)
-                    }
-                    .buttonStyle(ConverterPressingButtonStyle())
-                    .accessibilityLabel("Search taxonomy")
-
-                    Button {
-                        saveCurrentPairAsFavorite()
-                    } label: {
-                        Image(systemName: isCurrentPairAlreadyFavorite ? "star.fill" : "star")
-                            .font(.body.weight(.regular))
-                            .imageScale(.medium)
-                            .foregroundStyle(isCurrentPairAlreadyFavorite ? categoryAccent.opacity(0.95) : Color.secondary)
-                    }
-                    .disabled(!canSaveFavoriteTap)
-                    .buttonStyle(ConverterPressingButtonStyle())
-                    .accessibilityLabel(isCurrentPairAlreadyFavorite ? "Already a favorite" : "Save as favorite")
-
-                    if vm.selectedMode == .custom {
-                        Button {
-                            Haptics.tap()
-                            showCustomUnitForm = true
-                        } label: {
-                            Image(systemName: "plus")
-                                .font(.body.weight(.regular))
-                                .imageScale(.medium)
-                        }
-                        .buttonStyle(ConverterPressingButtonStyle())
-                        .accessibilityLabel("Add custom unit")
-                    }
+        Group {
+            if embedsInParentNavigationStack {
+                converterChrome
+            } else {
+                NavigationStack {
+                    converterChrome
                 }
             }
-            .sheet(isPresented: $showTaxonomySearch) {
-                TaxonomySearchView { itemId in
-                    if let route = taxonomyStore.converterRoute(forTaxonomyItemId: itemId) {
-                        vm.applyTaxonomyRoute(route)
-                    }
-                    showTaxonomySearch = false
+        }
+    }
+
+    /// Shared scroll content, navigation chrome, sheets, and SwiftData sync — with or without an inner `NavigationStack`.
+    private var converterChrome: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 0) {
+                if let msg = taxonomyStore.loadFailureMessage {
+                    Text("Couldn’t load taxonomy (\(msg)). Using built-in category and mode order.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .accessibilityLabel("Taxonomy load warning: \(msg)")
+                        .padding(.bottom, ConverterLayout.rhythm12)
                 }
+
+                categoryModeBlock
+
+                Spacer()
+                    .frame(height: ConverterLayout.majorBlockSpacing)
+
+                conversionInputBlock
+
+                Spacer()
+                    .frame(height: ConverterLayout.majorBlockSpacing)
+
+                resultCard
+            }
+            .padding(.horizontal, ConverterLayout.horizontalInset)
+            .padding(.vertical, ConverterLayout.rhythm16)
+        }
+        .navigationTitle("Measure Anything")
+        .navigationBarTitleDisplayMode(.inline)
+        .scrollDismissesKeyboard(.interactively)
+        .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
+        .toolbar {
+            ToolbarItem(placement: .topBarLeading) {
+                Button {
+                    Haptics.tap()
+                    showFavorites = true
+                } label: {
+                    Image(systemName: "list.star")
+                        .font(.body.weight(.regular))
+                        .imageScale(.medium)
+                }
+                .buttonStyle(ConverterPressingButtonStyle())
+                .accessibilityLabel("View favorites")
+            }
+            ToolbarItemGroup(placement: .topBarTrailing) {
+                Button {
+                    Haptics.tap()
+                    showTaxonomySearch = true
+                } label: {
+                    Image(systemName: "magnifyingglass")
+                        .font(.body.weight(.regular))
+                        .imageScale(.medium)
+                }
+                .buttonStyle(ConverterPressingButtonStyle())
+                .accessibilityLabel("Search taxonomy")
+
+                Button {
+                    saveCurrentPairAsFavorite()
+                } label: {
+                    Image(systemName: isCurrentPairAlreadyFavorite ? "star.fill" : "star")
+                        .font(.body.weight(.regular))
+                        .imageScale(.medium)
+                        .foregroundStyle(isCurrentPairAlreadyFavorite ? categoryAccent.opacity(0.95) : Color.secondary)
+                }
+                .disabled(!canSaveFavoriteTap)
+                .buttonStyle(ConverterPressingButtonStyle())
+                .accessibilityLabel(isCurrentPairAlreadyFavorite ? "Already a favorite" : "Save as favorite")
+
+                if vm.selectedMode == .custom {
+                    Button {
+                        Haptics.tap()
+                        showCustomUnitForm = true
+                    } label: {
+                        Image(systemName: "plus")
+                            .font(.body.weight(.regular))
+                            .imageScale(.medium)
+                    }
+                    .buttonStyle(ConverterPressingButtonStyle())
+                    .accessibilityLabel("Add custom unit")
+                }
+            }
+        }
+        .sheet(isPresented: $showTaxonomySearch) {
+            TaxonomySearchView { itemId in
+                if let route = taxonomyStore.converterRoute(forTaxonomyItemId: itemId) {
+                    vm.applyTaxonomyRoute(route)
+                }
+                showTaxonomySearch = false
+            }
+            .environmentObject(taxonomyStore)
+        }
+        .sheet(isPresented: $showCustomUnitForm) {
+            CustomUnitFormView()
                 .environmentObject(taxonomyStore)
+        }
+        .sheet(isPresented: $showFavorites) {
+            FavoritesListView(registry: vm.currentRegistry) { fav in
+                vm.applyFavoriteRestore(
+                    categoryRaw: fav.categoryRaw,
+                    fromID: fav.fromUnitID,
+                    toID: fav.toUnitID
+                )
             }
-            .sheet(isPresented: $showCustomUnitForm) {
-                CustomUnitFormView()
-                    .environmentObject(taxonomyStore)
-            }
-            .sheet(isPresented: $showFavorites) {
-                FavoritesListView(registry: vm.currentRegistry) { fav in
-                    vm.applyFavoriteRestore(
-                        categoryRaw: fav.categoryRaw,
-                        fromID: fav.fromUnitID,
-                        toID: fav.toUnitID
-                    )
-                }
-            }
-            .sheet(isPresented: $showShareSheet) {
-                ActivityView(activityItems: shareActivityItems)
-            }
-            .task(id: customUnitsSyncToken) {
-                vm.sync(customUnits: customUnits)
-            }
+        }
+        .sheet(isPresented: $showShareSheet) {
+            ActivityView(activityItems: shareActivityItems)
+        }
+        .task(id: customUnitsSyncToken) {
+            vm.sync(customUnits: customUnits)
         }
     }
 

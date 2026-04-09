@@ -6,6 +6,7 @@ enum ConverterLayout {
     static let rhythm8: CGFloat = 8
     static let rhythm12: CGFloat = 12
     static let rhythm16: CGFloat = 16
+    static let rhythm20: CGFloat = 20
     static let rhythm24: CGFloat = 24
 
     /// Vertical gap between the three main converter blocks (category/mode, input, result).

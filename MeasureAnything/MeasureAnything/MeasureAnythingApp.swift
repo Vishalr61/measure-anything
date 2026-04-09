@@ -21,7 +21,7 @@ struct MeasureAnythingApp: App {
 
     var body: some Scene {
         WindowGroup {
-            ConverterView(vm: converterViewModel)
+            HomeView(vm: converterViewModel)
                 .environmentObject(taxonomyStore)
         }
         .modelContainer(for: [CustomUnit.self, FavoriteConversion.self])
