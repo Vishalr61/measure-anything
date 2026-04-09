@@ -11,7 +11,7 @@ enum ConverterLayout {
     static let rhythm24: CGFloat = 24
 
     /// Vertical gap between the three main converter blocks (category/mode, input, result).
-    static let majorBlockSpacing: CGFloat = 24
+    static let majorBlockSpacing: CGFloat = 30
 
     /// Lighter secondary surfaces (category/mode + input).
     static let secondaryBlockPadding: CGFloat = 16
@@ -27,10 +27,10 @@ enum ConverterLayout {
     static let resultHeroPadding: CGFloat = 24
     static let resultHeroCornerRadius: CGFloat = 28
 
-    static let sectionSpacing: CGFloat = 24
-    static let blockSpacing: CGFloat = 16
+    static let sectionSpacing: CGFloat = 28
+    static let blockSpacing: CGFloat = 20
     static let tightSpacing: CGFloat = 10
-    static let cardPadding: CGFloat = 20
+    static let cardPadding: CGFloat = 22
     static let cardCornerRadius: CGFloat = 16
     static let insetCornerRadius: CGFloat = 12
     static let horizontalInset: CGFloat = 20

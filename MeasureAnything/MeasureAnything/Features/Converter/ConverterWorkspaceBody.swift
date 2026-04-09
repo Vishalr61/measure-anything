@@ -45,7 +45,7 @@ struct ConverterWorkspaceBody: View {
             resultCard
         }
         .padding(.horizontal, ConverterLayout.horizontalInset)
-        .padding(.vertical, ConverterLayout.rhythm16)
+        .padding(.vertical, ConverterLayout.rhythm20)
         .sheet(isPresented: $showCustomUnitForm) {
             CustomUnitFormView()
                 .environmentObject(taxonomyStore)
@@ -406,12 +406,12 @@ struct ConverterWorkspaceBody: View {
             HStack(spacing: 8) {
                 Text(name)
                     .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(.primary)
+                    .foregroundStyle(categoryAccent.opacity(0.92))
                     .lineLimit(1)
                     .minimumScaleFactor(0.75)
                 Image(systemName: "chevron.down")
                     .font(.caption.weight(.bold))
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(categoryAccent.opacity(0.65))
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 12)
@@ -427,6 +427,7 @@ struct ConverterWorkspaceBody: View {
         }
         .buttonStyle(.plain)
         .pickerStyle(.menu)
+        .tint(categoryAccent)
         .accessibilityLabel("\(name) unit, opens menu")
         .accessibilityHint("Choose a unit")
     }
