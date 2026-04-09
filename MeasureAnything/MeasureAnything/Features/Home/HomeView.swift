@@ -1,32 +1,37 @@
+import SwiftData
 import SwiftUI
 import MeasureAnythingCore
 
-/// Discovery dashboard: cards and search entry; pushes shared `ConverterView` without changing converter behavior.
+/// Single-page conversion workspace: discovery chrome, category pills, live converter, and optional shortcuts below.
 struct HomeView: View {
+    private enum HomeScrollTarget {
+        static let converter = "converterWorkspace"
+    }
+
+    @Query(sort: \FavoriteConversion.createdAt, order: .reverse) private var favorites: [FavoriteConversion]
+    @Environment(\.modelContext) private var modelContext
     @ObservedObject var vm: ConverterViewModel
     @EnvironmentObject private var taxonomyStore: AppTaxonomyStore
 
-    @State private var path = NavigationPath()
     @State private var showTaxonomySearch = false
     @State private var showFavorites = false
+    @State private var showCustomUnitForm = false
+    @State private var scrollToConverterToken = 0
 
-    private enum HomeNav: Hashable {
-        case converter
+    private var categoryAccent: Color {
+        ConverterCategoryAccent.accent(for: vm.selectedCategory)
     }
 
-    /// Single converter destination on the root stack (avoids duplicate pushes and works with `navigationDestination`).
-    private func pushConverter() {
-        path = NavigationPath()
-        path.append(HomeNav.converter)
-    }
-
-    /// Prefer normal conversions when entering from a category tile.
-    private func selectDefaultNormalMode() {
-        if vm.modes.contains(.normal) {
-            vm.selectedMode = .normal
-        } else if let first = vm.modes.first {
-            vm.selectedMode = first
+    private var isCurrentPairAlreadyFavorite: Bool {
+        favorites.contains {
+            $0.categoryRaw == vm.selectedCategory.rawValue
+                && $0.fromUnitID == vm.selectedFromUnitID
+                && $0.toUnitID == vm.selectedToUnitID
         }
+    }
+
+    private var canSaveFavoriteTap: Bool {
+        vm.canSaveCurrentPairAsFavorite && !isCurrentPairAlreadyFavorite
     }
 
     /// Keep absurd mode on a valid taxonomy category.
@@ -36,28 +41,58 @@ struct HomeView: View {
         }
     }
 
+    private func saveCurrentPairAsFavorite() {
+        guard vm.canSaveCurrentPairAsFavorite, !isCurrentPairAlreadyFavorite else { return }
+        let fav = FavoriteConversion(
+            categoryRaw: vm.selectedCategory.rawValue,
+            fromUnitID: vm.selectedFromUnitID,
+            toUnitID: vm.selectedToUnitID
+        )
+        modelContext.insert(fav)
+        try? modelContext.save()
+        Haptics.favorite()
+    }
+
+    private func focusConverterFromAbsurdShortcut() {
+        scrollToConverterToken &+= 1
+    }
+
     var body: some View {
-        NavigationStack(path: $path) {
-            ScrollView {
-                VStack(alignment: .leading, spacing: ConverterLayout.rhythm16) {
-                    dashboardHeader
+        NavigationStack {
+            ScrollViewReader { proxy in
+                ScrollView {
+                    VStack(alignment: .leading, spacing: ConverterLayout.rhythm16) {
+                        dashboardHeader
+                            .padding(.horizontal, ConverterLayout.horizontalInset)
 
-                    searchBarButton
-                        .padding(.top, ConverterLayout.rhythm8)
+                        searchBarButton
+                            .padding(.horizontal, ConverterLayout.horizontalInset)
 
-                    continueConverterCard
-                        .padding(.top, ConverterLayout.rhythm12)
+                        categoryPillBar
 
-                    recommendedSection
+                        ConverterWorkspaceBody(
+                            showsCategoryPicker: false,
+                            showCustomUnitForm: $showCustomUnitForm,
+                            vm: vm
+                        )
+                        .id(HomeScrollTarget.converter)
 
-                    categoryGridSection
+                        recommendedSection
+                            .padding(.horizontal, ConverterLayout.horizontalInset)
+                    }
+                    .padding(.bottom, ConverterLayout.rhythm24)
                 }
-                .padding(.horizontal, ConverterLayout.horizontalInset)
-                .padding(.bottom, ConverterLayout.rhythm24)
+                .onChange(of: scrollToConverterToken) { _, _ in
+                    withAnimation(.easeInOut(duration: 0.35)) {
+                        proxy.scrollTo(HomeScrollTarget.converter, anchor: .top)
+                    }
+                }
             }
             .background(Color(.systemGroupedBackground))
             .navigationTitle("Measure Anything")
             .navigationBarTitleDisplayMode(.large)
+            .scrollDismissesKeyboard(.interactively)
+            .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     Image(systemName: "ruler")
@@ -65,39 +100,61 @@ struct HomeView: View {
                         .foregroundStyle(ConverterCategoryAccent.accent(for: .length))
                         .accessibilityHidden(true)
                 }
-                ToolbarItem(placement: .topBarTrailing) {
-                    HStack(spacing: ConverterLayout.rhythm12) {
-                        Button {
-                            Haptics.tap()
-                            showFavorites = true
-                        } label: {
-                            Image(systemName: "list.star")
-                                .font(.body.weight(.regular))
-                                .imageScale(.medium)
-                        }
-                        .accessibilityLabel("View favorites")
+                ToolbarItem(placement: .topBarLeading) {
+                    Button {
+                        showFavorites = true
+                    } label: {
+                        Image(systemName: "list.star")
+                            .font(.body.weight(.medium))
+                            .imageScale(.medium)
+                            .frame(width: 44, height: 44)
+                            .contentShape(Rectangle())
+                    }
+                    .buttonStyle(FavoritesToolbarButtonStyle())
+                    .accessibilityLabel("View favorites")
+                }
+                ToolbarItemGroup(placement: .topBarTrailing) {
+                    Button {
+                        Haptics.tap()
+                        showTaxonomySearch = true
+                    } label: {
+                        Image(systemName: "magnifyingglass")
+                            .font(.body.weight(.regular))
+                            .imageScale(.medium)
+                    }
+                    .buttonStyle(ConverterPressingButtonStyle())
+                    .accessibilityLabel("Search taxonomy")
 
+                    Button {
+                        saveCurrentPairAsFavorite()
+                    } label: {
+                        Image(systemName: isCurrentPairAlreadyFavorite ? "star.fill" : "star")
+                            .font(.body.weight(.regular))
+                            .imageScale(.medium)
+                            .foregroundStyle(isCurrentPairAlreadyFavorite ? categoryAccent.opacity(0.95) : Color.secondary)
+                    }
+                    .disabled(!canSaveFavoriteTap)
+                    .buttonStyle(ConverterPressingButtonStyle())
+                    .accessibilityLabel(isCurrentPairAlreadyFavorite ? "Already a favorite" : "Save as favorite")
+
+                    if vm.selectedMode == .custom {
                         Button {
                             Haptics.tap()
-                            showTaxonomySearch = true
+                            showCustomUnitForm = true
                         } label: {
-                            Image(systemName: "magnifyingglass")
+                            Image(systemName: "plus")
                                 .font(.body.weight(.regular))
                                 .imageScale(.medium)
                         }
-                        .accessibilityLabel("Search taxonomy")
+                        .buttonStyle(ConverterPressingButtonStyle())
+                        .accessibilityLabel("Add custom unit")
                     }
                 }
-            }
-            .navigationDestination(for: HomeNav.self) { _ in
-                ConverterView(embedsInParentNavigationStack: true, vm: vm)
-                    .environmentObject(taxonomyStore)
             }
             .sheet(isPresented: $showTaxonomySearch) {
                 TaxonomySearchView { itemId in
                     if let route = taxonomyStore.converterRoute(forTaxonomyItemId: itemId) {
                         vm.applyTaxonomyRoute(route)
-                        pushConverter()
                     }
                     showTaxonomySearch = false
                 }
@@ -110,7 +167,6 @@ struct HomeView: View {
                         fromID: fav.fromUnitID,
                         toID: fav.toUnitID
                     )
-                    pushConverter()
                 }
             }
         }
@@ -121,7 +177,7 @@ struct HomeView: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text("Convert anything")
                     .font(.title2.weight(.bold))
-                Text("Pick a category or try an absurd comparison.")
+                Text("Choose a category, then convert on the same screen.")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
             }
@@ -159,51 +215,46 @@ struct HomeView: View {
         .accessibilityHint("Opens taxonomy search")
     }
 
-    private var continueConverterCard: some View {
-        let accent = ConverterCategoryAccent.accent(for: vm.selectedCategory)
+    private var categoryPillBar: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: ConverterLayout.rhythm8) {
+                ForEach(vm.categories, id: \.self) { category in
+                    categoryPill(category)
+                }
+            }
+            .padding(.horizontal, ConverterLayout.horizontalInset)
+            .padding(.vertical, 2)
+        }
+    }
+
+    private func categoryPill(_ category: UnitCategory) -> some View {
+        let display = taxonomyStore.categoryDisplay(for: category)
+        let accent = ConverterCategoryAccent.accent(for: category)
+        let selected = vm.selectedCategory == category
         return Button {
             Haptics.tap()
-            pushConverter()
+            vm.selectedCategory = category
         } label: {
-            HStack(alignment: .center, spacing: ConverterLayout.rhythm16) {
-                ZStack {
-                    Circle()
-                        .fill(accent.opacity(0.18))
-                        .frame(width: 48, height: 48)
-                    Image(systemName: "arrow.forward.circle.fill")
-                        .font(.title2)
-                        .foregroundStyle(accent)
-                }
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("Continue converting")
-                        .font(.body.weight(.semibold))
-                        .foregroundStyle(.primary)
-                    Text("Open the full converter with your current category and units.")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                        .multilineTextAlignment(.leading)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                Image(systemName: "chevron.right")
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(.tertiary)
-            }
-            .padding(ConverterLayout.rhythm16)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .background(
-                RoundedRectangle(cornerRadius: ConverterLayout.cardCornerRadius, style: .continuous)
-                    .fill(Color(.systemBackground))
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: ConverterLayout.cardCornerRadius, style: .continuous)
-                    .strokeBorder(Color.primary.opacity(ConverterLayout.strokeOpacitySubtle), lineWidth: ConverterLayout.strokeHairline)
-            )
-            .shadow(color: .black.opacity(0.06), radius: 8, x: 0, y: 4)
+            Text(display.displayName)
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(selected ? Color.white : Color.primary)
+                .padding(.horizontal, ConverterLayout.rhythm16)
+                .padding(.vertical, 10)
+                .background(
+                    Capsule(style: .continuous)
+                        .fill(selected ? accent : Color(.secondarySystemGroupedBackground))
+                )
+                .overlay(
+                    Capsule(style: .continuous)
+                        .strokeBorder(
+                            selected ? accent.opacity(0.35) : Color.primary.opacity(ConverterLayout.strokeOpacitySubtle),
+                            lineWidth: ConverterLayout.strokeHairline
+                        )
+                )
         }
         .buttonStyle(.plain)
-        .accessibilityLabel("Continue converting")
-        .accessibilityHint("Opens the converter with your current settings")
+        .accessibilityLabel("\(display.displayName) category")
+        .accessibilityAddTraits(selected ? .isSelected : [])
     }
 
     private var recommendedSection: some View {
@@ -218,13 +269,13 @@ struct HomeView: View {
                 Haptics.tap()
                 ensureSelectedCategoryIsValid()
                 vm.selectedMode = .absurd
-                pushConverter()
+                focusConverterFromAbsurdShortcut()
             } label: {
                 featuredAbsurdCard
             }
             .buttonStyle(.plain)
             .accessibilityLabel("Absurd conversions")
-            .accessibilityHint("Opens converter in absurd mode")
+            .accessibilityHint("Switches to absurd mode and scrolls to the converter")
         }
     }
 
@@ -251,7 +302,7 @@ struct HomeView: View {
                     .fixedSize(horizontal: false, vertical: true)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
-            Image(systemName: "chevron.right")
+            Image(systemName: "chevron.up")
                 .font(.subheadline.weight(.semibold))
                 .foregroundStyle(.white.opacity(0.7))
                 .padding(.top, 4)
@@ -268,104 +319,11 @@ struct HomeView: View {
         )
         .shadow(color: .black.opacity(0.1), radius: 12, x: 0, y: 6)
     }
-
-    private var categoryGridSection: some View {
-        VStack(alignment: .leading, spacing: ConverterLayout.rhythm12) {
-            Text("Categories")
-                .font(.title3.weight(.bold))
-
-            LazyVGrid(
-                columns: [
-                    GridItem(.flexible(), spacing: ConverterLayout.rhythm12),
-                    GridItem(.flexible(), spacing: ConverterLayout.rhythm12)
-                ],
-                spacing: ConverterLayout.rhythm12
-            ) {
-                ForEach(vm.categories, id: \.self) { category in
-                    Button {
-                        Haptics.tap()
-                        vm.selectedCategory = category
-                        selectDefaultNormalMode()
-                        pushConverter()
-                    } label: {
-                        categoryCard(for: category)
-                    }
-                    .buttonStyle(.plain)
-                    .accessibilityLabel("\(taxonomyStore.categoryDisplay(for: category).displayName) category")
-                    .accessibilityHint("Opens converter for this category")
-                }
-            }
-        }
-    }
-
-    private func categoryCard(for category: UnitCategory) -> some View {
-        let display = taxonomyStore.categoryDisplay(for: category)
-        let accent = ConverterCategoryAccent.accent(for: category)
-        return VStack(alignment: .leading, spacing: ConverterLayout.rhythm12) {
-            ZStack {
-                Circle()
-                    .fill(accent.opacity(0.18))
-                    .frame(width: 44, height: 44)
-                Image(systemName: categoryIconName(category))
-                    .font(.title3.weight(.semibold))
-                    .foregroundStyle(accent)
-            }
-            Text(display.displayName)
-                .font(.subheadline.weight(.semibold))
-                .foregroundStyle(.primary)
-                .multilineTextAlignment(.leading)
-                .lineLimit(2)
-                .minimumScaleFactor(0.85)
-            if let d = display.description, !d.isEmpty {
-                Text(d)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .lineLimit(3)
-                    .multilineTextAlignment(.leading)
-                    .fixedSize(horizontal: false, vertical: true)
-            } else {
-                Text(categoryFallbackDescriptor(category))
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .lineLimit(2)
-            }
-        }
-        .padding(ConverterLayout.rhythm16)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(
-            RoundedRectangle(cornerRadius: ConverterLayout.secondaryBlockCornerRadius, style: .continuous)
-                .fill(Color(.systemBackground))
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: ConverterLayout.secondaryBlockCornerRadius, style: .continuous)
-                .strokeBorder(Color.primary.opacity(ConverterLayout.strokeOpacitySubtle), lineWidth: ConverterLayout.strokeHairline)
-        )
-        .shadow(color: .black.opacity(0.06), radius: 8, x: 0, y: 4)
-    }
-
-    private func categoryIconName(_ category: UnitCategory) -> String {
-        switch category {
-        case .length: "ruler"
-        case .mass: "scalemass"
-        case .time: "clock"
-        case .temperature: "thermometer.medium"
-        case .volume: "cube.fill"
-        }
-    }
-
-    private func categoryFallbackDescriptor(_ category: UnitCategory) -> String {
-        switch category {
-        case .length: "Distance and height"
-        case .mass: "Weight and mass"
-        case .time: "Durations and rates"
-        case .temperature: "Degrees and scales"
-        case .volume: "Space and capacity"
-        }
-    }
 }
 
 #Preview {
     let taxonomy = AppTaxonomyStore()
     HomeView(vm: ConverterViewModel(taxonomy: taxonomy))
         .environmentObject(taxonomy)
+        .modelContainer(for: [CustomUnit.self, FavoriteConversion.self], inMemory: true)
 }
