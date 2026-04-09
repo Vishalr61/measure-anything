@@ -50,6 +50,83 @@
       "converterUnitId": "meter"
     },
     {
+      "id": "item.measurement.normal.kilometer",
+      "domainId": "measurement",
+      "subgenreId": "measurement.normal",
+      "name": "Kilometer",
+      "description": "Metric length unit equal to one thousand meters.",
+      "synonyms": ["Kilometre", "Thousand meters", "Metric kilometer"],
+      "tags": ["length", "distance", "metric", "si"],
+      "unitCategoryRaw": "length",
+      "converterUnitId": "kilometer"
+    },
+    {
+      "id": "item.measurement.normal.centimeter",
+      "domainId": "measurement",
+      "subgenreId": "measurement.normal",
+      "name": "Centimeter",
+      "description": "Metric length unit equal to one hundredth of a meter.",
+      "synonyms": ["Centimetre", "One hundredth meter", "Metric centimeter"],
+      "tags": ["length", "distance", "metric", "si"],
+      "unitCategoryRaw": "length",
+      "converterUnitId": "centimeter"
+    },
+    {
+      "id": "item.measurement.normal.millimeter",
+      "domainId": "measurement",
+      "subgenreId": "measurement.normal",
+      "name": "Millimeter",
+      "description": "Metric length unit equal to one thousandth of a meter.",
+      "synonyms": ["Millimetre", "One thousandth meter", "Metric millimeter"],
+      "tags": ["length", "distance", "metric", "si"],
+      "unitCategoryRaw": "length",
+      "converterUnitId": "millimeter"
+    },
+    {
+      "id": "item.measurement.normal.inch",
+      "domainId": "measurement",
+      "subgenreId": "measurement.normal",
+      "name": "Inch",
+      "description": "Imperial length unit commonly used in the United States.",
+      "synonyms": ["International inch", "Imperial inch", "United States customary inch"],
+      "tags": ["length", "distance", "imperial", "us customary"],
+      "unitCategoryRaw": "length",
+      "converterUnitId": "inch"
+    },
+    {
+      "id": "item.measurement.normal.foot",
+      "domainId": "measurement",
+      "subgenreId": "measurement.normal",
+      "name": "Foot",
+      "description": "Imperial length unit equal to twelve inches.",
+      "synonyms": ["International foot", "Imperial foot", "Twelve inches"],
+      "tags": ["length", "distance", "imperial", "us customary"],
+      "unitCategoryRaw": "length",
+      "converterUnitId": "foot"
+    },
+    {
+      "id": "item.measurement.normal.yard",
+      "domainId": "measurement",
+      "subgenreId": "measurement.normal",
+      "name": "Yard",
+      "description": "Imperial length unit equal to three feet.",
+      "synonyms": ["International yard", "Imperial yard", "Three feet"],
+      "tags": ["length", "distance", "imperial", "us customary"],
+      "unitCategoryRaw": "length",
+      "converterUnitId": "yard"
+    },
+    {
+      "id": "item.measurement.normal.mile",
+      "domainId": "measurement",
+      "subgenreId": "measurement.normal",
+      "name": "Mile",
+      "description": "Imperial length unit commonly used for road distances.",
+      "synonyms": ["International mile", "Statute mile", "Road mile"],
+      "tags": ["length", "distance", "imperial", "us customary"],
+      "unitCategoryRaw": "length",
+      "converterUnitId": "mile"
+    },
+    {
       "id": "item.measurement.normal.kilogram",
       "domainId": "measurement",
       "subgenreId": "measurement.normal",
@@ -70,6 +147,39 @@
       "tags": ["meme", "length"],
       "unitCategoryRaw": "length",
       "converterUnitId": "banana"
+    },
+    {
+      "id": "item.measurement.absurd.fridge",
+      "domainId": "measurement",
+      "subgenreId": "measurement.absurd",
+      "name": "Refrigerator (height)",
+      "description": "Typical refrigerator height (order-of-magnitude).",
+      "synonyms": ["Refrigerator height", "Kitchen refrigerator", "Household refrigerator"],
+      "tags": ["absurd", "comparison", "length", "everyday"],
+      "unitCategoryRaw": "length",
+      "converterUnitId": "fridge"
+    },
+    {
+      "id": "item.measurement.absurd.bus",
+      "domainId": "measurement",
+      "subgenreId": "measurement.absurd",
+      "name": "City bus (length)",
+      "description": "Typical city bus length (order-of-magnitude).",
+      "synonyms": ["City bus", "Transit bus", "Urban bus"],
+      "tags": ["absurd", "comparison", "length", "transport"],
+      "unitCategoryRaw": "length",
+      "converterUnitId": "bus"
+    },
+    {
+      "id": "item.measurement.absurd.blue_whale",
+      "domainId": "measurement",
+      "subgenreId": "measurement.absurd",
+      "name": "Blue whale (length)",
+      "description": "Typical adult blue whale length (order-of-magnitude).",
+      "synonyms": ["Blue whale length", "Adult blue whale", "Whale length"],
+      "tags": ["absurd", "comparison", "length", "nature"],
+      "unitCategoryRaw": "length",
+      "converterUnitId": "blue_whale"
     },
     {
       "id": "item.measurement.absurd.elephant",
