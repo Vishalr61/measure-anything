@@ -266,8 +266,8 @@ struct HomeView: View {
     private var featuredAbsurdCard: some View {
         let g = LinearGradient(
             colors: [
-                ConverterCategoryAccent.accent(for: .length),
-                ConverterCategoryAccent.accent(for: .volume).opacity(0.92)
+                categoryAccent,
+                categoryAccent.opacity(0.82),
             ],
             startPoint: .topLeading,
             endPoint: .bottomTrailing

@@ -234,7 +234,6 @@ struct ConverterWorkspaceBody: View {
 
     private func modePillOption(title: String, selection: UnitRegistry.Mode, option: UnitRegistry.Mode, action: @escaping () -> Void) -> some View {
         let selected = selection == option
-        let absurdBlue = Color(.systemBlue)
         let textColor: Color = {
             if selected {
                 return option == .absurd ? Color.white : Color.primary
@@ -246,7 +245,7 @@ struct ConverterWorkspaceBody: View {
             guard selected else { return Color.clear }
             // Match reference: Normal selected is white; Absurd selected is a slightly deeper tint.
             if option == .normal { return Color(.systemBackground) }
-            return absurdBlue.opacity(0.92)
+            return categoryAccent.opacity(0.92)
         }()
 
         return Button(action: action) {
@@ -323,7 +322,7 @@ struct ConverterWorkspaceBody: View {
             }
 
             if effectiveTopModeBinding.wrappedValue == .absurd {
-                DiceRollCard(vm: vm)
+                DiceRollCard(vm: vm, accent: categoryAccent)
                     .transition(.move(edge: .bottom).combined(with: .opacity))
             }
 

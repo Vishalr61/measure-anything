@@ -2,6 +2,7 @@ import SwiftUI
 
 struct DiceRollCard: View {
     @ObservedObject var vm: ConverterViewModel
+    var accent: Color
 
     var body: some View {
         Button {
@@ -42,7 +43,7 @@ struct DiceRollCard: View {
         HStack(spacing: 0) {
             Text("landed on ")
                 .font(.system(size: 11, weight: .semibold, design: .rounded))
-                .foregroundStyle(Color(red: 0xC8 / 255, green: 0xD9 / 255, blue: 0xFF / 255))
+                .foregroundStyle(Color.white.opacity(0.78))
 
             Text(vm.diceLandedUnitName)
                 .font(.system(size: 11, weight: .semibold, design: .rounded))
@@ -56,13 +57,13 @@ struct DiceRollCard: View {
     }
 
     private var rightColumn: some View {
-        DiceFaceView(face: $vm.diceDisplayFace)
+        DiceFaceView(face: $vm.diceDisplayFace, pipColor: accent)
             .rotationEffect(.degrees(vm.diceRotationDegrees))
     }
 
     private var cardBackground: some View {
         ZStack {
-            Color(red: 0x2B / 255, green: 0x5C / 255, blue: 0xE6 / 255)
+            accent
 
             Circle()
                 .stroke(Color.white.opacity(0.06), lineWidth: 2)
