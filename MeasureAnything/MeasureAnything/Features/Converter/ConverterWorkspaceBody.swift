@@ -495,6 +495,14 @@ struct ConverterWorkspaceBody: View {
     }
 
     private static let commonUnitSymbols: [String: String] = [
+        // Length (SI / scientific)
+        "picometer": "pm",
+        "angstrom": "Å",
+        "nanometer": "nm",
+        "micrometer": "µm",
+        "decimeter": "dm",
+        "hectometer": "hm",
+        "megameter": "Mm",
         "meter": "m",
         "kilometer": "km",
         "centimeter": "cm",
@@ -503,6 +511,25 @@ struct ConverterWorkspaceBody: View {
         "foot": "ft",
         "yard": "yd",
         "mile": "mi",
+
+        // Length (imperial / historical)
+        "thou": "thou",
+        "fathom": "ftm",
+        "chain": "ch",
+        "rod": "rd",
+        "furlong": "fur",
+        "league": "lea",
+        "hand": "hh",
+        "cubit": "cubit",
+        "pace": "pace",
+        "nautical_mile": "nmi",
+
+        // Length (astronomy)
+        "astronomical_unit": "AU",
+        "light_year": "ly",
+        "parsec": "pc",
+        "light_second": "ls",
+
         "kilogram": "kg",
         "gram": "g",
         "milligram": "mg",
@@ -654,6 +681,7 @@ struct ConverterWorkspaceBody: View {
 
                     referenceRateLine(input: input, fromSym: fromSym, output: output, toSym: toSym)
                         .frame(maxWidth: .infinity, alignment: .center)
+                        .padding(.horizontal, ConverterLayout.rhythm8)
                 }
                 .frame(maxWidth: .infinity, alignment: .center)
 
@@ -703,30 +731,33 @@ struct ConverterWorkspaceBody: View {
     }
 
     private func referenceRateLine(input: String, fromSym: String, output: String, toSym: String) -> some View {
-        let left = Text("\(input) \(fromSym) = ")
-            .font(.system(size: 28, weight: .bold, design: .rounded))
+        // Prefer fully visible text (wrap) over truncation. Fallback to a slightly smaller font when needed.
+        ViewThatFits(in: .horizontal) {
+            referenceRateLineText(input: input, fromSym: fromSym, output: output, toSym: toSym, size: 28)
+            referenceRateLineText(input: input, fromSym: fromSym, output: output, toSym: toSym, size: 24)
+            referenceRateLineText(input: input, fromSym: fromSym, output: output, toSym: toSym, size: 20)
+            referenceRateLineText(input: input, fromSym: fromSym, output: output, toSym: toSym, size: 18)
+        }
+    }
+
+    private func referenceRateLineText(input: String, fromSym: String, output: String, toSym: String, size: CGFloat) -> some View {
+        let combined = Text("\(input) \(fromSym) = \(output) \(toSym)")
+            .font(.system(size: size, weight: .bold, design: .rounded))
             .foregroundStyle(.primary)
             .monospacedDigit()
-
-        let animatedOutput = Text(output)
-            .font(.system(size: 28, weight: .bold, design: .rounded))
-            .foregroundStyle(.primary)
-            .monospacedDigit()
-
-        let right = Text(" \(toSym)")
-            .font(.system(size: 28, weight: .bold, design: .rounded))
-            .foregroundStyle(.primary)
-            .monospacedDigit()
-
-        let combined = (left + animatedOutput + right)
-            .lineLimit(2)
-            .minimumScaleFactor(0.6)
+            .lineLimit(4)
+            .minimumScaleFactor(0.32)
             .multilineTextAlignment(.center)
+            .fixedSize(horizontal: false, vertical: true)
+            .allowsTightening(true)
+            .layoutPriority(1)
 
-        if #available(iOS 17.0, *) {
-            return combined.contentTransition(.numericText())
-        } else {
-            return combined
+        return Group {
+            if #available(iOS 17.0, *) {
+                combined.contentTransition(ContentTransition.numericText())
+            } else {
+                combined
+            }
         }
     }
 
