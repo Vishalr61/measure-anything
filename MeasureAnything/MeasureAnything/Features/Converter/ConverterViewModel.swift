@@ -55,11 +55,9 @@ final class ConverterViewModel: ObservableObject {
 
     @Published var isDiceRolling: Bool = false
     @Published var diceDisplayFace: Int = 5
-    @Published var diceRotationDegrees: Double = 0
-    @Published var diceFaceLabel: String = ""
-    @Published var showDiceResultPill: Bool = false
-    @Published var diceResultPillText: String = ""
-    @Published var toNumberScale: CGFloat = 1.0
+    @Published var diceRotationDegrees: Double = 15
+    @Published var showDiceSubtitle: Bool = false
+    @Published var diceLandedUnitName: String = ""
 
     private var registry: UnitRegistry
     private var engine: ConverterEngine
@@ -140,8 +138,9 @@ final class ConverterViewModel: ObservableObject {
         impact.impactOccurred()
 
         isDiceRolling = true
-        showDiceResultPill = false
-        diceFaceLabel = ""
+        // Fade out subtitle instantly (no animation).
+        showDiceSubtitle = false
+        diceLandedUnitName = ""
 
         // Pre-select outcome before animation starts.
         let newFace = Int.random(in: 1...6)
@@ -152,21 +151,21 @@ final class ConverterViewModel: ObservableObject {
             return (candidates.isEmpty ? pool : candidates).randomElement()
         }()
 
-        // Reset rotation instantly, then animate to +720.
+        // Reset rotation to 15° instantly, then animate to 735° (15 + 720).
         withAnimation(.linear(duration: 0)) {
-            diceRotationDegrees = 0
+            diceRotationDegrees = 15
         }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.01) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.016) {
             MainActor.assumeIsolated {
                 withAnimation(.interpolatingSpring(mass: 1, stiffness: 80, damping: 14, initialVelocity: 8)) {
-                    self.diceRotationDegrees = 720
+                    self.diceRotationDegrees = 735
                 }
             }
         }
 
         // Flash loop.
         var flashCount = 0
-        Timer.scheduledTimer(withTimeInterval: 0.07, repeats: true) { t in
+        let timer = Timer.scheduledTimer(withTimeInterval: 0.07, repeats: true) { t in
             MainActor.assumeIsolated {
                 self.diceDisplayFace = Int.random(in: 1...6)
                 flashCount += 1
@@ -175,39 +174,21 @@ final class ConverterViewModel: ObservableObject {
         }
 
         // Land.
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.68) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.72) {
             MainActor.assumeIsolated {
+                timer.invalidate()
                 self.diceDisplayFace = newFace
-                self.diceFaceLabel = ["", "one", "two", "three", "four", "five", "six"][newFace]
 
                 if let u = newUnit {
                     self.selectedToUnitID = u.id
-                    self.diceResultPillText = u.name
+                    self.diceLandedUnitName = u.name
                 } else {
-                    self.diceResultPillText = ""
+                    self.diceLandedUnitName = ""
                 }
 
-                // Number pop (To value).
-                self.toNumberScale = 1.0
-                withAnimation(.spring(response: 0.22, dampingFraction: 0.55)) {
-                    self.toNumberScale = 1.12
+                withAnimation(.easeIn(duration: 0.25)) {
+                    self.showDiceSubtitle = (self.diceLandedUnitName.isEmpty == false)
                 }
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.12) {
-                    MainActor.assumeIsolated {
-                        withAnimation(.spring(response: 0.24, dampingFraction: 0.8)) {
-                            self.toNumberScale = 0.97
-                        }
-                    }
-                }
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.24) {
-                    MainActor.assumeIsolated {
-                        withAnimation(.spring(response: 0.28, dampingFraction: 0.82)) {
-                            self.toNumberScale = 1.0
-                        }
-                    }
-                }
-
-                self.showDiceResultPill = (self.diceResultPillText.isEmpty == false)
                 let notification = UINotificationFeedbackGenerator()
                 notification.notificationOccurred(.success)
                 self.isDiceRolling = false

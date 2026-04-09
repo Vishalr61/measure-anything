@@ -322,8 +322,10 @@ struct ConverterWorkspaceBody: View {
                     .padding(.top, -27)
             }
 
-            DiceRollCard(vm: vm)
-                .transition(.move(edge: .bottom).combined(with: .opacity))
+            if effectiveTopModeBinding.wrappedValue == .absurd {
+                DiceRollCard(vm: vm)
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+            }
 
             referenceMetaInfoPair
         }
@@ -373,7 +375,6 @@ struct ConverterWorkspaceBody: View {
                             .font(.system(size: 40, weight: .bold, design: .rounded))
                             .foregroundStyle(toRowUsesPlaceholder ? Color.secondary.opacity(0.55) : Color.primary)
                             .monospacedDigit()
-                            .scaleEffect(vm.toNumberScale)
                             .lineLimit(1)
                             .minimumScaleFactor(0.55)
                             .accessibilityLabel("Converted amount, \(toRowDisplayString)")

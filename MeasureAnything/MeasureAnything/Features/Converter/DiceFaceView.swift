@@ -2,33 +2,34 @@ import SwiftUI
 
 struct DiceFaceView: View {
     @Binding var face: Int // 1...6
-    @Binding var isRolling: Bool
+    let size: CGFloat = 46
 
     private let pipPositions: [Int: [(CGFloat, CGFloat)]] = [
-        1: [(26, 26)],
-        2: [(14, 14), (38, 38)],
-        3: [(14, 14), (26, 26), (38, 38)],
-        4: [(14, 14), (38, 14), (14, 38), (38, 38)],
-        5: [(14, 14), (38, 14), (26, 26), (14, 38), (38, 38)],
-        6: [(14, 14), (38, 14), (14, 26), (38, 26), (14, 38), (38, 38)],
+        1: [(22, 22)],
+        2: [(13, 13), (31, 31)],
+        3: [(13, 13), (22, 22), (31, 31)],
+        4: [(13, 13), (31, 13), (13, 31), (31, 31)],
+        5: [(13, 13), (31, 13), (22, 22), (13, 31), (31, 31)],
+        6: [(13, 13), (31, 13), (13, 22), (31, 22), (13, 31), (31, 31)],
     ]
 
     var body: some View {
-        ZStack {
-            RoundedRectangle(cornerRadius: 10, style: .continuous)
-                .stroke(Color.white, lineWidth: 2.5)
-                .frame(width: 46, height: 46)
+        Canvas { ctx, _ in
+            let dieBlue = Color(red: 0x2B / 255, green: 0x5C / 255, blue: 0xE6 / 255)
 
-            Canvas { context, size in
-                let dots = pipPositions[clampedFace] ?? pipPositions[1]!
-                for (x, y) in dots {
-                    let rect = CGRect(x: x - 4.2, y: y - 4.2, width: 8.4, height: 8.4)
-                    context.fill(Path(ellipseIn: rect), with: .color(.white))
-                }
+            // White filled rounded rect, inset 2pt on each side.
+            let rect = CGRect(x: 2, y: 2, width: size - 4, height: size - 4)
+            let rr = Path(roundedRect: rect, cornerRadius: 9)
+            ctx.fill(rr, with: .color(.white))
+
+            // Blue pips (radius 3.2) in a 44×44 viewBox coordinates.
+            let dots = pipPositions[clampedFace] ?? pipPositions[1]!
+            for (x, y) in dots {
+                let pip = CGRect(x: x - 3.2, y: y - 3.2, width: 6.4, height: 6.4)
+                ctx.fill(Path(ellipseIn: pip), with: .color(dieBlue))
             }
-            .frame(width: 52, height: 52)
         }
-        .frame(width: 52, height: 52)
+        .frame(width: size, height: size)
         .accessibilityHidden(true)
     }
 
