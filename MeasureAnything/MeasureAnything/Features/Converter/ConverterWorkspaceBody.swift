@@ -437,22 +437,22 @@ struct ConverterWorkspaceBody: View {
             Button {
                 Haptics.tap()
                 withAnimation(.easeOut(duration: 0.2)) {
-                    vm.randomizeTargetUnit()
+                    vm.randomizeUnitPair()
                 }
             } label: {
                 HStack(spacing: 8) {
                     Image(systemName: "dice.fill")
                         .font(.subheadline.weight(.semibold))
-                    Text("Random target")
+                    Text("Randomize")
                         .font(.subheadline.weight(.semibold))
                 }
-                .foregroundStyle(vm.canRandomizeTargetUnit ? AnyShapeStyle(categoryAccent) : AnyShapeStyle(Color.secondary))
+                .foregroundStyle(vm.canRandomizeUnitPair ? AnyShapeStyle(categoryAccent) : AnyShapeStyle(Color.secondary))
                 .padding(.horizontal, ConverterLayout.rhythm16)
                 .padding(.vertical, 12)
                 .background(
                     Capsule(style: .continuous)
                         .fill(
-                            vm.canRandomizeTargetUnit
+                            vm.canRandomizeUnitPair
                                 ? categoryAccent.opacity(0.14)
                                 : Color(.systemGray5).opacity(0.65)
                         )
@@ -460,15 +460,15 @@ struct ConverterWorkspaceBody: View {
                 .overlay(
                     Capsule(style: .continuous)
                         .strokeBorder(
-                            vm.canRandomizeTargetUnit ? categoryAccent.opacity(0.22) : Color.primary.opacity(0.06),
+                            vm.canRandomizeUnitPair ? categoryAccent.opacity(0.22) : Color.primary.opacity(0.06),
                             lineWidth: ConverterLayout.strokeHairline
                         )
                 )
             }
             .buttonStyle(ConverterPressingButtonStyle())
-            .disabled(!vm.canRandomizeTargetUnit)
-            .accessibilityLabel("Randomize target unit")
-            .accessibilityHint("Chooses a random unit for the result")
+            .disabled(!vm.canRandomizeUnitPair)
+            .accessibilityLabel("Randomize")
+            .accessibilityHint("Chooses random from and to units")
         }
     }
 

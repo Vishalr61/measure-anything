@@ -120,26 +120,23 @@ final class ConverterViewModel: ObservableObject {
         selectedToUnitID = tmp
     }
 
-    /// Picks a random `selectedToUnitID` from `availableUnits`, excluding the source. In absurd mode, prefers absurd kinds when any exist.
-    func randomizeTargetUnit() {
-        guard let next = targetRandomizationCandidates().randomElement() else { return }
-        selectedToUnitID = next.id
+    /// Randomly chooses both `selectedFromUnitID` and `selectedToUnitID` from `availableUnits`.
+    /// Keeps them distinct and stays within the current category + mode set.
+    func randomizeUnitPair() {
+        let units = availableUnits
+        guard units.count >= 2 else { return }
+
+        guard let from = units.randomElement() else { return }
+        let toCandidates = units.filter { $0.id != from.id }
+        guard let to = toCandidates.randomElement() else { return }
+
+        selectedFromUnitID = from.id
+        selectedToUnitID = to.id
     }
 
-    /// `false` when there is no other unit to pick (e.g. only one unit in category/mode).
-    var canRandomizeTargetUnit: Bool {
-        !targetRandomizationCandidates().isEmpty
-    }
-
-    private func targetRandomizationCandidates() -> [UnitDefinition] {
-        var candidates = availableUnits.filter { $0.id != selectedFromUnitID }
-        if selectedMode == .absurd {
-            let absurdOnly = candidates.filter { $0.kind == .absurd }
-            if !absurdOnly.isEmpty {
-                candidates = absurdOnly
-            }
-        }
-        return candidates
+    /// `false` when there are fewer than two units available in the current category/mode.
+    var canRandomizeUnitPair: Bool {
+        availableUnits.count >= 2
     }
 
     /// Whether the current from/to pair can be stored as a favorite (pair metadata only).

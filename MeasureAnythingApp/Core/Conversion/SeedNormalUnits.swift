@@ -8,14 +8,46 @@ public enum SeedNormalUnits {
 
     public static var length: [UnitDefinition] {
         [
-            try! UnitDefinition(id: "meter", name: "Meter", category: .length, baseUnit: "meter", kind: .normal, factor: 1),
-            try! UnitDefinition(id: "kilometer", name: "Kilometer", category: .length, baseUnit: "meter", kind: .normal, factor: 1000),
-            try! UnitDefinition(id: "centimeter", name: "Centimeter", category: .length, baseUnit: "meter", kind: .normal, factor: 0.01),
+            // Sub-atomic / atomic
+            try! UnitDefinition(id: "picometer", name: "Picometer", category: .length, baseUnit: "meter", kind: .normal, factor: 1e-12),
+            try! UnitDefinition(id: "angstrom", name: "Angstrom", category: .length, baseUnit: "meter", kind: .normal, factor: 1e-10),
+            try! UnitDefinition(id: "nanometer", name: "Nanometer", category: .length, baseUnit: "meter", kind: .normal, factor: 1e-9),
+
+            // Microscopic / engineering
+            try! UnitDefinition(id: "micrometer", name: "Micrometer", category: .length, baseUnit: "meter", kind: .normal, factor: 0.000001),
+            try! UnitDefinition(id: "thou", name: "Thou", category: .length, baseUnit: "meter", kind: .normal, factor: 0.0000254),
+
+            // Metric / SI
             try! UnitDefinition(id: "millimeter", name: "Millimeter", category: .length, baseUnit: "meter", kind: .normal, factor: 0.001),
+            try! UnitDefinition(id: "centimeter", name: "Centimeter", category: .length, baseUnit: "meter", kind: .normal, factor: 0.01),
+            try! UnitDefinition(id: "decimeter", name: "Decimeter", category: .length, baseUnit: "meter", kind: .normal, factor: 0.1),
+            try! UnitDefinition(id: "meter", name: "Meter", category: .length, baseUnit: "meter", kind: .normal, factor: 1),
+            try! UnitDefinition(id: "hectometer", name: "Hectometer", category: .length, baseUnit: "meter", kind: .normal, factor: 100),
+            try! UnitDefinition(id: "kilometer", name: "Kilometer", category: .length, baseUnit: "meter", kind: .normal, factor: 1000),
+            try! UnitDefinition(id: "megameter", name: "Megameter", category: .length, baseUnit: "meter", kind: .normal, factor: 1000000),
+
+            // Imperial / US customary
             try! UnitDefinition(id: "inch", name: "Inch", category: .length, baseUnit: "meter", kind: .normal, factor: 0.0254),
             try! UnitDefinition(id: "foot", name: "Foot", category: .length, baseUnit: "meter", kind: .normal, factor: 0.3048),
             try! UnitDefinition(id: "yard", name: "Yard", category: .length, baseUnit: "meter", kind: .normal, factor: 0.9144),
-            try! UnitDefinition(id: "mile", name: "Mile", category: .length, baseUnit: "meter", kind: .normal, factor: 1609.344)
+            try! UnitDefinition(id: "fathom", name: "Fathom", category: .length, baseUnit: "meter", kind: .normal, factor: 1.8288),
+            try! UnitDefinition(id: "rod", name: "Rod", category: .length, baseUnit: "meter", kind: .normal, factor: 5.0292),
+            try! UnitDefinition(id: "chain", name: "Chain", category: .length, baseUnit: "meter", kind: .normal, factor: 20.1168),
+            try! UnitDefinition(id: "furlong", name: "Furlong", category: .length, baseUnit: "meter", kind: .normal, factor: 201.168),
+            try! UnitDefinition(id: "mile", name: "Mile", category: .length, baseUnit: "meter", kind: .normal, factor: 1609.344),
+            try! UnitDefinition(id: "league", name: "League", category: .length, baseUnit: "meter", kind: .normal, factor: 4828.032),
+            try! UnitDefinition(id: "nautical_mile", name: "Nautical mile", category: .length, baseUnit: "meter", kind: .normal, factor: 1852),
+
+            // Human-scale historical
+            try! UnitDefinition(id: "hand", name: "Hand", category: .length, baseUnit: "meter", kind: .normal, factor: 0.1016),
+            try! UnitDefinition(id: "cubit", name: "Cubit", category: .length, baseUnit: "meter", kind: .normal, factor: 0.4572),
+            try! UnitDefinition(id: "pace", name: "Pace", category: .length, baseUnit: "meter", kind: .normal, factor: 0.762),
+
+            // Astronomy
+            try! UnitDefinition(id: "light_second", name: "Light-second", category: .length, baseUnit: "meter", kind: .normal, factor: 299792458),
+            try! UnitDefinition(id: "astronomical_unit", name: "Astronomical unit", category: .length, baseUnit: "meter", kind: .normal, factor: 1.495978707e+11),
+            try! UnitDefinition(id: "light_year", name: "Light-year", category: .length, baseUnit: "meter", kind: .normal, factor: 9.4607304725808e+15),
+            try! UnitDefinition(id: "parsec", name: "Parsec", category: .length, baseUnit: "meter", kind: .normal, factor: 3.085677581e+16)
         ]
     }
 
