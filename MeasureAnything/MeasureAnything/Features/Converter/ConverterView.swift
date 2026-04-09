@@ -334,12 +334,13 @@ struct ConverterView: View {
         }
     }
 
-    /// Single horizontal conversion control: source pill, swap, target pill.
+    /// Single horizontal conversion control: source pill, swap, target pill, randomize target.
     private var conversionUnitRow: some View {
         HStack(alignment: .center, spacing: ConverterLayout.rhythm8) {
             unitPickerPill(accessibilityTitle: "From unit", selection: $vm.selectedFromUnitID, accent: categoryAccent)
             swapButton
             unitPickerPill(accessibilityTitle: "To unit", selection: $vm.selectedToUnitID, accent: categoryAccent)
+            randomizeTargetButton
         }
         .animation(.easeOut(duration: 0.22), value: unitSelectionAnimationKey)
     }
@@ -431,6 +432,34 @@ struct ConverterView: View {
         }
         .buttonStyle(ConverterPressingButtonStyle())
         .accessibilityLabel("Swap from and to units")
+    }
+
+    private var randomizeTargetButton: some View {
+        Button {
+            Haptics.tap()
+            withAnimation(.easeOut(duration: 0.2)) {
+                vm.randomizeTargetUnit()
+            }
+        } label: {
+            Image(systemName: "dice.fill")
+                .font(.system(size: 15, weight: .semibold))
+                .foregroundStyle(categoryAccent.opacity(0.92))
+                .frame(width: 40, height: 40)
+                .background(
+                    ZStack {
+                        Circle().fill(.thinMaterial)
+                        Circle().fill(categoryAccent.opacity(0.14))
+                    }
+                )
+                .overlay(
+                    Circle()
+                        .strokeBorder(categoryAccent.opacity(0.28), lineWidth: ConverterLayout.strokeHairline)
+                )
+        }
+        .buttonStyle(ConverterPressingButtonStyle())
+        .disabled(!vm.canRandomizeTargetUnit)
+        .accessibilityLabel("Randomize target unit")
+        .accessibilityHint("Chooses a random unit for the result")
     }
 
     private func unitPickerPill(accessibilityTitle: String, selection: Binding<UnitDefinition.ID>, accent: Color) -> some View {
