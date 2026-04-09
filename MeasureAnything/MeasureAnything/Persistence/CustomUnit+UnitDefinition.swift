@@ -37,7 +37,8 @@ extension CustomUnit {
             factor: factor,
             iconName: iconName,
             description: detail,
-            exampleMeme: nil
+            exampleMeme: nil,
+            funFact: nil
         )
     }
 }

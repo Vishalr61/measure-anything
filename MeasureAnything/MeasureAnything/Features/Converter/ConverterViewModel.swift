@@ -59,6 +59,9 @@ final class ConverterViewModel: ObservableObject {
     @Published var showDiceSubtitle: Bool = false
     @Published var diceLandedUnitName: String = ""
 
+    private var diceFlashTimer: Timer?
+    private var diceRollToken: UUID = UUID()
+
     private var registry: UnitRegistry
     private var engine: ConverterEngine
     private let taxonomy: AppTaxonomyStore
@@ -132,7 +135,11 @@ final class ConverterViewModel: ObservableObject {
     }
 
     func rollDice() {
-        guard !isDiceRolling else { return }
+        // Make dice roll interruptible so the user can spam taps.
+        diceRollToken = UUID()
+        let token = diceRollToken
+        diceFlashTimer?.invalidate()
+        diceFlashTimer = nil
 
         let impact = UIImpactFeedbackGenerator(style: .medium)
         impact.impactOccurred()
@@ -157,6 +164,7 @@ final class ConverterViewModel: ObservableObject {
         }
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.016) {
             MainActor.assumeIsolated {
+                guard self.diceRollToken == token else { return }
                 withAnimation(.interpolatingSpring(mass: 1, stiffness: 80, damping: 14, initialVelocity: 8)) {
                     self.diceRotationDegrees = 735
                 }
@@ -167,16 +175,25 @@ final class ConverterViewModel: ObservableObject {
         var flashCount = 0
         let timer = Timer.scheduledTimer(withTimeInterval: 0.07, repeats: true) { t in
             MainActor.assumeIsolated {
+                guard self.diceRollToken == token else {
+                    t.invalidate()
+                    return
+                }
                 self.diceDisplayFace = Int.random(in: 1...6)
                 flashCount += 1
                 if flashCount >= 9 { t.invalidate() }
             }
         }
+        diceFlashTimer = timer
 
         // Land.
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.72) {
             MainActor.assumeIsolated {
+                guard self.diceRollToken == token else { return }
                 timer.invalidate()
+                if self.diceFlashTimer === timer {
+                    self.diceFlashTimer = nil
+                }
                 self.diceDisplayFace = newFace
 
                 if let u = newUnit {
@@ -444,5 +461,10 @@ final class ConverterViewModel: ObservableObject {
         }
 
         return f.string(from: NSNumber(value: value)) ?? String(format: "%g", value)
+    }
+
+    var formattedResult: String {
+        guard let r = conversionResult else { return "—" }
+        return formatNumberForDisplay(r.outputValue)
     }
 }

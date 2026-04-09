@@ -76,9 +76,6 @@ struct HomeView: View {
                             vm: vm
                         )
                         .id(HomeScrollTarget.converter)
-
-                        recommendedSection
-                            .padding(.horizontal, ConverterLayout.horizontalInset)
                     }
                     .padding(.bottom, ConverterLayout.rhythm24)
                 }
@@ -241,68 +238,6 @@ struct HomeView: View {
         .accessibilityAddTraits(selected ? .isSelected : [])
     }
 
-    private var recommendedSection: some View {
-        VStack(alignment: .leading, spacing: ConverterLayout.rhythm12) {
-            HStack {
-                Text("Recommended")
-                    .font(.title3.weight(.bold))
-                Spacer()
-            }
-
-            Button {
-                Haptics.tap()
-                ensureSelectedCategoryIsValid()
-                vm.selectedMode = .absurd
-                focusConverterFromAbsurdShortcut()
-            } label: {
-                featuredAbsurdCard
-            }
-            .buttonStyle(.plain)
-            .accessibilityLabel("Absurd conversions")
-            .accessibilityHint("Switches to absurd mode and scrolls to the converter")
-        }
-    }
-
-    private var featuredAbsurdCard: some View {
-        let g = LinearGradient(
-            colors: [
-                categoryAccent,
-                categoryAccent.opacity(0.82),
-            ],
-            startPoint: .topLeading,
-            endPoint: .bottomTrailing
-        )
-        return HStack(alignment: .top, spacing: ConverterLayout.rhythm16) {
-            VStack(alignment: .leading, spacing: ConverterLayout.rhythm8) {
-                Image(systemName: "sparkles")
-                    .font(.title2.weight(.semibold))
-                    .foregroundStyle(.white.opacity(0.95))
-                Text("Absurd conversions")
-                    .font(.title3.weight(.bold))
-                    .foregroundStyle(.white)
-                Text("Fun comparisons backed by real factors")
-                    .font(.subheadline)
-                    .foregroundStyle(.white.opacity(0.88))
-                    .fixedSize(horizontal: false, vertical: true)
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            Image(systemName: "chevron.up")
-                .font(.subheadline.weight(.semibold))
-                .foregroundStyle(.white.opacity(0.7))
-                .padding(.top, 4)
-        }
-        .padding(ConverterLayout.rhythm20)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(
-            RoundedRectangle(cornerRadius: ConverterLayout.cardCornerRadius, style: .continuous)
-                .fill(g)
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: ConverterLayout.cardCornerRadius, style: .continuous)
-                .strokeBorder(Color.white.opacity(0.2), lineWidth: ConverterLayout.strokeHairline)
-        )
-        .shadow(color: .black.opacity(0.1), radius: 12, x: 0, y: 6)
-    }
 }
 
 #Preview {

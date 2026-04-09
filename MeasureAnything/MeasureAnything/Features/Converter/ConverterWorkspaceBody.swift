@@ -43,6 +43,17 @@ struct ConverterWorkspaceBody: View {
                 .frame(height: ConverterLayout.majorBlockSpacing)
 
             resultCard
+
+            // Below the live conversion rate card.
+            if let toUnit = vm.toUnit,
+               toUnit.funFact != nil {
+                DidYouKnowCard(
+                    unit: toUnit
+                )
+                .transition(.opacity.combined(with: .move(edge: .bottom)))
+                .animation(.spring(response: 0.4, dampingFraction: 0.8), value: toUnit.id)
+                .padding(.top, ConverterLayout.rhythm12)
+            }
         }
         .padding(.horizontal, ConverterLayout.horizontalInset)
         .padding(.vertical, ConverterLayout.rhythm20)

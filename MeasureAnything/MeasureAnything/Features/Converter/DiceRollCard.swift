@@ -22,7 +22,6 @@ struct DiceRollCard: View {
             .contentShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
         }
         .buttonStyle(.plain)
-        .disabled(vm.isDiceRolling)
         .accessibilityLabel("Roll the dice")
         .accessibilityHint("Randomises the absurd target unit")
         .accessibilityAddTraits(.isButton)

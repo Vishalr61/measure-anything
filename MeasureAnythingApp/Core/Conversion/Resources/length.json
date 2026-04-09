@@ -9,7 +9,8 @@
     "factor": 0.178,
     "iconName": "leaf",
     "description": "Average banana length ≈ 17.8 cm.",
-    "exampleMeme": "That is a lot of bananas."
+    "exampleMeme": "That is a lot of bananas.",
+    "funFact": "The average person eats around 100 bananas a year."
   },
   {
     "id": "fridge",
@@ -21,7 +22,8 @@
     "factor": 1.7,
     "iconName": "refrigerator",
     "description": "Typical fridge height ≈ 1.7 m.",
-    "exampleMeme": "Roughly fridge-sized, emotionally and physically."
+    "exampleMeme": "Roughly fridge-sized, emotionally and physically.",
+    "funFact": "The average household fridge runs continuously for around 10–15 years and is one of the few appliances left on 24/7."
   },
   {
     "id": "bus",
@@ -33,7 +35,8 @@
     "factor": 12.0,
     "iconName": "bus",
     "description": "Typical city bus length ≈ 12 m.",
-    "exampleMeme": "Long enough to miss your stop twice."
+    "exampleMeme": "Long enough to miss your stop twice.",
+    "funFact": "A standard double-decker bus is about 12 m long and weighs about 12 tonnes."
   },
   {
     "id": "blue_whale",
@@ -45,7 +48,8 @@
     "factor": 29.9,
     "iconName": "water.waves",
     "description": "Adult blue whale length ≈ 29.9 m (order-of-magnitude).",
-    "exampleMeme": "Ocean-grade distance."
+    "exampleMeme": "Ocean-grade distance.",
+    "funFact": "Blue whales are among the rarest animals on Earth — there are only around 10,000–25,000 left."
   },
   {
     "id": "olympic_pool",
@@ -57,7 +61,8 @@
     "factor": 50.0,
     "iconName": "figure.pool.swim",
     "description": "Standard Olympic swimming pool length = 50 m.",
-    "exampleMeme": "An Olympic amount of distance."
+    "exampleMeme": "An Olympic amount of distance.",
+    "funFact": "An Olympic pool holds about 2.5 million litres of water and takes roughly 2 days to fill."
   },
   {
     "id": "short_pool",
@@ -69,7 +74,8 @@
     "factor": 25.0,
     "iconName": "figure.pool.swim",
     "description": "Short course pool length = 25 m.",
-    "exampleMeme": "Half an Olympic pool, still exhausting."
+    "exampleMeme": "Half an Olympic pool, still exhausting.",
+    "funFact": "Short course pools (25 m) are used for most club and national competitions — only the Olympics and World Championships use the 50 m standard."
   },
   {
     "id": "football_field",
@@ -81,7 +87,8 @@
     "factor": 91.44,
     "iconName": "sportscourt",
     "description": "American football field length ≈ 100 yards (91.44 m).",
-    "exampleMeme": "A field’s worth of distance."
+    "exampleMeme": "A field’s worth of distance.",
+    "funFact": "An NFL football field is exactly 91.44 m long (100 yards)."
   },
   {
     "id": "tennis_court",
@@ -93,7 +100,8 @@
     "factor": 23.77,
     "iconName": "sportscourt",
     "description": "Standard tennis court length = 23.77 m.",
-    "exampleMeme": "Baseline to baseline energy."
+    "exampleMeme": "Baseline to baseline energy.",
+    "funFact": "Tennis was first played on grass at Wimbledon in 1877. The first tournament had just 22 players and one umpire."
   },
   {
     "id": "bowling_lane",
@@ -105,7 +113,8 @@
     "factor": 18.29,
     "iconName": "figure.bowling",
     "description": "Foul line to head pin ≈ 18.29 m.",
-    "exampleMeme": "Strike-length distance."
+    "exampleMeme": "Strike-length distance.",
+    "funFact": "Bowling lanes are coated in a thin layer of oil that affects how the ball curves — professional bowlers study the oil pattern before every game."
   },
   {
     "id": "basketball_hoop",
@@ -117,7 +126,8 @@
     "factor": 3.048,
     "iconName": "basketball",
     "description": "Standard hoop height = 10 ft (3.048 m).",
-    "exampleMeme": "Just high enough to humble you."
+    "exampleMeme": "Just high enough to humble you.",
+    "funFact": "The 10 ft (3.048 m) hoop height has never changed since James Naismith nailed a peach basket to a balcony railing in 1891."
   },
   {
     "id": "credit_card",
@@ -129,7 +139,8 @@
     "factor": 0.0856,
     "iconName": "creditcard",
     "description": "Standard card length ≈ 85.6 mm.",
-    "exampleMeme": "Wallet-sized precision."
+    "exampleMeme": "Wallet-sized precision.",
+    "funFact": "Every credit card in the world is exactly 85.6 mm long — an ISO standard."
   },
   {
     "id": "smartphone",
@@ -141,7 +152,8 @@
     "factor": 0.1508,
     "iconName": "iphone",
     "description": "Typical smartphone height ≈ 15.08 cm.",
-    "exampleMeme": "One phone tall."
+    "exampleMeme": "One phone tall.",
+    "funFact": "The average person checks their phone around 96 times a day — roughly once every 10 minutes of waking life."
   },
   {
     "id": "pencil",
@@ -153,7 +165,8 @@
     "factor": 0.19,
     "iconName": "pencil",
     "description": "Typical pencil length ≈ 19 cm.",
-    "exampleMeme": "Sharpened to scale."
+    "exampleMeme": "Sharpened to scale.",
+    "funFact": "The average pencil can draw a line about 56 km long before running out."
   },
   {
     "id": "paperclip",
@@ -165,7 +178,8 @@
     "factor": 0.032,
     "iconName": "paperclip",
     "description": "Typical paperclip length ≈ 32 mm.",
-    "exampleMeme": "Office-grade measurement."
+    "exampleMeme": "Office-grade measurement.",
+    "funFact": "The paperclip was patented in 1867, but the iconic double-loop design most people use today wasn't invented until around 1899."
   },
   {
     "id": "door",
@@ -177,7 +191,8 @@
     "factor": 2.032,
     "iconName": "door.left.hand.open",
     "description": "Typical door height ≈ 2.032 m (80 inches).",
-    "exampleMeme": "Tall enough to be dramatic."
+    "exampleMeme": "Tall enough to be dramatic.",
+    "funFact": "Standard door height is 2.032 m (6 ft 8 in) — chosen so 99% of people can walk through."
   },
   {
     "id": "car",
@@ -189,7 +204,8 @@
     "factor": 4.5,
     "iconName": "car",
     "description": "Typical car length ≈ 4.5 m.",
-    "exampleMeme": "Parking-space sized."
+    "exampleMeme": "Parking-space sized.",
+    "funFact": "The average car spends about 95% of its life parked — moving for only around 1 hour per day."
   },
   {
     "id": "giraffe",
@@ -201,7 +217,8 @@
     "factor": 5.5,
     "iconName": "tortoise",
     "description": "Adult giraffe height ≈ 5.5 m (order-of-magnitude).",
-    "exampleMeme": "Neck-first scale."
+    "exampleMeme": "Neck-first scale.",
+    "funFact": "A giraffe's neck alone is about 1.8 m — nearly as tall as an average human."
   },
   {
     "id": "eiffel_tower",
@@ -213,7 +230,8 @@
     "factor": 330.0,
     "iconName": "building.2",
     "description": "Eiffel Tower height ≈ 330 m (including antenna).",
-    "exampleMeme": "Paris-sized vertical."
+    "exampleMeme": "Paris-sized vertical.",
+    "funFact": "The Eiffel Tower was the tallest man-made structure on Earth for 41 years after it was built in 1889."
   },
   {
     "id": "empire_state_building",
@@ -225,7 +243,8 @@
     "factor": 443.0,
     "iconName": "building.2",
     "description": "Empire State Building height ≈ 443 m (roof height, no antenna).",
-    "exampleMeme": "A skyline-sized number."
+    "exampleMeme": "A skyline-sized number.",
+    "funFact": "The Empire State Building was constructed in just 410 days — about a floor per day — and was the world's tallest building for nearly 40 years."
   },
   {
     "id": "mount_everest",
@@ -237,7 +256,8 @@
     "factor": 8848.86,
     "iconName": "mountain.2",
     "description": "Mount Everest height ≈ 8848.86 m.",
-    "exampleMeme": "Peak measurement energy."
+    "exampleMeme": "Peak measurement energy.",
+    "funFact": "Mount Everest grows about 4 mm taller every year due to the Indian tectonic plate continuing to push into Asia."
   },
   {
     "id": "great_wall",
@@ -249,7 +269,8 @@
     "factor": 21196000.0,
     "iconName": "building.columns",
     "description": "Great Wall total length ≈ 21,196 km (including branches).",
-    "exampleMeme": "Historically long."
+    "exampleMeme": "Historically long.",
+    "funFact": "Despite the popular myth, the Great Wall of China is not visible from space with the naked eye — it's too narrow relative to its length."
   },
   {
     "id": "amazon_river",
@@ -261,7 +282,8 @@
     "factor": 6400000.0,
     "iconName": "water.waves",
     "description": "Amazon River length ≈ 6,400 km (order-of-magnitude).",
-    "exampleMeme": "River-scale distance."
+    "exampleMeme": "River-scale distance.",
+    "funFact": "The Amazon River discharges more water into the ocean than the next seven largest rivers combined."
   },
   {
     "id": "city_block",
@@ -273,7 +295,8 @@
     "factor": 80.4672,
     "iconName": "building.2",
     "description": "Manhattan short block ≈ 264 ft (80.4672 m).",
-    "exampleMeme": "One block away… plus feelings."
+    "exampleMeme": "One block away… plus feelings.",
+    "funFact": "A Manhattan city block is about 80 m east to west."
   },
   {
     "id": "marathon",
@@ -285,7 +308,8 @@
     "factor": 42195.0,
     "iconName": "figure.run",
     "description": "Marathon distance = 42,195 m.",
-    "exampleMeme": "A commitment in meters."
+    "exampleMeme": "A commitment in meters.",
+    "funFact": "The marathon distance was standardised at 42.195 km in 1921."
   },
   {
     "id": "boeing_747",
@@ -297,7 +321,8 @@
     "factor": 70.66,
     "iconName": "airplane",
     "description": "Boeing 747-400 length ≈ 70.66 m.",
-    "exampleMeme": "Jumbo distance."
+    "exampleMeme": "Jumbo distance.",
+    "funFact": "A Boeing 747 is about 70.6 m long and can carry over 400 passengers."
   },
   {
     "id": "aircraft_carrier",
@@ -333,7 +358,8 @@
     "factor": 4.38,
     "iconName": "bus.doubledecker",
     "description": "Double-decker bus height ≈ 4.38 m (height, not length).",
-    "exampleMeme": "Tall bus, big vibes."
+    "exampleMeme": "Tall bus, big vibes.",
+    "funFact": "The iconic red double-decker London bus was introduced in 1956. Its colour became standardised partly to make it immediately recognisable in traffic."
   },
   {
     "id": "subway_car",
@@ -345,7 +371,8 @@
     "factor": 22.86,
     "iconName": "tram",
     "description": "Typical subway car length ≈ 22.86 m.",
-    "exampleMeme": "One car long."
+    "exampleMeme": "One car long.",
+    "funFact": "The New York City subway has 472 stations — more than any other metro system in the world — served by cars very similar in length to this."
   },
   {
     "id": "earth_to_moon",
@@ -357,7 +384,8 @@
     "factor": 384400000.0,
     "iconName": "moon.stars",
     "description": "Mean Earth–Moon distance ≈ 384,400 km.",
-    "exampleMeme": "Lunar-scale."
+    "exampleMeme": "Lunar-scale.",
+    "funFact": "The Moon is slowly drifting away from Earth at about 3.8 cm per year — roughly the same rate your fingernails grow."
   },
   {
     "id": "earth_to_sun",
@@ -369,7 +397,8 @@
     "factor": 1.496e+11,
     "iconName": "sun.max",
     "description": "Average Earth–Sun distance ≈ 1 AU.",
-    "exampleMeme": "Solar system scale."
+    "exampleMeme": "Solar system scale.",
+    "funFact": "Light from the Sun takes about 8 minutes and 20 seconds to reach Earth. If the Sun disappeared, we wouldn't know for over 8 minutes."
   },
   {
     "id": "comet_tail",
@@ -381,7 +410,8 @@
     "factor": 1.5e+10,
     "iconName": "sparkle",
     "description": "Pinned to an average large comet tail (~0.1 AU).",
-    "exampleMeme": "Cosmic hair."
+    "exampleMeme": "Cosmic hair.",
+    "funFact": "A comet's tail always points away from the Sun regardless of the direction the comet is travelling — pushed by solar wind."
   },
   {
     "id": "human_hair",
@@ -393,7 +423,8 @@
     "factor": 0.00007,
     "iconName": "circle.dotted",
     "description": "Average human hair width ≈ 70 µm.",
-    "exampleMeme": "Microscope vibes."
+    "exampleMeme": "Microscope vibes.",
+    "funFact": "Human hair is typically around 70 µm wide — roughly 1/14,000th of a metre."
   },
   {
     "id": "red_blood_cell",
@@ -405,7 +436,8 @@
     "factor": 0.000008,
     "iconName": "drop",
     "description": "Typical red blood cell diameter ≈ 8 µm.",
-    "exampleMeme": "Blood-cell scale."
+    "exampleMeme": "Blood-cell scale.",
+    "funFact": "Red blood cells are so small that about 5 million fit in a single drop of blood."
   },
   {
     "id": "grain_of_rice",
@@ -417,7 +449,8 @@
     "factor": 0.006,
     "iconName": "leaf",
     "description": "Typical grain of rice length ≈ 6 mm.",
-    "exampleMeme": "Tiny but important."
+    "exampleMeme": "Tiny but important.",
+    "funFact": "Rice has been cultivated for over 10,000 years and currently feeds more than half the world's population."
   },
   {
     "id": "ant",
@@ -429,7 +462,8 @@
     "factor": 0.002,
     "iconName": "ant",
     "description": "Common ant body length ≈ 2 mm.",
-    "exampleMeme": "Ant-sized distance."
+    "exampleMeme": "Ant-sized distance.",
+    "funFact": "A single ant can carry 10–50 times its own body weight."
   },
   {
     "id": "toothbrush",
@@ -441,7 +475,8 @@
     "factor": 0.19,
     "iconName": "mouth",
     "description": "Standard toothbrush length ≈ 19 cm.",
-    "exampleMeme": "Dental ruler."
+    "exampleMeme": "Dental ruler.",
+    "funFact": "The modern nylon-bristle toothbrush was invented in 1938. Before that, people used twigs, feathers, and animal hair."
   },
   {
     "id": "yoga_mat",
@@ -453,7 +488,8 @@
     "factor": 1.83,
     "iconName": "figure.yoga",
     "description": "Standard yoga mat length ≈ 1.83 m (6 ft).",
-    "exampleMeme": "Stretch-sized."
+    "exampleMeme": "Stretch-sized.",
+    "funFact": "A standard yoga mat is about 1.83 m long — just tall enough for most people to lie flat."
   },
   {
     "id": "guitar",
@@ -465,7 +501,8 @@
     "factor": 1.016,
     "iconName": "guitars",
     "description": "Typical acoustic guitar length ≈ 1.016 m (40 in).",
-    "exampleMeme": "One guitar long."
+    "exampleMeme": "One guitar long.",
+    "funFact": "The acoustic guitar's modern form was standardised in the 1850s by Spanish luthier Antonio Torres Jurado, whose designs are still the basis for guitars today."
   },
   {
     "id": "footlong_sub",
@@ -477,7 +514,8 @@
     "factor": 0.3048,
     "iconName": "fork.knife",
     "description": "Exactly 1 foot (0.3048 m).",
-    "exampleMeme": "Sandwich-standard unit."
+    "exampleMeme": "Sandwich-standard unit.",
+    "funFact": "A footlong is — by design — exactly one foot (30.48 cm)."
   },
   {
     "id": "chopstick",
@@ -489,7 +527,8 @@
     "factor": 0.24,
     "iconName": "fork.knife",
     "description": "Typical chopstick length ≈ 24 cm.",
-    "exampleMeme": "Dinner-scale distance."
+    "exampleMeme": "Dinner-scale distance.",
+    "funFact": "Chopsticks have been used in China for over 3,000 years."
   },
   {
     "id": "newborn_baby",
@@ -501,7 +540,8 @@
     "factor": 0.5,
     "iconName": "figure.and.child.holdinghands",
     "description": "Average newborn length ≈ 50 cm (order-of-magnitude).",
-    "exampleMeme": "Baby-sized."
+    "exampleMeme": "Baby-sized.",
+    "funFact": "The average newborn is about 50 cm at birth."
   },
   {
     "id": "arm_span",
@@ -513,7 +553,8 @@
     "factor": 1.79,
     "iconName": "figure.stand",
     "description": "Average adult arm span ≈ 1.79 m (order-of-magnitude).",
-    "exampleMeme": "Vitruvian measurement."
+    "exampleMeme": "Vitruvian measurement.",
+    "funFact": "Leonardo da Vinci's Vitruvian Man illustrated that arm span equals height in a perfectly proportioned body — a principle still used in forensic anthropology."
   }
 ]
 
