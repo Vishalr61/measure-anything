@@ -192,13 +192,8 @@ struct ConverterWorkspaceBody: View {
 
     private var modeControls: some View {
         VStack(alignment: .leading, spacing: ConverterLayout.rhythm12) {
-            Picker("Mode", selection: effectiveTopModeBinding) {
-                Text("Normal").tag(UnitRegistry.Mode.normal)
-                Text("Absurd").tag(UnitRegistry.Mode.absurd)
-            }
-            .pickerStyle(.segmented)
-            .tint(Color.primary.opacity(0.38))
-            .disabled(!supportsAbsurdMode)
+            modePillToggle
+                .disabled(!supportsAbsurdMode)
         }
     }
 
@@ -208,6 +203,72 @@ struct ConverterWorkspaceBody: View {
 
     private var supportsCustomMode: Bool {
         vm.modes.contains(.custom)
+    }
+
+    private var modePillToggle: some View {
+        let selection = effectiveTopModeBinding.wrappedValue
+        return HStack(spacing: 0) {
+            modePillOption(title: "Normal", selection: selection, option: .normal) {
+                withAnimation(.easeOut(duration: 0.18)) {
+                    effectiveTopModeBinding.wrappedValue = .normal
+                }
+            }
+            modePillOption(title: "Absurd", selection: selection, option: .absurd) {
+                withAnimation(.easeOut(duration: 0.18)) {
+                    effectiveTopModeBinding.wrappedValue = .absurd
+                }
+            }
+        }
+        .background(
+            Capsule(style: .continuous)
+                .fill(Color(.systemGray5))
+        )
+        .overlay(
+            Capsule(style: .continuous)
+                .strokeBorder(Color.primary.opacity(0.06), lineWidth: ConverterLayout.strokeHairline)
+        )
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("Mode")
+        .accessibilityValue(selection == .normal ? "Normal" : "Absurd")
+    }
+
+    private func modePillOption(title: String, selection: UnitRegistry.Mode, option: UnitRegistry.Mode, action: @escaping () -> Void) -> some View {
+        let selected = selection == option
+        let absurdBlue = Color(.systemBlue)
+        let textColor: Color = {
+            if selected {
+                return option == .absurd ? Color.white : Color.primary
+            }
+            return Color.secondary
+        }()
+
+        let fill: Color = {
+            guard selected else { return Color.clear }
+            // Match reference: Normal selected is white; Absurd selected is a slightly deeper tint.
+            if option == .normal { return Color(.systemBackground) }
+            return absurdBlue.opacity(0.92)
+        }()
+
+        return Button(action: action) {
+            Text(title)
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(textColor)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 10)
+                .background(
+                    Capsule(style: .continuous)
+                        .fill(fill)
+                )
+                .overlay(
+                    Capsule(style: .continuous)
+                        .strokeBorder(
+                            selected ? Color.white.opacity(option == .absurd ? 0.18 : 0.0) : Color.clear,
+                            lineWidth: ConverterLayout.strokeHairline
+                        )
+                )
+        }
+        .buttonStyle(.plain)
+        .accessibilityAddTraits(selected ? .isSelected : [])
     }
 
     /// Top mode control is always normal/absurd. If the VM is in `.custom`, treat it as `.absurd` at the top level.
