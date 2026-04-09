@@ -160,7 +160,7 @@ struct ConverterWorkspaceBody: View {
         return .successStandard
     }
 
-    /// Block 1: category (optional) + mode + result tone (secondary surface).
+    /// Block 1: category (optional) + mode (secondary surface).
     private var categoryModeBlock: some View {
         secondarySurface {
             VStack(alignment: .leading, spacing: ConverterLayout.rhythm12) {
@@ -168,7 +168,7 @@ struct ConverterWorkspaceBody: View {
                 if showsCategoryPicker {
                     categoryAndModeContent
                 } else {
-                    modeAndMemeOnlyContent
+                    modeControls
                 }
             }
         }
@@ -186,43 +186,52 @@ struct ConverterWorkspaceBody: View {
             .pickerStyle(.segmented)
             .tint(categoryAccent)
 
-            modeAndMemeOnlyContent
+            modeControls
         }
     }
 
-    private var modeAndMemeOnlyContent: some View {
+    private var modeControls: some View {
         VStack(alignment: .leading, spacing: ConverterLayout.rhythm12) {
-            Picker("Mode", selection: $vm.selectedMode) {
-                ForEach(vm.modes, id: \.self) { mode in
-                    let d = taxonomyStore.modeDisplay(for: mode)
-                    Text(d.displayName).tag(mode)
-                        .taxonomyPickerSegmentAccessibility(displayName: d.displayName, description: d.description)
-                }
+            Picker("Mode", selection: effectiveTopModeBinding) {
+                Text("Normal").tag(UnitRegistry.Mode.normal)
+                Text("Absurd").tag(UnitRegistry.Mode.absurd)
             }
             .pickerStyle(.segmented)
             .tint(Color.primary.opacity(0.38))
-
-            memeOutputStyleControl
+            .disabled(!supportsAbsurdMode)
         }
     }
 
-    /// Compact output-style control (same binding as former meme toggle).
-    private var memeOutputStyleControl: some View {
-        VStack(alignment: .leading, spacing: ConverterLayout.rhythm8) {
-            Text("Result tone")
-                .font(.caption.weight(.semibold))
-                .foregroundStyle(.secondary)
-            Picker("Explanation style", selection: $vm.isMemeExplanationEnabled) {
-                Text("Standard").tag(false)
-                Text("Meme").tag(true)
+    private var supportsAbsurdMode: Bool {
+        vm.modes.contains(.absurd)
+    }
+
+    private var supportsCustomMode: Bool {
+        vm.modes.contains(.custom)
+    }
+
+    /// Top mode control is always normal/absurd. If the VM is in `.custom`, treat it as `.absurd` at the top level.
+    private var effectiveTopModeBinding: Binding<UnitRegistry.Mode> {
+        Binding(
+            get: {
+                switch vm.selectedMode {
+                case .custom: return .absurd
+                default: return vm.selectedMode
+                }
+            },
+            set: { next in
+                // When leaving absurd, always go to normal (not custom).
+                if next == .normal {
+                    vm.selectedMode = .normal
+                    return
+                }
+                // Entering absurd prefers `.absurd`, unless the user explicitly chose custom via submode.
+                vm.selectedMode = .absurd
             }
-            .pickerStyle(.segmented)
-            .tint(Color.secondary)
-        }
-        .accessibilityElement(children: .combine)
-        .accessibilityLabel("Result explanation style")
-        .accessibilityHint("Standard keeps the result concise. Meme adds a playful explanation when available.")
+        )
     }
+
+    // Custom mode is entered via the + button in the top bar while Absurd is selected.
 
     /// Block 2: amount and unit pickers — reference-style stacked white cards + floating swap.
     private var conversionInputBlock: some View {

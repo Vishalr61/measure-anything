@@ -47,7 +47,7 @@ struct ConverterView: View {
                     Button {
                         showFavorites = true
                     } label: {
-                        Image(systemName: "list.star")
+                        Image(systemName: "list.bullet")
                             .font(.body.weight(.medium))
                             .imageScale(.medium)
                             .frame(width: 44, height: 44)
@@ -57,17 +57,6 @@ struct ConverterView: View {
                     .accessibilityLabel("View favorites")
                 }
                 ToolbarItemGroup(placement: .topBarTrailing) {
-                    Button {
-                        Haptics.tap()
-                        showTaxonomySearch = true
-                    } label: {
-                        Image(systemName: "magnifyingglass")
-                            .font(.body.weight(.regular))
-                            .imageScale(.medium)
-                    }
-                    .buttonStyle(ConverterPressingButtonStyle())
-                    .accessibilityLabel("Search taxonomy")
-
                     Button {
                         saveCurrentPairAsFavorite()
                     } label: {
@@ -80,9 +69,10 @@ struct ConverterView: View {
                     .buttonStyle(ConverterPressingButtonStyle())
                     .accessibilityLabel(isCurrentPairAlreadyFavorite ? "Already a favorite" : "Save as favorite")
 
-                    if vm.selectedMode == .custom {
+                    if vm.selectedMode != .normal {
                         Button {
                             Haptics.tap()
+                            vm.selectedMode = .custom
                             showCustomUnitForm = true
                         } label: {
                             Image(systemName: "plus")
