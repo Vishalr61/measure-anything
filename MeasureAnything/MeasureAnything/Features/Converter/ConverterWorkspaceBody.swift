@@ -602,46 +602,24 @@ struct ConverterWorkspaceBody: View {
     private var resultCard: some View {
         let state = converterResultVisualState
         return VStack(alignment: .leading, spacing: ConverterLayout.rhythm16) {
-            ZStack(alignment: .topTrailing) {
-                Text("Result")
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(resultTitleStyle(for: state))
-                    .frame(maxWidth: .infinity, alignment: .leading)
-
-                if canShareResult {
-                    resultCardTrailingChrome
-                }
-            }
-
             Group {
                 if let err = vm.validationError {
+                    Text("Result")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(resultTitleStyle(for: state))
                     validationErrorView(message: err)
                 } else if let result = vm.conversionResult,
-                          let fromName = vm.fromUnit?.name,
-                          let toName = vm.toUnit?.name {
-                    let input = vm.formatNumberForDisplay(result.inputValue)
-                    let output = vm.formatNumberForDisplay(result.outputValue)
-
-                    ResultCardContent(
-                        inputFormatted: input,
-                        fromName: fromName,
-                        outputFormatted: output,
-                        toName: toName,
-                        meme: result.memeExplanation,
-                        prominent: true,
-                        equivalenceLine: equivalenceLine(result: result, fromName: fromName, toName: toName),
-                        categoryAccent: categoryAccent,
-                        outputUnitSymbol: unitDisplaySymbol(vm.toUnit)
-                    )
+                          let fromUnit = vm.fromUnit,
+                          let toUnit = vm.toUnit {
+                    referenceResultCard(result: result, fromUnit: fromUnit, toUnit: toUnit)
                 } else {
+                    Text("Result")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(resultTitleStyle(for: state))
                     resultEmptyPlaceholder
                 }
             }
             .animation(.easeOut(duration: 0.24), value: resultBodyAnimationKey)
-
-            if canShareResult {
-                resultReferenceActionPills
-            }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(ConverterLayout.resultHeroPadding)
@@ -657,6 +635,145 @@ struct ConverterWorkspaceBody: View {
             resultLeadingAccentBar(state: state)
         }
         .shadow(color: .black.opacity(resultCardShadowOpacity(for: state)), radius: 20, x: 0, y: 8)
+    }
+
+    private func referenceResultCard(result: ConversionResult, fromUnit: UnitDefinition, toUnit: UnitDefinition) -> some View {
+        let input = vm.formatNumberForDisplay(result.inputValue)
+        let output = vm.formatNumberForDisplay(result.outputValue)
+        let fromSym = unitDisplaySymbol(fromUnit)
+        let toSym = unitDisplaySymbol(toUnit)
+
+        return VStack(alignment: .center, spacing: ConverterLayout.rhythm16) {
+            ZStack(alignment: .topTrailing) {
+                VStack(spacing: 6) {
+                    Text("Live conversion rate")
+                        .font(.caption2.weight(.bold))
+                        .foregroundStyle(.secondary)
+                        .textCase(.uppercase)
+                        .tracking(0.7)
+
+                    referenceRateLine(input: input, fromSym: fromSym, output: output, toSym: toSym)
+                        .frame(maxWidth: .infinity, alignment: .center)
+                }
+                .frame(maxWidth: .infinity, alignment: .center)
+
+                Button {
+                    saveCurrentPairAsFavorite()
+                } label: {
+                    Image(systemName: isCurrentPairAlreadyFavorite ? "star.fill" : "star")
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(isCurrentPairAlreadyFavorite ? categoryAccent : Color.secondary)
+                        .frame(width: 40, height: 40)
+                        .background(
+                            Circle()
+                                .fill(Color(.systemBackground).opacity(0.7))
+                        )
+                        .overlay(
+                            Circle()
+                                .strokeBorder(Color.primary.opacity(0.06), lineWidth: ConverterLayout.strokeHairline)
+                        )
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(ConverterPressingButtonStyle())
+                .disabled(!canSaveFavoriteTap)
+                .accessibilityLabel(isCurrentPairAlreadyFavorite ? "Already a favorite" : "Save as favorite")
+            }
+
+            if let meme = result.memeExplanation, !meme.isEmpty {
+                Text(meme)
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .italic()
+                    .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(ConverterLayout.rhythm16)
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .background(
+                        RoundedRectangle(cornerRadius: ConverterLayout.secondaryBlockCornerRadius, style: .continuous)
+                            .fill(Color(.systemBackground).opacity(0.6))
+                    )
+                    .overlay(
+                        RoundedRectangle(cornerRadius: ConverterLayout.secondaryBlockCornerRadius, style: .continuous)
+                            .strokeBorder(categoryAccent.opacity(0.18), lineWidth: ConverterLayout.strokeHairline)
+                    )
+            }
+
+            referenceResultButtons
+        }
+    }
+
+    private func referenceRateLine(input: String, fromSym: String, output: String, toSym: String) -> some View {
+        let left = Text("\(input) \(fromSym) = ")
+            .font(.system(size: 28, weight: .bold, design: .rounded))
+            .foregroundStyle(.primary)
+            .monospacedDigit()
+
+        let animatedOutput = Text(output)
+            .font(.system(size: 28, weight: .bold, design: .rounded))
+            .foregroundStyle(.primary)
+            .monospacedDigit()
+
+        let right = Text(" \(toSym)")
+            .font(.system(size: 28, weight: .bold, design: .rounded))
+            .foregroundStyle(.primary)
+            .monospacedDigit()
+
+        let combined = (left + animatedOutput + right)
+            .lineLimit(2)
+            .minimumScaleFactor(0.6)
+            .multilineTextAlignment(.center)
+
+        if #available(iOS 17.0, *) {
+            return combined.contentTransition(.numericText())
+        } else {
+            return combined
+        }
+    }
+
+    private var referenceResultButtons: some View {
+        HStack(spacing: ConverterLayout.rhythm12) {
+            Button {
+                copyResultToPasteboard()
+            } label: {
+                HStack(spacing: 10) {
+                    Image(systemName: "doc.on.doc")
+                        .font(.subheadline.weight(.semibold))
+                    Text("Copy")
+                        .font(.subheadline.weight(.semibold))
+                }
+                .foregroundStyle(.primary)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 16)
+                .background(
+                    RoundedRectangle(cornerRadius: 18, style: .continuous)
+                        .fill(Color(.systemGray5))
+                )
+            }
+            .buttonStyle(ConverterPressingButtonStyle())
+            .accessibilityLabel("Copy")
+
+            Menu {
+                Button("Copy") { copyResultToPasteboard() }
+                Button("Share as Text") { presentShareText() }
+                Button("Share as Image") { presentShareImage() }
+            } label: {
+                HStack(spacing: 10) {
+                    Image(systemName: "square.and.arrow.up")
+                        .font(.subheadline.weight(.semibold))
+                    Text("Share")
+                        .font(.subheadline.weight(.semibold))
+                }
+                .foregroundStyle(.white)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 16)
+                .background(
+                    RoundedRectangle(cornerRadius: 18, style: .continuous)
+                        .fill(categoryAccent)
+                )
+            }
+            .buttonStyle(ConverterPressingButtonStyle())
+            .accessibilityLabel("Share")
+        }
     }
 
     private func resultTitleStyle(for state: ConverterResultVisualState) -> Color {
