@@ -1,5 +1,8 @@
 import Combine
+import CoreGraphics
 import Foundation
+import SwiftUI
+import UIKit
 import MeasureAnythingCore
 
 @MainActor
@@ -47,6 +50,16 @@ final class ConverterViewModel: ObservableObject {
 
     @Published private(set) var conversionResult: ConversionResult?
     @Published private(set) var validationError: String?
+
+    // MARK: - Dice roll (Absurd-mode TO randomiser)
+
+    @Published var isDiceRolling: Bool = false
+    @Published var diceDisplayFace: Int = 5
+    @Published var diceRotationDegrees: Double = 0
+    @Published var diceFaceLabel: String = ""
+    @Published var showDiceResultPill: Bool = false
+    @Published var diceResultPillText: String = ""
+    @Published var toNumberScale: CGFloat = 1.0
 
     private var registry: UnitRegistry
     private var engine: ConverterEngine
@@ -120,6 +133,88 @@ final class ConverterViewModel: ObservableObject {
         selectedToUnitID = tmp
     }
 
+    func rollDice() {
+        guard !isDiceRolling else { return }
+
+        let impact = UIImpactFeedbackGenerator(style: .medium)
+        impact.impactOccurred()
+
+        isDiceRolling = true
+        showDiceResultPill = false
+        diceFaceLabel = ""
+
+        // Pre-select outcome before animation starts.
+        let newFace = Int.random(in: 1...6)
+        let pool = diceToUnitPool()
+        let newUnit: UnitDefinition? = {
+            guard !pool.isEmpty else { return nil }
+            let candidates = pool.filter { $0.id != selectedToUnitID }
+            return (candidates.isEmpty ? pool : candidates).randomElement()
+        }()
+
+        // Reset rotation instantly, then animate to +720.
+        withAnimation(.linear(duration: 0)) {
+            diceRotationDegrees = 0
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.01) {
+            MainActor.assumeIsolated {
+                withAnimation(.interpolatingSpring(mass: 1, stiffness: 80, damping: 14, initialVelocity: 8)) {
+                    self.diceRotationDegrees = 720
+                }
+            }
+        }
+
+        // Flash loop.
+        var flashCount = 0
+        Timer.scheduledTimer(withTimeInterval: 0.07, repeats: true) { t in
+            MainActor.assumeIsolated {
+                self.diceDisplayFace = Int.random(in: 1...6)
+                flashCount += 1
+                if flashCount >= 9 { t.invalidate() }
+            }
+        }
+
+        // Land.
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.68) {
+            MainActor.assumeIsolated {
+                self.diceDisplayFace = newFace
+                self.diceFaceLabel = ["", "one", "two", "three", "four", "five", "six"][newFace]
+
+                if let u = newUnit {
+                    self.selectedToUnitID = u.id
+                    self.diceResultPillText = u.name
+                } else {
+                    self.diceResultPillText = ""
+                }
+
+                // Number pop (To value).
+                self.toNumberScale = 1.0
+                withAnimation(.spring(response: 0.22, dampingFraction: 0.55)) {
+                    self.toNumberScale = 1.12
+                }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.12) {
+                    MainActor.assumeIsolated {
+                        withAnimation(.spring(response: 0.24, dampingFraction: 0.8)) {
+                            self.toNumberScale = 0.97
+                        }
+                    }
+                }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.24) {
+                    MainActor.assumeIsolated {
+                        withAnimation(.spring(response: 0.28, dampingFraction: 0.82)) {
+                            self.toNumberScale = 1.0
+                        }
+                    }
+                }
+
+                self.showDiceResultPill = (self.diceResultPillText.isEmpty == false)
+                let notification = UINotificationFeedbackGenerator()
+                notification.notificationOccurred(.success)
+                self.isDiceRolling = false
+            }
+        }
+    }
+
     /// Randomly chooses both `selectedFromUnitID` and `selectedToUnitID` from `availableUnits`.
     /// Keeps them distinct and stays within the current category + mode set.
     func randomizeUnitPair() {
@@ -137,6 +232,23 @@ final class ConverterViewModel: ObservableObject {
     /// `false` when there are fewer than two units available in the current category/mode.
     var canRandomizeUnitPair: Bool {
         availableUnits.count >= 2
+    }
+
+    private func diceToUnitPool() -> [UnitDefinition] {
+        // In normal mode: keep it within the current mode's available units.
+        if selectedMode == .normal {
+            return availableUnits
+        }
+
+        // In absurd/custom: prefer "true absurd" units scoped to the current category (not comparators/custom).
+        let absurdOnly = registry.units(in: selectedCategory, includeKinds: [.absurd])
+        if !absurdOnly.isEmpty { return absurdOnly }
+
+        // Fallback: use any absurd units already present in the current mode's list.
+        let fromAvailable = availableUnits.filter { $0.kind == .absurd }
+        if !fromAvailable.isEmpty { return fromAvailable }
+
+        return availableUnits
     }
 
     /// Whether the current from/to pair can be stored as a favorite (pair metadata only).

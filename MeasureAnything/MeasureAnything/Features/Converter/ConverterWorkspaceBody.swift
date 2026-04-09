@@ -322,8 +322,8 @@ struct ConverterWorkspaceBody: View {
                     .padding(.top, -27)
             }
 
-            referenceRandomizeRow
-                .padding(.top, ConverterLayout.rhythm4)
+            DiceRollCard(vm: vm)
+                .transition(.move(edge: .bottom).combined(with: .opacity))
 
             referenceMetaInfoPair
         }
@@ -373,6 +373,7 @@ struct ConverterWorkspaceBody: View {
                             .font(.system(size: 40, weight: .bold, design: .rounded))
                             .foregroundStyle(toRowUsesPlaceholder ? Color.secondary.opacity(0.55) : Color.primary)
                             .monospacedDigit()
+                            .scaleEffect(vm.toNumberScale)
                             .lineLimit(1)
                             .minimumScaleFactor(0.55)
                             .accessibilityLabel("Converted amount, \(toRowDisplayString)")
@@ -499,47 +500,6 @@ struct ConverterWorkspaceBody: View {
         }
         .buttonStyle(ConverterPressingButtonStyle())
         .accessibilityLabel("Swap from and to units")
-    }
-
-    private var referenceRandomizeRow: some View {
-        HStack {
-            Spacer(minLength: 0)
-            Button {
-                Haptics.tap()
-                withAnimation(.easeOut(duration: 0.2)) {
-                    vm.randomizeUnitPair()
-                }
-            } label: {
-                HStack(spacing: 8) {
-                    Image(systemName: "dice.fill")
-                        .font(.subheadline.weight(.semibold))
-                    Text("Randomize")
-                        .font(.subheadline.weight(.semibold))
-                }
-                .foregroundStyle(vm.canRandomizeUnitPair ? AnyShapeStyle(categoryAccent) : AnyShapeStyle(Color.secondary))
-                .padding(.horizontal, ConverterLayout.rhythm16)
-                .padding(.vertical, 12)
-                .background(
-                    Capsule(style: .continuous)
-                        .fill(
-                            vm.canRandomizeUnitPair
-                                ? categoryAccent.opacity(0.14)
-                                : Color(.systemGray5).opacity(0.65)
-                        )
-                )
-                .overlay(
-                    Capsule(style: .continuous)
-                        .strokeBorder(
-                            vm.canRandomizeUnitPair ? categoryAccent.opacity(0.22) : Color.primary.opacity(0.06),
-                            lineWidth: ConverterLayout.strokeHairline
-                        )
-                )
-            }
-            .buttonStyle(ConverterPressingButtonStyle())
-            .disabled(!vm.canRandomizeUnitPair)
-            .accessibilityLabel("Randomize")
-            .accessibilityHint("Chooses random from and to units")
-        }
     }
 
     private var referenceUnitCardFill: some View {
