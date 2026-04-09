@@ -1,0 +1,73 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+
+  <!-- App icon background with rounded corners (iOS style) -->
+  <defs>
+    <clipPath id="rounded">
+      <rect width="1024" height="1024" rx="230" ry="230"/>
+    </clipPath>
+  </defs>
+
+  <g clip-path="url(#rounded)">
+
+    <!-- Background -->
+    <rect width="1024" height="1024" fill="#0f4c81"/>
+
+    <!-- Globe — ocean base -->
+    <circle cx="512" cy="512" r="340" fill="#1a6fbf"/>
+
+    <!-- Globe land masses — stylised continents -->
+    <!-- Americas -->
+    <ellipse cx="390" cy="430" rx="60" ry="90" fill="#2d8a4e" opacity=".85"/>
+    <ellipse cx="400" cy="580" rx="45" ry="70" fill="#2d8a4e" opacity=".85"/>
+    <!-- Europe/Africa -->
+    <ellipse cx="520" cy="400" rx="40" ry="60" fill="#2d8a4e" opacity=".85"/>
+    <ellipse cx="530" cy="540" rx="55" ry="80" fill="#2d8a4e" opacity=".85"/>
+    <!-- Asia/Australia -->
+    <ellipse cx="650" cy="420" rx="75" ry="55" fill="#2d8a4e" opacity=".85"/>
+    <ellipse cx="670" cy="580" rx="35" ry="30" fill="#2d8a4e" opacity=".85"/>
+
+    <!-- Globe latitude lines (subtle) -->
+    <ellipse cx="512" cy="512" rx="340" ry="120" fill="none" stroke="#5ab4f0" stroke-width="8" opacity=".25"/>
+    <ellipse cx="512" cy="512" rx="340" ry="260" fill="none" stroke="#5ab4f0" stroke-width="6" opacity=".18"/>
+    <!-- Globe vertical meridian -->
+    <ellipse cx="512" cy="512" rx="120" ry="340" fill="none" stroke="#5ab4f0" stroke-width="6" opacity=".18"/>
+
+    <!-- Globe outline -->
+    <circle cx="512" cy="512" r="340" fill="none" stroke="#5ab4f0" stroke-width="10" opacity=".4"/>
+
+    <!-- Measuring tape band wrapping around equator -->
+    <rect x="172" y="484" width="680" height="56" rx="0" fill="#f5e642"/>
+
+    <!-- Tape measure tick marks -->
+    <line x1="220" y1="484" x2="220" y2="464" stroke="#1a1a1a" stroke-width="8" stroke-linecap="round"/>
+    <line x1="270" y1="484" x2="270" y2="472" stroke="#1a1a1a" stroke-width="6" stroke-linecap="round"/>
+    <line x1="320" y1="484" x2="320" y2="464" stroke="#1a1a1a" stroke-width="8" stroke-linecap="round"/>
+    <line x1="370" y1="484" x2="370" y2="472" stroke="#1a1a1a" stroke-width="6" stroke-linecap="round"/>
+    <line x1="420" y1="484" x2="420" y2="464" stroke="#1a1a1a" stroke-width="8" stroke-linecap="round"/>
+    <line x1="470" y1="484" x2="470" y2="472" stroke="#1a1a1a" stroke-width="6" stroke-linecap="round"/>
+    <line x1="512" y1="484" x2="512" y2="456" stroke="#1a1a1a" stroke-width="10" stroke-linecap="round"/>
+    <line x1="554" y1="484" x2="554" y2="472" stroke="#1a1a1a" stroke-width="6" stroke-linecap="round"/>
+    <line x1="604" y1="484" x2="604" y2="464" stroke="#1a1a1a" stroke-width="8" stroke-linecap="round"/>
+    <line x1="654" y1="484" x2="654" y2="472" stroke="#1a1a1a" stroke-width="6" stroke-linecap="round"/>
+    <line x1="704" y1="484" x2="704" y2="464" stroke="#1a1a1a" stroke-width="8" stroke-linecap="round"/>
+    <line x1="754" y1="484" x2="754" y2="472" stroke="#1a1a1a" stroke-width="6" stroke-linecap="round"/>
+    <line x1="804" y1="484" x2="804" y2="464" stroke="#1a1a1a" stroke-width="8" stroke-linecap="round"/>
+
+    <!-- Tape left end cap (curled back) -->
+    <rect x="172" y="484" width="32" height="56" rx="0" fill="#c8a800"/>
+    <rect x="172" y="484" width="12" height="56" fill="#e8c400"/>
+
+    <!-- Tape right end cap -->
+    <rect x="820" y="484" width="32" height="56" rx="0" fill="#c8a800"/>
+    <rect x="840" y="484" width="12" height="56" fill="#e8c400"/>
+
+    <!-- Tape top and bottom subtle border lines -->
+    <line x1="172" y1="484" x2="852" y2="484" stroke="#c8a800" stroke-width="3" opacity=".6"/>
+    <line x1="172" y1="540" x2="852" y2="540" stroke="#c8a800" stroke-width="3" opacity=".6"/>
+
+    <!-- Globe outline on top of tape (tape wraps around) -->
+    <circle cx="512" cy="512" r="340" fill="none" stroke="#5ab4f0" stroke-width="10" opacity=".3"/>
+
+  </g>
+
+</svg>

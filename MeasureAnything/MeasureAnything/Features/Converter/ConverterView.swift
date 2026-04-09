@@ -15,37 +15,51 @@ struct ConverterView: View {
     @State private var showShareSheet = false
     @State private var shareActivityItems: [Any] = []
     @State private var showTaxonomySearch = false
+    @State private var swapRotation: Double = 0
 
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(alignment: .leading, spacing: ConverterLayout.sectionSpacing) {
+                VStack(alignment: .leading, spacing: 0) {
                     if let msg = taxonomyStore.loadFailureMessage {
                         Text("Couldn’t load taxonomy (\(msg)). Using built-in category and mode order.")
                             .font(.caption)
                             .foregroundStyle(.secondary)
                             .fixedSize(horizontal: false, vertical: true)
                             .accessibilityLabel("Taxonomy load warning: \(msg)")
+                            .padding(.bottom, ConverterLayout.rhythm12)
                     }
-                    header
-                    inputs
-                    if vm.selectedMode == .custom {
-                        customUnitsSection
-                    }
+
+                    categoryModeBlock
+
+                    Spacer()
+                        .frame(height: ConverterLayout.majorBlockSpacing)
+
+                    conversionInputBlock
+
+                    Spacer()
+                        .frame(height: ConverterLayout.majorBlockSpacing)
+
                     resultCard
                 }
                 .padding(.horizontal, ConverterLayout.horizontalInset)
-                .padding(.vertical, 8)
+                .padding(.vertical, ConverterLayout.rhythm16)
             }
             .navigationTitle("Measure Anything")
             .navigationBarTitleDisplayMode(.inline)
             .scrollDismissesKeyboard(.interactively)
+            .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    Button("Favorites", systemImage: "list.star") {
+                    Button {
                         Haptics.tap()
                         showFavorites = true
+                    } label: {
+                        Image(systemName: "list.star")
+                            .font(.body.weight(.regular))
+                            .imageScale(.medium)
                     }
+                    .buttonStyle(ConverterPressingButtonStyle())
                     .accessibilityLabel("View favorites")
                 }
                 ToolbarItemGroup(placement: .topBarTrailing) {
@@ -54,22 +68,34 @@ struct ConverterView: View {
                         showTaxonomySearch = true
                     } label: {
                         Image(systemName: "magnifyingglass")
+                            .font(.body.weight(.regular))
+                            .imageScale(.medium)
                     }
+                    .buttonStyle(ConverterPressingButtonStyle())
                     .accessibilityLabel("Search taxonomy")
 
                     Button {
                         saveCurrentPairAsFavorite()
                     } label: {
                         Image(systemName: isCurrentPairAlreadyFavorite ? "star.fill" : "star")
+                            .font(.body.weight(.regular))
+                            .imageScale(.medium)
+                            .foregroundStyle(isCurrentPairAlreadyFavorite ? categoryAccent.opacity(0.95) : Color.secondary)
                     }
                     .disabled(!canSaveFavoriteTap)
+                    .buttonStyle(ConverterPressingButtonStyle())
                     .accessibilityLabel(isCurrentPairAlreadyFavorite ? "Already a favorite" : "Save as favorite")
 
                     if vm.selectedMode == .custom {
-                        Button("Add unit", systemImage: "plus") {
+                        Button {
                             Haptics.tap()
                             showCustomUnitForm = true
+                        } label: {
+                            Image(systemName: "plus")
+                                .font(.body.weight(.regular))
+                                .imageScale(.medium)
                         }
+                        .buttonStyle(ConverterPressingButtonStyle())
                         .accessibilityLabel("Add custom unit")
                     }
                 }
@@ -182,8 +208,36 @@ struct ConverterView: View {
             .joined(separator: ";")
     }
 
-    private var header: some View {
-        VStack(alignment: .leading, spacing: ConverterLayout.blockSpacing) {
+    private var categoryAccent: Color {
+        ConverterCategoryAccent.accent(for: vm.selectedCategory)
+    }
+
+    private enum ConverterResultVisualState {
+        case empty
+        case error
+        case successStandard
+        case successMeme
+    }
+
+    private var converterResultVisualState: ConverterResultVisualState {
+        if vm.validationError != nil { return .error }
+        guard vm.conversionResult != nil else { return .empty }
+        if let m = vm.conversionResult?.memeExplanation, !m.isEmpty { return .successMeme }
+        return .successStandard
+    }
+
+    /// Block 1: category and mode (secondary surface).
+    private var categoryModeBlock: some View {
+        secondarySurface {
+            VStack(alignment: .leading, spacing: ConverterLayout.rhythm12) {
+                sectionLabel("Category & mode")
+                categoryModeContent
+            }
+        }
+    }
+
+    private var categoryModeContent: some View {
+        VStack(alignment: .leading, spacing: ConverterLayout.rhythm16) {
             Picker("Category", selection: $vm.selectedCategory) {
                 ForEach(vm.categories, id: \.self) { category in
                     let d = taxonomyStore.categoryDisplay(for: category)
@@ -192,8 +246,9 @@ struct ConverterView: View {
                 }
             }
             .pickerStyle(.segmented)
+            .tint(categoryAccent)
 
-            VStack(alignment: .leading, spacing: 12) {
+            VStack(alignment: .leading, spacing: ConverterLayout.rhythm12) {
                 Picker("Mode", selection: $vm.selectedMode) {
                     ForEach(vm.modes, id: \.self) { mode in
                         let d = taxonomyStore.modeDisplay(for: mode)
@@ -202,40 +257,62 @@ struct ConverterView: View {
                     }
                 }
                 .pickerStyle(.segmented)
+                .tint(Color.primary.opacity(0.38))
 
-                taxonomySelectionContextLines
-
-                Toggle("Explain like a meme", isOn: $vm.isMemeExplanationEnabled)
-                    .font(.subheadline)
+                memeOutputStyleControl
             }
         }
     }
 
-    /// Minimal on-screen context for the current category and mode when taxonomy supplies descriptions.
-    private var taxonomySelectionContextLines: some View {
-        let cat = taxonomyStore.categoryDisplay(for: vm.selectedCategory)
-        let mode = taxonomyStore.modeDisplay(for: vm.selectedMode)
-        return VStack(alignment: .leading, spacing: 4) {
-            if let t = cat.description, !t.isEmpty {
-                Text(t)
-                    .font(.caption)
-                    .foregroundStyle(.tertiary)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .accessibilityLabel("Category: \(t)")
+    /// Compact output-style control (same binding as former meme toggle).
+    private var memeOutputStyleControl: some View {
+        VStack(alignment: .leading, spacing: ConverterLayout.rhythm8) {
+            Text("Result tone")
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(.secondary)
+            Picker("Explanation style", selection: $vm.isMemeExplanationEnabled) {
+                Text("Standard").tag(false)
+                Text("Meme").tag(true)
             }
-            if let t = mode.description, !t.isEmpty {
-                Text(t)
-                    .font(.caption)
-                    .foregroundStyle(.tertiary)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .accessibilityLabel("Mode: \(t)")
-            }
+            .pickerStyle(.segmented)
+            .tint(Color.secondary)
         }
         .accessibilityElement(children: .combine)
+        .accessibilityLabel("Result explanation style")
+        .accessibilityHint("Standard keeps the result concise. Meme adds a playful explanation when available.")
+    }
+
+    /// Block 2: amount and unit pickers (secondary surface).
+    private var conversionInputBlock: some View {
+        secondarySurface {
+            VStack(alignment: .leading, spacing: ConverterLayout.rhythm16) {
+                inputs
+                if vm.selectedMode == .custom {
+                    customUnitsSection
+                }
+            }
+        }
+    }
+
+    private func secondarySurface<Content: View>(@ViewBuilder content: () -> Content) -> some View {
+        content()
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(ConverterLayout.secondaryBlockPadding)
+            .background(
+                RoundedRectangle(cornerRadius: ConverterLayout.secondaryBlockCornerRadius, style: .continuous)
+                    .fill(Color(.tertiarySystemBackground))
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: ConverterLayout.secondaryBlockCornerRadius, style: .continuous)
+                    .strokeBorder(
+                        Color.primary.opacity(ConverterLayout.strokeOpacitySubtle),
+                        lineWidth: ConverterLayout.strokeHairline
+                    )
+            )
     }
 
     private var inputs: some View {
-        VStack(alignment: .leading, spacing: ConverterLayout.blockSpacing) {
+        VStack(alignment: .leading, spacing: ConverterLayout.rhythm12) {
             sectionLabel("Amount")
 
             TextField("e.g. 10 or 3.5", text: $vm.inputText)
@@ -253,16 +330,28 @@ struct ConverterView: View {
                     }
                 }
 
-            HStack(alignment: .center, spacing: 12) {
-                unitPickerColumn(title: "From", selection: $vm.selectedFromUnitID)
-                swapButton
-                unitPickerColumn(title: "To", selection: $vm.selectedToUnitID)
-            }
+            conversionUnitRow
         }
     }
 
+    /// Single horizontal conversion control: source pill, swap, target pill, randomize target.
+    private var conversionUnitRow: some View {
+        HStack(alignment: .center, spacing: ConverterLayout.rhythm8) {
+            unitPickerPill(accessibilityTitle: "From unit", selection: $vm.selectedFromUnitID, accent: categoryAccent)
+            swapButton
+            unitPickerPill(accessibilityTitle: "To unit", selection: $vm.selectedToUnitID, accent: categoryAccent)
+            randomizeTargetButton
+        }
+        .animation(.easeOut(duration: 0.22), value: unitSelectionAnimationKey)
+    }
+
+    private var unitSelectionAnimationKey: String {
+        "\(vm.selectedFromUnitID)|\(vm.selectedToUnitID)"
+    }
+
     private var customUnitsSection: some View {
-        VStack(alignment: .leading, spacing: ConverterLayout.tightSpacing) {
+        VStack(alignment: .leading, spacing: ConverterLayout.rhythm12) {
+            Divider()
             sectionLabel("My custom units")
 
             if customUnits.isEmpty {
@@ -270,7 +359,7 @@ struct ConverterView: View {
             } else {
                 ForEach(customUnits) { unit in
                     HStack(alignment: .center) {
-                        VStack(alignment: .leading, spacing: 4) {
+                        VStack(alignment: .leading, spacing: ConverterLayout.rhythm8) {
                             Text(unit.name)
                                 .font(.body.weight(.medium))
                             Text(unit.categoryRaw.capitalized)
@@ -296,20 +385,16 @@ struct ConverterView: View {
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(ConverterLayout.cardPadding - 4)
-        .background(
-            RoundedRectangle(cornerRadius: ConverterLayout.insetCornerRadius, style: .continuous)
-                .fill(Color(.tertiarySystemBackground))
-        )
+        .padding(.top, ConverterLayout.rhythm8)
     }
 
     private var emptyCustomUnitsPlaceholder: some View {
-        HStack(alignment: .top, spacing: 12) {
+        HStack(alignment: .top, spacing: ConverterLayout.rhythm12) {
             Image(systemName: "square.dashed")
                 .font(.title2)
                 .foregroundStyle(.tertiary)
                 .frame(width: 28)
-            VStack(alignment: .leading, spacing: 4) {
+            VStack(alignment: .leading, spacing: ConverterLayout.rhythm8) {
                 Text("No custom units yet")
                     .font(.subheadline.weight(.medium))
                 Text("Tap + above to add one. It will appear in Custom mode for that category.")
@@ -324,53 +409,109 @@ struct ConverterView: View {
     private var swapButton: some View {
         Button {
             Haptics.tap()
-            vm.swapUnits()
+            withAnimation(.spring(response: 0.34, dampingFraction: 0.82)) {
+                swapRotation += 180
+                vm.swapUnits()
+            }
         } label: {
             Image(systemName: "arrow.left.arrow.right")
-                .font(.headline)
-                .frame(width: 44, height: 44)
-                .background(.thinMaterial, in: RoundedRectangle(cornerRadius: ConverterLayout.insetCornerRadius, style: .continuous))
+                .font(.system(size: 15, weight: .semibold))
+                .foregroundStyle(categoryAccent.opacity(0.92))
+                .frame(width: 40, height: 40)
+                .background(
+                    ZStack {
+                        Circle().fill(.thinMaterial)
+                        Circle().fill(categoryAccent.opacity(0.14))
+                    }
+                )
+                .overlay(
+                    Circle()
+                        .strokeBorder(categoryAccent.opacity(0.28), lineWidth: ConverterLayout.strokeHairline)
+                )
+                .rotationEffect(.degrees(swapRotation))
         }
-        .buttonStyle(.plain)
+        .buttonStyle(ConverterPressingButtonStyle())
         .accessibilityLabel("Swap from and to units")
     }
 
-    private func unitPickerColumn(title: String, selection: Binding<UnitDefinition.ID>) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text(title)
-                .font(.caption.weight(.semibold))
-                .foregroundStyle(.secondary)
-            Picker(title, selection: selection) {
-                ForEach(vm.availableUnits, id: \.id) { unit in
-                    Text(unit.name).tag(unit.id)
-                }
+    private var randomizeTargetButton: some View {
+        Button {
+            Haptics.tap()
+            withAnimation(.easeOut(duration: 0.2)) {
+                vm.randomizeTargetUnit()
             }
-            .pickerStyle(.menu)
-            .frame(maxWidth: .infinity, alignment: .leading)
+        } label: {
+            Image(systemName: "dice.fill")
+                .font(.system(size: 15, weight: .semibold))
+                .foregroundStyle(categoryAccent.opacity(0.92))
+                .frame(width: 40, height: 40)
+                .background(
+                    ZStack {
+                        Circle().fill(.thinMaterial)
+                        Circle().fill(categoryAccent.opacity(0.14))
+                    }
+                )
+                .overlay(
+                    Circle()
+                        .strokeBorder(categoryAccent.opacity(0.28), lineWidth: ConverterLayout.strokeHairline)
+                )
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
+        .buttonStyle(ConverterPressingButtonStyle())
+        .disabled(!vm.canRandomizeTargetUnit)
+        .accessibilityLabel("Randomize target unit")
+        .accessibilityHint("Chooses a random unit for the result")
     }
 
+    private func unitPickerPill(accessibilityTitle: String, selection: Binding<UnitDefinition.ID>, accent: Color) -> some View {
+        let name = vm.availableUnits.first { $0.id == selection.wrappedValue }?.name ?? "—"
+        return Picker(selection: selection) {
+            ForEach(vm.availableUnits, id: \.id) { unit in
+                Text(unit.name).tag(unit.id)
+            }
+        } label: {
+            HStack(spacing: 6) {
+                Text(name)
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(.primary)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.72)
+                Image(systemName: "chevron.down")
+                    .font(.caption2.weight(.semibold))
+                    .foregroundStyle(accent.opacity(0.55))
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 12)
+            .padding(.horizontal, 14)
+            .background(
+                Capsule(style: .continuous)
+                    .fill(accent.opacity(0.14))
+            )
+            .background(
+                Capsule(style: .continuous)
+                    .fill(Color(.systemBackground).opacity(0.42))
+            )
+            .overlay(
+                Capsule(style: .continuous)
+                    .strokeBorder(accent.opacity(0.42), lineWidth: ConverterLayout.strokeHairline)
+            )
+        }
+        .pickerStyle(.menu)
+        .accessibilityLabel("\(accessibilityTitle), \(name)")
+        .accessibilityHint("Opens a menu to choose a unit")
+    }
+
+    /// Block 3: conversion output (primary elevated surface).
     private var resultCard: some View {
-        VStack(alignment: .leading, spacing: ConverterLayout.blockSpacing) {
-            HStack(alignment: .center) {
-                sectionLabel("Result")
-                Spacer(minLength: 8)
+        let state = converterResultVisualState
+        return VStack(alignment: .leading, spacing: ConverterLayout.rhythm16) {
+            ZStack(alignment: .topTrailing) {
+                Text("Result")
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(resultTitleStyle(for: state))
+                    .frame(maxWidth: .infinity, alignment: .leading)
+
                 if canShareResult {
-                    Menu {
-                        Button("Share as Text") {
-                            presentShareText()
-                        }
-                        Button("Share as Image") {
-                            presentShareImage()
-                        }
-                    } label: {
-                        Image(systemName: "square.and.arrow.up")
-                            .font(.body.weight(.semibold))
-                            .frame(minWidth: 44, minHeight: 44)
-                            .contentShape(Rectangle())
-                    }
-                    .accessibilityLabel("Share result")
+                    shareMenuDiminutive
                 }
             }
 
@@ -388,24 +529,136 @@ struct ConverterView: View {
                         fromName: fromName,
                         outputFormatted: output,
                         toName: toName,
-                        meme: result.memeExplanation
+                        meme: result.memeExplanation,
+                        prominent: true,
+                        equivalenceLine: equivalenceLine(result: result, fromName: fromName, toName: toName),
+                        categoryAccent: categoryAccent
                     )
                 } else {
                     resultEmptyPlaceholder
                 }
             }
+            .animation(.easeOut(duration: 0.24), value: resultBodyAnimationKey)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(ConverterLayout.cardPadding)
+        .padding(ConverterLayout.resultHeroPadding)
         .background(
-            RoundedRectangle(cornerRadius: ConverterLayout.cardCornerRadius, style: .continuous)
-                .fill(Color(.secondarySystemBackground))
+            RoundedRectangle(cornerRadius: ConverterLayout.resultHeroCornerRadius, style: .continuous)
+                .fill(resultCardFill(for: state))
         )
         .overlay(
-            RoundedRectangle(cornerRadius: ConverterLayout.cardCornerRadius, style: .continuous)
-                .strokeBorder(Color.primary.opacity(0.07), lineWidth: 1)
+            RoundedRectangle(cornerRadius: ConverterLayout.resultHeroCornerRadius, style: .continuous)
+                .strokeBorder(resultCardStroke(for: state), lineWidth: ConverterLayout.strokeHairline)
         )
-        .shadow(color: .black.opacity(0.06), radius: 12, x: 0, y: 4)
+        .overlay(alignment: .leading) {
+            resultLeadingAccentBar(state: state)
+        }
+        .shadow(color: .black.opacity(resultCardShadowOpacity(for: state)), radius: 20, x: 0, y: 8)
+    }
+
+    private func resultTitleStyle(for state: ConverterResultVisualState) -> Color {
+        switch state {
+        case .empty: return Color.secondary.opacity(0.85)
+        case .error: return Color.red.opacity(0.75)
+        case .successStandard, .successMeme: return Color.secondary
+        }
+    }
+
+    private func resultCardFill(for state: ConverterResultVisualState) -> Color {
+        switch state {
+        case .empty:
+            return Color(.secondarySystemGroupedBackground)
+        case .error:
+            return Color(.systemBackground)
+        case .successStandard, .successMeme:
+            return Color(.systemBackground)
+        }
+    }
+
+    private func resultCardStroke(for state: ConverterResultVisualState) -> Color {
+        switch state {
+        case .empty:
+            return Color.primary.opacity(ConverterLayout.strokeOpacitySubtle)
+        case .error:
+            return Color.red.opacity(0.28)
+        case .successStandard:
+            return categoryAccent.opacity(0.26)
+        case .successMeme:
+            return categoryAccent.opacity(0.34)
+        }
+    }
+
+    private func resultCardShadowOpacity(for state: ConverterResultVisualState) -> Double {
+        switch state {
+        case .empty: return 0.06
+        case .error: return 0.1
+        case .successStandard: return 0.12
+        case .successMeme: return 0.14
+        }
+    }
+
+    @ViewBuilder
+    private func resultLeadingAccentBar(state: ConverterResultVisualState) -> some View {
+        switch state {
+        case .empty:
+            EmptyView()
+        case .error:
+            Capsule(style: .continuous)
+                .fill(Color.red.opacity(0.55))
+                .frame(width: ConverterLayout.accentBarWidth)
+                .padding(.leading, ConverterLayout.rhythm12)
+                .padding(.vertical, ConverterLayout.rhythm24)
+        case .successStandard:
+            Capsule(style: .continuous)
+                .fill(categoryAccent.opacity(0.88))
+                .frame(width: ConverterLayout.accentBarWidth)
+                .padding(.leading, ConverterLayout.rhythm12)
+                .padding(.vertical, ConverterLayout.rhythm24)
+        case .successMeme:
+            Capsule(style: .continuous)
+                .fill(categoryAccent.opacity(0.95))
+                .frame(width: ConverterLayout.accentBarWidth)
+                .padding(.leading, ConverterLayout.rhythm12)
+                .padding(.vertical, ConverterLayout.rhythm24)
+        }
+    }
+
+    private var resultBodyAnimationKey: String {
+        if let err = vm.validationError { return "e:\(err)" }
+        if let r = vm.conversionResult {
+            return "r:\(r.outputValue):\(r.inputValue):\(vm.inputText):\(vm.isMemeExplanationEnabled):\(r.memeExplanation ?? "")"
+        }
+        return "empty"
+    }
+
+    private var shareMenuDiminutive: some View {
+        Menu {
+            Button("Share as Text") {
+                presentShareText()
+            }
+            Button("Share as Image") {
+                presentShareImage()
+            }
+        } label: {
+            Image(systemName: "square.and.arrow.up")
+                .font(.caption2.weight(.medium))
+                .foregroundStyle(.quaternary)
+                .frame(width: 44, height: 44)
+                .contentShape(Rectangle())
+        }
+        .buttonStyle(ConverterPressingButtonStyle())
+        .accessibilityLabel("Share result")
+    }
+
+    /// Linear factor line; omitted for temperature and degenerate cases.
+    private func equivalenceLine(result: ConversionResult, fromName: String, toName: String) -> String? {
+        guard result.category != .temperature,
+              result.fromUnitID != result.toUnitID else { return nil }
+        let inp = result.inputValue
+        guard inp != 0, abs(inp) > 1e-12 else { return nil }
+        let ratio = result.outputValue / inp
+        let r = vm.formatNumberForDisplay(ratio)
+        return "1 \(fromName) ≈ \(r) \(toName)"
     }
 
     private func sectionLabel(_ title: String) -> some View {
@@ -417,7 +670,7 @@ struct ConverterView: View {
     }
 
     private func validationErrorView(message: String) -> some View {
-        HStack(alignment: .top, spacing: 10) {
+        HStack(alignment: .top, spacing: ConverterLayout.rhythm12) {
             Image(systemName: "exclamationmark.circle.fill")
                 .font(.body)
                 .foregroundStyle(.red.opacity(0.9))
@@ -427,31 +680,45 @@ struct ConverterView: View {
                 .foregroundStyle(.primary)
                 .fixedSize(horizontal: false, vertical: true)
         }
-        .padding(12)
+        .padding(ConverterLayout.rhythm12)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(
-            RoundedRectangle(cornerRadius: 12, style: .continuous)
-                .fill(Color.red.opacity(0.08))
+            RoundedRectangle(cornerRadius: ConverterLayout.secondaryBlockCornerRadius, style: .continuous)
+                .fill(Color.red.opacity(0.09))
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: ConverterLayout.secondaryBlockCornerRadius, style: .continuous)
+                .strokeBorder(Color.red.opacity(0.22), lineWidth: ConverterLayout.strokeHairline)
         )
     }
 
     private var resultEmptyPlaceholder: some View {
-        HStack(alignment: .top, spacing: 12) {
+        HStack(alignment: .top, spacing: ConverterLayout.rhythm12) {
             Image(systemName: "function")
-                .font(.title2)
-                .foregroundStyle(.tertiary)
-                .frame(width: 28)
-            VStack(alignment: .leading, spacing: 4) {
+                .font(.title3)
+                .foregroundStyle(.quaternary)
+                .frame(width: 26)
+            VStack(alignment: .leading, spacing: ConverterLayout.rhythm8) {
                 Text("No result yet")
-                    .font(.subheadline.weight(.medium))
+                    .font(.subheadline.weight(.semibold))
                     .foregroundStyle(.secondary)
-                Text("Enter a number and pick units above. Invalid input is called out in red.")
+                Text("Enter an amount and choose units.")
                     .font(.footnote)
                     .foregroundStyle(.tertiary)
                     .fixedSize(horizontal: false, vertical: true)
             }
         }
+        .padding(ConverterLayout.rhythm16)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(
+            RoundedRectangle(cornerRadius: ConverterLayout.secondaryBlockCornerRadius, style: .continuous)
+                .strokeBorder(
+                    Color.primary.opacity(ConverterLayout.strokeOpacitySubtle),
+                    style: StrokeStyle(lineWidth: ConverterLayout.strokeHairline, dash: [6, 5])
+                )
+        )
         .accessibilityElement(children: .combine)
+        .accessibilityHint("Invalid input appears in red below when present.")
     }
 }
 

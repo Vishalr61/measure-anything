@@ -7,8 +7,22 @@ struct ResultCardContent: View {
     let outputFormatted: String
     let toName: String
     let meme: String?
+    /// Larger type on the live converter; export keeps the default.
+    var prominent: Bool = false
+    /// Optional factor line (e.g. linear conversions); omitted for export.
+    var equivalenceLine: String? = nil
+    /// Live converter: subtle tint behind meme copy when present.
+    var categoryAccent: Color? = nil
 
     var body: some View {
+        if prominent {
+            prominentLayout
+        } else {
+            exportLayout
+        }
+    }
+
+    private var exportLayout: some View {
         VStack(alignment: .leading, spacing: ConverterLayout.tightSpacing) {
             Text("\(inputFormatted) \(fromName)")
                 .font(.callout)
@@ -20,19 +34,95 @@ struct ResultCardContent: View {
                 .padding(.vertical, 2)
 
             Text("\(outputFormatted) \(toName)")
-                .font(.title3.weight(.bold))
+                .font(.title3)
+                .fontWeight(.bold)
                 .foregroundStyle(.primary)
                 .monospacedDigit()
 
-            if let meme, !meme.isEmpty {
+            memeBlock(font: .callout)
+        }
+    }
+
+    private var prominentLayout: some View {
+        VStack(alignment: .leading, spacing: ConverterLayout.rhythm12) {
+            Text("\(inputFormatted) \(fromName)")
+                .font(.caption)
+                .foregroundStyle(.tertiary)
+                .lineLimit(2)
+                .minimumScaleFactor(0.88)
+
+            if let equivalenceLine, !equivalenceLine.isEmpty {
+                Text(equivalenceLine)
+                    .font(.caption2)
+                    .foregroundStyle(
+                        categoryAccent.map { $0.opacity(0.48) } ?? Color.secondary.opacity(0.55)
+                    )
+                    .lineLimit(2)
+                    .minimumScaleFactor(0.85)
+            }
+
+            prominentOutputText
+
+            prominentMemeBlock
+        }
+    }
+
+    @ViewBuilder
+    private var prominentOutputText: some View {
+        let text = Text("\(outputFormatted) \(toName)")
+            .font(.largeTitle)
+            .fontWeight(.bold)
+            .foregroundStyle(.primary)
+            .monospacedDigit()
+            .minimumScaleFactor(0.45)
+            .lineLimit(3)
+            .multilineTextAlignment(.leading)
+
+        if #available(iOS 17.0, *) {
+            text.contentTransition(.numericText())
+        } else {
+            text
+        }
+    }
+
+    @ViewBuilder
+    private func memeBlock(font: Font) -> some View {
+        if let meme, !meme.isEmpty {
+            Divider()
+                .padding(.vertical, ConverterLayout.rhythm8)
+            Text(meme)
+                .font(font)
+                .foregroundStyle(.secondary)
+                .italic()
+                .fixedSize(horizontal: false, vertical: true)
+        }
+    }
+
+    @ViewBuilder
+    private var prominentMemeBlock: some View {
+        if let meme, !meme.isEmpty {
+            VStack(alignment: .leading, spacing: 0) {
                 Divider()
-                    .padding(.vertical, 4)
+                    .padding(.vertical, ConverterLayout.rhythm8)
                 Text(meme)
-                    .font(.callout)
+                    .font(.subheadline)
                     .foregroundStyle(.secondary)
                     .italic()
                     .fixedSize(horizontal: false, vertical: true)
             }
+            .padding(ConverterLayout.rhythm12)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(
+                RoundedRectangle(cornerRadius: ConverterLayout.secondaryBlockCornerRadius, style: .continuous)
+                    .fill((categoryAccent ?? .clear).opacity(categoryAccent != nil ? 0.11 : 0))
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: ConverterLayout.secondaryBlockCornerRadius, style: .continuous)
+                    .strokeBorder(
+                        (categoryAccent ?? .clear).opacity(categoryAccent != nil ? 0.22 : 0),
+                        lineWidth: ConverterLayout.strokeHairline
+                    )
+            )
         }
     }
 }
@@ -69,7 +159,7 @@ struct ExportResultCardView: View {
         )
         .overlay(
             RoundedRectangle(cornerRadius: ConverterLayout.cardCornerRadius, style: .continuous)
-                .strokeBorder(Color.primary.opacity(0.07), lineWidth: 1)
+                .strokeBorder(Color.primary.opacity(ConverterLayout.strokeOpacitySubtle), lineWidth: ConverterLayout.strokeHairline)
         )
     }
 }
