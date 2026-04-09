@@ -334,7 +334,8 @@
     "factor": 332.8,
     "iconName": "ferry",
     "description": "Nimitz-class carrier length ≈ 332.8 m.",
-    "exampleMeme": "Deck-length energy."
+    "exampleMeme": "Deck-length energy.",
+    "funFact": "The Nimitz-class aircraft carrier is about 332.8 m long and can carry over 5,000 sailors and aircraft."
   },
   {
     "id": "school_bus",
