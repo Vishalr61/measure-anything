@@ -39,6 +39,8 @@ public struct UnitDefinition: Identifiable, Codable, Hashable, Sendable {
     public var description: String?
     /// Deterministic meme line shown on the result card when enabled.
     public var exampleMeme: String?
+    /// Contextual "did you know" fact tied to this unit (may reference the live result via `{result}`).
+    public var funFact: String?
 
     public init(
         id: ID,
@@ -50,7 +52,8 @@ public struct UnitDefinition: Identifiable, Codable, Hashable, Sendable {
         factor: Double? = nil,
         iconName: String? = nil,
         description: String? = nil,
-        exampleMeme: String? = nil
+        exampleMeme: String? = nil,
+        funFact: String? = nil
     ) throws {
         self.id = id
         self.name = name
@@ -62,6 +65,7 @@ public struct UnitDefinition: Identifiable, Codable, Hashable, Sendable {
         self.iconName = iconName
         self.description = description
         self.exampleMeme = exampleMeme
+        self.funFact = funFact
 
         try validate()
     }

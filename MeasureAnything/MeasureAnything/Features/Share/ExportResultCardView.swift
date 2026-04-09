@@ -13,6 +13,8 @@ struct ResultCardContent: View {
     var equivalenceLine: String? = nil
     /// Live converter: subtle tint behind meme copy when present.
     var categoryAccent: Color? = nil
+    /// When set (prominent layout), output shows large primary value + accent-colored symbol (e.g. `ft`).
+    var outputUnitSymbol: String? = nil
 
     var body: some View {
         if prominent {
@@ -69,13 +71,50 @@ struct ResultCardContent: View {
 
     @ViewBuilder
     private var prominentOutputText: some View {
-        let text = Text("\(outputFormatted) \(toName)")
+        if let sym = outputUnitSymbol, !sym.isEmpty {
+            VStack(alignment: .leading, spacing: 6) {
+                HStack(alignment: .firstTextBaseline, spacing: 10) {
+                    prominentOutputValueText(outputFormatted)
+                    Text(sym)
+                        .font(.title.weight(.bold))
+                        .foregroundStyle(categoryAccent ?? .accentColor)
+                        .monospacedDigit()
+                        .minimumScaleFactor(0.6)
+                        .lineLimit(1)
+                }
+                Text(toName)
+                    .font(.caption.weight(.medium))
+                    .foregroundStyle(.secondary)
+                    .lineLimit(2)
+                    .minimumScaleFactor(0.85)
+            }
+        } else {
+            let text = Text("\(outputFormatted) \(toName)")
+                .font(.largeTitle)
+                .fontWeight(.bold)
+                .foregroundStyle(.primary)
+                .monospacedDigit()
+                .minimumScaleFactor(0.45)
+                .lineLimit(3)
+                .multilineTextAlignment(.leading)
+
+            if #available(iOS 17.0, *) {
+                text.contentTransition(.numericText())
+            } else {
+                text
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func prominentOutputValueText(_ value: String) -> some View {
+        let text = Text(value)
             .font(.largeTitle)
             .fontWeight(.bold)
             .foregroundStyle(.primary)
             .monospacedDigit()
             .minimumScaleFactor(0.45)
-            .lineLimit(3)
+            .lineLimit(2)
             .multilineTextAlignment(.leading)
 
         if #available(iOS 17.0, *) {

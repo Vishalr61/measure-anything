@@ -1,5 +1,8 @@
 import Combine
+import CoreGraphics
 import Foundation
+import SwiftUI
+import UIKit
 import MeasureAnythingCore
 
 @MainActor
@@ -12,6 +15,7 @@ final class ConverterViewModel: ObservableObject {
             guard oldValue != selectedCategory else { return }
             guard !isApplyingFavoriteRestore else { return }
             applyDefaultsAfterCategoryChange()
+            syncDiceTiltToCategory(animated: true)
         }
     }
 
@@ -48,6 +52,28 @@ final class ConverterViewModel: ObservableObject {
     @Published private(set) var conversionResult: ConversionResult?
     @Published private(set) var validationError: String?
 
+    // MARK: - Dice roll (Absurd-mode TO randomiser)
+
+    @Published var isDiceRolling: Bool = false
+    @Published var diceDisplayFace: Int = 5
+    @Published var diceRotationDegrees: Double = UnitCategory.length.converterDiceRestDegrees
+    @Published var showDiceSubtitle: Bool = false
+    @Published var diceLandedUnitName: String = ""
+
+    private var diceFlashTimer: Timer?
+    private var diceRollToken: UUID = UUID()
+
+    private func syncDiceTiltToCategory(animated: Bool) {
+        let rest = selectedCategory.converterDiceRestDegrees
+        if animated {
+            withAnimation(.easeOut(duration: 0.22)) {
+                diceRotationDegrees = rest
+            }
+        } else {
+            diceRotationDegrees = rest
+        }
+    }
+
     private var registry: UnitRegistry
     private var engine: ConverterEngine
     private let taxonomy: AppTaxonomyStore
@@ -77,6 +103,7 @@ final class ConverterViewModel: ObservableObject {
             selectedMode = modes[0]
         }
         applyDefaultsAfterCategoryChange()
+        syncDiceTiltToCategory(animated: false)
         recompute()
     }
 
@@ -120,26 +147,120 @@ final class ConverterViewModel: ObservableObject {
         selectedToUnitID = tmp
     }
 
-    /// Picks a random `selectedToUnitID` from `availableUnits`, excluding the source. In absurd mode, prefers absurd kinds when any exist.
-    func randomizeTargetUnit() {
-        guard let next = targetRandomizationCandidates().randomElement() else { return }
-        selectedToUnitID = next.id
-    }
+    func rollDice() {
+        // Make dice roll interruptible so the user can spam taps.
+        diceRollToken = UUID()
+        let token = diceRollToken
+        diceFlashTimer?.invalidate()
+        diceFlashTimer = nil
 
-    /// `false` when there is no other unit to pick (e.g. only one unit in category/mode).
-    var canRandomizeTargetUnit: Bool {
-        !targetRandomizationCandidates().isEmpty
-    }
+        let impact = UIImpactFeedbackGenerator(style: .medium)
+        impact.impactOccurred()
 
-    private func targetRandomizationCandidates() -> [UnitDefinition] {
-        var candidates = availableUnits.filter { $0.id != selectedFromUnitID }
-        if selectedMode == .absurd {
-            let absurdOnly = candidates.filter { $0.kind == .absurd }
-            if !absurdOnly.isEmpty {
-                candidates = absurdOnly
+        isDiceRolling = true
+        // Fade out subtitle instantly (no animation).
+        showDiceSubtitle = false
+        diceLandedUnitName = ""
+
+        // Pre-select outcome before animation starts.
+        let newFace = Int.random(in: 1...6)
+        let pool = diceToUnitPool()
+        let newUnit: UnitDefinition? = {
+            guard !pool.isEmpty else { return nil }
+            let candidates = pool.filter { $0.id != selectedToUnitID }
+            return (candidates.isEmpty ? pool : candidates).randomElement()
+        }()
+
+        let rest = selectedCategory.converterDiceRestDegrees
+        // Snap to category rest angle, then spin two full turns from there.
+        withAnimation(.linear(duration: 0)) {
+            diceRotationDegrees = rest
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.016) {
+            MainActor.assumeIsolated {
+                guard self.diceRollToken == token else { return }
+                withAnimation(.interpolatingSpring(mass: 1, stiffness: 80, damping: 14, initialVelocity: 8)) {
+                    self.diceRotationDegrees = rest + 720
+                }
             }
         }
-        return candidates
+
+        // Flash loop.
+        var flashCount = 0
+        let timer = Timer.scheduledTimer(withTimeInterval: 0.07, repeats: true) { t in
+            MainActor.assumeIsolated {
+                guard self.diceRollToken == token else {
+                    t.invalidate()
+                    return
+                }
+                self.diceDisplayFace = Int.random(in: 1...6)
+                flashCount += 1
+                if flashCount >= 9 { t.invalidate() }
+            }
+        }
+        diceFlashTimer = timer
+
+        // Land.
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.72) {
+            MainActor.assumeIsolated {
+                guard self.diceRollToken == token else { return }
+                timer.invalidate()
+                if self.diceFlashTimer === timer {
+                    self.diceFlashTimer = nil
+                }
+                self.diceDisplayFace = newFace
+
+                if let u = newUnit {
+                    self.selectedToUnitID = u.id
+                    self.diceLandedUnitName = u.name
+                } else {
+                    self.diceLandedUnitName = ""
+                }
+
+                withAnimation(.easeIn(duration: 0.25)) {
+                    self.showDiceSubtitle = (self.diceLandedUnitName.isEmpty == false)
+                }
+                let notification = UINotificationFeedbackGenerator()
+                notification.notificationOccurred(.success)
+                self.isDiceRolling = false
+            }
+        }
+    }
+
+    /// Randomly chooses both `selectedFromUnitID` and `selectedToUnitID` from `availableUnits`.
+    /// Keeps them distinct and stays within the current category + mode set.
+    func randomizeUnitPair() {
+        let units = availableUnits
+        guard units.count >= 2 else { return }
+
+        guard let from = units.randomElement() else { return }
+        let toCandidates = units.filter { $0.id != from.id }
+        guard let to = toCandidates.randomElement() else { return }
+
+        selectedFromUnitID = from.id
+        selectedToUnitID = to.id
+    }
+
+    /// `false` when there are fewer than two units available in the current category/mode.
+    var canRandomizeUnitPair: Bool {
+        availableUnits.count >= 2
+    }
+
+    private func diceToUnitPool() -> [UnitDefinition] {
+        // In normal mode: keep it within the current mode's available units.
+        if selectedMode == .normal {
+            return availableUnits
+        }
+
+        // In absurd/custom: prefer "true absurd" units scoped to the current category (not comparators/custom).
+        let absurdOnly = registry.units(in: selectedCategory, includeKinds: [.absurd])
+        if !absurdOnly.isEmpty { return absurdOnly }
+
+        // Fallback: use any absurd units already present in the current mode's list.
+        let fromAvailable = availableUnits.filter { $0.kind == .absurd }
+        if !fromAvailable.isEmpty { return fromAvailable }
+
+        return availableUnits
     }
 
     /// Whether the current from/to pair can be stored as a favorite (pair metadata only).
@@ -160,6 +281,7 @@ final class ConverterViewModel: ObservableObject {
         selectedToUnitID = toID
         isApplyingFavoriteRestore = false
         reconcileSelectionsAfterModeChange()
+        syncDiceTiltToCategory(animated: true)
         recompute()
     }
 
@@ -170,6 +292,7 @@ final class ConverterViewModel: ObservableObject {
         defer {
             isApplyingFavoriteRestore = false
             reconcileSelectionsAfterModeChange()
+            syncDiceTiltToCategory(animated: true)
             recompute()
         }
 
@@ -354,5 +477,10 @@ final class ConverterViewModel: ObservableObject {
         }
 
         return f.string(from: NSNumber(value: value)) ?? String(format: "%g", value)
+    }
+
+    var formattedResult: String {
+        guard let r = conversionResult else { return "—" }
+        return formatNumberForDisplay(r.outputValue)
     }
 }
