@@ -15,6 +15,7 @@ final class ConverterViewModel: ObservableObject {
             guard oldValue != selectedCategory else { return }
             guard !isApplyingFavoriteRestore else { return }
             applyDefaultsAfterCategoryChange()
+            syncDiceTiltToCategory(animated: true)
         }
     }
 
@@ -55,12 +56,23 @@ final class ConverterViewModel: ObservableObject {
 
     @Published var isDiceRolling: Bool = false
     @Published var diceDisplayFace: Int = 5
-    @Published var diceRotationDegrees: Double = 15
+    @Published var diceRotationDegrees: Double = UnitCategory.length.converterDiceRestDegrees
     @Published var showDiceSubtitle: Bool = false
     @Published var diceLandedUnitName: String = ""
 
     private var diceFlashTimer: Timer?
     private var diceRollToken: UUID = UUID()
+
+    private func syncDiceTiltToCategory(animated: Bool) {
+        let rest = selectedCategory.converterDiceRestDegrees
+        if animated {
+            withAnimation(.easeOut(duration: 0.22)) {
+                diceRotationDegrees = rest
+            }
+        } else {
+            diceRotationDegrees = rest
+        }
+    }
 
     private var registry: UnitRegistry
     private var engine: ConverterEngine
@@ -91,6 +103,7 @@ final class ConverterViewModel: ObservableObject {
             selectedMode = modes[0]
         }
         applyDefaultsAfterCategoryChange()
+        syncDiceTiltToCategory(animated: false)
         recompute()
     }
 
@@ -158,15 +171,16 @@ final class ConverterViewModel: ObservableObject {
             return (candidates.isEmpty ? pool : candidates).randomElement()
         }()
 
-        // Reset rotation to 15° instantly, then animate to 735° (15 + 720).
+        let rest = selectedCategory.converterDiceRestDegrees
+        // Snap to category rest angle, then spin two full turns from there.
         withAnimation(.linear(duration: 0)) {
-            diceRotationDegrees = 15
+            diceRotationDegrees = rest
         }
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.016) {
             MainActor.assumeIsolated {
                 guard self.diceRollToken == token else { return }
                 withAnimation(.interpolatingSpring(mass: 1, stiffness: 80, damping: 14, initialVelocity: 8)) {
-                    self.diceRotationDegrees = 735
+                    self.diceRotationDegrees = rest + 720
                 }
             }
         }
@@ -267,6 +281,7 @@ final class ConverterViewModel: ObservableObject {
         selectedToUnitID = toID
         isApplyingFavoriteRestore = false
         reconcileSelectionsAfterModeChange()
+        syncDiceTiltToCategory(animated: true)
         recompute()
     }
 
@@ -277,6 +292,7 @@ final class ConverterViewModel: ObservableObject {
         defer {
             isApplyingFavoriteRestore = false
             reconcileSelectionsAfterModeChange()
+            syncDiceTiltToCategory(animated: true)
             recompute()
         }
 
