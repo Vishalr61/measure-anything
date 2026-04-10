@@ -155,13 +155,11 @@ struct HomeView: View {
 
     private var dashboardHeader: some View {
         HStack(alignment: .center, spacing: ConverterLayout.rhythm12) {
-            VStack(alignment: .leading, spacing: 4) {
-                Text("Convert anything")
-                    .font(.title2.weight(.bold))
-                Text("Choose a category, then convert on the same screen.")
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-            }
+            Text("Convert anything, anytime.")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+                .lineLimit(1)
+                .minimumScaleFactor(0.78)
             Spacer(minLength: 0)
         }
         .padding(.top, ConverterLayout.rhythm8)
