@@ -60,6 +60,12 @@ struct ConverterWorkspaceBody: View {
             && vm.toUnit != nil
     }
 
+    private var canCopyResult: Bool {
+        vm.conversionResult != nil
+            && vm.validationError == nil
+            && vm.toUnit != nil
+    }
+
     private func shareTextLine() -> String {
         guard let r = vm.conversionResult,
               let fromName = vm.fromUnit?.name,
@@ -138,15 +144,24 @@ struct ConverterWorkspaceBody: View {
 
     private var categoryAndModeContent: some View {
         VStack(alignment: .leading, spacing: ConverterLayout.rhythm16) {
-            Picker("Category", selection: $vm.selectedCategory) {
-                ForEach(vm.categories, id: \.self) { category in
-                    let d = taxonomyStore.categoryDisplay(for: category)
-                    Text(d.displayName).tag(category)
-                        .taxonomyPickerSegmentAccessibility(displayName: d.displayName, description: d.description)
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: ConverterLayout.rhythm8) {
+                    ForEach(vm.categories, id: \.self) { category in
+                        let d = taxonomyStore.categoryDisplay(for: category)
+                        CategoryChip(
+                            category: category,
+                            displayName: d.displayName,
+                            accent: ConverterCategoryAccent.accent(for: category),
+                            isSelected: vm.selectedCategory == category,
+                            onTap: {
+                                Haptics.tap()
+                                vm.selectedCategory = category
+                            }
+                        )
+                        .accessibilityHint(d.description ?? "")
+                    }
                 }
             }
-            .pickerStyle(.segmented)
-            .tint(categoryAccent)
 
             modeControls
         }
@@ -303,7 +318,7 @@ struct ConverterWorkspaceBody: View {
             }
 
             if let toUnit = vm.toUnit, toUnit.funFact != nil {
-                DidYouKnowCard(unit: toUnit)
+                DidYouKnowCard(unit: toUnit, accent: categoryAccent)
                     .id(toUnit.id)
                     .transition(.opacity)
                     .animation(.easeIn(duration: 0.25), value: toUnit.id)
@@ -331,9 +346,11 @@ struct ConverterWorkspaceBody: View {
             formulaLine: toRowFootnoteText,
             accent: categoryAccent,
             isSaved: isCurrentPairAlreadyFavorite,
+            copyEnabled: canCopyResult,
             shareEnabled: canShareResult,
             saveEnabled: vm.canSaveCurrentPairAsFavorite,
             usesPlaceholderResult: toRowUsesPlaceholder,
+            onCopy: { vm.copyResult() },
             onShare: { presentShareText() },
             onSave: { saveCurrentPairAsFavorite() },
             selectedToUnitID: $vm.selectedToUnitID,

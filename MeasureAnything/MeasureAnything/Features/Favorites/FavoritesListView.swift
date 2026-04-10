@@ -10,6 +10,8 @@ struct FavoritesListView: View {
 
     let registry: UnitRegistry
     let onSelect: (FavoriteConversion) -> Void
+    /// When `false`, embedded in the main tab bar (no Done toolbar, no dismiss on select).
+    var presentedAsSheet: Bool = true
 
     var body: some View {
         NavigationStack {
@@ -27,7 +29,9 @@ struct FavoritesListView: View {
                                 if fav.isRestorable(registry: registry) {
                                     Haptics.tap()
                                     onSelect(fav)
-                                    dismiss()
+                                    if presentedAsSheet {
+                                        dismiss()
+                                    }
                                 }
                             } label: {
                                 HStack(alignment: .center) {
@@ -64,8 +68,10 @@ struct FavoritesListView: View {
             .navigationTitle("Favorites")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Done") { dismiss() }
+                if presentedAsSheet {
+                    ToolbarItem(placement: .cancellationAction) {
+                        Button("Done") { dismiss() }
+                    }
                 }
             }
         }

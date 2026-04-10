@@ -2,80 +2,36 @@ import SwiftUI
 import UIKit
 import MeasureAnythingCore
 
-/// Expanded “To” conversion card: header actions, baseline-aligned number + unit row, formula footnote.
+/// “To” card: baseline-aligned result + unit, formula, then Copy / Share / Save grid.
 struct ToCard: View {
     let toUnitName: String
     let resultText: String
-    /// Live equivalence line (e.g. `50 Meter = 263.16 Pencil`); `nil` hides row 3.
+    /// Live equivalence (e.g. `50 Meter = 263.16 Kilometer`); `nil` skips formula row only.
     let formulaLine: String?
-    /// Category accent (teal family) — used where specs reference “brand teal”.
+    /// Category accent for result, unit picker, and Save action (matches chips / swap / dice).
     let accent: Color
     let isSaved: Bool
+    let copyEnabled: Bool
     let shareEnabled: Bool
     let saveEnabled: Bool
     let usesPlaceholderResult: Bool
+    let onCopy: () -> Void
     let onShare: () -> Void
     let onSave: () -> Void
     @Binding var selectedToUnitID: UnitDefinition.ID
     let availableUnits: [UnitDefinition]
 
-    @State private var starVisualScale: CGFloat = 1.0
+    @State private var saveStarScale: CGFloat = 1.0
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            // Row 1 — label + Share / Save
-            HStack(alignment: .center) {
-                Text("To")
-                    .font(.system(size: 8, weight: .semibold))
-                    .foregroundStyle(Color(hex: "#888780"))
-                    .tracking(1.0)
-                    .textCase(.uppercase)
+            Text("To")
+                .font(.system(size: 7, weight: .semibold))
+                .foregroundStyle(Color(hex: "#888780"))
+                .tracking(1.0)
+                .textCase(.uppercase)
+                .padding(.bottom, 6)
 
-                Spacer()
-
-                HStack(spacing: 5) {
-                    Button {
-                        guard shareEnabled else { return }
-                        onShare()
-                    } label: {
-                        RoundedRectangle(cornerRadius: 8, style: .continuous)
-                            .fill(Color(hex: "#F5F5F7"))
-                            .frame(width: 26, height: 26)
-                            .overlay(
-                                Image(systemName: "square.and.arrow.up")
-                                    .font(.system(size: 12))
-                                    .foregroundStyle(Color(hex: "#5F5E5A"))
-                            )
-                    }
-                    .buttonStyle(.plain)
-                    .disabled(!shareEnabled)
-                    .opacity(shareEnabled ? 1 : 0.4)
-                    .accessibilityLabel("Share")
-
-                    Button {
-                        guard saveEnabled, !isSaved else { return }
-                        UIImpactFeedbackGenerator(style: .light).impactOccurred()
-                        onSave()
-                    } label: {
-                        RoundedRectangle(cornerRadius: 8, style: .continuous)
-                            .fill(Color(hex: "#EAF5F4"))
-                            .frame(width: 26, height: 26)
-                            .overlay(
-                                Image(systemName: isSaved ? "star.fill" : "star")
-                                    .font(.system(size: 12))
-                                    .foregroundStyle(accent)
-                                    .scaleEffect(starVisualScale)
-                            )
-                    }
-                    .buttonStyle(.plain)
-                    .disabled(isSaved || !saveEnabled)
-                    .opacity((isSaved || saveEnabled) ? 1 : 0.4)
-                    .accessibilityLabel(isSaved ? "Already saved as favorite" : "Save as favorite")
-                }
-            }
-            .padding(.bottom, 8)
-
-            // Row 2 — hero number + unit picker (same baseline as FROM amount + pill)
             HStack(alignment: .lastTextBaseline) {
                 Text(resultText)
                     .font(.system(size: 36, weight: .bold))
@@ -109,7 +65,6 @@ struct ToCard: View {
             }
             .padding(.bottom, 8)
 
-            // Row 3 — hairline + live formula
             if let formulaLine {
                 Rectangle()
                     .fill(Color(hex: "#F5F5F7"))
@@ -117,13 +72,51 @@ struct ToCard: View {
                     .padding(.bottom, 6)
 
                 Text(formulaLine)
-                    .font(.system(size: 9))
+                    .font(.system(size: 8))
                     .foregroundStyle(Color(hex: "#888780"))
                     .fixedSize(horizontal: false, vertical: true)
+                    .padding(.bottom, 10)
+            }
+
+            Rectangle()
+                .fill(Color(hex: "#F5F5F7"))
+                .frame(height: 0.5)
+                .padding(.bottom, 10)
+
+            HStack(spacing: 8) {
+                ActionButton(
+                    icon: "doc.on.doc",
+                    label: "Copy",
+                    background: Color(hex: "#F0F0F3"),
+                    foreground: Color(hex: "#5F5E5A"),
+                    disabled: !copyEnabled,
+                    action: onCopy
+                )
+                ActionButton(
+                    icon: "square.and.arrow.up",
+                    label: "Share",
+                    background: Color(hex: "#F0F0F3"),
+                    foreground: Color(hex: "#5F5E5A"),
+                    disabled: !shareEnabled,
+                    action: onShare
+                )
+                ActionButton(
+                    icon: isSaved ? "star.fill" : "star",
+                    label: isSaved ? "Saved" : "Save",
+                    background: accent.opacity(0.14),
+                    foreground: accent,
+                    disabled: isSaved || !saveEnabled,
+                    iconScale: saveStarScale,
+                    action: {
+                        guard saveEnabled, !isSaved else { return }
+                        UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                        onSave()
+                    }
+                )
             }
         }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 14)
+        .padding(.horizontal, 14)
+        .padding(.vertical, 12)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(Color.white)
         .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
@@ -134,20 +127,20 @@ struct ToCard: View {
         .onChange(of: isSaved) { _, new in
             if new {
                 withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
-                    starVisualScale = 1.2
+                    saveStarScale = 1.2
                 }
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.12) {
                     withAnimation(.spring(response: 0.35, dampingFraction: 0.75)) {
-                        starVisualScale = 1.0
+                        saveStarScale = 1.0
                     }
                 }
             } else {
                 withAnimation(.spring(response: 0.28, dampingFraction: 0.65)) {
-                    starVisualScale = 1.12
+                    saveStarScale = 1.12
                 }
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                     withAnimation(.spring(response: 0.32, dampingFraction: 0.78)) {
-                        starVisualScale = 1.0
+                        saveStarScale = 1.0
                     }
                 }
             }

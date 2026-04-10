@@ -17,6 +17,7 @@ struct HomeView: View {
     @State private var showFavorites = false
     @State private var showCustomUnitForm = false
     @State private var scrollToConverterToken = 0
+    @State private var homeTab: BottomNav.Tab = .convert
 
     private var categoryAccent: Color {
         ConverterCategoryAccent.accent(for: vm.selectedCategory)
@@ -58,6 +59,43 @@ struct HomeView: View {
     }
 
     var body: some View {
+        VStack(spacing: 0) {
+            Group {
+                switch homeTab {
+                case .convert:
+                    convertTab
+                case .favourites:
+                    favouritesTab
+                case .settings:
+                    settingsTab
+                }
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+
+            BottomNav(selected: $homeTab, selectionTint: categoryAccent)
+        }
+        .background(Color(.systemGroupedBackground))
+        .sheet(isPresented: $showTaxonomySearch) {
+            TaxonomySearchView { itemId in
+                if let route = taxonomyStore.converterRoute(forTaxonomyItemId: itemId) {
+                    vm.applyTaxonomyRoute(route)
+                }
+                showTaxonomySearch = false
+            }
+            .environmentObject(taxonomyStore)
+        }
+        .sheet(isPresented: $showFavorites) {
+            FavoritesListView(registry: vm.currentRegistry) { fav in
+                vm.applyFavoriteRestore(
+                    categoryRaw: fav.categoryRaw,
+                    fromID: fav.fromUnitID,
+                    toID: fav.toUnitID
+                )
+            }
+        }
+    }
+
+    private var convertTab: some View {
         NavigationStack {
             ScrollViewReader { proxy in
                 ScrollView {
@@ -132,25 +170,26 @@ struct HomeView: View {
                     }
                 }
             }
-            .sheet(isPresented: $showTaxonomySearch) {
-                TaxonomySearchView { itemId in
-                    if let route = taxonomyStore.converterRoute(forTaxonomyItemId: itemId) {
-                        vm.applyTaxonomyRoute(route)
-                    }
-                    showTaxonomySearch = false
-                }
-                .environmentObject(taxonomyStore)
-            }
-            .sheet(isPresented: $showFavorites) {
-                FavoritesListView(registry: vm.currentRegistry) { fav in
-                    vm.applyFavoriteRestore(
-                        categoryRaw: fav.categoryRaw,
-                        fromID: fav.fromUnitID,
-                        toID: fav.toUnitID
-                    )
-                }
-            }
         }
+    }
+
+    private var favouritesTab: some View {
+        FavoritesListView(
+            registry: vm.currentRegistry,
+            onSelect: { fav in
+                vm.applyFavoriteRestore(
+                    categoryRaw: fav.categoryRaw,
+                    fromID: fav.fromUnitID,
+                    toID: fav.toUnitID
+                )
+                homeTab = .convert
+            },
+            presentedAsSheet: false
+        )
+    }
+
+    private var settingsTab: some View {
+        SettingsTabView()
     }
 
     private var dashboardHeader: some View {
@@ -208,32 +247,17 @@ struct HomeView: View {
 
     private func categoryPill(_ category: UnitCategory) -> some View {
         let display = taxonomyStore.categoryDisplay(for: category)
-        let accent = ConverterCategoryAccent.accent(for: category)
         let selected = vm.selectedCategory == category
-        return Button {
-            Haptics.tap()
-            vm.selectedCategory = category
-        } label: {
-            Text(display.displayName)
-                .font(.subheadline.weight(.semibold))
-                .foregroundStyle(selected ? Color.white : Color.primary)
-                .padding(.horizontal, ConverterLayout.rhythm16)
-                .padding(.vertical, 10)
-                .background(
-                    Capsule(style: .continuous)
-                        .fill(selected ? accent : Color(.secondarySystemGroupedBackground))
-                )
-                .overlay(
-                    Capsule(style: .continuous)
-                        .strokeBorder(
-                            selected ? accent.opacity(0.35) : Color.primary.opacity(ConverterLayout.strokeOpacitySubtle),
-                            lineWidth: ConverterLayout.strokeHairline
-                        )
-                )
-        }
-        .buttonStyle(.plain)
-        .accessibilityLabel("\(display.displayName) category")
-        .accessibilityAddTraits(selected ? .isSelected : [])
+        return CategoryChip(
+            category: category,
+            displayName: display.displayName,
+            accent: ConverterCategoryAccent.accent(for: category),
+            isSelected: selected,
+            onTap: {
+                Haptics.tap()
+                vm.selectedCategory = category
+            }
+        )
     }
 
 }

@@ -485,6 +485,16 @@ final class ConverterViewModel: ObservableObject {
         return formatNumberForDisplay(r.outputValue)
     }
 
+    /// Copies formatted result and “to” unit name to the pasteboard; success haptic when valid.
+    func copyResult() {
+        guard validationError == nil,
+              conversionResult != nil,
+              let name = toUnit?.name else { return }
+        let text = "\(formattedResult) \(name)"
+        UIPasteboard.general.string = text
+        UINotificationFeedbackGenerator().notificationOccurred(.success)
+    }
+
     /// Single-line conversion text for a share sheet (no meme appendix). Empty when invalid.
     func shareConversionPlainText() -> String {
         guard validationError == nil,
