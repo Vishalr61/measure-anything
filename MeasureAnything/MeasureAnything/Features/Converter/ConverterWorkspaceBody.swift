@@ -38,22 +38,6 @@ struct ConverterWorkspaceBody: View {
                 .frame(height: ConverterLayout.majorBlockSpacing)
 
             conversionInputBlock
-
-            Spacer()
-                .frame(height: ConverterLayout.majorBlockSpacing)
-
-            resultCard
-
-            // Below the live conversion rate card.
-            if let toUnit = vm.toUnit,
-               toUnit.funFact != nil {
-                DidYouKnowCard(
-                    unit: toUnit
-                )
-                .transition(.opacity.combined(with: .move(edge: .bottom)))
-                .animation(.spring(response: 0.4, dampingFraction: 0.8), value: toUnit.id)
-                .padding(.top, ConverterLayout.rhythm12)
-            }
         }
         .padding(.horizontal, ConverterLayout.horizontalInset)
         .padding(.vertical, ConverterLayout.rhythm20)
@@ -73,6 +57,12 @@ struct ConverterWorkspaceBody: View {
         vm.conversionResult != nil
             && vm.validationError == nil
             && vm.fromUnit != nil
+            && vm.toUnit != nil
+    }
+
+    private var canCopyResult: Bool {
+        vm.conversionResult != nil
+            && vm.validationError == nil
             && vm.toUnit != nil
     }
 
@@ -97,41 +87,12 @@ struct ConverterWorkspaceBody: View {
         showShareSheet = true
     }
 
-    private func copyResultToPasteboard() {
-        let text = shareTextLine()
-        guard !text.isEmpty else { return }
-        UIPasteboard.general.string = text
-        Haptics.tap()
-    }
-
-    private func presentShareImage() {
-        guard let r = vm.conversionResult,
-              let fromName = vm.fromUnit?.name,
-              let toName = vm.toUnit?.name else { return }
-        let input = vm.formatNumberForDisplay(r.inputValue)
-        let output = vm.formatNumberForDisplay(r.outputValue)
-        guard let image = ShareImageRenderer.renderCard(
-            inputFormatted: input,
-            fromName: fromName,
-            outputFormatted: output,
-            toName: toName,
-            meme: r.memeExplanation
-        ) else { return }
-        Haptics.share()
-        shareActivityItems = [image]
-        showShareSheet = true
-    }
-
     private var isCurrentPairAlreadyFavorite: Bool {
         favorites.contains {
             $0.categoryRaw == vm.selectedCategory.rawValue
                 && $0.fromUnitID == vm.selectedFromUnitID
                 && $0.toUnitID == vm.selectedToUnitID
         }
-    }
-
-    private var canSaveFavoriteTap: Bool {
-        vm.canSaveCurrentPairAsFavorite && !isCurrentPairAlreadyFavorite
     }
 
     private func saveCurrentPairAsFavorite() {
@@ -143,7 +104,6 @@ struct ConverterWorkspaceBody: View {
         )
         modelContext.insert(fav)
         try? modelContext.save()
-        Haptics.favorite()
     }
 
     private var customUnitsSyncToken: String {
@@ -157,18 +117,15 @@ struct ConverterWorkspaceBody: View {
         ConverterCategoryAccent.accent(for: vm.selectedCategory)
     }
 
-    private enum ConverterResultVisualState {
-        case empty
-        case error
-        case successStandard
-        case successMeme
-    }
-
-    private var converterResultVisualState: ConverterResultVisualState {
-        if vm.validationError != nil { return .error }
-        guard vm.conversionResult != nil else { return .empty }
-        if let m = vm.conversionResult?.memeExplanation, !m.isEmpty { return .successMeme }
-        return .successStandard
+    /// Live “1 m = … km” style line under the TO amount (hidden when invalid / no result).
+    private var toRowFootnoteText: String? {
+        guard vm.validationError == nil,
+              let r = vm.conversionResult,
+              let fromU = vm.fromUnit,
+              let toU = vm.toUnit else { return nil }
+        let inStr = vm.formatNumberForDisplay(r.inputValue)
+        let outStr = vm.formatNumberForDisplay(r.outputValue)
+        return "\(inStr) \(fromU.name) = \(outStr) \(toU.name)"
     }
 
     /// Block 1: category (optional) + mode (secondary surface).
@@ -187,15 +144,24 @@ struct ConverterWorkspaceBody: View {
 
     private var categoryAndModeContent: some View {
         VStack(alignment: .leading, spacing: ConverterLayout.rhythm16) {
-            Picker("Category", selection: $vm.selectedCategory) {
-                ForEach(vm.categories, id: \.self) { category in
-                    let d = taxonomyStore.categoryDisplay(for: category)
-                    Text(d.displayName).tag(category)
-                        .taxonomyPickerSegmentAccessibility(displayName: d.displayName, description: d.description)
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: ConverterLayout.rhythm8) {
+                    ForEach(vm.categories, id: \.self) { category in
+                        let d = taxonomyStore.categoryDisplay(for: category)
+                        CategoryChip(
+                            category: category,
+                            displayName: d.displayName,
+                            accent: ConverterCategoryAccent.accent(for: category),
+                            isSelected: vm.selectedCategory == category,
+                            onTap: {
+                                Haptics.tap()
+                                vm.selectedCategory = category
+                            }
+                        )
+                        .accessibilityHint(d.description ?? "")
+                    }
                 }
             }
-            .pickerStyle(.segmented)
-            .tint(categoryAccent)
 
             modeControls
         }
@@ -317,10 +283,18 @@ struct ConverterWorkspaceBody: View {
     }
 
     /// From/To: left column = amounts (input / converted output), right column = white unit pills — same `HStack` template so edges align. Swap on the seam.
+    /// Absurd pill treats `.custom` like absurd for dice visibility.
+    private var showsDiceCard: Bool {
+        switch vm.selectedMode {
+        case .normal: return false
+        case .absurd, .custom: return true
+        }
+    }
+
     private var referenceConversionColumn: some View {
-        VStack(alignment: .leading, spacing: ConverterLayout.rhythm16) {
+        VStack(alignment: .leading, spacing: 0) {
             VStack(spacing: 0) {
-                conversionAmountRow(isFrom: true)
+                fromConversionCard
                     .overlay(alignment: .bottom) {
                         referenceSwapButton
                             .offset(y: 27)
@@ -328,17 +302,30 @@ struct ConverterWorkspaceBody: View {
                     .padding(.bottom, 27)
                     .zIndex(1)
 
-                conversionAmountRow(isFrom: false)
+                expandedToCard
                     .padding(.top, -27)
             }
 
-            if effectiveTopModeBinding.wrappedValue == .absurd {
-                DiceRollCard(vm: vm, accent: categoryAccent)
-                    .transition(.move(edge: .bottom).combined(with: .opacity))
+            if let err = vm.validationError {
+                validationErrorView(message: err)
+                    .padding(.top, ConverterLayout.rhythm12)
             }
 
-            referenceMetaInfoPair
+            if showsDiceCard {
+                DiceRollCard(vm: vm, accent: categoryAccent)
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+                    .padding(.top, 10)
+            }
+
+            if let toUnit = vm.toUnit, toUnit.funFact != nil {
+                DidYouKnowCard(unit: toUnit, accent: categoryAccent)
+                    .id(toUnit.id)
+                    .transition(.opacity)
+                    .animation(.easeIn(duration: 0.25), value: toUnit.id)
+                    .padding(.top, 10)
+            }
         }
+        .animation(.spring(response: 0.4, dampingFraction: 0.8), value: showsDiceCard)
     }
 
     private var toRowDisplayString: String {
@@ -351,48 +338,56 @@ struct ConverterWorkspaceBody: View {
         vm.validationError != nil || vm.conversionResult == nil
     }
 
-    private func conversionAmountRow(isFrom: Bool) -> some View {
+    private var expandedToCard: some View {
+        let toName = vm.availableUnits.first { $0.id == vm.selectedToUnitID }?.name ?? "—"
+        return ToCard(
+            toUnitName: toName,
+            resultText: toRowDisplayString,
+            formulaLine: toRowFootnoteText,
+            accent: categoryAccent,
+            isSaved: isCurrentPairAlreadyFavorite,
+            copyEnabled: canCopyResult,
+            shareEnabled: canShareResult,
+            saveEnabled: vm.canSaveCurrentPairAsFavorite,
+            usesPlaceholderResult: toRowUsesPlaceholder,
+            onCopy: { vm.copyResult() },
+            onShare: { presentShareText() },
+            onSave: { saveCurrentPairAsFavorite() },
+            selectedToUnitID: $vm.selectedToUnitID,
+            availableUnits: vm.availableUnits
+        )
+    }
+
+    private var fromConversionCard: some View {
         VStack(alignment: .leading, spacing: ConverterLayout.rhythm8) {
-            Text(isFrom ? "From" : "To")
+            Text("From")
                 .font(.caption.weight(.semibold))
                 .foregroundStyle(.secondary)
                 .textCase(.uppercase)
                 .tracking(0.55)
 
             HStack(alignment: .center, spacing: ConverterLayout.rhythm12) {
-                Group {
-                    if isFrom {
-                        TextField("", text: $vm.inputText, prompt: Text("0").foregroundStyle(.tertiary))
-                            .keyboardType(.decimalPad)
-                            .focused($valueFieldFocused)
-                            .font(.system(size: 40, weight: .bold, design: .rounded))
-                            .foregroundStyle(.primary)
-                            .monospacedDigit()
-                            .lineLimit(1)
-                            .minimumScaleFactor(0.55)
-                            .toolbar {
-                                ToolbarItemGroup(placement: .keyboard) {
-                                    Spacer()
-                                    Button("Done") {
-                                        valueFieldFocused = false
-                                    }
-                                    .fontWeight(.semibold)
-                                }
+                TextField("", text: $vm.inputText, prompt: Text("0").foregroundStyle(.tertiary))
+                    .keyboardType(.decimalPad)
+                    .focused($valueFieldFocused)
+                    .font(.system(size: 40, weight: .bold, design: .rounded))
+                    .foregroundStyle(.primary)
+                    .monospacedDigit()
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.55)
+                    .toolbar {
+                        ToolbarItemGroup(placement: .keyboard) {
+                            Spacer()
+                            Button("Done") {
+                                valueFieldFocused = false
                             }
-                            .accessibilityLabel("Amount to convert")
-                    } else {
-                        Text(toRowDisplayString)
-                            .font(.system(size: 40, weight: .bold, design: .rounded))
-                            .foregroundStyle(toRowUsesPlaceholder ? Color.secondary.opacity(0.55) : Color.primary)
-                            .monospacedDigit()
-                            .lineLimit(1)
-                            .minimumScaleFactor(0.55)
-                            .accessibilityLabel("Converted amount, \(toRowDisplayString)")
+                            .fontWeight(.semibold)
+                        }
                     }
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
+                    .accessibilityLabel("Amount to convert")
+                    .frame(maxWidth: .infinity, alignment: .leading)
 
-                unitMenuPill(selection: isFrom ? $vm.selectedFromUnitID : $vm.selectedToUnitID)
+                unitMenuPill(selection: $vm.selectedFromUnitID)
             }
         }
         .padding(ConverterLayout.cardPadding)
@@ -443,56 +438,6 @@ struct ConverterWorkspaceBody: View {
         .accessibilityHint("Choose a unit")
     }
 
-    private var referenceMetaInfoPair: some View {
-        HStack(alignment: .top, spacing: ConverterLayout.rhythm12) {
-            metaInfoCard(title: "Formula", body: formulaMetaLine)
-                .frame(maxWidth: .infinity, alignment: .leading)
-            metaInfoCard(title: "Precision", body: precisionMetaLine)
-                .frame(maxWidth: .infinity, alignment: .leading)
-        }
-    }
-
-    private var formulaMetaLine: String {
-        guard let r = vm.conversionResult,
-              vm.validationError == nil,
-              let fromName = vm.fromUnit?.name,
-              let toName = vm.toUnit?.name,
-              let line = equivalenceLine(result: r, fromName: fromName, toName: toName),
-              !line.isEmpty
-        else {
-            return "Shown for linear conversions (not temperature)."
-        }
-        return line
-    }
-
-    private var precisionMetaLine: String {
-        "Adapts to magnitude (up to 6 decimal places)."
-    }
-
-    private func metaInfoCard(title: String, body: String) -> some View {
-        VStack(alignment: .leading, spacing: ConverterLayout.rhythm8) {
-            Text(title)
-                .font(.caption2.weight(.bold))
-                .foregroundStyle(.secondary)
-                .textCase(.uppercase)
-                .tracking(0.5)
-            Text(body)
-                .font(.caption)
-                .foregroundStyle(.primary)
-                .fixedSize(horizontal: false, vertical: true)
-        }
-        .padding(ConverterLayout.secondaryBlockPadding)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(
-            RoundedRectangle(cornerRadius: ConverterLayout.secondaryBlockCornerRadius, style: .continuous)
-                .fill(Color(.secondarySystemGroupedBackground))
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: ConverterLayout.secondaryBlockCornerRadius, style: .continuous)
-                .strokeBorder(Color.primary.opacity(ConverterLayout.strokeOpacitySubtle), lineWidth: ConverterLayout.strokeHairline)
-        )
-    }
-
     private var referenceSwapButton: some View {
         Button {
             Haptics.tap()
@@ -523,75 +468,6 @@ struct ConverterWorkspaceBody: View {
         RoundedRectangle(cornerRadius: ConverterLayout.referenceCardCornerRadius, style: .continuous)
             .strokeBorder(Color.primary.opacity(ConverterLayout.strokeOpacitySubtle * 0.85), lineWidth: ConverterLayout.strokeHairline)
     }
-
-    private func unitDisplaySymbol(_ unit: UnitDefinition?) -> String {
-        guard let unit else { return "—" }
-        if let s = Self.commonUnitSymbols[unit.id] { return s }
-        let parts = unit.name.split(separator: " ").filter { !$0.isEmpty }
-        if parts.count >= 2, let f = parts.first?.first {
-            let second = parts[1].first.map { String($0) } ?? ""
-            return String(f).uppercased() + second.lowercased()
-        }
-        if unit.name.count <= 5 { return unit.name }
-        return String(unit.name.prefix(4)) + "…"
-    }
-
-    private static let commonUnitSymbols: [String: String] = [
-        // Length (SI / scientific)
-        "picometer": "pm",
-        "angstrom": "Å",
-        "nanometer": "nm",
-        "micrometer": "µm",
-        "decimeter": "dm",
-        "hectometer": "hm",
-        "megameter": "Mm",
-        "meter": "m",
-        "kilometer": "km",
-        "centimeter": "cm",
-        "millimeter": "mm",
-        "inch": "in",
-        "foot": "ft",
-        "yard": "yd",
-        "mile": "mi",
-
-        // Length (imperial / historical)
-        "thou": "thou",
-        "fathom": "ftm",
-        "chain": "ch",
-        "rod": "rd",
-        "furlong": "fur",
-        "league": "lea",
-        "hand": "hh",
-        "cubit": "cubit",
-        "pace": "pace",
-        "nautical_mile": "nmi",
-
-        // Length (astronomy)
-        "astronomical_unit": "AU",
-        "light_year": "ly",
-        "parsec": "pc",
-        "light_second": "ls",
-
-        "kilogram": "kg",
-        "gram": "g",
-        "milligram": "mg",
-        "pound": "lb",
-        "ounce": "oz",
-        "second": "s",
-        "minute": "min",
-        "hour": "h",
-        "day": "d",
-        "liter": "L",
-        "milliliter": "mL",
-        "cubic_meter": "m³",
-        "gallon_us": "gal",
-        "quart_us": "qt",
-        "pint_us": "pt",
-        "cup_us": "cup",
-        "celsius": "°C",
-        "fahrenheit": "°F",
-        "kelvin": "K"
-    ]
 
     private func secondarySurface<Content: View>(@ViewBuilder content: () -> Content) -> some View {
         content()
@@ -667,345 +543,6 @@ struct ConverterWorkspaceBody: View {
         .padding(.vertical, 4)
     }
 
-    /// Block 3: conversion output (primary elevated surface).
-    private var resultCard: some View {
-        let state = converterResultVisualState
-        return VStack(alignment: .leading, spacing: ConverterLayout.rhythm16) {
-            Group {
-                if let err = vm.validationError {
-                    Text("Result")
-                        .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(resultTitleStyle(for: state))
-                    validationErrorView(message: err)
-                } else if let result = vm.conversionResult,
-                          let fromUnit = vm.fromUnit,
-                          let toUnit = vm.toUnit {
-                    referenceResultCard(result: result, fromUnit: fromUnit, toUnit: toUnit)
-                } else {
-                    Text("Result")
-                        .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(resultTitleStyle(for: state))
-                    resultEmptyPlaceholder
-                }
-            }
-            .animation(.easeOut(duration: 0.24), value: resultBodyAnimationKey)
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(ConverterLayout.resultHeroPadding)
-        .background(
-            RoundedRectangle(cornerRadius: ConverterLayout.resultHeroCornerRadius, style: .continuous)
-                .fill(resultCardFill(for: state))
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: ConverterLayout.resultHeroCornerRadius, style: .continuous)
-                .strokeBorder(resultCardStroke(for: state), lineWidth: ConverterLayout.strokeHairline)
-        )
-        .overlay(alignment: .leading) {
-            resultLeadingAccentBar(state: state)
-        }
-        .shadow(color: .black.opacity(resultCardShadowOpacity(for: state)), radius: 20, x: 0, y: 8)
-    }
-
-    private func referenceResultCard(result: ConversionResult, fromUnit: UnitDefinition, toUnit: UnitDefinition) -> some View {
-        let input = vm.formatNumberForDisplay(result.inputValue)
-        let output = vm.formatNumberForDisplay(result.outputValue)
-        let fromSym = unitDisplaySymbol(fromUnit)
-        let toSym = unitDisplaySymbol(toUnit)
-
-        return VStack(alignment: .center, spacing: ConverterLayout.rhythm16) {
-            ZStack(alignment: .topTrailing) {
-                VStack(spacing: 6) {
-                    Text("Live conversion rate")
-                        .font(.caption2.weight(.bold))
-                        .foregroundStyle(.secondary)
-                        .textCase(.uppercase)
-                        .tracking(0.7)
-
-                    referenceRateLine(input: input, fromSym: fromSym, output: output, toSym: toSym)
-                        .frame(maxWidth: .infinity, alignment: .center)
-                        .padding(.horizontal, ConverterLayout.rhythm8)
-                }
-                .frame(maxWidth: .infinity, alignment: .center)
-
-                Button {
-                    saveCurrentPairAsFavorite()
-                } label: {
-                    Image(systemName: isCurrentPairAlreadyFavorite ? "star.fill" : "star")
-                        .font(.caption.weight(.semibold))
-                        .foregroundStyle(isCurrentPairAlreadyFavorite ? categoryAccent : Color.secondary)
-                        .frame(width: 40, height: 40)
-                        .background(
-                            Circle()
-                                .fill(Color(.systemBackground).opacity(0.7))
-                        )
-                        .overlay(
-                            Circle()
-                                .strokeBorder(Color.primary.opacity(0.06), lineWidth: ConverterLayout.strokeHairline)
-                        )
-                        .contentShape(Rectangle())
-                }
-                .buttonStyle(ConverterPressingButtonStyle())
-                .disabled(!canSaveFavoriteTap)
-                .accessibilityLabel(isCurrentPairAlreadyFavorite ? "Already a favorite" : "Save as favorite")
-            }
-
-            if let meme = result.memeExplanation, !meme.isEmpty {
-                Text(meme)
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-                    .italic()
-                    .multilineTextAlignment(.center)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .padding(ConverterLayout.rhythm16)
-                    .frame(maxWidth: .infinity, alignment: .center)
-                    .background(
-                        RoundedRectangle(cornerRadius: ConverterLayout.secondaryBlockCornerRadius, style: .continuous)
-                            .fill(Color(.systemBackground).opacity(0.6))
-                    )
-                    .overlay(
-                        RoundedRectangle(cornerRadius: ConverterLayout.secondaryBlockCornerRadius, style: .continuous)
-                            .strokeBorder(categoryAccent.opacity(0.18), lineWidth: ConverterLayout.strokeHairline)
-                    )
-            }
-
-            referenceResultButtons
-        }
-    }
-
-    private func referenceRateLine(input: String, fromSym: String, output: String, toSym: String) -> some View {
-        // Prefer fully visible text (wrap) over truncation. Fallback to a slightly smaller font when needed.
-        ViewThatFits(in: .horizontal) {
-            referenceRateLineText(input: input, fromSym: fromSym, output: output, toSym: toSym, size: 28)
-            referenceRateLineText(input: input, fromSym: fromSym, output: output, toSym: toSym, size: 24)
-            referenceRateLineText(input: input, fromSym: fromSym, output: output, toSym: toSym, size: 20)
-            referenceRateLineText(input: input, fromSym: fromSym, output: output, toSym: toSym, size: 18)
-        }
-    }
-
-    private func referenceRateLineText(input: String, fromSym: String, output: String, toSym: String, size: CGFloat) -> some View {
-        let combined = Text("\(input) \(fromSym) = \(output) \(toSym)")
-            .font(.system(size: size, weight: .bold, design: .rounded))
-            .foregroundStyle(.primary)
-            .monospacedDigit()
-            .lineLimit(4)
-            .minimumScaleFactor(0.32)
-            .multilineTextAlignment(.center)
-            .fixedSize(horizontal: false, vertical: true)
-            .allowsTightening(true)
-            .layoutPriority(1)
-
-        return Group {
-            if #available(iOS 17.0, *) {
-                combined.contentTransition(ContentTransition.numericText())
-            } else {
-                combined
-            }
-        }
-    }
-
-    private var referenceResultButtons: some View {
-        HStack(spacing: ConverterLayout.rhythm12) {
-            Button {
-                copyResultToPasteboard()
-            } label: {
-                HStack(spacing: 10) {
-                    Image(systemName: "doc.on.doc")
-                        .font(.subheadline.weight(.semibold))
-                    Text("Copy")
-                        .font(.subheadline.weight(.semibold))
-                }
-                .foregroundStyle(.primary)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 16)
-                .background(
-                    RoundedRectangle(cornerRadius: 18, style: .continuous)
-                        .fill(Color(.systemGray5))
-                )
-            }
-            .buttonStyle(ConverterPressingButtonStyle())
-            .accessibilityLabel("Copy")
-
-            Menu {
-                Button("Copy") { copyResultToPasteboard() }
-                Button("Share as Text") { presentShareText() }
-                Button("Share as Image") { presentShareImage() }
-            } label: {
-                HStack(spacing: 10) {
-                    Image(systemName: "square.and.arrow.up")
-                        .font(.subheadline.weight(.semibold))
-                    Text("Share")
-                        .font(.subheadline.weight(.semibold))
-                }
-                .foregroundStyle(.white)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 16)
-                .background(
-                    RoundedRectangle(cornerRadius: 18, style: .continuous)
-                        .fill(categoryAccent)
-                )
-            }
-            .buttonStyle(ConverterPressingButtonStyle())
-            .accessibilityLabel("Share")
-        }
-    }
-
-    private func resultTitleStyle(for state: ConverterResultVisualState) -> Color {
-        switch state {
-        case .empty: return Color.secondary.opacity(0.85)
-        case .error: return Color.red.opacity(0.75)
-        case .successStandard, .successMeme: return Color.secondary
-        }
-    }
-
-    private func resultCardFill(for state: ConverterResultVisualState) -> Color {
-        switch state {
-        case .empty:
-            return Color(.secondarySystemGroupedBackground)
-        case .error:
-            return Color(.systemBackground)
-        case .successStandard, .successMeme:
-            return categoryAccent.opacity(0.1)
-        }
-    }
-
-    private func resultCardStroke(for state: ConverterResultVisualState) -> Color {
-        switch state {
-        case .empty:
-            return Color.primary.opacity(ConverterLayout.strokeOpacitySubtle)
-        case .error:
-            return Color.red.opacity(0.28)
-        case .successStandard:
-            return categoryAccent.opacity(0.2)
-        case .successMeme:
-            return categoryAccent.opacity(0.24)
-        }
-    }
-
-    private func resultCardShadowOpacity(for state: ConverterResultVisualState) -> Double {
-        switch state {
-        case .empty: return 0.06
-        case .error: return 0.1
-        case .successStandard: return 0.12
-        case .successMeme: return 0.14
-        }
-    }
-
-    @ViewBuilder
-    private func resultLeadingAccentBar(state: ConverterResultVisualState) -> some View {
-        switch state {
-        case .empty, .successStandard, .successMeme:
-            EmptyView()
-        case .error:
-            Capsule(style: .continuous)
-                .fill(Color.red.opacity(0.55))
-                .frame(width: ConverterLayout.accentBarWidth)
-                .padding(.leading, ConverterLayout.rhythm12)
-                .padding(.vertical, ConverterLayout.rhythm24)
-        }
-    }
-
-    private var resultBodyAnimationKey: String {
-        if let err = vm.validationError { return "e:\(err)" }
-        if let r = vm.conversionResult {
-            return "r:\(r.outputValue):\(r.inputValue):\(vm.inputText):\(vm.isMemeExplanationEnabled):\(r.memeExplanation ?? "")"
-        }
-        return "empty"
-    }
-
-    private var resultCardTrailingChrome: some View {
-        HStack(spacing: 0) {
-            Button {
-                copyResultToPasteboard()
-            } label: {
-                Image(systemName: "doc.on.doc")
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(categoryAccent.opacity(0.85))
-                    .frame(width: 40, height: 40)
-                    .contentShape(Rectangle())
-            }
-            .buttonStyle(ConverterPressingButtonStyle())
-            .accessibilityLabel("Copy result")
-
-            Menu {
-                Button("Copy") {
-                    copyResultToPasteboard()
-                }
-                Button("Share as Text") {
-                    presentShareText()
-                }
-                Button("Share as Image") {
-                    presentShareImage()
-                }
-            } label: {
-                Image(systemName: "square.and.arrow.up")
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(categoryAccent.opacity(0.75))
-                    .frame(width: 40, height: 40)
-                    .contentShape(Rectangle())
-            }
-            .buttonStyle(ConverterPressingButtonStyle())
-            .accessibilityLabel("Share result")
-        }
-    }
-
-    private var resultReferenceActionPills: some View {
-        HStack(spacing: ConverterLayout.rhythm12) {
-            Button {
-                saveCurrentPairAsFavorite()
-            } label: {
-                Text(isCurrentPairAlreadyFavorite ? "Saved" : "Favorite")
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(
-                        isCurrentPairAlreadyFavorite ? AnyShapeStyle(Color.secondary) : AnyShapeStyle(categoryAccent)
-                    )
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 14)
-                    .background(
-                        Capsule(style: .continuous)
-                            .fill(categoryAccent.opacity(isCurrentPairAlreadyFavorite ? 0.08 : 0.16))
-                    )
-                    .overlay(
-                        Capsule(style: .continuous)
-                            .strokeBorder(categoryAccent.opacity(0.22), lineWidth: ConverterLayout.strokeHairline)
-                    )
-            }
-            .buttonStyle(ConverterPressingButtonStyle())
-            .disabled(!vm.canSaveCurrentPairAsFavorite || isCurrentPairAlreadyFavorite)
-            .accessibilityLabel(isCurrentPairAlreadyFavorite ? "Already saved as favorite" : "Save as favorite")
-
-            Button {
-                presentShareText()
-            } label: {
-                Text("Share")
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(.secondary)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 14)
-                    .background(
-                        Capsule(style: .continuous)
-                            .fill(Color(.systemGray5))
-                    )
-                    .overlay(
-                        Capsule(style: .continuous)
-                            .strokeBorder(Color.primary.opacity(0.06), lineWidth: ConverterLayout.strokeHairline)
-                    )
-            }
-            .buttonStyle(ConverterPressingButtonStyle())
-            .accessibilityLabel("Share as text")
-        }
-    }
-
-    /// Linear factor line; omitted for temperature and degenerate cases.
-    private func equivalenceLine(result: ConversionResult, fromName: String, toName: String) -> String? {
-        guard result.category != .temperature,
-              result.fromUnitID != result.toUnitID else { return nil }
-        let inp = result.inputValue
-        guard inp != 0, abs(inp) > 1e-12 else { return nil }
-        let ratio = result.outputValue / inp
-        let r = vm.formatNumberForDisplay(ratio)
-        return "1 \(fromName) ≈ \(r) \(toName)"
-    }
-
     private func sectionLabel(_ title: String) -> some View {
         Text(title)
             .font(.footnote.weight(.semibold))
@@ -1035,35 +572,6 @@ struct ConverterWorkspaceBody: View {
             RoundedRectangle(cornerRadius: ConverterLayout.secondaryBlockCornerRadius, style: .continuous)
                 .strokeBorder(Color.red.opacity(0.22), lineWidth: ConverterLayout.strokeHairline)
         )
-    }
-
-    private var resultEmptyPlaceholder: some View {
-        HStack(alignment: .top, spacing: ConverterLayout.rhythm12) {
-            Image(systemName: "function")
-                .font(.title3)
-                .foregroundStyle(.quaternary)
-                .frame(width: 26)
-            VStack(alignment: .leading, spacing: ConverterLayout.rhythm8) {
-                Text("No result yet")
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(.secondary)
-                Text("Enter an amount and choose units.")
-                    .font(.footnote)
-                    .foregroundStyle(.tertiary)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
-        }
-        .padding(ConverterLayout.rhythm16)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(
-            RoundedRectangle(cornerRadius: ConverterLayout.secondaryBlockCornerRadius, style: .continuous)
-                .strokeBorder(
-                    Color.primary.opacity(ConverterLayout.strokeOpacitySubtle),
-                    style: StrokeStyle(lineWidth: ConverterLayout.strokeHairline, dash: [6, 5])
-                )
-        )
-        .accessibilityElement(children: .combine)
-        .accessibilityHint("Invalid input appears in red below when present.")
     }
 }
 

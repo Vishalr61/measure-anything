@@ -479,8 +479,30 @@ final class ConverterViewModel: ObservableObject {
         return f.string(from: NSNumber(value: value)) ?? String(format: "%g", value)
     }
 
+    /// Live formatted converted value for UI copy/share footnotes (`"—"` when invalid or missing).
     var formattedResult: String {
-        guard let r = conversionResult else { return "—" }
+        guard validationError == nil, let r = conversionResult else { return "—" }
         return formatNumberForDisplay(r.outputValue)
+    }
+
+    /// Copies formatted result and “to” unit name to the pasteboard; success haptic when valid.
+    func copyResult() {
+        guard validationError == nil,
+              conversionResult != nil,
+              let name = toUnit?.name else { return }
+        let text = "\(formattedResult) \(name)"
+        UIPasteboard.general.string = text
+        UINotificationFeedbackGenerator().notificationOccurred(.success)
+    }
+
+    /// Single-line conversion text for a share sheet (no meme appendix). Empty when invalid.
+    func shareConversionPlainText() -> String {
+        guard validationError == nil,
+              let r = conversionResult,
+              let fromN = fromUnit?.name,
+              let toN = toUnit?.name else { return "" }
+        let i = formatNumberForDisplay(r.inputValue)
+        let o = formatNumberForDisplay(r.outputValue)
+        return "\(i) \(fromN) = \(o) \(toN)"
     }
 }

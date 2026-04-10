@@ -3,6 +3,7 @@ import MeasureAnythingCore
 
 struct DidYouKnowCard: View {
     let unit: UnitDefinition
+    var accent: Color = Color(red: 0x2B / 255, green: 0x5C / 255, blue: 0xE6 / 255)
 
     @State private var showFact: Bool = false
     @State private var flashOpacity: Double = 1
@@ -13,7 +14,7 @@ struct DidYouKnowCard: View {
         return VStack(alignment: .leading, spacing: 10) {
             Text("Did you know")
                 .font(.system(size: 9, weight: .semibold))
-                .foregroundStyle(Color(red: 0x2B / 255, green: 0x5C / 255, blue: 0xE6 / 255))
+                .foregroundStyle(accent)
                 .textCase(.uppercase)
                 .tracking(0.54) // ≈ 0.06em at 9pt
 

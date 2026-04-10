@@ -12,6 +12,7 @@ struct ConverterView: View {
     @State private var showCustomUnitForm = false
     @State private var showFavorites = false
     @State private var showTaxonomySearch = false
+    @State private var mainTab: BottomNav.Tab = .convert
 
     private var categoryAccent: Color {
         ConverterCategoryAccent.accent(for: vm.selectedCategory)
@@ -30,6 +31,43 @@ struct ConverterView: View {
     }
 
     var body: some View {
+        VStack(spacing: 0) {
+            Group {
+                switch mainTab {
+                case .convert:
+                    convertTab
+                case .favourites:
+                    favouritesTab
+                case .settings:
+                    SettingsTabView()
+                }
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+
+            BottomNav(selected: $mainTab, selectionTint: categoryAccent)
+        }
+        .background(Color(.systemGroupedBackground))
+        .sheet(isPresented: $showTaxonomySearch) {
+            TaxonomySearchView { itemId in
+                if let route = taxonomyStore.converterRoute(forTaxonomyItemId: itemId) {
+                    vm.applyTaxonomyRoute(route)
+                }
+                showTaxonomySearch = false
+            }
+            .environmentObject(taxonomyStore)
+        }
+        .sheet(isPresented: $showFavorites) {
+            FavoritesListView(registry: vm.currentRegistry) { fav in
+                vm.applyFavoriteRestore(
+                    categoryRaw: fav.categoryRaw,
+                    fromID: fav.fromUnitID,
+                    toID: fav.toUnitID
+                )
+            }
+        }
+    }
+
+    private var convertTab: some View {
         NavigationStack {
             ScrollView {
                 ConverterWorkspaceBody(
@@ -84,25 +122,22 @@ struct ConverterView: View {
                     }
                 }
             }
-            .sheet(isPresented: $showTaxonomySearch) {
-                TaxonomySearchView { itemId in
-                    if let route = taxonomyStore.converterRoute(forTaxonomyItemId: itemId) {
-                        vm.applyTaxonomyRoute(route)
-                    }
-                    showTaxonomySearch = false
-                }
-                .environmentObject(taxonomyStore)
-            }
-            .sheet(isPresented: $showFavorites) {
-                FavoritesListView(registry: vm.currentRegistry) { fav in
-                    vm.applyFavoriteRestore(
-                        categoryRaw: fav.categoryRaw,
-                        fromID: fav.fromUnitID,
-                        toID: fav.toUnitID
-                    )
-                }
-            }
         }
+    }
+
+    private var favouritesTab: some View {
+        FavoritesListView(
+            registry: vm.currentRegistry,
+            onSelect: { fav in
+                vm.applyFavoriteRestore(
+                    categoryRaw: fav.categoryRaw,
+                    fromID: fav.fromUnitID,
+                    toID: fav.toUnitID
+                )
+                mainTab = .convert
+            },
+            presentedAsSheet: false
+        )
     }
 
     private func saveCurrentPairAsFavorite() {
