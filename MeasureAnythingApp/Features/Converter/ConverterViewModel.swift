@@ -43,12 +43,15 @@ final class ConverterViewModel: ObservableObject {
     private let displayFormatter: NumberFormatter = {
         let f = NumberFormatter()
         f.numberStyle = .decimal
-        f.locale = .current
+        f.locale = Locale(identifier: "en_US")
         f.usesGroupingSeparator = true
         f.roundingMode = .halfUp
         f.minimumFractionDigits = 0
+        f.maximumFractionDigits = 6
         return f
     }()
+
+    private static let displayFallbackLocale = Locale(identifier: "en_US")
 
     init() {
         let loadedRegistry: UnitRegistry
@@ -219,6 +222,9 @@ final class ConverterViewModel: ObservableObject {
             f.minimumFractionDigits = 0
         }
 
-        return f.string(from: NSNumber(value: value)) ?? String(format: "%g", value)
+        if let s = f.string(from: NSNumber(value: value)) {
+            return s
+        }
+        return String(format: "%g", locale: Self.displayFallbackLocale, value)
     }
 }

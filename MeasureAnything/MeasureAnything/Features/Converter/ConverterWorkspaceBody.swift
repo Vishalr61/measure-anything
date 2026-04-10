@@ -128,49 +128,40 @@ struct ConverterWorkspaceBody: View {
         return "\(inStr) \(fromU.name) = \(outStr) \(toU.name)"
     }
 
-    /// Block 1: category (optional) + mode (secondary surface).
+    /// Category chips (optional) + compact mode capsule — no card wrapper or “MODE” label.
     private var categoryModeBlock: some View {
-        secondarySurface {
-            VStack(alignment: .leading, spacing: ConverterLayout.rhythm12) {
-                sectionLabel(showsCategoryPicker ? "Category & mode" : "Mode")
-                if showsCategoryPicker {
-                    categoryAndModeContent
-                } else {
-                    modeControls
-                }
-            }
-        }
-    }
-
-    private var categoryAndModeContent: some View {
-        VStack(alignment: .leading, spacing: ConverterLayout.rhythm16) {
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: ConverterLayout.rhythm8) {
-                    ForEach(vm.categories, id: \.self) { category in
-                        let d = taxonomyStore.categoryDisplay(for: category)
-                        CategoryChip(
-                            category: category,
-                            displayName: d.displayName,
-                            accent: ConverterCategoryAccent.accent(for: category),
-                            isSelected: vm.selectedCategory == category,
-                            onTap: {
-                                Haptics.tap()
-                                vm.selectedCategory = category
-                            }
-                        )
-                        .accessibilityHint(d.description ?? "")
-                    }
-                }
-            }
-
-            modeControls
-        }
-    }
-
-    private var modeControls: some View {
         VStack(alignment: .leading, spacing: ConverterLayout.rhythm12) {
-            modePillToggle
-                .disabled(!supportsAbsurdMode)
+            if showsCategoryPicker {
+                categoryChipScroll
+            }
+            HStack {
+                Spacer(minLength: 0)
+                compactModeToggle
+                    .disabled(!supportsAbsurdMode)
+                Spacer(minLength: 0)
+            }
+            .padding(.vertical, 2)
+        }
+    }
+
+    private var categoryChipScroll: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: ConverterLayout.rhythm8) {
+                ForEach(vm.categories, id: \.self) { category in
+                    let d = taxonomyStore.categoryDisplay(for: category)
+                    CategoryChip(
+                        category: category,
+                        displayName: d.displayName,
+                        accent: ConverterCategoryAccent.accent(for: category),
+                        isSelected: vm.selectedCategory == category,
+                        onTap: {
+                            Haptics.tap()
+                            vm.selectedCategory = category
+                        }
+                    )
+                    .accessibilityHint(d.description ?? "")
+                }
+            }
         }
     }
 
@@ -178,69 +169,35 @@ struct ConverterWorkspaceBody: View {
         vm.modes.contains(.absurd)
     }
 
-    private var supportsCustomMode: Bool {
-        vm.modes.contains(.custom)
-    }
-
-    private var modePillToggle: some View {
+    private var compactModeToggle: some View {
         let selection = effectiveTopModeBinding.wrappedValue
         return HStack(spacing: 0) {
-            modePillOption(title: "Normal", selection: selection, option: .normal) {
-                withAnimation(.easeOut(duration: 0.18)) {
-                    effectiveTopModeBinding.wrappedValue = .normal
-                }
+            compactModePill(title: "Normal", selected: selection == .normal) {
+                effectiveTopModeBinding.wrappedValue = .normal
             }
-            modePillOption(title: "Absurd", selection: selection, option: .absurd) {
-                withAnimation(.easeOut(duration: 0.18)) {
-                    effectiveTopModeBinding.wrappedValue = .absurd
-                }
+            compactModePill(title: "Absurd", selected: selection == .absurd) {
+                effectiveTopModeBinding.wrappedValue = .absurd
             }
         }
         .background(
             Capsule(style: .continuous)
-                .fill(Color(.systemGray5))
-        )
-        .overlay(
-            Capsule(style: .continuous)
-                .strokeBorder(Color.primary.opacity(0.06), lineWidth: ConverterLayout.strokeHairline)
+                .fill(Color(hex: "#E0E0E2"))
         )
         .accessibilityElement(children: .combine)
         .accessibilityLabel("Mode")
         .accessibilityValue(selection == .normal ? "Normal" : "Absurd")
     }
 
-    private func modePillOption(title: String, selection: UnitRegistry.Mode, option: UnitRegistry.Mode, action: @escaping () -> Void) -> some View {
-        let selected = selection == option
-        let textColor: Color = {
-            if selected {
-                return option == .absurd ? Color.white : Color.primary
-            }
-            return Color.secondary
-        }()
-
-        let fill: Color = {
-            guard selected else { return Color.clear }
-            // Match reference: Normal selected is white; Absurd selected is a slightly deeper tint.
-            if option == .normal { return Color(.systemBackground) }
-            return categoryAccent.opacity(0.92)
-        }()
-
-        return Button(action: action) {
+    private func compactModePill(title: String, selected: Bool, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
             Text(title)
-                .font(.subheadline.weight(.semibold))
-                .foregroundStyle(textColor)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 10)
+                .font(.system(size: 13, weight: selected ? .semibold : .regular))
+                .foregroundStyle(selected ? Color.white : Color(hex: "#888780"))
+                .padding(.horizontal, 20)
+                .padding(.vertical, 7)
                 .background(
                     Capsule(style: .continuous)
-                        .fill(fill)
-                )
-                .overlay(
-                    Capsule(style: .continuous)
-                        .strokeBorder(
-                            selected ? Color.white.opacity(option == .absurd ? 0.18 : 0.0) : Color.clear,
-                            lineWidth: ConverterLayout.strokeHairline
-                        )
+                        .fill(selected ? categoryAccent : Color.clear)
                 )
         }
         .buttonStyle(.plain)
