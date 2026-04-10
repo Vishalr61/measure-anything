@@ -98,7 +98,6 @@ struct ConverterWorkspaceBody: View {
         )
         modelContext.insert(fav)
         try? modelContext.save()
-        Haptics.favorite()
     }
 
     private var customUnitsSyncToken: String {
@@ -277,38 +276,10 @@ struct ConverterWorkspaceBody: View {
         }
     }
 
-    private var shouldShowMemeBlock: Bool {
-        vm.validationError == nil
-            && !(vm.conversionResult?.memeExplanation ?? "").isEmpty
-    }
-
-    @ViewBuilder
-    private var memeExplanationBlock: some View {
-        if let meme = vm.conversionResult?.memeExplanation, !meme.isEmpty,
-           vm.validationError == nil {
-            Text(meme)
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
-                .italic()
-                .multilineTextAlignment(.center)
-                .fixedSize(horizontal: false, vertical: true)
-                .padding(ConverterLayout.rhythm16)
-                .frame(maxWidth: .infinity, alignment: .center)
-                .background(
-                    RoundedRectangle(cornerRadius: ConverterLayout.secondaryBlockCornerRadius, style: .continuous)
-                        .fill(Color(.systemBackground).opacity(0.6))
-                )
-                .overlay(
-                    RoundedRectangle(cornerRadius: ConverterLayout.secondaryBlockCornerRadius, style: .continuous)
-                        .strokeBorder(categoryAccent.opacity(0.18), lineWidth: ConverterLayout.strokeHairline)
-                )
-        }
-    }
-
     private var referenceConversionColumn: some View {
         VStack(alignment: .leading, spacing: 0) {
             VStack(spacing: 0) {
-                conversionAmountRow(isFrom: true)
+                fromConversionCard
                     .overlay(alignment: .bottom) {
                         referenceSwapButton
                             .offset(y: 27)
@@ -316,27 +287,13 @@ struct ConverterWorkspaceBody: View {
                     .padding(.bottom, 27)
                     .zIndex(1)
 
-                conversionAmountRow(isFrom: false)
+                expandedToCard
                     .padding(.top, -27)
             }
 
             if let err = vm.validationError {
                 validationErrorView(message: err)
                     .padding(.top, ConverterLayout.rhythm12)
-            }
-
-            ConversionActionRow(
-                onShare: { presentShareText() },
-                onSave: { saveCurrentPairAsFavorite() },
-                isSaved: isCurrentPairAlreadyFavorite,
-                shareEnabled: canShareResult,
-                saveEnabled: vm.canSaveCurrentPairAsFavorite
-            )
-            .padding(.top, 8)
-
-            if shouldShowMemeBlock {
-                memeExplanationBlock
-                    .padding(.top, 10)
             }
 
             if showsDiceCard {
@@ -366,59 +323,54 @@ struct ConverterWorkspaceBody: View {
         vm.validationError != nil || vm.conversionResult == nil
     }
 
-    private func conversionAmountRow(isFrom: Bool) -> some View {
+    private var expandedToCard: some View {
+        let toName = vm.availableUnits.first { $0.id == vm.selectedToUnitID }?.name ?? "—"
+        return ToCard(
+            toUnitName: toName,
+            resultText: toRowDisplayString,
+            formulaLine: toRowFootnoteText,
+            accent: categoryAccent,
+            isSaved: isCurrentPairAlreadyFavorite,
+            shareEnabled: canShareResult,
+            saveEnabled: vm.canSaveCurrentPairAsFavorite,
+            usesPlaceholderResult: toRowUsesPlaceholder,
+            onShare: { presentShareText() },
+            onSave: { saveCurrentPairAsFavorite() },
+            selectedToUnitID: $vm.selectedToUnitID,
+            availableUnits: vm.availableUnits
+        )
+    }
+
+    private var fromConversionCard: some View {
         VStack(alignment: .leading, spacing: ConverterLayout.rhythm8) {
-            Text(isFrom ? "From" : "To")
+            Text("From")
                 .font(.caption.weight(.semibold))
                 .foregroundStyle(.secondary)
                 .textCase(.uppercase)
                 .tracking(0.55)
 
-            HStack(alignment: isFrom ? .center : .top, spacing: ConverterLayout.rhythm12) {
-                Group {
-                    if isFrom {
-                        TextField("", text: $vm.inputText, prompt: Text("0").foregroundStyle(.tertiary))
-                            .keyboardType(.decimalPad)
-                            .focused($valueFieldFocused)
-                            .font(.system(size: 40, weight: .bold, design: .rounded))
-                            .foregroundStyle(.primary)
-                            .monospacedDigit()
-                            .lineLimit(1)
-                            .minimumScaleFactor(0.55)
-                            .toolbar {
-                                ToolbarItemGroup(placement: .keyboard) {
-                                    Spacer()
-                                    Button("Done") {
-                                        valueFieldFocused = false
-                                    }
-                                    .fontWeight(.semibold)
-                                }
+            HStack(alignment: .center, spacing: ConverterLayout.rhythm12) {
+                TextField("", text: $vm.inputText, prompt: Text("0").foregroundStyle(.tertiary))
+                    .keyboardType(.decimalPad)
+                    .focused($valueFieldFocused)
+                    .font(.system(size: 40, weight: .bold, design: .rounded))
+                    .foregroundStyle(.primary)
+                    .monospacedDigit()
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.55)
+                    .toolbar {
+                        ToolbarItemGroup(placement: .keyboard) {
+                            Spacer()
+                            Button("Done") {
+                                valueFieldFocused = false
                             }
-                            .accessibilityLabel("Amount to convert")
-                    } else {
-                        VStack(alignment: .leading, spacing: 0) {
-                            Text(toRowDisplayString)
-                                .font(.system(size: 40, weight: .bold, design: .rounded))
-                                .foregroundStyle(toRowUsesPlaceholder ? Color.secondary.opacity(0.55) : Color.primary)
-                                .monospacedDigit()
-                                .lineLimit(1)
-                                .minimumScaleFactor(0.55)
-                                .accessibilityLabel("Converted amount, \(toRowDisplayString)")
-
-                            if let foot = toRowFootnoteText {
-                                Text(foot)
-                                    .font(.system(size: 11))
-                                    .foregroundStyle(Color(red: 0x88 / 255, green: 0x87 / 255, blue: 0x80 / 255))
-                                    .padding(.top, 6)
-                                    .fixedSize(horizontal: false, vertical: true)
-                            }
+                            .fontWeight(.semibold)
                         }
                     }
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
+                    .accessibilityLabel("Amount to convert")
+                    .frame(maxWidth: .infinity, alignment: .leading)
 
-                unitMenuPill(selection: isFrom ? $vm.selectedFromUnitID : $vm.selectedToUnitID)
-                    .padding(.top, isFrom ? 0 : 4)
+                unitMenuPill(selection: $vm.selectedFromUnitID)
             }
         }
         .padding(ConverterLayout.cardPadding)
