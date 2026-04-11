@@ -79,11 +79,16 @@ struct ConverterWorkspaceBody: View {
         return s
     }
 
-    private func presentShareText() {
-        let text = shareTextLine()
-        guard !text.isEmpty else { return }
+    private func presentShareResult() {
+        guard canShareResult else { return }
         Haptics.share()
-        shareActivityItems = [text]
+        if let image = vm.renderShareCardImage() {
+            shareActivityItems = [image]
+        } else {
+            let text = shareTextLine()
+            guard !text.isEmpty else { return }
+            shareActivityItems = [text]
+        }
         showShareSheet = true
     }
 
@@ -274,7 +279,23 @@ struct ConverterWorkspaceBody: View {
                     .padding(.top, 10)
             }
 
-            if let toUnit = vm.toUnit, toUnit.funFact != nil {
+            if vm.showAbsurdNudge {
+                AbsurdNudgeCard(
+                    absurdResult: vm.absurdEquivalentDisplay,
+                    accent: categoryAccent,
+                    onTryAbsurd: {
+                        withAnimation {
+                            vm.selectedMode = .absurd
+                        }
+                        vm.hasSeenAbsurdNudge = true
+                    },
+                    onDismiss: {
+                        vm.hasSeenAbsurdNudge = true
+                    }
+                )
+                .padding(.top, 10)
+                .transition(.opacity)
+            } else if let toUnit = vm.toUnit, toUnit.funFact != nil {
                 DidYouKnowCard(unit: toUnit, accent: categoryAccent)
                     .id(toUnit.id)
                     .transition(.opacity)
@@ -308,7 +329,7 @@ struct ConverterWorkspaceBody: View {
             saveEnabled: vm.canSaveCurrentPairAsFavorite,
             usesPlaceholderResult: toRowUsesPlaceholder,
             onCopy: { vm.copyResult() },
-            onShare: { presentShareText() },
+            onShare: { presentShareResult() },
             onSave: { saveCurrentPairAsFavorite() },
             selectedToUnitID: $vm.selectedToUnitID,
             availableUnits: vm.availableUnits
@@ -345,6 +366,37 @@ struct ConverterWorkspaceBody: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
 
                 unitMenuPill(selection: $vm.selectedFromUnitID)
+            }
+
+            if ConversionHistory.shared.totalRecordedConversions >= 2 {
+                let suggestions = ConversionHistory.shared.suggestions(for: vm.selectedFromUnitID)
+                if !suggestions.isEmpty {
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 6) {
+                            Text("→")
+                                .font(.system(size: 10))
+                                .foregroundStyle(Color(hex: "#B4B2A9"))
+                            ForEach(suggestions, id: \.self) { unitId in
+                                if let unit = vm.availableUnits.first(where: { $0.id == unitId }) {
+                                    Button {
+                                        Haptics.tap()
+                                        vm.selectedToUnitID = unit.id
+                                    } label: {
+                                        Text(unit.name)
+                                            .font(.system(size: 11, weight: .medium))
+                                            .foregroundStyle(categoryAccent)
+                                            .padding(.horizontal, 10)
+                                            .padding(.vertical, 4)
+                                            .background(Color(hex: "#EAF5F4"))
+                                            .clipShape(Capsule())
+                                    }
+                                    .buttonStyle(.plain)
+                                }
+                            }
+                        }
+                        .padding(.top, 6)
+                    }
+                }
             }
         }
         .padding(ConverterLayout.cardPadding)
