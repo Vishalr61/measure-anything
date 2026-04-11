@@ -6,6 +6,8 @@
 xcuserdata/
 *.xcuserstate
 DerivedData/
+.derivedData/
+MeasureAnything/.derivedData/
 
 # macOS
 .DS_Store
