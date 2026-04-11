@@ -1,0 +1,20 @@
+{
+  "items": [
+    {
+      "id": "item.lifestyle.time.coffee-break",
+      "domainId": "lifestyle",
+      "subgenreId": "lifestyle.time-blocks",
+      "name": "Coffee break",
+      "description": "A nominal break-sized slice of time.",
+      "synonyms": [
+        "coffee pause"
+      ],
+      "tags": [
+        "break",
+        "time"
+      ],
+      "unitCategoryRaw": "time",
+      "converterUnitId": "coffee_break"
+    }
+  ]
+}

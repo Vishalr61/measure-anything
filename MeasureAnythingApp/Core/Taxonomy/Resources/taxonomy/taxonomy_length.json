@@ -1,42 +1,4 @@
 {
-  "domains": [
-    {
-      "id": "measurement",
-      "name": "Measurement",
-      "description": "Physical quantities: length, mass, time, volume, temperature."
-    },
-    {
-      "id": "lifestyle",
-      "name": "Lifestyle",
-      "description": "Informal or humor-oriented ways to describe everyday scales."
-    }
-  ],
-  "subgenres": [
-    {
-      "id": "measurement.normal",
-      "domainId": "measurement",
-      "name": "Normal units",
-      "description": "Standard SI and common imperial units."
-    },
-    {
-      "id": "measurement.absurd",
-      "domainId": "measurement",
-      "name": "Absurd units",
-      "description": "Meme-friendly units backed by approximate real factors."
-    },
-    {
-      "id": "measurement.custom",
-      "domainId": "measurement",
-      "name": "Custom units",
-      "description": "User-defined multiplicative units in Custom mode."
-    },
-    {
-      "id": "lifestyle.time-blocks",
-      "domainId": "lifestyle",
-      "name": "Time blocks",
-      "description": "Chunked time metaphors (breaks, episodes, sessions)."
-    }
-  ],
   "items": [
     {
       "id": "item.measurement.normal.meter",
@@ -44,8 +6,15 @@
       "subgenreId": "measurement.normal",
       "name": "Meter",
       "description": "Canonical length base unit.",
-      "synonyms": ["Metre", "m"],
-      "tags": ["si", "length", "distance"],
+      "synonyms": [
+        "Metre",
+        "m"
+      ],
+      "tags": [
+        "si",
+        "length",
+        "distance"
+      ],
       "unitCategoryRaw": "length",
       "converterUnitId": "meter"
     },
@@ -55,8 +24,17 @@
       "subgenreId": "measurement.normal",
       "name": "Kilometer",
       "description": "Metric length unit equal to one thousand meters.",
-      "synonyms": ["Kilometre", "Thousand meters", "Metric kilometer"],
-      "tags": ["length", "distance", "metric", "si"],
+      "synonyms": [
+        "Kilometre",
+        "Thousand meters",
+        "Metric kilometer"
+      ],
+      "tags": [
+        "length",
+        "distance",
+        "metric",
+        "si"
+      ],
       "unitCategoryRaw": "length",
       "converterUnitId": "kilometer"
     },
@@ -66,8 +44,17 @@
       "subgenreId": "measurement.normal",
       "name": "Centimeter",
       "description": "Metric length unit equal to one hundredth of a meter.",
-      "synonyms": ["Centimetre", "One hundredth meter", "Metric centimeter"],
-      "tags": ["length", "distance", "metric", "si"],
+      "synonyms": [
+        "Centimetre",
+        "One hundredth meter",
+        "Metric centimeter"
+      ],
+      "tags": [
+        "length",
+        "distance",
+        "metric",
+        "si"
+      ],
       "unitCategoryRaw": "length",
       "converterUnitId": "centimeter"
     },
@@ -77,8 +64,17 @@
       "subgenreId": "measurement.normal",
       "name": "Millimeter",
       "description": "Metric length unit equal to one thousandth of a meter.",
-      "synonyms": ["Millimetre", "One thousandth meter", "Metric millimeter"],
-      "tags": ["length", "distance", "metric", "si"],
+      "synonyms": [
+        "Millimetre",
+        "One thousandth meter",
+        "Metric millimeter"
+      ],
+      "tags": [
+        "length",
+        "distance",
+        "metric",
+        "si"
+      ],
       "unitCategoryRaw": "length",
       "converterUnitId": "millimeter"
     },
@@ -88,8 +84,17 @@
       "subgenreId": "measurement.normal",
       "name": "Inch",
       "description": "Imperial length unit commonly used in the United States.",
-      "synonyms": ["International inch", "Imperial inch", "United States customary inch"],
-      "tags": ["length", "distance", "imperial", "us customary"],
+      "synonyms": [
+        "International inch",
+        "Imperial inch",
+        "United States customary inch"
+      ],
+      "tags": [
+        "length",
+        "distance",
+        "imperial",
+        "us customary"
+      ],
       "unitCategoryRaw": "length",
       "converterUnitId": "inch"
     },
@@ -99,8 +104,17 @@
       "subgenreId": "measurement.normal",
       "name": "Foot",
       "description": "Imperial length unit equal to twelve inches.",
-      "synonyms": ["International foot", "Imperial foot", "Twelve inches"],
-      "tags": ["length", "distance", "imperial", "us customary"],
+      "synonyms": [
+        "International foot",
+        "Imperial foot",
+        "Twelve inches"
+      ],
+      "tags": [
+        "length",
+        "distance",
+        "imperial",
+        "us customary"
+      ],
       "unitCategoryRaw": "length",
       "converterUnitId": "foot"
     },
@@ -110,8 +124,17 @@
       "subgenreId": "measurement.normal",
       "name": "Yard",
       "description": "Imperial length unit equal to three feet.",
-      "synonyms": ["International yard", "Imperial yard", "Three feet"],
-      "tags": ["length", "distance", "imperial", "us customary"],
+      "synonyms": [
+        "International yard",
+        "Imperial yard",
+        "Three feet"
+      ],
+      "tags": [
+        "length",
+        "distance",
+        "imperial",
+        "us customary"
+      ],
       "unitCategoryRaw": "length",
       "converterUnitId": "yard"
     },
@@ -121,8 +144,17 @@
       "subgenreId": "measurement.normal",
       "name": "Mile",
       "description": "Imperial length unit commonly used for road distances.",
-      "synonyms": ["International mile", "Statute mile", "Road mile"],
-      "tags": ["length", "distance", "imperial", "us customary"],
+      "synonyms": [
+        "International mile",
+        "Statute mile",
+        "Road mile"
+      ],
+      "tags": [
+        "length",
+        "distance",
+        "imperial",
+        "us customary"
+      ],
       "unitCategoryRaw": "length",
       "converterUnitId": "mile"
     },
@@ -132,8 +164,17 @@
       "subgenreId": "measurement.normal",
       "name": "Nautical mile",
       "description": "Navigation distance unit equal to 1852 meters.",
-      "synonyms": ["nmi", "Nautical mile", "Sea mile"],
-      "tags": ["length", "navigation", "distance", "imperial"],
+      "synonyms": [
+        "nmi",
+        "Nautical mile",
+        "Sea mile"
+      ],
+      "tags": [
+        "length",
+        "navigation",
+        "distance",
+        "imperial"
+      ],
       "unitCategoryRaw": "length",
       "converterUnitId": "nautical_mile"
     },
@@ -143,8 +184,17 @@
       "subgenreId": "measurement.normal",
       "name": "Picometer",
       "description": "SI length unit used at atomic scales.",
-      "synonyms": ["pm", "Picometre", "Atomic scale"],
-      "tags": ["length", "si", "atomic", "physics"],
+      "synonyms": [
+        "pm",
+        "Picometre",
+        "Atomic scale"
+      ],
+      "tags": [
+        "length",
+        "si",
+        "atomic",
+        "physics"
+      ],
       "unitCategoryRaw": "length",
       "converterUnitId": "picometer"
     },
@@ -154,8 +204,17 @@
       "subgenreId": "measurement.normal",
       "name": "Angstrom",
       "description": "Non-SI unit commonly used in chemistry and crystallography.",
-      "synonyms": ["Å", "Angstrom unit", "Angstrom"],
-      "tags": ["length", "physics", "atomic", "chemistry"],
+      "synonyms": [
+        "Å",
+        "Angstrom unit",
+        "Angstrom"
+      ],
+      "tags": [
+        "length",
+        "physics",
+        "atomic",
+        "chemistry"
+      ],
       "unitCategoryRaw": "length",
       "converterUnitId": "angstrom"
     },
@@ -165,8 +224,17 @@
       "subgenreId": "measurement.normal",
       "name": "Nanometer",
       "description": "SI length unit commonly used for wavelengths and microfabrication.",
-      "synonyms": ["nm", "Nanometre", "Nano scale"],
-      "tags": ["length", "si", "tiny", "physics"],
+      "synonyms": [
+        "nm",
+        "Nanometre",
+        "Nano scale"
+      ],
+      "tags": [
+        "length",
+        "si",
+        "tiny",
+        "physics"
+      ],
       "unitCategoryRaw": "length",
       "converterUnitId": "nanometer"
     },
@@ -176,8 +244,17 @@
       "subgenreId": "measurement.normal",
       "name": "Micrometer",
       "description": "SI length unit commonly used for microscopic scales.",
-      "synonyms": ["Micron", "µm", "Micrometre"],
-      "tags": ["length", "si", "small", "biology"],
+      "synonyms": [
+        "Micron",
+        "µm",
+        "Micrometre"
+      ],
+      "tags": [
+        "length",
+        "si",
+        "small",
+        "biology"
+      ],
       "unitCategoryRaw": "length",
       "converterUnitId": "micrometer"
     },
@@ -187,8 +264,17 @@
       "subgenreId": "measurement.normal",
       "name": "Decimeter",
       "description": "Metric length unit equal to one tenth of a meter.",
-      "synonyms": ["dm", "Decimetre", "One tenth meter"],
-      "tags": ["length", "si", "metric", "everyday"],
+      "synonyms": [
+        "dm",
+        "Decimetre",
+        "One tenth meter"
+      ],
+      "tags": [
+        "length",
+        "si",
+        "metric",
+        "everyday"
+      ],
       "unitCategoryRaw": "length",
       "converterUnitId": "decimeter"
     },
@@ -198,8 +284,17 @@
       "subgenreId": "measurement.normal",
       "name": "Hectometer",
       "description": "Metric length unit equal to one hundred meters.",
-      "synonyms": ["hm", "Hectometre", "One hundred meters"],
-      "tags": ["length", "si", "metric", "distance"],
+      "synonyms": [
+        "hm",
+        "Hectometre",
+        "One hundred meters"
+      ],
+      "tags": [
+        "length",
+        "si",
+        "metric",
+        "distance"
+      ],
       "unitCategoryRaw": "length",
       "converterUnitId": "hectometer"
     },
@@ -209,8 +304,17 @@
       "subgenreId": "measurement.normal",
       "name": "Megameter",
       "description": "Metric length unit equal to one million meters.",
-      "synonyms": ["Mm", "Megametre", "One million meters"],
-      "tags": ["length", "si", "large", "distance"],
+      "synonyms": [
+        "Mm",
+        "Megametre",
+        "One million meters"
+      ],
+      "tags": [
+        "length",
+        "si",
+        "large",
+        "distance"
+      ],
       "unitCategoryRaw": "length",
       "converterUnitId": "megameter"
     },
@@ -220,8 +324,17 @@
       "subgenreId": "measurement.normal",
       "name": "Thou",
       "description": "Imperial engineering unit equal to one thousandth of an inch.",
-      "synonyms": ["Mil", "Thousandth inch", "Thou"],
-      "tags": ["length", "imperial", "engineering", "tiny"],
+      "synonyms": [
+        "Mil",
+        "Thousandth inch",
+        "Thou"
+      ],
+      "tags": [
+        "length",
+        "imperial",
+        "engineering",
+        "tiny"
+      ],
       "unitCategoryRaw": "length",
       "converterUnitId": "thou"
     },
@@ -231,8 +344,17 @@
       "subgenreId": "measurement.normal",
       "name": "Fathom",
       "description": "Traditional unit for measuring water depth.",
-      "synonyms": ["ftm", "Sea fathom", "Water depth unit"],
-      "tags": ["length", "imperial", "navigation", "depth"],
+      "synonyms": [
+        "ftm",
+        "Sea fathom",
+        "Water depth unit"
+      ],
+      "tags": [
+        "length",
+        "imperial",
+        "navigation",
+        "depth"
+      ],
       "unitCategoryRaw": "length",
       "converterUnitId": "fathom"
     },
@@ -242,8 +364,17 @@
       "subgenreId": "measurement.normal",
       "name": "Chain",
       "description": "Historical surveying unit traditionally used in land measurement.",
-      "synonyms": ["ch", "Gunter's chain", "Survey chain"],
-      "tags": ["length", "imperial", "surveying", "historical"],
+      "synonyms": [
+        "ch",
+        "Gunter's chain",
+        "Survey chain"
+      ],
+      "tags": [
+        "length",
+        "imperial",
+        "surveying",
+        "historical"
+      ],
       "unitCategoryRaw": "length",
       "converterUnitId": "chain"
     },
@@ -253,8 +384,17 @@
       "subgenreId": "measurement.normal",
       "name": "Rod",
       "description": "Historical unit used in surveying; also called pole or perch.",
-      "synonyms": ["rd", "Pole", "Perch"],
-      "tags": ["length", "imperial", "surveying", "historical"],
+      "synonyms": [
+        "rd",
+        "Pole",
+        "Perch"
+      ],
+      "tags": [
+        "length",
+        "imperial",
+        "surveying",
+        "historical"
+      ],
       "unitCategoryRaw": "length",
       "converterUnitId": "rod"
     },
@@ -264,8 +404,17 @@
       "subgenreId": "measurement.normal",
       "name": "Furlong",
       "description": "Historical distance unit still used in horse racing.",
-      "synonyms": ["fur", "Horse racing unit", "Furlong"],
-      "tags": ["length", "imperial", "historical", "racing"],
+      "synonyms": [
+        "fur",
+        "Horse racing unit",
+        "Furlong"
+      ],
+      "tags": [
+        "length",
+        "imperial",
+        "historical",
+        "racing"
+      ],
       "unitCategoryRaw": "length",
       "converterUnitId": "furlong"
     },
@@ -275,8 +424,17 @@
       "subgenreId": "measurement.normal",
       "name": "League",
       "description": "Historical distance unit; land league is three statute miles.",
-      "synonyms": ["lea", "Land league", "Three miles"],
-      "tags": ["length", "imperial", "historical", "distance"],
+      "synonyms": [
+        "lea",
+        "Land league",
+        "Three miles"
+      ],
+      "tags": [
+        "length",
+        "imperial",
+        "historical",
+        "distance"
+      ],
       "unitCategoryRaw": "length",
       "converterUnitId": "league"
     },
@@ -286,8 +444,17 @@
       "subgenreId": "measurement.normal",
       "name": "Hand",
       "description": "Unit used for measuring horse height.",
-      "synonyms": ["hh", "Hands", "Horse height"],
-      "tags": ["length", "imperial", "equestrian", "everyday"],
+      "synonyms": [
+        "hh",
+        "Hands",
+        "Horse height"
+      ],
+      "tags": [
+        "length",
+        "imperial",
+        "equestrian",
+        "everyday"
+      ],
       "unitCategoryRaw": "length",
       "converterUnitId": "hand"
     },
@@ -297,8 +464,17 @@
       "subgenreId": "measurement.normal",
       "name": "Cubit",
       "description": "Ancient unit traditionally based on the forearm length.",
-      "synonyms": ["Standard cubit", "Ancient cubit", "Forearm length"],
-      "tags": ["length", "historical", "ancient", "everyday"],
+      "synonyms": [
+        "Standard cubit",
+        "Ancient cubit",
+        "Forearm length"
+      ],
+      "tags": [
+        "length",
+        "historical",
+        "ancient",
+        "everyday"
+      ],
       "unitCategoryRaw": "length",
       "converterUnitId": "cubit"
     },
@@ -308,8 +484,17 @@
       "subgenreId": "measurement.normal",
       "name": "Pace",
       "description": "Historical step-length unit used for marching and distance estimates.",
-      "synonyms": ["Military pace", "Double pace", "Step length"],
-      "tags": ["length", "everyday", "historical", "distance"],
+      "synonyms": [
+        "Military pace",
+        "Double pace",
+        "Step length"
+      ],
+      "tags": [
+        "length",
+        "everyday",
+        "historical",
+        "distance"
+      ],
       "unitCategoryRaw": "length",
       "converterUnitId": "pace"
     },
@@ -319,8 +504,17 @@
       "subgenreId": "measurement.normal",
       "name": "Light-second",
       "description": "Distance light travels in one second in a vacuum.",
-      "synonyms": ["ls", "Light second", "One second of light"],
-      "tags": ["length", "astronomy", "physics", "space"],
+      "synonyms": [
+        "ls",
+        "Light second",
+        "One second of light"
+      ],
+      "tags": [
+        "length",
+        "astronomy",
+        "physics",
+        "space"
+      ],
       "unitCategoryRaw": "length",
       "converterUnitId": "light_second"
     },
@@ -330,8 +524,17 @@
       "subgenreId": "measurement.normal",
       "name": "Astronomical unit",
       "description": "Average Earth–Sun distance; baseline for solar system scale.",
-      "synonyms": ["AU", "au", "Earth–Sun distance"],
-      "tags": ["length", "astronomy", "space", "distance"],
+      "synonyms": [
+        "AU",
+        "au",
+        "Earth–Sun distance"
+      ],
+      "tags": [
+        "length",
+        "astronomy",
+        "space",
+        "distance"
+      ],
       "unitCategoryRaw": "length",
       "converterUnitId": "astronomical_unit"
     },
@@ -341,8 +544,17 @@
       "subgenreId": "measurement.normal",
       "name": "Light-year",
       "description": "Distance light travels in one year in a vacuum.",
-      "synonyms": ["ly", "Light year", "Year of light"],
-      "tags": ["length", "astronomy", "space", "distance"],
+      "synonyms": [
+        "ly",
+        "Light year",
+        "Year of light"
+      ],
+      "tags": [
+        "length",
+        "astronomy",
+        "space",
+        "distance"
+      ],
       "unitCategoryRaw": "length",
       "converterUnitId": "light_year"
     },
@@ -352,21 +564,19 @@
       "subgenreId": "measurement.normal",
       "name": "Parsec",
       "description": "Astronomical distance unit used for interstellar and galactic scales.",
-      "synonyms": ["pc", "Parsec", "Astronomy parsec"],
-      "tags": ["length", "astronomy", "space", "distance"],
+      "synonyms": [
+        "pc",
+        "Parsec",
+        "Astronomy parsec"
+      ],
+      "tags": [
+        "length",
+        "astronomy",
+        "space",
+        "distance"
+      ],
       "unitCategoryRaw": "length",
       "converterUnitId": "parsec"
-    },
-    {
-      "id": "item.measurement.normal.kilogram",
-      "domainId": "measurement",
-      "subgenreId": "measurement.normal",
-      "name": "Kilogram",
-      "description": "Canonical mass base unit.",
-      "synonyms": ["kg", "kilo"],
-      "tags": ["si", "mass"],
-      "unitCategoryRaw": "mass",
-      "converterUnitId": "kilogram"
     },
     {
       "id": "item.measurement.absurd.banana",
@@ -374,8 +584,13 @@
       "subgenreId": "measurement.absurd",
       "name": "Banana (length)",
       "description": "Approximate average banana length.",
-      "synonyms": ["yellow fruit ruler"],
-      "tags": ["meme", "length"],
+      "synonyms": [
+        "yellow fruit ruler"
+      ],
+      "tags": [
+        "meme",
+        "length"
+      ],
       "unitCategoryRaw": "length",
       "converterUnitId": "banana"
     },
@@ -385,8 +600,17 @@
       "subgenreId": "measurement.absurd",
       "name": "Refrigerator (height)",
       "description": "Typical refrigerator height (order-of-magnitude).",
-      "synonyms": ["Refrigerator height", "Kitchen refrigerator", "Household refrigerator"],
-      "tags": ["absurd", "comparison", "length", "everyday"],
+      "synonyms": [
+        "Refrigerator height",
+        "Kitchen refrigerator",
+        "Household refrigerator"
+      ],
+      "tags": [
+        "absurd",
+        "comparison",
+        "length",
+        "everyday"
+      ],
       "unitCategoryRaw": "length",
       "converterUnitId": "fridge"
     },
@@ -396,8 +620,17 @@
       "subgenreId": "measurement.absurd",
       "name": "City bus (length)",
       "description": "Typical city bus length (order-of-magnitude).",
-      "synonyms": ["City bus", "Transit bus", "Urban bus"],
-      "tags": ["absurd", "comparison", "length", "transport"],
+      "synonyms": [
+        "City bus",
+        "Transit bus",
+        "Urban bus"
+      ],
+      "tags": [
+        "absurd",
+        "comparison",
+        "length",
+        "transport"
+      ],
       "unitCategoryRaw": "length",
       "converterUnitId": "bus"
     },
@@ -407,8 +640,17 @@
       "subgenreId": "measurement.absurd",
       "name": "Blue whale (length)",
       "description": "Typical adult blue whale length (order-of-magnitude).",
-      "synonyms": ["Blue whale length", "Adult blue whale", "Whale length"],
-      "tags": ["absurd", "comparison", "length", "nature"],
+      "synonyms": [
+        "Blue whale length",
+        "Adult blue whale",
+        "Whale length"
+      ],
+      "tags": [
+        "absurd",
+        "comparison",
+        "length",
+        "nature"
+      ],
       "unitCategoryRaw": "length",
       "converterUnitId": "blue_whale"
     },
@@ -418,8 +660,17 @@
       "subgenreId": "measurement.absurd",
       "name": "Olympic pool (length)",
       "description": "Standard Olympic swimming pool length.",
-      "synonyms": ["Olympic pool", "50 meter pool", "Swimming pool length"],
-      "tags": ["length", "comparison", "sports", "everyday"],
+      "synonyms": [
+        "Olympic pool",
+        "50 meter pool",
+        "Swimming pool length"
+      ],
+      "tags": [
+        "length",
+        "comparison",
+        "sports",
+        "everyday"
+      ],
       "unitCategoryRaw": "length",
       "converterUnitId": "olympic_pool"
     },
@@ -429,8 +680,17 @@
       "subgenreId": "measurement.absurd",
       "name": "Short course pool (25 m)",
       "description": "Short course pool length (25 m).",
-      "synonyms": ["25 meter pool", "Short pool", "Short course pool"],
-      "tags": ["length", "comparison", "sports", "everyday"],
+      "synonyms": [
+        "25 meter pool",
+        "Short pool",
+        "Short course pool"
+      ],
+      "tags": [
+        "length",
+        "comparison",
+        "sports",
+        "everyday"
+      ],
       "unitCategoryRaw": "length",
       "converterUnitId": "short_pool"
     },
@@ -440,8 +700,17 @@
       "subgenreId": "measurement.absurd",
       "name": "Football field (length)",
       "description": "American football field length (100 yards).",
-      "synonyms": ["Football field", "Gridiron field", "100 yards"],
-      "tags": ["length", "comparison", "sports", "distance"],
+      "synonyms": [
+        "Football field",
+        "Gridiron field",
+        "100 yards"
+      ],
+      "tags": [
+        "length",
+        "comparison",
+        "sports",
+        "distance"
+      ],
       "unitCategoryRaw": "length",
       "converterUnitId": "football_field"
     },
@@ -451,8 +720,17 @@
       "subgenreId": "measurement.absurd",
       "name": "Tennis court (length)",
       "description": "Standard tennis court length.",
-      "synonyms": ["Tennis court", "Court length", "Baseline distance"],
-      "tags": ["length", "comparison", "sports", "everyday"],
+      "synonyms": [
+        "Tennis court",
+        "Court length",
+        "Baseline distance"
+      ],
+      "tags": [
+        "length",
+        "comparison",
+        "sports",
+        "everyday"
+      ],
       "unitCategoryRaw": "length",
       "converterUnitId": "tennis_court"
     },
@@ -462,8 +740,17 @@
       "subgenreId": "measurement.absurd",
       "name": "Bowling lane (length)",
       "description": "Bowling lane distance from foul line to head pin.",
-      "synonyms": ["Bowling lane", "Lane length", "Foul line to pin"],
-      "tags": ["length", "comparison", "sports", "everyday"],
+      "synonyms": [
+        "Bowling lane",
+        "Lane length",
+        "Foul line to pin"
+      ],
+      "tags": [
+        "length",
+        "comparison",
+        "sports",
+        "everyday"
+      ],
       "unitCategoryRaw": "length",
       "converterUnitId": "bowling_lane"
     },
@@ -473,8 +760,17 @@
       "subgenreId": "measurement.absurd",
       "name": "Basketball hoop (height)",
       "description": "Standard hoop height (10 feet).",
-      "synonyms": ["Hoop height", "Basket height", "10 foot hoop"],
-      "tags": ["length", "comparison", "sports", "everyday"],
+      "synonyms": [
+        "Hoop height",
+        "Basket height",
+        "10 foot hoop"
+      ],
+      "tags": [
+        "length",
+        "comparison",
+        "sports",
+        "everyday"
+      ],
       "unitCategoryRaw": "length",
       "converterUnitId": "basketball_hoop"
     },
@@ -484,8 +780,17 @@
       "subgenreId": "measurement.absurd",
       "name": "Credit card (long side)",
       "description": "Standard card long side length.",
-      "synonyms": ["Credit card", "Card length", "Wallet card"],
-      "tags": ["length", "comparison", "everyday", "tech"],
+      "synonyms": [
+        "Credit card",
+        "Card length",
+        "Wallet card"
+      ],
+      "tags": [
+        "length",
+        "comparison",
+        "everyday",
+        "tech"
+      ],
       "unitCategoryRaw": "length",
       "converterUnitId": "credit_card"
     },
@@ -495,8 +800,17 @@
       "subgenreId": "measurement.absurd",
       "name": "Smartphone (height)",
       "description": "Typical smartphone height reference.",
-      "synonyms": ["Phone height", "Smartphone height", "Handheld phone"],
-      "tags": ["length", "comparison", "everyday", "tech"],
+      "synonyms": [
+        "Phone height",
+        "Smartphone height",
+        "Handheld phone"
+      ],
+      "tags": [
+        "length",
+        "comparison",
+        "everyday",
+        "tech"
+      ],
       "unitCategoryRaw": "length",
       "converterUnitId": "smartphone"
     },
@@ -506,8 +820,17 @@
       "subgenreId": "measurement.absurd",
       "name": "Pencil (length)",
       "description": "Typical pencil length reference.",
-      "synonyms": ["Wooden pencil", "Standard pencil", "Pencil length"],
-      "tags": ["length", "comparison", "everyday", "school"],
+      "synonyms": [
+        "Wooden pencil",
+        "Standard pencil",
+        "Pencil length"
+      ],
+      "tags": [
+        "length",
+        "comparison",
+        "everyday",
+        "school"
+      ],
       "unitCategoryRaw": "length",
       "converterUnitId": "pencil"
     },
@@ -517,8 +840,17 @@
       "subgenreId": "measurement.absurd",
       "name": "Paperclip (length)",
       "description": "Typical paperclip length reference.",
-      "synonyms": ["Office paperclip", "Metal clip", "Paper clip"],
-      "tags": ["length", "comparison", "everyday", "office"],
+      "synonyms": [
+        "Office paperclip",
+        "Metal clip",
+        "Paper clip"
+      ],
+      "tags": [
+        "length",
+        "comparison",
+        "everyday",
+        "office"
+      ],
       "unitCategoryRaw": "length",
       "converterUnitId": "paperclip"
     },
@@ -528,8 +860,17 @@
       "subgenreId": "measurement.absurd",
       "name": "Door (height)",
       "description": "Typical interior door height reference.",
-      "synonyms": ["Door height", "Interior door", "Standard door"],
-      "tags": ["length", "comparison", "everyday", "home"],
+      "synonyms": [
+        "Door height",
+        "Interior door",
+        "Standard door"
+      ],
+      "tags": [
+        "length",
+        "comparison",
+        "everyday",
+        "home"
+      ],
       "unitCategoryRaw": "length",
       "converterUnitId": "door"
     },
@@ -539,8 +880,17 @@
       "subgenreId": "measurement.absurd",
       "name": "Car (length)",
       "description": "Typical car length reference.",
-      "synonyms": ["Passenger car", "Sedan length", "Car length"],
-      "tags": ["length", "comparison", "vehicle", "everyday"],
+      "synonyms": [
+        "Passenger car",
+        "Sedan length",
+        "Car length"
+      ],
+      "tags": [
+        "length",
+        "comparison",
+        "vehicle",
+        "everyday"
+      ],
       "unitCategoryRaw": "length",
       "converterUnitId": "car"
     },
@@ -550,8 +900,17 @@
       "subgenreId": "measurement.absurd",
       "name": "Giraffe (height)",
       "description": "Typical adult giraffe height reference.",
-      "synonyms": ["Giraffe height", "Adult giraffe", "Tall animal"],
-      "tags": ["length", "comparison", "animal", "everyday"],
+      "synonyms": [
+        "Giraffe height",
+        "Adult giraffe",
+        "Tall animal"
+      ],
+      "tags": [
+        "length",
+        "comparison",
+        "animal",
+        "everyday"
+      ],
       "unitCategoryRaw": "length",
       "converterUnitId": "giraffe"
     },
@@ -561,8 +920,17 @@
       "subgenreId": "measurement.absurd",
       "name": "Eiffel Tower (height)",
       "description": "Eiffel Tower height reference (including antenna).",
-      "synonyms": ["Eiffel Tower", "Paris tower", "Eiffel height"],
-      "tags": ["length", "comparison", "landmark", "distance"],
+      "synonyms": [
+        "Eiffel Tower",
+        "Paris tower",
+        "Eiffel height"
+      ],
+      "tags": [
+        "length",
+        "comparison",
+        "landmark",
+        "distance"
+      ],
       "unitCategoryRaw": "length",
       "converterUnitId": "eiffel_tower"
     },
@@ -572,8 +940,17 @@
       "subgenreId": "measurement.absurd",
       "name": "Empire State Building (height)",
       "description": "Empire State Building height reference (roof height).",
-      "synonyms": ["Empire State", "Empire State Building", "Skyscraper height"],
-      "tags": ["length", "comparison", "landmark", "distance"],
+      "synonyms": [
+        "Empire State",
+        "Empire State Building",
+        "Skyscraper height"
+      ],
+      "tags": [
+        "length",
+        "comparison",
+        "landmark",
+        "distance"
+      ],
       "unitCategoryRaw": "length",
       "converterUnitId": "empire_state_building"
     },
@@ -583,8 +960,17 @@
       "subgenreId": "measurement.absurd",
       "name": "Mount Everest (height)",
       "description": "Mount Everest height reference.",
-      "synonyms": ["Everest", "Mount Everest", "Highest mountain"],
-      "tags": ["length", "comparison", "geography", "landmark"],
+      "synonyms": [
+        "Everest",
+        "Mount Everest",
+        "Highest mountain"
+      ],
+      "tags": [
+        "length",
+        "comparison",
+        "geography",
+        "landmark"
+      ],
       "unitCategoryRaw": "length",
       "converterUnitId": "mount_everest"
     },
@@ -594,8 +980,17 @@
       "subgenreId": "measurement.absurd",
       "name": "Great Wall (total length)",
       "description": "Great Wall of China total length (including branches).",
-      "synonyms": ["Great Wall", "Great Wall of China", "Wall length"],
-      "tags": ["length", "comparison", "landmark", "distance"],
+      "synonyms": [
+        "Great Wall",
+        "Great Wall of China",
+        "Wall length"
+      ],
+      "tags": [
+        "length",
+        "comparison",
+        "landmark",
+        "distance"
+      ],
       "unitCategoryRaw": "length",
       "converterUnitId": "great_wall"
     },
@@ -605,8 +1000,17 @@
       "subgenreId": "measurement.absurd",
       "name": "Amazon River (length)",
       "description": "Amazon River length reference (order-of-magnitude).",
-      "synonyms": ["Amazon River", "River length", "Amazon distance"],
-      "tags": ["length", "comparison", "geography", "distance"],
+      "synonyms": [
+        "Amazon River",
+        "River length",
+        "Amazon distance"
+      ],
+      "tags": [
+        "length",
+        "comparison",
+        "geography",
+        "distance"
+      ],
       "unitCategoryRaw": "length",
       "converterUnitId": "amazon_river"
     },
@@ -616,8 +1020,17 @@
       "subgenreId": "measurement.absurd",
       "name": "City block (Manhattan)",
       "description": "Manhattan short block reference (varies by city).",
-      "synonyms": ["City block", "Manhattan block", "Urban block"],
-      "tags": ["length", "comparison", "everyday", "navigation"],
+      "synonyms": [
+        "City block",
+        "Manhattan block",
+        "Urban block"
+      ],
+      "tags": [
+        "length",
+        "comparison",
+        "everyday",
+        "navigation"
+      ],
       "unitCategoryRaw": "length",
       "converterUnitId": "city_block"
     },
@@ -627,8 +1040,17 @@
       "subgenreId": "measurement.absurd",
       "name": "Marathon (distance)",
       "description": "Marathon distance reference.",
-      "synonyms": ["Marathon distance", "42k", "Race distance"],
-      "tags": ["length", "comparison", "sports", "distance"],
+      "synonyms": [
+        "Marathon distance",
+        "42k",
+        "Race distance"
+      ],
+      "tags": [
+        "length",
+        "comparison",
+        "sports",
+        "distance"
+      ],
       "unitCategoryRaw": "length",
       "converterUnitId": "marathon"
     },
@@ -638,8 +1060,17 @@
       "subgenreId": "measurement.absurd",
       "name": "Boeing 747 (length)",
       "description": "Boeing 747 fuselage length reference.",
-      "synonyms": ["747", "Jumbo jet", "Boeing 747"],
-      "tags": ["length", "comparison", "vehicle", "aviation"],
+      "synonyms": [
+        "747",
+        "Jumbo jet",
+        "Boeing 747"
+      ],
+      "tags": [
+        "length",
+        "comparison",
+        "vehicle",
+        "aviation"
+      ],
       "unitCategoryRaw": "length",
       "converterUnitId": "boeing_747"
     },
@@ -649,8 +1080,17 @@
       "subgenreId": "measurement.absurd",
       "name": "Aircraft carrier (length)",
       "description": "Nimitz-class aircraft carrier length reference.",
-      "synonyms": ["Aircraft carrier", "Carrier deck", "Nimitz class"],
-      "tags": ["length", "comparison", "vehicle", "military"],
+      "synonyms": [
+        "Aircraft carrier",
+        "Carrier deck",
+        "Nimitz class"
+      ],
+      "tags": [
+        "length",
+        "comparison",
+        "vehicle",
+        "military"
+      ],
       "unitCategoryRaw": "length",
       "converterUnitId": "aircraft_carrier"
     },
@@ -660,8 +1100,17 @@
       "subgenreId": "measurement.absurd",
       "name": "School bus (length)",
       "description": "Standard school bus length reference (same comparator as the city bus unit).",
-      "synonyms": ["School bus", "Yellow bus", "Type C bus"],
-      "tags": ["length", "comparison", "vehicle", "everyday"],
+      "synonyms": [
+        "School bus",
+        "Yellow bus",
+        "Type C bus"
+      ],
+      "tags": [
+        "length",
+        "comparison",
+        "vehicle",
+        "everyday"
+      ],
       "unitCategoryRaw": "length",
       "converterUnitId": "bus"
     },
@@ -671,8 +1120,17 @@
       "subgenreId": "measurement.absurd",
       "name": "Double-decker bus (height)",
       "description": "Double-decker bus height reference (height, not length).",
-      "synonyms": ["London bus", "Routemaster", "Double-decker height"],
-      "tags": ["length", "comparison", "vehicle", "everyday"],
+      "synonyms": [
+        "London bus",
+        "Routemaster",
+        "Double-decker height"
+      ],
+      "tags": [
+        "length",
+        "comparison",
+        "vehicle",
+        "everyday"
+      ],
       "unitCategoryRaw": "length",
       "converterUnitId": "double_decker_bus"
     },
@@ -682,8 +1140,17 @@
       "subgenreId": "measurement.absurd",
       "name": "Subway car (length)",
       "description": "Subway or metro car length reference.",
-      "synonyms": ["Subway car", "Metro car", "Train car"],
-      "tags": ["length", "comparison", "vehicle", "everyday"],
+      "synonyms": [
+        "Subway car",
+        "Metro car",
+        "Train car"
+      ],
+      "tags": [
+        "length",
+        "comparison",
+        "vehicle",
+        "everyday"
+      ],
       "unitCategoryRaw": "length",
       "converterUnitId": "subway_car"
     },
@@ -693,8 +1160,17 @@
       "subgenreId": "measurement.absurd",
       "name": "Earth to Moon (distance)",
       "description": "Mean Earth–Moon distance reference.",
-      "synonyms": ["Lunar distance", "Earth–Moon distance", "Moon distance"],
-      "tags": ["length", "comparison", "astronomy", "space"],
+      "synonyms": [
+        "Lunar distance",
+        "Earth–Moon distance",
+        "Moon distance"
+      ],
+      "tags": [
+        "length",
+        "comparison",
+        "astronomy",
+        "space"
+      ],
       "unitCategoryRaw": "length",
       "converterUnitId": "earth_to_moon"
     },
@@ -704,8 +1180,17 @@
       "subgenreId": "measurement.absurd",
       "name": "Earth to Sun (distance)",
       "description": "Average Earth–Sun distance reference (same as astronomical unit).",
-      "synonyms": ["Earth–Sun distance", "Distance to Sun", "Solar distance"],
-      "tags": ["length", "comparison", "astronomy", "space"],
+      "synonyms": [
+        "Earth–Sun distance",
+        "Distance to Sun",
+        "Solar distance"
+      ],
+      "tags": [
+        "length",
+        "comparison",
+        "astronomy",
+        "space"
+      ],
       "unitCategoryRaw": "length",
       "converterUnitId": "earth_to_sun"
     },
@@ -715,8 +1200,17 @@
       "subgenreId": "measurement.absurd",
       "name": "Comet tail (average)",
       "description": "Average large comet tail length reference (highly variable).",
-      "synonyms": ["Comet tail length", "Comet tail", "Tail distance"],
-      "tags": ["length", "comparison", "astronomy", "space"],
+      "synonyms": [
+        "Comet tail length",
+        "Comet tail",
+        "Tail distance"
+      ],
+      "tags": [
+        "length",
+        "comparison",
+        "astronomy",
+        "space"
+      ],
       "unitCategoryRaw": "length",
       "converterUnitId": "comet_tail"
     },
@@ -726,8 +1220,17 @@
       "subgenreId": "measurement.absurd",
       "name": "Human hair (width)",
       "description": "Average human hair width reference.",
-      "synonyms": ["Hair width", "Hair diameter", "Human hair"],
-      "tags": ["length", "comparison", "tiny", "biology"],
+      "synonyms": [
+        "Hair width",
+        "Hair diameter",
+        "Human hair"
+      ],
+      "tags": [
+        "length",
+        "comparison",
+        "tiny",
+        "biology"
+      ],
       "unitCategoryRaw": "length",
       "converterUnitId": "human_hair"
     },
@@ -737,8 +1240,17 @@
       "subgenreId": "measurement.absurd",
       "name": "Red blood cell (diameter)",
       "description": "Average red blood cell diameter reference.",
-      "synonyms": ["Red blood cell", "RBC", "Blood cell diameter"],
-      "tags": ["length", "comparison", "tiny", "biology"],
+      "synonyms": [
+        "Red blood cell",
+        "RBC",
+        "Blood cell diameter"
+      ],
+      "tags": [
+        "length",
+        "comparison",
+        "tiny",
+        "biology"
+      ],
       "unitCategoryRaw": "length",
       "converterUnitId": "red_blood_cell"
     },
@@ -748,8 +1260,17 @@
       "subgenreId": "measurement.absurd",
       "name": "Grain of rice (length)",
       "description": "Typical grain of rice length reference.",
-      "synonyms": ["Rice grain", "Grain of rice", "Rice length"],
-      "tags": ["length", "comparison", "tiny", "everyday"],
+      "synonyms": [
+        "Rice grain",
+        "Grain of rice",
+        "Rice length"
+      ],
+      "tags": [
+        "length",
+        "comparison",
+        "tiny",
+        "everyday"
+      ],
       "unitCategoryRaw": "length",
       "converterUnitId": "grain_of_rice"
     },
@@ -759,8 +1280,17 @@
       "subgenreId": "measurement.absurd",
       "name": "Ant (body length)",
       "description": "Typical ant body length reference.",
-      "synonyms": ["Ant length", "Common ant", "Ant body"],
-      "tags": ["length", "comparison", "tiny", "animal"],
+      "synonyms": [
+        "Ant length",
+        "Common ant",
+        "Ant body"
+      ],
+      "tags": [
+        "length",
+        "comparison",
+        "tiny",
+        "animal"
+      ],
       "unitCategoryRaw": "length",
       "converterUnitId": "ant"
     },
@@ -770,8 +1300,17 @@
       "subgenreId": "measurement.absurd",
       "name": "Toothbrush (length)",
       "description": "Standard toothbrush length reference.",
-      "synonyms": ["Standard toothbrush", "Toothbrush", "Brush length"],
-      "tags": ["length", "comparison", "everyday", "home"],
+      "synonyms": [
+        "Standard toothbrush",
+        "Toothbrush",
+        "Brush length"
+      ],
+      "tags": [
+        "length",
+        "comparison",
+        "everyday",
+        "home"
+      ],
       "unitCategoryRaw": "length",
       "converterUnitId": "toothbrush"
     },
@@ -781,8 +1320,17 @@
       "subgenreId": "measurement.absurd",
       "name": "Yoga mat (length)",
       "description": "Standard yoga mat length reference (6 feet).",
-      "synonyms": ["Yoga mat", "Exercise mat", "Stretch mat"],
-      "tags": ["length", "comparison", "everyday", "sports"],
+      "synonyms": [
+        "Yoga mat",
+        "Exercise mat",
+        "Stretch mat"
+      ],
+      "tags": [
+        "length",
+        "comparison",
+        "everyday",
+        "sports"
+      ],
       "unitCategoryRaw": "length",
       "converterUnitId": "yoga_mat"
     },
@@ -792,8 +1340,17 @@
       "subgenreId": "measurement.absurd",
       "name": "Guitar (total length)",
       "description": "Typical acoustic guitar length reference.",
-      "synonyms": ["Acoustic guitar", "Guitar length", "Instrument length"],
-      "tags": ["length", "comparison", "everyday", "music"],
+      "synonyms": [
+        "Acoustic guitar",
+        "Guitar length",
+        "Instrument length"
+      ],
+      "tags": [
+        "length",
+        "comparison",
+        "everyday",
+        "music"
+      ],
       "unitCategoryRaw": "length",
       "converterUnitId": "guitar"
     },
@@ -803,8 +1360,17 @@
       "subgenreId": "measurement.absurd",
       "name": "Footlong sub (length)",
       "description": "Footlong sandwich length (exactly one foot).",
-      "synonyms": ["Footlong", "Sub sandwich", "One foot"],
-      "tags": ["length", "comparison", "everyday", "food"],
+      "synonyms": [
+        "Footlong",
+        "Sub sandwich",
+        "One foot"
+      ],
+      "tags": [
+        "length",
+        "comparison",
+        "everyday",
+        "food"
+      ],
       "unitCategoryRaw": "length",
       "converterUnitId": "footlong_sub"
     },
@@ -814,8 +1380,17 @@
       "subgenreId": "measurement.absurd",
       "name": "Chopstick (length)",
       "description": "Typical chopstick length reference.",
-      "synonyms": ["Chopstick", "Chopsticks", "Hashi"],
-      "tags": ["length", "comparison", "everyday", "food"],
+      "synonyms": [
+        "Chopstick",
+        "Chopsticks",
+        "Hashi"
+      ],
+      "tags": [
+        "length",
+        "comparison",
+        "everyday",
+        "food"
+      ],
       "unitCategoryRaw": "length",
       "converterUnitId": "chopstick"
     },
@@ -825,8 +1400,17 @@
       "subgenreId": "measurement.absurd",
       "name": "Newborn baby (length)",
       "description": "Average newborn length reference (order-of-magnitude).",
-      "synonyms": ["Newborn length", "Baby length", "Newborn size"],
-      "tags": ["length", "comparison", "everyday", "biology"],
+      "synonyms": [
+        "Newborn length",
+        "Baby length",
+        "Newborn size"
+      ],
+      "tags": [
+        "length",
+        "comparison",
+        "everyday",
+        "biology"
+      ],
       "unitCategoryRaw": "length",
       "converterUnitId": "newborn_baby"
     },
@@ -836,46 +1420,19 @@
       "subgenreId": "measurement.absurd",
       "name": "Human arm span",
       "description": "Average human arm span reference (order-of-magnitude).",
-      "synonyms": ["Arm span", "Wingspan", "Human wingspan"],
-      "tags": ["length", "comparison", "everyday", "biology"],
+      "synonyms": [
+        "Arm span",
+        "Wingspan",
+        "Human wingspan"
+      ],
+      "tags": [
+        "length",
+        "comparison",
+        "everyday",
+        "biology"
+      ],
       "unitCategoryRaw": "length",
       "converterUnitId": "arm_span"
-    },
-    {
-      "id": "item.measurement.absurd.elephant",
-      "domainId": "measurement",
-      "subgenreId": "measurement.absurd",
-      "name": "Elephant (mass)",
-      "description": "Approximate adult elephant mass.",
-      "tags": ["meme", "mass"],
-      "unitCategoryRaw": "mass",
-      "converterUnitId": "elephant"
-    },
-    {
-      "id": "item.lifestyle.time.coffee-break",
-      "domainId": "lifestyle",
-      "subgenreId": "lifestyle.time-blocks",
-      "name": "Coffee break",
-      "description": "A nominal break-sized slice of time.",
-      "synonyms": ["coffee pause"],
-      "tags": ["break", "time"],
-      "unitCategoryRaw": "time",
-      "converterUnitId": "coffee_break"
     }
-  ],
-  "converterNavigation": {
-    "measurementDomainId": "measurement",
-    "categories": [
-      { "unitCategoryRaw": "length", "description": "Distance, height, and similar scales." },
-      { "unitCategoryRaw": "mass" },
-      { "unitCategoryRaw": "time" },
-      { "unitCategoryRaw": "temperature" },
-      { "unitCategoryRaw": "volume" }
-    ],
-    "modes": [
-      { "modeRaw": "normal", "subgenreId": "measurement.normal" },
-      { "modeRaw": "absurd", "subgenreId": "measurement.absurd" },
-      { "modeRaw": "custom", "subgenreId": "measurement.custom" }
-    ]
-  }
+  ]
 }

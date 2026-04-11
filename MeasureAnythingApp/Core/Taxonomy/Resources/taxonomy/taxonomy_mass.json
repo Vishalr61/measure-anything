@@ -1,0 +1,34 @@
+{
+  "items": [
+    {
+      "id": "item.measurement.normal.kilogram",
+      "domainId": "measurement",
+      "subgenreId": "measurement.normal",
+      "name": "Kilogram",
+      "description": "Canonical mass base unit.",
+      "synonyms": [
+        "kg",
+        "kilo"
+      ],
+      "tags": [
+        "si",
+        "mass"
+      ],
+      "unitCategoryRaw": "mass",
+      "converterUnitId": "kilogram"
+    },
+    {
+      "id": "item.measurement.absurd.elephant",
+      "domainId": "measurement",
+      "subgenreId": "measurement.absurd",
+      "name": "Elephant (mass)",
+      "description": "Approximate adult elephant mass.",
+      "tags": [
+        "meme",
+        "mass"
+      ],
+      "unitCategoryRaw": "mass",
+      "converterUnitId": "elephant"
+    }
+  ]
+}

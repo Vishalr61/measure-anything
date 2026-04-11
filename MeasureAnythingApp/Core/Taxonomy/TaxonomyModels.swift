@@ -104,7 +104,9 @@ public struct ConverterNavigation: Codable, Hashable, Sendable {
     }
 }
 
-/// JSON envelope for `taxonomy.json`.
+/// JSON envelope for a full taxonomy snapshot (used by `TaxonomyRegistry.init(jsonData:)` and tooling).
+///
+/// The bundled app data is split under `Resources/taxonomy/`: `taxonomy_meta.json` plus `taxonomy_<category>.json` shards.
 public struct TaxonomyBundle: Codable, Hashable, Sendable {
     public var domains: [Domain]
     public var subgenres: [Subgenre]
