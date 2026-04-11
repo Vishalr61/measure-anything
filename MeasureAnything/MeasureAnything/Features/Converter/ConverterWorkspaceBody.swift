@@ -317,7 +317,8 @@ struct ConverterWorkspaceBody: View {
     }
 
     private var expandedToCard: some View {
-        let toName = vm.availableUnits.first { $0.id == vm.selectedToUnitID }?.name ?? "—"
+        // Resolve from the registry so labels stay correct when the selection is outside the current mode list until sanitise runs.
+        let toName = vm.toUnit?.name ?? "—"
         return ToCard(
             toUnitName: toName,
             resultText: toRowDisplayString,
@@ -369,14 +370,16 @@ struct ConverterWorkspaceBody: View {
             }
 
             if ConversionHistory.shared.totalRecordedConversions >= 2 {
-                let suggestions = ConversionHistory.shared.suggestions(for: vm.selectedFromUnitID)
+                // Over-fetch then drop current TO so pills stay useful; history never suggests from→from.
+                let raw = ConversionHistory.shared.suggestions(for: vm.selectedFromUnitID, limit: 12)
+                let suggestions = raw.filter { $0 != vm.selectedToUnitID }
                 if !suggestions.isEmpty {
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 6) {
                             Text("→")
                                 .font(.system(size: 10))
                                 .foregroundStyle(Color(hex: "#B4B2A9"))
-                            ForEach(suggestions, id: \.self) { unitId in
+                            ForEach(Array(suggestions.prefix(3)), id: \.self) { unitId in
                                 if let unit = vm.availableUnits.first(where: { $0.id == unitId }) {
                                     Button {
                                         Haptics.tap()
@@ -412,7 +415,7 @@ struct ConverterWorkspaceBody: View {
     }
 
     private func unitMenuPill(selection: Binding<UnitDefinition.ID>) -> some View {
-        let name = vm.availableUnits.first { $0.id == selection.wrappedValue }?.name ?? "—"
+        let name = vm.fromUnit?.name ?? "—"
         return Picker(selection: selection) {
             ForEach(vm.availableUnits, id: \.id) { u in
                 Text(u.name).tag(u.id)

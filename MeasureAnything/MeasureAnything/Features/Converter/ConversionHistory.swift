@@ -20,17 +20,26 @@ final class ConversionHistory {
     }
 
     func record(from: String, to: String) {
+        guard from != to else { return }
         let pairKey = "\(from)→\(to)"
         var next = frequency
         next[pairKey, default: 0] += 1
         frequency = next
     }
 
+    /// Top destination unit IDs for this `from` unit, excluding self-conversions (`from→from`).
     func suggestions(for fromUnit: String, limit: Int = 3) -> [String] {
-        frequency
-            .filter { $0.key.hasPrefix("\(fromUnit)→") }
-            .sorted { $0.value > $1.value }
-            .prefix(limit)
-            .compactMap { $0.key.components(separatedBy: "→").last }
+        let prefix = "\(fromUnit)→"
+        return Array(
+            frequency
+                .filter { $0.key.hasPrefix(prefix) }
+                .sorted { $0.value > $1.value }
+                .compactMap { pair -> String? in
+                    let key = pair.key
+                    guard let to = key.components(separatedBy: "→").last, to != fromUnit else { return nil }
+                    return to
+                }
+                .prefix(limit)
+        )
     }
 }

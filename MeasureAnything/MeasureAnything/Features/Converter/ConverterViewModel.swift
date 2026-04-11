@@ -11,6 +11,8 @@ final class ConverterViewModel: ObservableObject {
     private var isApplyingFavoriteRestore = false
     /// Skips reactive defaults / `recompute` while restoring `UserDefaults` session in `init`.
     private var isRestoringSession = false
+    /// Skips `selectedFromUnitID` / `selectedToUnitID` `didSet` → `recompute` while batching ID fixes (avoids re-entrancy).
+    private var isSanitisingSelections = false
     private var sessionPersistenceEnabled = false
 
     private enum SessionKeys {
@@ -50,14 +52,14 @@ final class ConverterViewModel: ObservableObject {
 
     @Published var selectedFromUnitID: UnitDefinition.ID = "meter" {
         didSet {
-            guard !isApplyingFavoriteRestore, !isRestoringSession else { return }
+            guard !isApplyingFavoriteRestore, !isRestoringSession, !isSanitisingSelections else { return }
             recompute()
         }
     }
 
     @Published var selectedToUnitID: UnitDefinition.ID = "kilometer" {
         didSet {
-            guard !isApplyingFavoriteRestore, !isRestoringSession else { return }
+            guard !isApplyingFavoriteRestore, !isRestoringSession, !isSanitisingSelections else { return }
             recompute()
         }
     }
@@ -331,8 +333,11 @@ final class ConverterViewModel: ObservableObject {
         let pool = diceToUnitPool()
         let newUnit: UnitDefinition? = {
             guard !pool.isEmpty else { return nil }
-            let candidates = pool.filter { $0.id != selectedToUnitID }
-            return (candidates.isEmpty ? pool : candidates).randomElement()
+            // Never land on the same unit as FROM (and avoid repeating current TO when other options exist).
+            let notFrom = pool.filter { $0.id != selectedFromUnitID }
+            guard !notFrom.isEmpty else { return nil }
+            let avoidTo = notFrom.filter { $0.id != selectedToUnitID }
+            return (avoidTo.isEmpty ? notFrom : avoidTo).randomElement()
         }()
 
         let rest = selectedCategory.converterDiceRestDegrees
@@ -374,7 +379,18 @@ final class ConverterViewModel: ObservableObject {
                 }
                 self.diceDisplayFace = newFace
 
-                if let u = newUnit {
+                // `newUnit` was chosen at roll start; mode/category may have changed since — never apply a stale ID.
+                let allowed = Set(self.availableUnits.map(\.id))
+                let resolvedTo: UnitDefinition? = {
+                    if let u = newUnit, allowed.contains(u.id), u.id != self.selectedFromUnitID {
+                        return u
+                    }
+                    let pool = self.diceToUnitPool().filter { allowed.contains($0.id) }
+                    let candidates = pool.filter { $0.id != self.selectedFromUnitID }
+                    return candidates.randomElement()
+                }()
+
+                if let u = resolvedTo {
                     self.selectedToUnitID = u.id
                     self.diceLandedUnitName = u.name
                 } else {
@@ -569,6 +585,30 @@ final class ConverterViewModel: ObservableObject {
         selectedToUnitID = firstDistinctToUnit(from: selectedFromUnitID, in: units)
     }
 
+    /// Keeps from/to IDs inside the current category + mode list so menus and labels stay valid (e.g. after a delayed dice land or rapid mode toggles).
+    private func sanitiseUnitSelectionsIfNeeded() {
+        let units = availableUnits
+        guard !units.isEmpty else { return }
+        let ids = Set(units.map(\.id))
+        let fromOK = ids.contains(selectedFromUnitID)
+        let toOK = ids.contains(selectedToUnitID)
+        guard !fromOK || !toOK else {
+            ensureDistinctFromTo(in: units)
+            return
+        }
+
+        isSanitisingSelections = true
+        defer { isSanitisingSelections = false }
+
+        if !fromOK {
+            selectedFromUnitID = units[0].id
+        }
+        if !toOK {
+            selectedToUnitID = firstDistinctToUnit(from: selectedFromUnitID, in: units)
+        }
+        ensureDistinctFromTo(in: units)
+    }
+
     // MARK: - Parsing & conversion
 
     private func parsedInput() -> Double? {
@@ -581,6 +621,8 @@ final class ConverterViewModel: ObservableObject {
     }
 
     private func recompute() {
+        sanitiseUnitSelectionsIfNeeded()
+
         validationError = nil
         conversionResult = nil
         defer {
