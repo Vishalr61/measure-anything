@@ -100,12 +100,6 @@ struct HomeView: View {
             ScrollViewReader { proxy in
                 ScrollView {
                     VStack(alignment: .leading, spacing: ConverterLayout.rhythm16) {
-                        dashboardHeader
-                            .padding(.horizontal, ConverterLayout.horizontalInset)
-
-                        searchBarButton
-                            .padding(.horizontal, ConverterLayout.horizontalInset)
-
                         categoryPillBar
 
                         ConverterWorkspaceBody(
@@ -125,7 +119,7 @@ struct HomeView: View {
             }
             .background(Color(.systemGroupedBackground))
             .navigationTitle("Measure Anything")
-            .navigationBarTitleDisplayMode(.large)
+            .navigationBarTitleDisplayMode(.inline)
             .scrollDismissesKeyboard(.interactively)
             .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
             .toolbar {
@@ -143,6 +137,18 @@ struct HomeView: View {
                     .accessibilityLabel("View favorites")
                 }
                 ToolbarItemGroup(placement: .topBarTrailing) {
+                    Button {
+                        Haptics.tap()
+                        showTaxonomySearch = true
+                    } label: {
+                        Image(systemName: "magnifyingglass")
+                            .font(.system(size: 15))
+                            .foregroundStyle(Color(hex: "#5F5E5A"))
+                    }
+                    .buttonStyle(ConverterPressingButtonStyle())
+                    .accessibilityLabel("Search")
+                    .accessibilityHint("Opens taxonomy search")
+
                     Button {
                         saveCurrentPairAsFavorite()
                     } label: {
@@ -190,47 +196,6 @@ struct HomeView: View {
 
     private var settingsTab: some View {
         SettingsTabView()
-    }
-
-    private var dashboardHeader: some View {
-        HStack(alignment: .center, spacing: ConverterLayout.rhythm12) {
-            Text("Convert anything, anytime.")
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
-                .lineLimit(1)
-                .minimumScaleFactor(0.78)
-            Spacer(minLength: 0)
-        }
-        .padding(.top, ConverterLayout.rhythm8)
-    }
-
-    private var searchBarButton: some View {
-        Button {
-            Haptics.tap()
-            showTaxonomySearch = true
-        } label: {
-            HStack(spacing: ConverterLayout.rhythm12) {
-                Image(systemName: "magnifyingglass")
-                    .foregroundStyle(.secondary)
-                Text("Search conversion tools…")
-                    .font(.body)
-                    .foregroundStyle(.tertiary)
-                Spacer(minLength: 0)
-            }
-            .padding(.horizontal, ConverterLayout.rhythm16)
-            .padding(.vertical, 14)
-            .background(
-                RoundedRectangle(cornerRadius: 20, style: .continuous)
-                    .fill(Color(.secondarySystemGroupedBackground))
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: 20, style: .continuous)
-                    .strokeBorder(Color.primary.opacity(ConverterLayout.strokeOpacitySubtle), lineWidth: ConverterLayout.strokeHairline)
-            )
-        }
-        .buttonStyle(.plain)
-        .accessibilityLabel("Search")
-        .accessibilityHint("Opens taxonomy search")
     }
 
     private var categoryPillBar: some View {

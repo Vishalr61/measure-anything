@@ -1,0 +1,169 @@
+{
+  "items": [
+    {
+      "id": "item.lifestyle.time.coffee-break",
+      "domainId": "lifestyle",
+      "subgenreId": "lifestyle.time-blocks",
+      "name": "Coffee break",
+      "description": "Nominal coffee break ≈ 15 minutes.",
+      "synonyms": ["coffee pause", "15 minute break"],
+      "tags": ["break", "time", "work"],
+      "unitCategoryRaw": "time",
+      "converterUnitId": "coffee_break"
+    },
+    {
+      "id": "item.measurement.normal.second",
+      "domainId": "measurement",
+      "subgenreId": "measurement.normal",
+      "name": "Second",
+      "description": "SI base unit of time.",
+      "synonyms": ["s", "SI second"],
+      "tags": ["si", "time"],
+      "unitCategoryRaw": "time",
+      "converterUnitId": "second"
+    },
+    {
+      "id": "item.measurement.absurd.blink",
+      "domainId": "measurement",
+      "subgenreId": "measurement.absurd",
+      "name": "Blink",
+      "description": "Average human blink ≈ 150 ms.",
+      "synonyms": ["Eye blink", "Blink duration"],
+      "tags": ["time", "comparison", "biology", "everyday"],
+      "unitCategoryRaw": "time",
+      "converterUnitId": "blink"
+    },
+    {
+      "id": "item.measurement.absurd.heartbeat",
+      "domainId": "measurement",
+      "subgenreId": "measurement.absurd",
+      "name": "Heartbeat",
+      "description": "Average heartbeat interval ≈ 0.857 s (70 bpm).",
+      "synonyms": ["Heart beat interval", "Pulse beat"],
+      "tags": ["time", "comparison", "biology", "health"],
+      "unitCategoryRaw": "time",
+      "converterUnitId": "heartbeat"
+    },
+    {
+      "id": "item.measurement.absurd.tv_episode",
+      "domainId": "measurement",
+      "subgenreId": "measurement.absurd",
+      "name": "TV episode",
+      "description": "Typical TV episode ≈ 45 minutes.",
+      "synonyms": ["Episode length", "Show episode"],
+      "tags": ["time", "comparison", "media", "everyday"],
+      "unitCategoryRaw": "time",
+      "converterUnitId": "tv_episode"
+    },
+    {
+      "id": "item.measurement.absurd.nap",
+      "domainId": "measurement",
+      "subgenreId": "measurement.absurd",
+      "name": "Power nap",
+      "description": "Optimal power nap ≈ 20 minutes.",
+      "synonyms": ["Nap", "Short sleep"],
+      "tags": ["time", "comparison", "health", "everyday"],
+      "unitCategoryRaw": "time",
+      "converterUnitId": "nap"
+    },
+    {
+      "id": "item.measurement.absurd.work_day",
+      "domainId": "measurement",
+      "subgenreId": "measurement.absurd",
+      "name": "Work day",
+      "description": "Standard 8-hour work day = 28,800 s.",
+      "synonyms": ["Workday", "8 hour day"],
+      "tags": ["time", "comparison", "work", "everyday"],
+      "unitCategoryRaw": "time",
+      "converterUnitId": "work_day"
+    },
+    {
+      "id": "item.measurement.absurd.lunar_month",
+      "domainId": "measurement",
+      "subgenreId": "measurement.absurd",
+      "name": "Lunar month",
+      "description": "One lunar cycle ≈ 29.53 days.",
+      "synonyms": ["Moon month", "Synodic month"],
+      "tags": ["time", "comparison", "astronomy", "calendar"],
+      "unitCategoryRaw": "time",
+      "converterUnitId": "lunar_month"
+    },
+    {
+      "id": "item.measurement.absurd.olympic_100m",
+      "domainId": "measurement",
+      "subgenreId": "measurement.absurd",
+      "name": "100m sprint",
+      "description": "World record 100m sprint ≈ 9.58 s (Usain Bolt, 2009).",
+      "synonyms": ["Sprint time", "100 metres"],
+      "tags": ["time", "comparison", "sports", "olympics"],
+      "unitCategoryRaw": "time",
+      "converterUnitId": "olympic_100m"
+    },
+    {
+      "id": "item.measurement.absurd.mars_day",
+      "domainId": "measurement",
+      "subgenreId": "measurement.absurd",
+      "name": "Mars day",
+      "description": "One Martian sol ≈ 24h 37m (88,775 s).",
+      "synonyms": ["Martian sol", "Mars sol"],
+      "tags": ["time", "comparison", "space", "astronomy"],
+      "unitCategoryRaw": "time",
+      "converterUnitId": "mars_day"
+    },
+    {
+      "id": "item.measurement.absurd.dog_year",
+      "domainId": "measurement",
+      "subgenreId": "measurement.absurd",
+      "name": "Dog year",
+      "description": "One 'dog year' ≈ 7 human years ≈ 46,356,000 s.",
+      "synonyms": ["Canine year", "7 human years"],
+      "tags": ["time", "comparison", "humor", "everyday"],
+      "unitCategoryRaw": "time",
+      "converterUnitId": "dog_year"
+    },
+    {
+      "id": "item.measurement.absurd.light_travel_earth_moon",
+      "domainId": "measurement",
+      "subgenreId": "measurement.absurd",
+      "name": "Light to the Moon",
+      "description": "Time for light to travel Earth to Moon ≈ 1.28 s.",
+      "synonyms": ["Earth Moon light time", "Lunar light delay"],
+      "tags": ["time", "comparison", "space", "astronomy"],
+      "unitCategoryRaw": "time",
+      "converterUnitId": "light_travel_earth_moon"
+    },
+    {
+      "id": "item.measurement.absurd.gym_session",
+      "domainId": "measurement",
+      "subgenreId": "measurement.absurd",
+      "name": "Gym session",
+      "description": "Gym session ≈ 60 minutes.",
+      "synonyms": ["Workout session", "Gym hour"],
+      "tags": ["time", "comparison", "fitness", "everyday"],
+      "unitCategoryRaw": "time",
+      "converterUnitId": "gym_session"
+    },
+    {
+      "id": "item.measurement.absurd.one_episode",
+      "domainId": "measurement",
+      "subgenreId": "measurement.absurd",
+      "name": "One episode",
+      "description": "Typical episode runtime ≈ 45 minutes.",
+      "synonyms": ["Episode", "TV runtime"],
+      "tags": ["time", "comparison", "media", "everyday"],
+      "unitCategoryRaw": "time",
+      "converterUnitId": "one_episode"
+    },
+    {
+      "id": "item.measurement.absurd.bad_meeting",
+      "domainId": "measurement",
+      "subgenreId": "measurement.absurd",
+      "name": "Bad meeting",
+      "description": "Bad meeting ≈ 90 minutes.",
+      "synonyms": ["Long meeting", "Meeting hell"],
+      "tags": ["time", "comparison", "work", "humor"],
+      "unitCategoryRaw": "time",
+      "converterUnitId": "bad_meeting"
+    }
+  ]
+}

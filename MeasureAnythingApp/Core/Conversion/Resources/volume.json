@@ -1,5 +1,47 @@
 [
   {
+    "id": "teaspoon_vol",
+    "name": "Teaspoon",
+    "category": "volume",
+    "baseUnit": "liter",
+    "kind": "absurd",
+    "conversionStyle": "multiplicative",
+    "factor": 0.00493,
+    "iconName": "fork.knife",
+    "description": "US teaspoon ≈ 4.93 ml.",
+    "exampleMeme": "Spoon-sized volume.",
+    "funFact": "The teaspoon was standardised at 4.93 ml in the US in 1893 — but a 'teaspoon' in recipes from the 1800s could mean anything from 2 to 6 ml.",
+    "interestScore": 7
+  },
+  {
+    "id": "can_of_soda",
+    "name": "Can of soda",
+    "category": "volume",
+    "baseUnit": "liter",
+    "kind": "absurd",
+    "conversionStyle": "multiplicative",
+    "factor": 0.355,
+    "iconName": "cup.and.saucer",
+    "description": "Standard 355 ml soda can.",
+    "exampleMeme": "Can-sized volume.",
+    "funFact": "The 355 ml (12 fl oz) can size was standardised in the US in 1953 — it was chosen to match the volume of a standard serving glass at the time.",
+    "interestScore": 8
+  },
+  {
+    "id": "wine_bottle_vol",
+    "name": "Wine bottle",
+    "category": "volume",
+    "baseUnit": "liter",
+    "kind": "absurd",
+    "conversionStyle": "multiplicative",
+    "factor": 0.75,
+    "iconName": "wineglass",
+    "description": "Standard wine bottle = 750 ml.",
+    "exampleMeme": "Bottle-sized volume.",
+    "funFact": "The 750 ml bottle was standardised partly because it matched the lung capacity of a glassblower — the original bottles were literally blown by human breath.",
+    "interestScore": 8
+  },
+  {
     "id": "soda_can",
     "name": "Soda can",
     "category": "volume",
@@ -9,7 +51,8 @@
     "factor": 0.355,
     "iconName": "takeoutbag.and.cup.and.straw",
     "description": "Standard can volume ≈ 355 mL.",
-    "exampleMeme": "Hydration, but with consequences."
+    "exampleMeme": "Hydration, but with consequences.",
+    "interestScore": 7
   },
   {
     "id": "wine_glass",
@@ -21,7 +64,8 @@
     "factor": 0.15,
     "iconName": "wineglass",
     "description": "Typical pour ≈ 150 mL.",
-    "exampleMeme": "A responsible amount (until it isn't)."
+    "exampleMeme": "A responsible amount (until it isn't).",
+    "interestScore": 7
   },
   {
     "id": "bathtub",
@@ -30,10 +74,12 @@
     "baseUnit": "liter",
     "kind": "absurd",
     "conversionStyle": "multiplicative",
-    "factor": 150.0,
-    "iconName": "drop",
-    "description": "Typical bathtub fill ≈ 150 L.",
-    "exampleMeme": "A suspiciously specific amount of water."
+    "factor": 300,
+    "iconName": "bathtub",
+    "description": "Standard bathtub capacity ≈ 300 litres.",
+    "exampleMeme": "Bath-sized volume.",
+    "funFact": "A full bathtub uses more water than a 10-minute shower — the average bath uses 150–300 litres while a low-flow showerhead uses about 8 litres per minute.",
+    "interestScore": 9
   },
   {
     "id": "bucket",
@@ -42,10 +88,108 @@
     "baseUnit": "liter",
     "kind": "absurd",
     "conversionStyle": "multiplicative",
-    "factor": 10.0,
+    "factor": 10,
     "iconName": "shippingbox",
     "description": "Common bucket volume ≈ 10 L.",
-    "exampleMeme": "Bucket-based engineering."
+    "exampleMeme": "Bucket-based engineering.",
+    "interestScore": 6
+  },
+  {
+    "id": "olympic_pool_vol",
+    "name": "Olympic pool",
+    "category": "volume",
+    "baseUnit": "liter",
+    "kind": "absurd",
+    "conversionStyle": "multiplicative",
+    "factor": 2500000,
+    "iconName": "figure.pool.swim",
+    "description": "Olympic swimming pool ≈ 2,500,000 litres.",
+    "exampleMeme": "Olympic-scale volume.",
+    "funFact": "An Olympic pool holds 2.5 million litres — if you drank 2 litres of water per day it would take you 3,424 years to drink the whole pool.",
+    "interestScore": 9
+  },
+  {
+    "id": "stomach",
+    "name": "Human stomach",
+    "category": "volume",
+    "baseUnit": "liter",
+    "kind": "absurd",
+    "conversionStyle": "multiplicative",
+    "factor": 1,
+    "iconName": "circle.fill",
+    "description": "Comfortable human stomach capacity ≈ 1 litre.",
+    "exampleMeme": "Gut-feeling volume.",
+    "funFact": "An empty stomach is about the size of a fist — but can expand to hold up to 4 litres when fully stretched, though 1 litre is comfortable.",
+    "interestScore": 8
+  },
+  {
+    "id": "hot_tub",
+    "name": "Hot tub",
+    "category": "volume",
+    "baseUnit": "liter",
+    "kind": "absurd",
+    "conversionStyle": "multiplicative",
+    "factor": 1500,
+    "iconName": "thermometer.medium",
+    "description": "Average hot tub capacity ≈ 1,500 litres.",
+    "exampleMeme": "Jacuzzi-sized volume.",
+    "funFact": "A hot tub at 40°C loses about 3% of its water per week to evaporation — and you need to replace chemicals every time it rains.",
+    "interestScore": 6
+  },
+  {
+    "id": "fuel_tank",
+    "name": "Car fuel tank",
+    "category": "volume",
+    "baseUnit": "liter",
+    "kind": "absurd",
+    "conversionStyle": "multiplicative",
+    "factor": 55,
+    "iconName": "fuelpump",
+    "description": "Average car fuel tank ≈ 55 litres.",
+    "exampleMeme": "Full tank volume.",
+    "funFact": "The average petrol car tank holds about 55 litres — enough to drive roughly 700 km, or about the distance from London to Edinburgh and back.",
+    "interestScore": 7
+  },
+  {
+    "id": "blood_volume",
+    "name": "Human blood volume",
+    "category": "volume",
+    "baseUnit": "liter",
+    "kind": "absurd",
+    "conversionStyle": "multiplicative",
+    "factor": 5,
+    "iconName": "drop",
+    "description": "Total blood in an adult human ≈ 5 litres.",
+    "exampleMeme": "Bloodstream volume.",
+    "funFact": "Your body circulates its entire blood supply roughly once per minute — the heart pumps about 5 litres per minute at rest.",
+    "interestScore": 8
+  },
+  {
+    "id": "milk_carton",
+    "name": "Milk carton",
+    "category": "volume",
+    "baseUnit": "liter",
+    "kind": "absurd",
+    "conversionStyle": "multiplicative",
+    "factor": 1,
+    "iconName": "cube.box",
+    "description": "Standard 1-litre milk carton.",
+    "exampleMeme": "Carton-sized volume.",
+    "funFact": "The paperboard milk carton was invented in 1915 but only became widespread in the 1950s — before that, milk was delivered in glass bottles that you'd return for a deposit.",
+    "interestScore": 7
+  },
+  {
+    "id": "earths_ocean",
+    "name": "Earth's oceans",
+    "category": "volume",
+    "baseUnit": "liter",
+    "kind": "absurd",
+    "conversionStyle": "multiplicative",
+    "factor": 1.335e21,
+    "iconName": "globe",
+    "description": "Total volume of Earth's oceans ≈ 1.335 × 10²¹ litres.",
+    "exampleMeme": "Planetary-scale volume.",
+    "funFact": "If you compressed all of Earth's ocean water into a sphere, it would be about 1,385 km in diameter — smaller than the Moon.",
+    "interestScore": 7
   }
 ]
-

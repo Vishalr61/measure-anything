@@ -18,16 +18,30 @@ final class CoreConversionTests: XCTestCase {
         let store = AbsurdUnitStore()
 
         let length = try store.load(category: .length)
-        XCTAssertEqual(Set(length.map(\.id)), Set(["banana", "fridge", "bus", "blue_whale"]))
+        let lengthIDs = Set(length.map(\.id))
+        XCTAssertGreaterThanOrEqual(lengthIDs.count, 50)
+        XCTAssertFalse(lengthIDs.contains("school_bus"))
+        for required in ["banana", "fridge", "bus", "blue_whale", "spider_silk", "distance_light_second"] {
+            XCTAssertTrue(lengthIDs.contains(required), "Expected length absurd id missing: \(required)")
+        }
 
         let mass = try store.load(category: .mass)
-        XCTAssertEqual(Set(mass.map(\.id)), Set(["cat", "bowling_ball", "microwave", "elephant"]))
+        XCTAssertEqual(mass.count, 17)
+        XCTAssertTrue(Set(mass.map(\.id)).contains("elephant"))
+        XCTAssertTrue(Set(mass.map(\.id)).contains("blue_whale_mass"))
 
         let time = try store.load(category: .time)
-        XCTAssertEqual(Set(time.map(\.id)), Set(["coffee_break", "gym_session", "one_episode", "bad_meeting"]))
+        XCTAssertEqual(time.count, 14)
+        XCTAssertTrue(Set(time.map(\.id)).contains("coffee_break"))
+        XCTAssertTrue(Set(time.map(\.id)).contains("blink"))
 
         let volume = try store.load(category: .volume)
-        XCTAssertEqual(Set(volume.map(\.id)), Set(["soda_can", "wine_glass", "bathtub", "bucket"]))
+        XCTAssertEqual(volume.count, 14)
+        XCTAssertTrue(Set(volume.map(\.id)).contains("bathtub"))
+
+        let temperature = try store.load(category: .temperature)
+        XCTAssertEqual(temperature.count, 7)
+        XCTAssertTrue(Set(temperature.map(\.id)).contains("body_temp"))
     }
 
     func testRegistryRejectsDuplicateIDs() throws {
@@ -70,13 +84,13 @@ final class CoreConversionTests: XCTestCase {
         let kmToM = try engine.convert(1, from: "kilometer", to: "meter")
         XCTAssertEqual(kmToM.outputValue, 1000, accuracy: 1e-12)
 
-        // 1 banana -> meter = 0.19
+        // 1 banana -> meter = 0.178
         let bananaToM = try engine.convert(1, from: "banana", to: "meter")
-        XCTAssertEqual(bananaToM.outputValue, 0.19, accuracy: 1e-12)
+        XCTAssertEqual(bananaToM.outputValue, 0.178, accuracy: 1e-12)
 
-        // 10 meter -> banana ≈ 52.63
+        // 10 meter -> banana
         let mToBanana = try engine.convert(10, from: "meter", to: "banana")
-        XCTAssertEqual(mToBanana.outputValue, 10 / 0.19, accuracy: 1e-12)
+        XCTAssertEqual(mToBanana.outputValue, 10 / 0.178, accuracy: 1e-12)
 
         // 1 elephant -> kilogram = 6000
         let elephantToKg = try engine.convert(1, from: "elephant", to: "kilogram")
@@ -98,6 +112,23 @@ final class CoreConversionTests: XCTestCase {
         // 32 fahrenheit -> celsius = 0
         let fToC = try engine.convert(32, from: "fahrenheit", to: "celsius")
         XCTAssertEqual(fToC.outputValue, 0, accuracy: 1e-12)
+    }
+
+    func testTemperatureAbsurdOffsetJSON() throws {
+        let store = AbsurdUnitStore()
+        let absurdTemp = try store.load(category: .temperature)
+        let registry = try UnitRegistry(units: SeedNormalUnits.all + absurdTemp)
+        let engine = ConverterEngine(registry: registry)
+
+        // body_temp JSON uses offset encoding; 1 unit == 37 °C
+        let bodyToC = try engine.convert(1, from: "body_temp", to: "celsius")
+        XCTAssertEqual(bodyToC.outputValue, 37, accuracy: 0.01)
+
+        let cToBody = try engine.convert(37, from: "celsius", to: "body_temp")
+        XCTAssertEqual(cToBody.outputValue, 1, accuracy: 1e-9)
+
+        let pizzaToC = try engine.convert(1, from: "pizza_oven", to: "celsius")
+        XCTAssertEqual(pizzaToC.outputValue, 450, accuracy: 0.01)
     }
 
     func testAbsurdJSONRejectsTemperatureUnits() throws {

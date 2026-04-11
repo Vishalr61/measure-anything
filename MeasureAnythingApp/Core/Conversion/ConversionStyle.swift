@@ -8,5 +8,7 @@ import Foundation
 public enum ConversionStyle: String, CaseIterable, Codable, Hashable, Sendable {
     case multiplicative
     case temperature
+    /// Absurd temperature units: Kelvin = 273.15 + `factor` × value (factor is loaded as −JSON.factor×JSON.offset).
+    case temperatureAffine
 }
 

@@ -1,0 +1,75 @@
+{
+  "domains": [
+    {
+      "id": "measurement",
+      "name": "Measurement",
+      "description": "Physical quantities: length, mass, time, volume, temperature."
+    },
+    {
+      "id": "lifestyle",
+      "name": "Lifestyle",
+      "description": "Informal or humor-oriented ways to describe everyday scales."
+    }
+  ],
+  "subgenres": [
+    {
+      "id": "measurement.normal",
+      "domainId": "measurement",
+      "name": "Normal units",
+      "description": "Standard SI and common imperial units."
+    },
+    {
+      "id": "measurement.absurd",
+      "domainId": "measurement",
+      "name": "Absurd units",
+      "description": "Meme-friendly units backed by approximate real factors."
+    },
+    {
+      "id": "measurement.custom",
+      "domainId": "measurement",
+      "name": "Custom units",
+      "description": "User-defined multiplicative units in Custom mode."
+    },
+    {
+      "id": "lifestyle.time-blocks",
+      "domainId": "lifestyle",
+      "name": "Time blocks",
+      "description": "Chunked time metaphors (breaks, episodes, sessions)."
+    }
+  ],
+  "converterNavigation": {
+    "measurementDomainId": "measurement",
+    "categories": [
+      {
+        "unitCategoryRaw": "length",
+        "description": "Distance, height, and similar scales."
+      },
+      {
+        "unitCategoryRaw": "mass"
+      },
+      {
+        "unitCategoryRaw": "time"
+      },
+      {
+        "unitCategoryRaw": "temperature"
+      },
+      {
+        "unitCategoryRaw": "volume"
+      }
+    ],
+    "modes": [
+      {
+        "modeRaw": "normal",
+        "subgenreId": "measurement.normal"
+      },
+      {
+        "modeRaw": "absurd",
+        "subgenreId": "measurement.absurd"
+      },
+      {
+        "modeRaw": "custom",
+        "subgenreId": "measurement.custom"
+      }
+    ]
+  }
+}

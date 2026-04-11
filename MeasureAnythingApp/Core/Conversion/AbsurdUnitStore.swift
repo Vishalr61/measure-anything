@@ -19,6 +19,24 @@ public struct AbsurdUnitStore: Sendable {
         }
     }
 
+    /// Shipped `temperature.json` uses `conversionStyle: "offset"` with `factor` and `offset`;
+    /// loaded `UnitDefinition` uses `temperatureAffine` and `factor = -(factor×offset)` (Kelvin per unit).
+    private struct AbsurdTemperatureJSONUnit: Codable, Sendable {
+        var id: String
+        var name: String
+        var category: String?
+        var baseUnit: String?
+        var kind: String?
+        var conversionStyle: String
+        var factor: Double
+        var offset: Double
+        var iconName: String?
+        var description: String?
+        var exampleMeme: String?
+        var funFact: String?
+        var interestScore: Int?
+    }
+
     public let bundle: Bundle
     public let decoder: JSONDecoder
 
@@ -42,15 +60,13 @@ public struct AbsurdUnitStore: Sendable {
 
     public func loadAll() throws -> [UnitDefinition] {
         var units: [UnitDefinition] = []
-        for category in UnitCategory.allCases where category != .temperature {
+        for category in UnitCategory.allCases {
             units.append(contentsOf: try load(category: category))
         }
         return units
     }
 
     public func load(category: UnitCategory) throws -> [UnitDefinition] {
-        precondition(category != .temperature, "v1: absurd temperature units are not supported")
-
         let resourceName = category.rawValue
         let resourceExt = "json"
         guard let url = bundle.url(forResource: resourceName, withExtension: resourceExt) else {
@@ -59,6 +75,9 @@ public struct AbsurdUnitStore: Sendable {
 
         do {
             let data = try Data(contentsOf: url)
+            if category == .temperature {
+                return try decodeTemperatureAbsurd(data: data)
+            }
             return try decodeAndValidate(data: data, category: category)
         } catch let error as StoreError {
             throw error
@@ -92,5 +111,46 @@ public struct AbsurdUnitStore: Sendable {
         }
         return validated
     }
-}
 
+    private func decodeTemperatureAbsurd(data: Data) throws -> [UnitDefinition] {
+        let decoded = try decoder.decode([AbsurdTemperatureJSONUnit].self, from: data)
+        var out: [UnitDefinition] = []
+        out.reserveCapacity(decoded.count)
+        for raw in decoded {
+            do {
+                guard raw.conversionStyle == "offset" else {
+                    throw StoreError.invalidUnit(
+                        category: .temperature,
+                        id: raw.id,
+                        underlying: "Expected conversionStyle \"offset\" for absurd temperature JSON."
+                    )
+                }
+                let kelvinPerUnit = -raw.factor * raw.offset
+                let def = try UnitDefinition(
+                    id: raw.id,
+                    name: raw.name,
+                    category: .temperature,
+                    baseUnit: "kelvin",
+                    kind: .absurd,
+                    conversionStyle: .temperatureAffine,
+                    factor: kelvinPerUnit,
+                    iconName: raw.iconName,
+                    description: raw.description,
+                    exampleMeme: raw.exampleMeme,
+                    funFact: raw.funFact,
+                    interestScore: raw.interestScore
+                )
+                out.append(def)
+            } catch let error as StoreError {
+                throw error
+            } catch {
+                throw StoreError.invalidUnit(
+                    category: .temperature,
+                    id: raw.id,
+                    underlying: String(describing: error)
+                )
+            }
+        }
+        return out
+    }
+}

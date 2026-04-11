@@ -9,11 +9,27 @@ import MeasureAnythingCore
 final class ConverterViewModel: ObservableObject {
     /// Skips category/mode defaulting and per-field `recompute` while applying a saved favorite.
     private var isApplyingFavoriteRestore = false
+    /// Skips reactive defaults / `recompute` while restoring `UserDefaults` session in `init`.
+    private var isRestoringSession = false
+    /// Skips `selectedFromUnitID` / `selectedToUnitID` `didSet` → `recompute` while batching ID fixes (avoids re-entrancy).
+    private var isSanitisingSelections = false
+    private var sessionPersistenceEnabled = false
+
+    private enum SessionKeys {
+        static let hasLaunchedBefore = "hasLaunchedBefore"
+        static let sessionCategory = "session.category"
+        static let sessionFrom = "session.fromUnit"
+        static let sessionTo = "session.toUnit"
+        static let sessionMode = "session.mode"
+        static let sessionInput = "session.inputValue"
+        static let hasSeenAbsurdNudge = "hasSeenAbsurdNudge"
+        static let normalConversionCount = "normalConversionCount"
+    }
 
     @Published var selectedCategory: UnitCategory = .length {
         didSet {
             guard oldValue != selectedCategory else { return }
-            guard !isApplyingFavoriteRestore else { return }
+            guard !isApplyingFavoriteRestore, !isRestoringSession else { return }
             applyDefaultsAfterCategoryChange()
             syncDiceTiltToCategory(animated: true)
         }
@@ -22,25 +38,28 @@ final class ConverterViewModel: ObservableObject {
     @Published var selectedMode: UnitRegistry.Mode = .normal {
         didSet {
             guard oldValue != selectedMode else { return }
-            guard !isApplyingFavoriteRestore else { return }
+            guard !isApplyingFavoriteRestore, !isRestoringSession else { return }
             reconcileSelectionsAfterModeChange()
         }
     }
 
     @Published var inputText: String = "1" {
-        didSet { recompute() }
+        didSet {
+            guard !isRestoringSession else { return }
+            recompute()
+        }
     }
 
     @Published var selectedFromUnitID: UnitDefinition.ID = "meter" {
         didSet {
-            guard !isApplyingFavoriteRestore else { return }
+            guard !isApplyingFavoriteRestore, !isRestoringSession, !isSanitisingSelections else { return }
             recompute()
         }
     }
 
     @Published var selectedToUnitID: UnitDefinition.ID = "kilometer" {
         didSet {
-            guard !isApplyingFavoriteRestore else { return }
+            guard !isApplyingFavoriteRestore, !isRestoringSession, !isSanitisingSelections else { return }
             recompute()
         }
     }
@@ -81,12 +100,15 @@ final class ConverterViewModel: ObservableObject {
     private let displayFormatter: NumberFormatter = {
         let f = NumberFormatter()
         f.numberStyle = .decimal
-        f.locale = .current
+        f.locale = Locale(identifier: "en_US")
         f.usesGroupingSeparator = true
         f.roundingMode = .halfUp
         f.minimumFractionDigits = 0
+        f.maximumFractionDigits = 6
         return f
     }()
+
+    private static let displayFallbackLocale = Locale(identifier: "en_US")
 
     init(taxonomy: AppTaxonomyStore) {
         self.taxonomy = taxonomy
@@ -102,9 +124,28 @@ final class ConverterViewModel: ObservableObject {
         if !modes.isEmpty, !modes.contains(selectedMode) {
             selectedMode = modes[0]
         }
-        applyDefaultsAfterCategoryChange()
+
+        sessionPersistenceEnabled = false
+        let isFirstLaunch = !UserDefaults.standard.bool(forKey: SessionKeys.hasLaunchedBefore)
+        if isFirstLaunch {
+            UserDefaults.standard.set(true, forKey: SessionKeys.hasLaunchedBefore)
+        }
+
+        isRestoringSession = true
+        let restored = performSessionRestore()
+        isRestoringSession = false
+
+        if !restored {
+            if isFirstLaunch {
+                applyRegionalDefaultPair()
+            } else {
+                applyDefaultsAfterCategoryChange()
+            }
+        }
+
         syncDiceTiltToCategory(animated: false)
-        recompute()
+        sessionPersistenceEnabled = true
+        saveSession()
     }
 
     /// Rebuilds engine + registry when SwiftData custom rows change.
@@ -138,6 +179,131 @@ final class ConverterViewModel: ObservableObject {
     var fromUnit: UnitDefinition? { try? registry.unit(id: selectedFromUnitID) }
     var toUnit: UnitDefinition? { try? registry.unit(id: selectedToUnitID) }
 
+    // MARK: - Session persistence
+
+    private func saveSession() {
+        guard sessionPersistenceEnabled else { return }
+        let d = UserDefaults.standard
+        d.set(selectedCategory.rawValue, forKey: SessionKeys.sessionCategory)
+        d.set(selectedFromUnitID, forKey: SessionKeys.sessionFrom)
+        d.set(selectedToUnitID, forKey: SessionKeys.sessionTo)
+        d.set(selectedMode.rawValue, forKey: SessionKeys.sessionMode)
+        d.set(inputText, forKey: SessionKeys.sessionInput)
+    }
+
+    /// Restores category, units, mode, and input when session keys exist. Returns whether any session row was applied.
+    private func performSessionRestore() -> Bool {
+        let d = UserDefaults.standard
+        guard let catRaw = d.string(forKey: SessionKeys.sessionCategory),
+              let cat = UnitCategory(rawValue: catRaw),
+              categories.contains(cat) else { return false }
+
+        selectedCategory = cat
+
+        if let modeRaw = d.string(forKey: SessionKeys.sessionMode),
+           let mode = UnitRegistry.Mode(rawValue: modeRaw),
+           modes.contains(mode) {
+            selectedMode = mode
+        }
+
+        let units = registry.units(in: selectedCategory, includeKinds: selectedMode.includedKinds)
+        let idSet = Set(units.map(\.id))
+
+        if let from = d.string(forKey: SessionKeys.sessionFrom), idSet.contains(from) {
+            selectedFromUnitID = from
+        }
+        if let to = d.string(forKey: SessionKeys.sessionTo), idSet.contains(to) {
+            selectedToUnitID = to
+        }
+        if let saved = d.string(forKey: SessionKeys.sessionInput) {
+            inputText = saved
+        }
+
+        if !idSet.contains(selectedFromUnitID) || !idSet.contains(selectedToUnitID) {
+            applyDefaultsAfterCategoryChange()
+        } else {
+            ensureDistinctFromTo(in: availableUnits)
+            recompute()
+        }
+        return true
+    }
+
+    private func applyRegionalDefaultPair() {
+        let units = availableUnits
+        guard !units.isEmpty else {
+            validationError = "No units for this category and mode."
+            conversionResult = nil
+            return
+        }
+
+        let ids = Set(units.map(\.id))
+        let pair = AppDefaults.defaultPair(for: selectedCategory)
+
+        if ids.contains(pair.from), ids.contains(pair.to) {
+            selectedFromUnitID = pair.from
+            selectedToUnitID = pair.to
+        } else if let base = selectedCategory.canonicalBaseUnit, ids.contains(base) {
+            selectedFromUnitID = base
+            selectedToUnitID = firstDistinctToUnit(from: base, in: units)
+        } else {
+            selectedFromUnitID = units[0].id
+            selectedToUnitID = firstDistinctToUnit(from: units[0].id, in: units)
+        }
+
+        ensureDistinctFromTo(in: units)
+        recompute()
+    }
+
+    // MARK: - Absurd mode nudge (one-time)
+
+    var hasSeenAbsurdNudge: Bool {
+        get { UserDefaults.standard.bool(forKey: SessionKeys.hasSeenAbsurdNudge) }
+        set {
+            UserDefaults.standard.set(newValue, forKey: SessionKeys.hasSeenAbsurdNudge)
+            objectWillChange.send()
+        }
+    }
+
+    private var normalConversionCount: Int {
+        get { UserDefaults.standard.integer(forKey: SessionKeys.normalConversionCount) }
+        set { UserDefaults.standard.set(newValue, forKey: SessionKeys.normalConversionCount) }
+    }
+
+    /// Fixed absurd unit per category for the nudge preview (registry must include it).
+    private var absurdNudgeTargetUnitID: String? {
+        switch selectedCategory {
+        case .length: "giraffe"
+        case .mass: "elephant"
+        case .time: "coffee_break"
+        case .volume: "soda_can"
+        case .temperature: nil
+        }
+    }
+
+    /// Human-readable absurd conversion for the nudge (empty when unavailable).
+    var absurdEquivalentDisplay: String {
+        guard let targetID = absurdNudgeTargetUnitID,
+              let absurdDef = try? registry.unit(id: targetID),
+              let value = parsedInput(),
+              let result = try? engine.convert(
+                  value,
+                  from: selectedFromUnitID,
+                  to: targetID,
+                  includeMemeExplanation: false
+              )
+        else { return "" }
+
+        return "\(formatNumberForDisplay(result.outputValue)) \(absurdDef.name)"
+    }
+
+    var showAbsurdNudge: Bool {
+        selectedMode == .normal
+            && !hasSeenAbsurdNudge
+            && normalConversionCount >= 1
+            && absurdNudgeTargetUnitID != nil
+            && !absurdEquivalentDisplay.isEmpty
+    }
+
     /// Exposed for favorites UI (read-only snapshot of the live registry).
     var currentRegistry: UnitRegistry { registry }
 
@@ -167,8 +333,12 @@ final class ConverterViewModel: ObservableObject {
         let pool = diceToUnitPool()
         let newUnit: UnitDefinition? = {
             guard !pool.isEmpty else { return nil }
-            let candidates = pool.filter { $0.id != selectedToUnitID }
-            return (candidates.isEmpty ? pool : candidates).randomElement()
+            // Never land on the same unit as FROM (and avoid repeating current TO when other options exist).
+            let notFrom = pool.filter { $0.id != selectedFromUnitID }
+            guard !notFrom.isEmpty else { return nil }
+            let avoidTo = notFrom.filter { $0.id != selectedToUnitID }
+            let candidates = avoidTo.isEmpty ? notFrom : avoidTo
+            return Self.weightedRandomUnit(from: candidates)
         }()
 
         let rest = selectedCategory.converterDiceRestDegrees
@@ -210,7 +380,18 @@ final class ConverterViewModel: ObservableObject {
                 }
                 self.diceDisplayFace = newFace
 
-                if let u = newUnit {
+                // `newUnit` was chosen at roll start; mode/category may have changed since — never apply a stale ID.
+                let allowed = Set(self.availableUnits.map(\.id))
+                let resolvedTo: UnitDefinition? = {
+                    if let u = newUnit, allowed.contains(u.id), u.id != self.selectedFromUnitID {
+                        return u
+                    }
+                    let pool = self.diceToUnitPool().filter { allowed.contains($0.id) }
+                    let candidates = pool.filter { $0.id != self.selectedFromUnitID }
+                    return Self.weightedRandomUnit(from: candidates)
+                }()
+
+                if let u = resolvedTo {
                     self.selectedToUnitID = u.id
                     self.diceLandedUnitName = u.name
                 } else {
@@ -261,6 +442,21 @@ final class ConverterViewModel: ObservableObject {
         if !fromAvailable.isEmpty { return fromAvailable }
 
         return availableUnits
+    }
+
+    /// Weighted pick for dice: `interestScore` (default 5) adds proportional weight; clamped to 1…10.
+    private static func weightedRandomUnit(from candidates: [UnitDefinition]) -> UnitDefinition? {
+        guard !candidates.isEmpty else { return nil }
+        var weighted: [UnitDefinition] = []
+        weighted.reserveCapacity(candidates.count * 10)
+        for u in candidates {
+            let raw = u.interestScore ?? 5
+            let w = max(1, min(10, raw))
+            for _ in 0..<w {
+                weighted.append(u)
+            }
+        }
+        return weighted.randomElement()
     }
 
     /// Whether the current from/to pair can be stored as a favorite (pair metadata only).
@@ -405,6 +601,30 @@ final class ConverterViewModel: ObservableObject {
         selectedToUnitID = firstDistinctToUnit(from: selectedFromUnitID, in: units)
     }
 
+    /// Keeps from/to IDs inside the current category + mode list so menus and labels stay valid (e.g. after a delayed dice land or rapid mode toggles).
+    private func sanitiseUnitSelectionsIfNeeded() {
+        let units = availableUnits
+        guard !units.isEmpty else { return }
+        let ids = Set(units.map(\.id))
+        let fromOK = ids.contains(selectedFromUnitID)
+        let toOK = ids.contains(selectedToUnitID)
+        guard !fromOK || !toOK else {
+            ensureDistinctFromTo(in: units)
+            return
+        }
+
+        isSanitisingSelections = true
+        defer { isSanitisingSelections = false }
+
+        if !fromOK {
+            selectedFromUnitID = units[0].id
+        }
+        if !toOK {
+            selectedToUnitID = firstDistinctToUnit(from: selectedFromUnitID, in: units)
+        }
+        ensureDistinctFromTo(in: units)
+    }
+
     // MARK: - Parsing & conversion
 
     private func parsedInput() -> Double? {
@@ -417,8 +637,15 @@ final class ConverterViewModel: ObservableObject {
     }
 
     private func recompute() {
+        sanitiseUnitSelectionsIfNeeded()
+
         validationError = nil
         conversionResult = nil
+        defer {
+            if sessionPersistenceEnabled {
+                saveSession()
+            }
+        }
 
         let trimmed = inputText.trimmingCharacters(in: .whitespacesAndNewlines)
         if trimmed.isEmpty {
@@ -449,6 +676,12 @@ final class ConverterViewModel: ObservableObject {
                 to: selectedToUnitID,
                 includeMemeExplanation: includeMeme
             )
+            if sessionPersistenceEnabled {
+                ConversionHistory.shared.record(from: selectedFromUnitID, to: selectedToUnitID)
+                if selectedMode == .normal {
+                    normalConversionCount = normalConversionCount + 1
+                }
+            }
         } catch {
             validationError = "Conversion couldn’t be completed."
         }
@@ -476,7 +709,10 @@ final class ConverterViewModel: ObservableObject {
             f.minimumFractionDigits = 0
         }
 
-        return f.string(from: NSNumber(value: value)) ?? String(format: "%g", value)
+        if let s = f.string(from: NSNumber(value: value)) {
+            return s
+        }
+        return String(format: "%g", locale: Self.displayFallbackLocale, value)
     }
 
     /// Live formatted converted value for UI copy/share footnotes (`"—"` when invalid or missing).
@@ -504,5 +740,34 @@ final class ConverterViewModel: ObservableObject {
         let i = formatNumberForDisplay(r.inputValue)
         let o = formatNumberForDisplay(r.outputValue)
         return "\(i) \(fromN) = \(o) \(toN)"
+    }
+
+    /// Footer line for the share card when the destination unit has no fun fact.
+    func shareCardFormulaLine() -> String? {
+        guard let fromU = fromUnit, let toU = toUnit,
+              let one = try? engine.convert(1, from: selectedFromUnitID, to: selectedToUnitID, includeMemeExplanation: false)
+        else { return nil }
+        return "1 \(fromU.name) = \(formatNumberForDisplay(one.outputValue)) \(toU.name)"
+    }
+
+    /// Renders the 1080×1080 share card (iOS 16+). Returns `nil` when invalid or unavailable.
+    func renderShareCardImage() -> UIImage? {
+        guard #available(iOS 16.0, *) else { return nil }
+        guard validationError == nil, let r = conversionResult,
+              let fromN = fromUnit?.name, let toN = toUnit?.name else { return nil }
+        let fromVal = formatNumberForDisplay(r.inputValue)
+        let toVal = formatNumberForDisplay(r.outputValue)
+        let fact = toUnit?.funFact
+        let formula = shareCardFormulaLine()
+        let trimmedFact = fact?.trimmingCharacters(in: .whitespacesAndNewlines)
+        let useFact = trimmedFact.map { !$0.isEmpty } ?? false
+        return ShareCardView.renderImage(
+            fromValue: fromVal,
+            fromUnit: fromN,
+            toValue: toVal,
+            toUnit: toN,
+            funFact: useFact ? trimmedFact : nil,
+            formulaLine: useFact ? nil : formula
+        )
     }
 }

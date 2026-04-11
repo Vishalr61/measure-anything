@@ -96,6 +96,18 @@ struct ConverterView: View {
                 }
                 ToolbarItemGroup(placement: .topBarTrailing) {
                     Button {
+                        Haptics.tap()
+                        showTaxonomySearch = true
+                    } label: {
+                        Image(systemName: "magnifyingglass")
+                            .font(.system(size: 15))
+                            .foregroundStyle(Color(hex: "#5F5E5A"))
+                    }
+                    .buttonStyle(ConverterPressingButtonStyle())
+                    .accessibilityLabel("Search")
+                    .accessibilityHint("Opens taxonomy search")
+
+                    Button {
                         saveCurrentPairAsFavorite()
                     } label: {
                         Image(systemName: isCurrentPairAlreadyFavorite ? "star.fill" : "star")

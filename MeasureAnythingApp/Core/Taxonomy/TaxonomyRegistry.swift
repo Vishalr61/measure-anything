@@ -52,25 +52,69 @@ public struct TaxonomyRegistry: Sendable {
     public let subgenresByDomainId: [Domain.ID: [Subgenre]]
     public let itemsBySubgenreId: [Subgenre.ID: [Item]]
 
-    /// Loads and validates `taxonomy.json` from the `MeasureAnythingTaxonomy` resource bundle.
+    /// Loads and validates split taxonomy JSON under `Resources/taxonomy/` in the `MeasureAnythingTaxonomy` bundle.
     public init() throws {
         try self.init(bundle: Bundle.module)
     }
 
-    /// Loads and validates `taxonomy.json` from the given bundle (for tests or alternate packaging).
+    /// Loads and validates split taxonomy JSON from the given bundle (for tests or alternate packaging).
     public init(bundle: Bundle) throws {
-        guard let url = bundle.url(forResource: "taxonomy", withExtension: "json") else {
-            throw RegistryError.resourceNotFound("taxonomy.json")
-        }
-        let data = try Data(contentsOf: url)
-        try self.init(jsonData: data)
+        let bundleDecoded = try Self.loadSplitTaxonomy(from: bundle)
+        try Self.validate(bundleDecoded)
+        self.init(populatingFrom: bundleDecoded)
     }
 
-    /// Decodes and validates taxonomy JSON (for tests, tooling, or alternate sources).
+    /// Decodes and validates a single-file taxonomy envelope (for tests, tooling, or alternate sources).
     public init(jsonData: Data) throws {
         let bundleDecoded = try JSONDecoder().decode(TaxonomyBundle.self, from: jsonData)
         try Self.validate(bundleDecoded)
         self.init(populatingFrom: bundleDecoded)
+    }
+
+    /// Source files live under `Resources/taxonomy/`; SwiftPM copies them into the resource bundle root.
+    private struct TaxonomyMetaFile: Codable, Sendable {
+        var domains: [Domain]
+        var subgenres: [Subgenre]
+        var converterNavigation: ConverterNavigation?
+    }
+
+    private struct TaxonomyCategoryItemsFile: Codable, Sendable {
+        var items: [Item]
+    }
+
+    /// Merges `taxonomy_meta.json` with `taxonomy_<category>.json` item shards.
+    private static func loadSplitTaxonomy(from bundle: Bundle) throws -> TaxonomyBundle {
+        func resourceURL(name: String) throws -> URL {
+            if let url = bundle.url(forResource: name, withExtension: "json", subdirectory: "taxonomy") {
+                return url
+            }
+            if let url = bundle.url(forResource: name, withExtension: "json") {
+                return url
+            }
+            throw RegistryError.resourceNotFound("taxonomy/\(name).json")
+        }
+
+        let metaDecoded = try JSONDecoder().decode(
+            TaxonomyMetaFile.self,
+            from: Data(contentsOf: try resourceURL(name: "taxonomy_meta"))
+        )
+
+        var mergedItems: [Item] = []
+        for category in ["length", "mass", "time", "temperature", "volume"] {
+            let resourceName = "taxonomy_\(category)"
+            let shard = try JSONDecoder().decode(
+                TaxonomyCategoryItemsFile.self,
+                from: Data(contentsOf: try resourceURL(name: resourceName))
+            )
+            mergedItems.append(contentsOf: shard.items)
+        }
+
+        return TaxonomyBundle(
+            domains: metaDecoded.domains,
+            subgenres: metaDecoded.subgenres,
+            items: mergedItems,
+            converterNavigation: metaDecoded.converterNavigation
+        )
     }
 
     private init(populatingFrom bundleDecoded: TaxonomyBundle) {

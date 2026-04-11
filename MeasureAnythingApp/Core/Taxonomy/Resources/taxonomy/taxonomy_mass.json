@@ -1,0 +1,202 @@
+{
+  "items": [
+    {
+      "id": "item.measurement.normal.kilogram",
+      "domainId": "measurement",
+      "subgenreId": "measurement.normal",
+      "name": "Kilogram",
+      "description": "Canonical mass base unit.",
+      "synonyms": ["kg", "kilo"],
+      "tags": ["si", "mass"],
+      "unitCategoryRaw": "mass",
+      "converterUnitId": "kilogram"
+    },
+    {
+      "id": "item.measurement.absurd.elephant",
+      "domainId": "measurement",
+      "subgenreId": "measurement.absurd",
+      "name": "Elephant",
+      "description": "Adult African elephant mass ≈ 6,000 kg.",
+      "synonyms": ["African elephant", "Elephant weight"],
+      "tags": ["mass", "comparison", "biology", "everyday"],
+      "unitCategoryRaw": "mass",
+      "converterUnitId": "elephant"
+    },
+    {
+      "id": "item.measurement.absurd.blue_whale_mass",
+      "domainId": "measurement",
+      "subgenreId": "measurement.absurd",
+      "name": "Blue whale",
+      "description": "Adult blue whale mass ≈ 150,000 kg.",
+      "synonyms": ["Whale mass", "Blue whale weight"],
+      "tags": ["mass", "comparison", "biology", "nature"],
+      "unitCategoryRaw": "mass",
+      "converterUnitId": "blue_whale_mass"
+    },
+    {
+      "id": "item.measurement.absurd.bag_of_sugar",
+      "domainId": "measurement",
+      "subgenreId": "measurement.absurd",
+      "name": "Bag of sugar",
+      "description": "Standard 1 kg bag of sugar.",
+      "synonyms": ["Sugar bag", "1 kg sugar"],
+      "tags": ["mass", "comparison", "everyday", "food"],
+      "unitCategoryRaw": "mass",
+      "converterUnitId": "bag_of_sugar"
+    },
+    {
+      "id": "item.measurement.absurd.chicken",
+      "domainId": "measurement",
+      "subgenreId": "measurement.absurd",
+      "name": "Chicken",
+      "description": "Average chicken mass ≈ 2.5 kg.",
+      "synonyms": ["Poultry", "Whole chicken"],
+      "tags": ["mass", "comparison", "food", "everyday"],
+      "unitCategoryRaw": "mass",
+      "converterUnitId": "chicken"
+    },
+    {
+      "id": "item.measurement.absurd.house_cat",
+      "domainId": "measurement",
+      "subgenreId": "measurement.absurd",
+      "name": "House cat",
+      "description": "Average domestic cat mass ≈ 4.5 kg.",
+      "synonyms": ["Cat", "Domestic cat"],
+      "tags": ["mass", "comparison", "everyday", "pets"],
+      "unitCategoryRaw": "mass",
+      "converterUnitId": "house_cat"
+    },
+    {
+      "id": "item.measurement.absurd.bowling_ball",
+      "domainId": "measurement",
+      "subgenreId": "measurement.absurd",
+      "name": "Bowling ball",
+      "description": "Standard bowling ball mass ≈ 6.35 kg (14 lbs).",
+      "synonyms": ["Bowling ball weight", "14 lb ball"],
+      "tags": ["mass", "comparison", "sports", "everyday"],
+      "unitCategoryRaw": "mass",
+      "converterUnitId": "bowling_ball"
+    },
+    {
+      "id": "item.measurement.absurd.newborn_baby_mass",
+      "domainId": "measurement",
+      "subgenreId": "measurement.absurd",
+      "name": "Newborn baby",
+      "description": "Average newborn baby mass ≈ 3.5 kg.",
+      "synonyms": ["Baby weight", "Newborn weight"],
+      "tags": ["mass", "comparison", "biology", "everyday"],
+      "unitCategoryRaw": "mass",
+      "converterUnitId": "newborn_baby_mass"
+    },
+    {
+      "id": "item.measurement.absurd.golden_retriever",
+      "domainId": "measurement",
+      "subgenreId": "measurement.absurd",
+      "name": "Golden retriever",
+      "description": "Average golden retriever mass ≈ 32 kg.",
+      "synonyms": ["Dog mass", "Retriever"],
+      "tags": ["mass", "comparison", "pets", "everyday"],
+      "unitCategoryRaw": "mass",
+      "converterUnitId": "golden_retriever"
+    },
+    {
+      "id": "item.measurement.absurd.grand_piano",
+      "domainId": "measurement",
+      "subgenreId": "measurement.absurd",
+      "name": "Grand piano",
+      "description": "Concert grand piano mass ≈ 480 kg.",
+      "synonyms": ["Piano", "Concert grand"],
+      "tags": ["mass", "comparison", "music", "everyday"],
+      "unitCategoryRaw": "mass",
+      "converterUnitId": "grand_piano"
+    },
+    {
+      "id": "item.measurement.absurd.small_car",
+      "domainId": "measurement",
+      "subgenreId": "measurement.absurd",
+      "name": "Small car",
+      "description": "Average small car mass ≈ 1,200 kg.",
+      "synonyms": ["Car mass", "Compact car"],
+      "tags": ["mass", "comparison", "vehicle", "everyday"],
+      "unitCategoryRaw": "mass",
+      "converterUnitId": "small_car"
+    },
+    {
+      "id": "item.measurement.absurd.rhino",
+      "domainId": "measurement",
+      "subgenreId": "measurement.absurd",
+      "name": "Rhinoceros",
+      "description": "White rhinoceros mass ≈ 2,300 kg.",
+      "synonyms": ["Rhino", "Rhinoceros weight"],
+      "tags": ["mass", "comparison", "nature", "biology"],
+      "unitCategoryRaw": "mass",
+      "converterUnitId": "rhino"
+    },
+    {
+      "id": "item.measurement.absurd.london_double_decker_bus",
+      "domainId": "measurement",
+      "subgenreId": "measurement.absurd",
+      "name": "Double-decker bus",
+      "description": "Loaded double-decker bus mass ≈ 12,000 kg.",
+      "synonyms": ["London bus mass", "Bus weight"],
+      "tags": ["mass", "comparison", "vehicle", "urban"],
+      "unitCategoryRaw": "mass",
+      "converterUnitId": "london_double_decker_bus"
+    },
+    {
+      "id": "item.measurement.absurd.t_rex",
+      "domainId": "measurement",
+      "subgenreId": "measurement.absurd",
+      "name": "T-Rex",
+      "description": "Tyrannosaurus Rex estimated mass ≈ 8,000 kg.",
+      "synonyms": ["Tyrannosaurus", "T Rex"],
+      "tags": ["mass", "comparison", "prehistoric", "biology"],
+      "unitCategoryRaw": "mass",
+      "converterUnitId": "t_rex"
+    },
+    {
+      "id": "item.measurement.absurd.space_shuttle",
+      "domainId": "measurement",
+      "subgenreId": "measurement.absurd",
+      "name": "Space Shuttle",
+      "description": "Space Shuttle at launch ≈ 2,000,000 kg.",
+      "synonyms": ["Shuttle launch mass", "Orbiter stack"],
+      "tags": ["mass", "comparison", "space", "engineering"],
+      "unitCategoryRaw": "mass",
+      "converterUnitId": "space_shuttle"
+    },
+    {
+      "id": "item.measurement.absurd.paperclip_mass",
+      "domainId": "measurement",
+      "subgenreId": "measurement.absurd",
+      "name": "Paperclip",
+      "description": "Standard paperclip mass ≈ 1 g.",
+      "synonyms": ["Paper clip", "1 gram clip"],
+      "tags": ["mass", "comparison", "tiny", "everyday"],
+      "unitCategoryRaw": "mass",
+      "converterUnitId": "paperclip_mass"
+    },
+    {
+      "id": "item.measurement.absurd.grain_of_rice_mass",
+      "domainId": "measurement",
+      "subgenreId": "measurement.absurd",
+      "name": "Grain of rice",
+      "description": "Single grain of rice mass ≈ 25 mg.",
+      "synonyms": ["Rice grain", "Single rice"],
+      "tags": ["mass", "comparison", "tiny", "food"],
+      "unitCategoryRaw": "mass",
+      "converterUnitId": "grain_of_rice_mass"
+    },
+    {
+      "id": "item.measurement.absurd.eiffel_tower_mass",
+      "domainId": "measurement",
+      "subgenreId": "measurement.absurd",
+      "name": "Eiffel Tower",
+      "description": "Eiffel Tower iron mass ≈ 7,300 tonnes.",
+      "synonyms": ["Eiffel mass", "Paris tower weight"],
+      "tags": ["mass", "comparison", "landmark", "engineering"],
+      "unitCategoryRaw": "mass",
+      "converterUnitId": "eiffel_tower_mass"
+    }
+  ]
+}
