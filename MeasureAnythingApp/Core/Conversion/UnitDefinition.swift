@@ -6,8 +6,8 @@ import Foundation
 /// - `baseValue = input * from.factor`
 /// - `output = baseValue / to.factor`
 ///
-/// Temperature is intentionally *not* represented with affine offsets here.
-/// Keep it on a dedicated conversion path to avoid contaminating the core rule.
+/// Normal temperature scales use `TemperatureConverter`. Absurd temperature comparators use
+/// `temperatureAffine` (Kelvin = 273.15 + factor × input).
 public struct UnitDefinition: Identifiable, Codable, Hashable, Sendable {
     public typealias ID = String
 
@@ -23,6 +23,7 @@ public struct UnitDefinition: Identifiable, Codable, Hashable, Sendable {
     ///
     /// - `.multiplicative`: uses `factor` with the canonical base unit
     /// - `.temperature`: participates in temperature conversion via `TemperatureConverter`
+    /// - `.temperatureAffine`: absurd temperature; Kelvin = 273.15 + `factor` × value
     public var conversionStyle: ConversionStyle
 
     /// Multiplicative factor to convert *this* unit into the category base unit.
@@ -30,7 +31,8 @@ public struct UnitDefinition: Identifiable, Codable, Hashable, Sendable {
     /// - kilometer.factor = 1000
     /// - banana.factor = 0.19
     ///
-    /// Required when `conversionStyle == .multiplicative`. Ignored for temperature units.
+    /// Required when `conversionStyle == .multiplicative` or `.temperatureAffine` (non-zero).
+    /// Ignored for `.temperature` scale units.
     public var factor: Double?
 
     /// Optional SF Symbol name or app asset name for display layers.
@@ -81,8 +83,10 @@ public extension UnitDefinition {
         case emptyName
         case missingFactorForMultiplicative
         case nonPositiveFactor(Double)
-        case invalidStyleForCategory(expected: ConversionStyle, actual: ConversionStyle)
+        case invalidStyleForCategory(expected: String, actual: ConversionStyle)
         case baseUnitMismatch(expected: String, actual: String)
+        case missingAffineTemperatureFactor
+        case zeroAffineTemperatureFactor
 
         public var errorDescription: String? {
             switch self {
@@ -98,6 +102,10 @@ public extension UnitDefinition {
                 "UnitDefinition.conversionStyle mismatch (expected \(expected), got \(actual))."
             case .baseUnitMismatch(let expected, let actual):
                 "UnitDefinition.baseUnit mismatch (expected '\(expected)', got '\(actual)')."
+            case .missingAffineTemperatureFactor:
+                "UnitDefinition.factor is required for temperatureAffine units."
+            case .zeroAffineTemperatureFactor:
+                "UnitDefinition.factor must be non-zero for temperatureAffine units."
             }
         }
     }
@@ -110,11 +118,38 @@ public extension UnitDefinition {
         if name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
             throw ValidationError.emptyName
         }
-        let expectedStyle: ConversionStyle = (category == .temperature) ? .temperature : .multiplicative
-        if conversionStyle != expectedStyle {
-            throw ValidationError.invalidStyleForCategory(expected: expectedStyle, actual: conversionStyle)
-        }
-        if conversionStyle == .multiplicative {
+
+        switch category {
+        case .temperature:
+            switch conversionStyle {
+            case .temperature:
+                break
+            case .temperatureAffine:
+                guard kind == .absurd else {
+                    throw ValidationError.invalidStyleForCategory(
+                        expected: "temperatureAffine only for absurd temperature units",
+                        actual: conversionStyle
+                    )
+                }
+                guard let factor else {
+                    throw ValidationError.missingAffineTemperatureFactor
+                }
+                guard factor != 0 else {
+                    throw ValidationError.zeroAffineTemperatureFactor
+                }
+            case .multiplicative:
+                throw ValidationError.invalidStyleForCategory(
+                    expected: "temperature or temperatureAffine",
+                    actual: conversionStyle
+                )
+            }
+        default:
+            guard conversionStyle == .multiplicative else {
+                throw ValidationError.invalidStyleForCategory(
+                    expected: "multiplicative",
+                    actual: conversionStyle
+                )
+            }
             guard let factor else {
                 throw ValidationError.missingFactorForMultiplicative
             }

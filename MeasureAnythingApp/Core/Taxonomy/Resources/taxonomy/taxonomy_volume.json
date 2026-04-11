@@ -1,3 +1,169 @@
 {
-  "items": []
+  "items": [
+    {
+      "id": "item.measurement.normal.liter",
+      "domainId": "measurement",
+      "subgenreId": "measurement.normal",
+      "name": "Liter",
+      "description": "Metric volume unit.",
+      "synonyms": ["L", "litre"],
+      "tags": ["volume", "metric", "si"],
+      "unitCategoryRaw": "volume",
+      "converterUnitId": "liter"
+    },
+    {
+      "id": "item.measurement.absurd.teaspoon_vol",
+      "domainId": "measurement",
+      "subgenreId": "measurement.absurd",
+      "name": "Teaspoon",
+      "description": "US teaspoon ≈ 4.93 ml.",
+      "synonyms": ["Tsp", "US teaspoon"],
+      "tags": ["volume", "comparison", "cooking", "everyday"],
+      "unitCategoryRaw": "volume",
+      "converterUnitId": "teaspoon_vol"
+    },
+    {
+      "id": "item.measurement.absurd.can_of_soda",
+      "domainId": "measurement",
+      "subgenreId": "measurement.absurd",
+      "name": "Can of soda",
+      "description": "Standard 355 ml soda can.",
+      "synonyms": ["Soda can", "12 oz can"],
+      "tags": ["volume", "comparison", "everyday", "food"],
+      "unitCategoryRaw": "volume",
+      "converterUnitId": "can_of_soda"
+    },
+    {
+      "id": "item.measurement.absurd.wine_bottle_vol",
+      "domainId": "measurement",
+      "subgenreId": "measurement.absurd",
+      "name": "Wine bottle",
+      "description": "Standard wine bottle = 750 ml.",
+      "synonyms": ["750ml bottle", "Wine volume"],
+      "tags": ["volume", "comparison", "food", "everyday"],
+      "unitCategoryRaw": "volume",
+      "converterUnitId": "wine_bottle_vol"
+    },
+    {
+      "id": "item.measurement.absurd.soda_can",
+      "domainId": "measurement",
+      "subgenreId": "measurement.absurd",
+      "name": "Soda can",
+      "description": "Standard can volume ≈ 355 mL.",
+      "synonyms": ["Soft drink can", "355 ml"],
+      "tags": ["volume", "comparison", "everyday"],
+      "unitCategoryRaw": "volume",
+      "converterUnitId": "soda_can"
+    },
+    {
+      "id": "item.measurement.absurd.wine_glass",
+      "domainId": "measurement",
+      "subgenreId": "measurement.absurd",
+      "name": "Wine glass",
+      "description": "Typical pour ≈ 150 mL.",
+      "synonyms": ["Glass of wine", "Wine pour"],
+      "tags": ["volume", "comparison", "food", "everyday"],
+      "unitCategoryRaw": "volume",
+      "converterUnitId": "wine_glass"
+    },
+    {
+      "id": "item.measurement.absurd.bathtub",
+      "domainId": "measurement",
+      "subgenreId": "measurement.absurd",
+      "name": "Bathtub",
+      "description": "Standard bathtub capacity ≈ 300 litres.",
+      "synonyms": ["Bath volume", "Tub fill"],
+      "tags": ["volume", "comparison", "everyday", "home"],
+      "unitCategoryRaw": "volume",
+      "converterUnitId": "bathtub"
+    },
+    {
+      "id": "item.measurement.absurd.bucket",
+      "domainId": "measurement",
+      "subgenreId": "measurement.absurd",
+      "name": "Bucket",
+      "description": "Common bucket volume ≈ 10 L.",
+      "synonyms": ["Pail", "10 litre bucket"],
+      "tags": ["volume", "comparison", "everyday"],
+      "unitCategoryRaw": "volume",
+      "converterUnitId": "bucket"
+    },
+    {
+      "id": "item.measurement.absurd.olympic_pool_vol",
+      "domainId": "measurement",
+      "subgenreId": "measurement.absurd",
+      "name": "Olympic pool",
+      "description": "Olympic swimming pool ≈ 2,500,000 litres.",
+      "synonyms": ["Olympic swimming pool", "Pool volume"],
+      "tags": ["volume", "comparison", "sports", "everyday"],
+      "unitCategoryRaw": "volume",
+      "converterUnitId": "olympic_pool_vol"
+    },
+    {
+      "id": "item.measurement.absurd.stomach",
+      "domainId": "measurement",
+      "subgenreId": "measurement.absurd",
+      "name": "Human stomach",
+      "description": "Comfortable human stomach capacity ≈ 1 litre.",
+      "synonyms": ["Stomach capacity", "Gut volume"],
+      "tags": ["volume", "comparison", "biology", "health"],
+      "unitCategoryRaw": "volume",
+      "converterUnitId": "stomach"
+    },
+    {
+      "id": "item.measurement.absurd.hot_tub",
+      "domainId": "measurement",
+      "subgenreId": "measurement.absurd",
+      "name": "Hot tub",
+      "description": "Average hot tub capacity ≈ 1,500 litres.",
+      "synonyms": ["Jacuzzi", "Spa tub"],
+      "tags": ["volume", "comparison", "everyday", "home"],
+      "unitCategoryRaw": "volume",
+      "converterUnitId": "hot_tub"
+    },
+    {
+      "id": "item.measurement.absurd.fuel_tank",
+      "domainId": "measurement",
+      "subgenreId": "measurement.absurd",
+      "name": "Car fuel tank",
+      "description": "Average car fuel tank ≈ 55 litres.",
+      "synonyms": ["Petrol tank", "Gas tank"],
+      "tags": ["volume", "comparison", "vehicle", "everyday"],
+      "unitCategoryRaw": "volume",
+      "converterUnitId": "fuel_tank"
+    },
+    {
+      "id": "item.measurement.absurd.blood_volume",
+      "domainId": "measurement",
+      "subgenreId": "measurement.absurd",
+      "name": "Human blood volume",
+      "description": "Total blood in an adult human ≈ 5 litres.",
+      "synonyms": ["Blood volume", "Circulating blood"],
+      "tags": ["volume", "comparison", "biology", "health"],
+      "unitCategoryRaw": "volume",
+      "converterUnitId": "blood_volume"
+    },
+    {
+      "id": "item.measurement.absurd.milk_carton",
+      "domainId": "measurement",
+      "subgenreId": "measurement.absurd",
+      "name": "Milk carton",
+      "description": "Standard 1-litre milk carton.",
+      "synonyms": ["1L milk", "Milk pack"],
+      "tags": ["volume", "comparison", "food", "everyday"],
+      "unitCategoryRaw": "volume",
+      "converterUnitId": "milk_carton"
+    },
+    {
+      "id": "item.measurement.absurd.earths_ocean",
+      "domainId": "measurement",
+      "subgenreId": "measurement.absurd",
+      "name": "Earth's oceans",
+      "description": "Total volume of Earth's oceans ≈ 1.335 × 10²¹ litres.",
+      "synonyms": ["Ocean volume", "Global seawater"],
+      "tags": ["volume", "comparison", "geography", "science"],
+      "unitCategoryRaw": "volume",
+      "converterUnitId": "earths_ocean"
+    }
+  ]
 }

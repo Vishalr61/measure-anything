@@ -1,3 +1,92 @@
 {
-  "items": []
+  "items": [
+    {
+      "id": "item.measurement.normal.celsius",
+      "domainId": "measurement",
+      "subgenreId": "measurement.normal",
+      "name": "Celsius",
+      "description": "Common temperature scale anchored at water freeze and boil.",
+      "synonyms": ["°C", "Centigrade"],
+      "tags": ["temperature", "metric", "si"],
+      "unitCategoryRaw": "temperature",
+      "converterUnitId": "celsius"
+    },
+    {
+      "id": "item.measurement.absurd.body_temp",
+      "domainId": "measurement",
+      "subgenreId": "measurement.absurd",
+      "name": "Body temperature",
+      "description": "Normal human body temperature = 37°C.",
+      "synonyms": ["Human body temp", "37 degrees"],
+      "tags": ["temperature", "comparison", "biology", "health"],
+      "unitCategoryRaw": "temperature",
+      "converterUnitId": "body_temp"
+    },
+    {
+      "id": "item.measurement.absurd.pizza_oven",
+      "domainId": "measurement",
+      "subgenreId": "measurement.absurd",
+      "name": "Pizza oven",
+      "description": "Neapolitan wood-fired pizza oven ≈ 450°C.",
+      "synonyms": ["Wood oven", "Pizza heat"],
+      "tags": ["temperature", "comparison", "food", "cooking"],
+      "unitCategoryRaw": "temperature",
+      "converterUnitId": "pizza_oven"
+    },
+    {
+      "id": "item.measurement.absurd.sun_surface",
+      "domainId": "measurement",
+      "subgenreId": "measurement.absurd",
+      "name": "Sun's surface",
+      "description": "Sun's surface temperature ≈ 5,500°C.",
+      "synonyms": ["Solar surface", "Photosphere temperature"],
+      "tags": ["temperature", "comparison", "astronomy", "space"],
+      "unitCategoryRaw": "temperature",
+      "converterUnitId": "sun_surface"
+    },
+    {
+      "id": "item.measurement.absurd.candle_flame",
+      "domainId": "measurement",
+      "subgenreId": "measurement.absurd",
+      "name": "Candle flame",
+      "description": "Candle flame outer cone ≈ 1,000°C.",
+      "synonyms": ["Candle heat", "Flame temperature"],
+      "tags": ["temperature", "comparison", "everyday"],
+      "unitCategoryRaw": "temperature",
+      "converterUnitId": "candle_flame"
+    },
+    {
+      "id": "item.measurement.absurd.comfortable_room",
+      "domainId": "measurement",
+      "subgenreId": "measurement.absurd",
+      "name": "Comfortable room",
+      "description": "Comfortable room temperature ≈ 21°C (70°F).",
+      "synonyms": ["Room temp", "Indoor comfort"],
+      "tags": ["temperature", "comparison", "everyday", "home"],
+      "unitCategoryRaw": "temperature",
+      "converterUnitId": "comfortable_room"
+    },
+    {
+      "id": "item.measurement.absurd.deep_space",
+      "domainId": "measurement",
+      "subgenreId": "measurement.absurd",
+      "name": "Deep space",
+      "description": "Deep space (CMB temperature) ≈ −270.45°C (2.7 K).",
+      "synonyms": ["Cosmic background", "CMB cold"],
+      "tags": ["temperature", "comparison", "astronomy", "space"],
+      "unitCategoryRaw": "temperature",
+      "converterUnitId": "deep_space"
+    },
+    {
+      "id": "item.measurement.absurd.lava",
+      "domainId": "measurement",
+      "subgenreId": "measurement.absurd",
+      "name": "Lava",
+      "description": "Basaltic lava temperature ≈ 1,100°C.",
+      "synonyms": ["Volcanic lava", "Magma temperature"],
+      "tags": ["temperature", "comparison", "geology", "nature"],
+      "unitCategoryRaw": "temperature",
+      "converterUnitId": "lava"
+    }
+  ]
 }

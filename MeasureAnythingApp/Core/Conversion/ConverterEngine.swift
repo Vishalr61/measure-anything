@@ -4,15 +4,15 @@ import Foundation
 public struct ConverterEngine: Sendable {
     public enum EngineError: Error, LocalizedError, Equatable {
         case categoryMismatch(from: UnitCategory, to: UnitCategory)
-        case unsupportedConversionStyle(ConversionStyle)
+        case unsupportedConversionStyle(from: ConversionStyle, to: ConversionStyle)
         case unsupportedTemperatureUnitID(String)
 
         public var errorDescription: String? {
             switch self {
             case .categoryMismatch(let from, let to):
                 "Cannot convert across categories (\(from.rawValue) -> \(to.rawValue))."
-            case .unsupportedConversionStyle(let style):
-                "Unsupported conversion style: \(style)"
+            case .unsupportedConversionStyle(let from, let to):
+                "Unsupported conversion style pair (\(from.rawValue) -> \(to.rawValue))."
             case .unsupportedTemperatureUnitID(let id):
                 "Unsupported temperature unit id: \(id)"
             }
@@ -38,11 +38,10 @@ public struct ConverterEngine: Sendable {
             throw EngineError.categoryMismatch(from: fromUnit.category, to: toUnit.category)
         }
 
-        switch fromUnit.conversionStyle {
-        case .multiplicative:
-            guard toUnit.conversionStyle == .multiplicative else {
-                throw EngineError.unsupportedConversionStyle(toUnit.conversionStyle)
-            }
+        let meme = includeMemeExplanation ? (toUnit.exampleMeme ?? fromUnit.exampleMeme) : nil
+
+        switch (fromUnit.conversionStyle, toUnit.conversionStyle) {
+        case (.multiplicative, .multiplicative):
             let base = inputValue * (fromUnit.factor ?? 1)
             let output = base / (toUnit.factor ?? 1)
             return ConversionResult(
@@ -52,13 +51,10 @@ public struct ConverterEngine: Sendable {
                 toUnitID: toUnit.id,
                 baseValue: base,
                 outputValue: output,
-                memeExplanation: includeMemeExplanation ? (toUnit.exampleMeme ?? fromUnit.exampleMeme) : nil
+                memeExplanation: meme
             )
 
-        case .temperature:
-            guard toUnit.conversionStyle == .temperature else {
-                throw EngineError.unsupportedConversionStyle(toUnit.conversionStyle)
-            }
+        case (.temperature, .temperature):
             guard
                 let fromTemp = TemperatureUnit(rawValue: fromUnit.id),
                 let toTemp = TemperatureUnit(rawValue: toUnit.id)
@@ -74,9 +70,70 @@ public struct ConverterEngine: Sendable {
                 toUnitID: toUnit.id,
                 baseValue: base,
                 outputValue: output,
-                memeExplanation: includeMemeExplanation ? (toUnit.exampleMeme ?? fromUnit.exampleMeme) : nil
+                memeExplanation: meme
             )
+
+        case (.temperatureAffine, .temperatureAffine):
+            let k = try kelvin(affine: fromUnit, value: inputValue)
+            let slopeTo = try affineSlope(toUnit)
+            let output = (k - 273.15) / slopeTo
+            return ConversionResult(
+                category: .temperature,
+                inputValue: inputValue,
+                fromUnitID: fromUnit.id,
+                toUnitID: toUnit.id,
+                baseValue: k,
+                outputValue: output,
+                memeExplanation: meme
+            )
+
+        case (.temperatureAffine, .temperature):
+            let k = try kelvin(affine: fromUnit, value: inputValue)
+            guard let toTemp = TemperatureUnit(rawValue: toUnit.id) else {
+                throw EngineError.unsupportedTemperatureUnitID("\(fromUnit.id)->\(toUnit.id)")
+            }
+            let output = TemperatureConverter.fromKelvin(k, to: toTemp)
+            return ConversionResult(
+                category: .temperature,
+                inputValue: inputValue,
+                fromUnitID: fromUnit.id,
+                toUnitID: toUnit.id,
+                baseValue: k,
+                outputValue: output,
+                memeExplanation: meme
+            )
+
+        case (.temperature, .temperatureAffine):
+            guard let fromTemp = TemperatureUnit(rawValue: fromUnit.id) else {
+                throw EngineError.unsupportedTemperatureUnitID("\(fromUnit.id)->\(toUnit.id)")
+            }
+            let k = TemperatureConverter.toKelvin(inputValue, from: fromTemp)
+            let slopeTo = try affineSlope(toUnit)
+            let output = (k - 273.15) / slopeTo
+            return ConversionResult(
+                category: .temperature,
+                inputValue: inputValue,
+                fromUnitID: fromUnit.id,
+                toUnitID: toUnit.id,
+                baseValue: k,
+                outputValue: output,
+                memeExplanation: meme
+            )
+
+        case let (fromStyle, toStyle):
+            throw EngineError.unsupportedConversionStyle(from: fromStyle, to: toStyle)
         }
     }
-}
 
+    private func kelvin(affine unit: UnitDefinition, value: Double) throws -> Double {
+        let slope = try affineSlope(unit)
+        return 273.15 + slope * value
+    }
+
+    private func affineSlope(_ unit: UnitDefinition) throws -> Double {
+        guard let f = unit.factor, f != 0 else {
+            throw EngineError.unsupportedTemperatureUnitID(unit.id)
+        }
+        return f
+    }
+}

@@ -582,7 +582,7 @@
       "id": "item.measurement.absurd.banana",
       "domainId": "measurement",
       "subgenreId": "measurement.absurd",
-      "name": "Banana (length)",
+      "name": "Banana",
       "description": "Approximate average banana length.",
       "synonyms": [
         "yellow fruit ruler"
@@ -598,7 +598,7 @@
       "id": "item.measurement.absurd.fridge",
       "domainId": "measurement",
       "subgenreId": "measurement.absurd",
-      "name": "Refrigerator (height)",
+      "name": "Fridge",
       "description": "Typical refrigerator height (order-of-magnitude).",
       "synonyms": [
         "Refrigerator height",
@@ -618,7 +618,7 @@
       "id": "item.measurement.absurd.bus",
       "domainId": "measurement",
       "subgenreId": "measurement.absurd",
-      "name": "City bus (length)",
+      "name": "Bus",
       "description": "Typical city bus length (order-of-magnitude).",
       "synonyms": [
         "City bus",
@@ -638,7 +638,7 @@
       "id": "item.measurement.absurd.blue_whale",
       "domainId": "measurement",
       "subgenreId": "measurement.absurd",
-      "name": "Blue whale (length)",
+      "name": "Blue whale",
       "description": "Typical adult blue whale length (order-of-magnitude).",
       "synonyms": [
         "Blue whale length",
@@ -658,7 +658,7 @@
       "id": "item.measurement.absurd.olympic_pool",
       "domainId": "measurement",
       "subgenreId": "measurement.absurd",
-      "name": "Olympic pool (length)",
+      "name": "Olympic pool",
       "description": "Standard Olympic swimming pool length.",
       "synonyms": [
         "Olympic pool",
@@ -678,7 +678,7 @@
       "id": "item.measurement.absurd.short_pool",
       "domainId": "measurement",
       "subgenreId": "measurement.absurd",
-      "name": "Short course pool (25 m)",
+      "name": "Short pool",
       "description": "Short course pool length (25 m).",
       "synonyms": [
         "25 meter pool",
@@ -698,7 +698,7 @@
       "id": "item.measurement.absurd.football_field",
       "domainId": "measurement",
       "subgenreId": "measurement.absurd",
-      "name": "Football field (length)",
+      "name": "Football field",
       "description": "American football field length (100 yards).",
       "synonyms": [
         "Football field",
@@ -718,7 +718,7 @@
       "id": "item.measurement.absurd.tennis_court",
       "domainId": "measurement",
       "subgenreId": "measurement.absurd",
-      "name": "Tennis court (length)",
+      "name": "Tennis court",
       "description": "Standard tennis court length.",
       "synonyms": [
         "Tennis court",
@@ -738,7 +738,7 @@
       "id": "item.measurement.absurd.bowling_lane",
       "domainId": "measurement",
       "subgenreId": "measurement.absurd",
-      "name": "Bowling lane (length)",
+      "name": "Bowling lane",
       "description": "Bowling lane distance from foul line to head pin.",
       "synonyms": [
         "Bowling lane",
@@ -758,7 +758,7 @@
       "id": "item.measurement.absurd.basketball_hoop",
       "domainId": "measurement",
       "subgenreId": "measurement.absurd",
-      "name": "Basketball hoop (height)",
+      "name": "Basketball hoop",
       "description": "Standard hoop height (10 feet).",
       "synonyms": [
         "Hoop height",
@@ -778,7 +778,7 @@
       "id": "item.measurement.absurd.credit_card",
       "domainId": "measurement",
       "subgenreId": "measurement.absurd",
-      "name": "Credit card (long side)",
+      "name": "Credit card",
       "description": "Standard card long side length.",
       "synonyms": [
         "Credit card",
@@ -798,7 +798,7 @@
       "id": "item.measurement.absurd.smartphone",
       "domainId": "measurement",
       "subgenreId": "measurement.absurd",
-      "name": "Smartphone (height)",
+      "name": "Smartphone",
       "description": "Typical smartphone height reference.",
       "synonyms": [
         "Phone height",
@@ -818,7 +818,7 @@
       "id": "item.measurement.absurd.pencil",
       "domainId": "measurement",
       "subgenreId": "measurement.absurd",
-      "name": "Pencil (length)",
+      "name": "Pencil",
       "description": "Typical pencil length reference.",
       "synonyms": [
         "Wooden pencil",
@@ -838,7 +838,7 @@
       "id": "item.measurement.absurd.paperclip",
       "domainId": "measurement",
       "subgenreId": "measurement.absurd",
-      "name": "Paperclip (length)",
+      "name": "Paperclip",
       "description": "Typical paperclip length reference.",
       "synonyms": [
         "Office paperclip",
@@ -858,7 +858,7 @@
       "id": "item.measurement.absurd.door",
       "domainId": "measurement",
       "subgenreId": "measurement.absurd",
-      "name": "Door (height)",
+      "name": "Door",
       "description": "Typical interior door height reference.",
       "synonyms": [
         "Door height",
@@ -878,7 +878,7 @@
       "id": "item.measurement.absurd.car",
       "domainId": "measurement",
       "subgenreId": "measurement.absurd",
-      "name": "Car (length)",
+      "name": "Car",
       "description": "Typical car length reference.",
       "synonyms": [
         "Passenger car",
@@ -898,7 +898,7 @@
       "id": "item.measurement.absurd.giraffe",
       "domainId": "measurement",
       "subgenreId": "measurement.absurd",
-      "name": "Giraffe (height)",
+      "name": "Giraffe",
       "description": "Typical adult giraffe height reference.",
       "synonyms": [
         "Giraffe height",
@@ -918,7 +918,7 @@
       "id": "item.measurement.absurd.eiffel_tower",
       "domainId": "measurement",
       "subgenreId": "measurement.absurd",
-      "name": "Eiffel Tower (height)",
+      "name": "Eiffel Tower",
       "description": "Eiffel Tower height reference (including antenna).",
       "synonyms": [
         "Eiffel Tower",
@@ -938,7 +938,7 @@
       "id": "item.measurement.absurd.empire_state_building",
       "domainId": "measurement",
       "subgenreId": "measurement.absurd",
-      "name": "Empire State Building (height)",
+      "name": "Empire State Building",
       "description": "Empire State Building height reference (roof height).",
       "synonyms": [
         "Empire State",
@@ -958,7 +958,7 @@
       "id": "item.measurement.absurd.mount_everest",
       "domainId": "measurement",
       "subgenreId": "measurement.absurd",
-      "name": "Mount Everest (height)",
+      "name": "Mount Everest",
       "description": "Mount Everest height reference.",
       "synonyms": [
         "Everest",
@@ -978,7 +978,7 @@
       "id": "item.measurement.absurd.great_wall",
       "domainId": "measurement",
       "subgenreId": "measurement.absurd",
-      "name": "Great Wall (total length)",
+      "name": "Great Wall of China",
       "description": "Great Wall of China total length (including branches).",
       "synonyms": [
         "Great Wall",
@@ -998,7 +998,7 @@
       "id": "item.measurement.absurd.amazon_river",
       "domainId": "measurement",
       "subgenreId": "measurement.absurd",
-      "name": "Amazon River (length)",
+      "name": "Amazon River",
       "description": "Amazon River length reference (order-of-magnitude).",
       "synonyms": [
         "Amazon River",
@@ -1018,7 +1018,7 @@
       "id": "item.measurement.absurd.city_block",
       "domainId": "measurement",
       "subgenreId": "measurement.absurd",
-      "name": "City block (Manhattan)",
+      "name": "Manhattan block",
       "description": "Manhattan short block reference (varies by city).",
       "synonyms": [
         "City block",
@@ -1038,7 +1038,7 @@
       "id": "item.measurement.absurd.marathon",
       "domainId": "measurement",
       "subgenreId": "measurement.absurd",
-      "name": "Marathon (distance)",
+      "name": "Marathon",
       "description": "Marathon distance reference.",
       "synonyms": [
         "Marathon distance",
@@ -1058,7 +1058,7 @@
       "id": "item.measurement.absurd.boeing_747",
       "domainId": "measurement",
       "subgenreId": "measurement.absurd",
-      "name": "Boeing 747 (length)",
+      "name": "Boeing 747",
       "description": "Boeing 747 fuselage length reference.",
       "synonyms": [
         "747",
@@ -1078,7 +1078,7 @@
       "id": "item.measurement.absurd.aircraft_carrier",
       "domainId": "measurement",
       "subgenreId": "measurement.absurd",
-      "name": "Aircraft carrier (length)",
+      "name": "Aircraft carrier",
       "description": "Nimitz-class aircraft carrier length reference.",
       "synonyms": [
         "Aircraft carrier",
@@ -1095,30 +1095,10 @@
       "converterUnitId": "aircraft_carrier"
     },
     {
-      "id": "item.measurement.absurd.school_bus",
-      "domainId": "measurement",
-      "subgenreId": "measurement.absurd",
-      "name": "School bus (length)",
-      "description": "Standard school bus length reference (same comparator as the city bus unit).",
-      "synonyms": [
-        "School bus",
-        "Yellow bus",
-        "Type C bus"
-      ],
-      "tags": [
-        "length",
-        "comparison",
-        "vehicle",
-        "everyday"
-      ],
-      "unitCategoryRaw": "length",
-      "converterUnitId": "bus"
-    },
-    {
       "id": "item.measurement.absurd.double_decker_bus",
       "domainId": "measurement",
       "subgenreId": "measurement.absurd",
-      "name": "Double-decker bus (height)",
+      "name": "Double-decker bus",
       "description": "Double-decker bus height reference (height, not length).",
       "synonyms": [
         "London bus",
@@ -1138,7 +1118,7 @@
       "id": "item.measurement.absurd.subway_car",
       "domainId": "measurement",
       "subgenreId": "measurement.absurd",
-      "name": "Subway car (length)",
+      "name": "Subway car",
       "description": "Subway or metro car length reference.",
       "synonyms": [
         "Subway car",
@@ -1158,7 +1138,7 @@
       "id": "item.measurement.absurd.earth_to_moon",
       "domainId": "measurement",
       "subgenreId": "measurement.absurd",
-      "name": "Earth to Moon (distance)",
+      "name": "Earth → Moon",
       "description": "Mean Earth–Moon distance reference.",
       "synonyms": [
         "Lunar distance",
@@ -1178,7 +1158,7 @@
       "id": "item.measurement.absurd.earth_to_sun",
       "domainId": "measurement",
       "subgenreId": "measurement.absurd",
-      "name": "Earth to Sun (distance)",
+      "name": "Earth → Sun",
       "description": "Average Earth–Sun distance reference (same as astronomical unit).",
       "synonyms": [
         "Earth–Sun distance",
@@ -1198,7 +1178,7 @@
       "id": "item.measurement.absurd.comet_tail",
       "domainId": "measurement",
       "subgenreId": "measurement.absurd",
-      "name": "Comet tail (average)",
+      "name": "Comet tail",
       "description": "Average large comet tail length reference (highly variable).",
       "synonyms": [
         "Comet tail length",
@@ -1218,7 +1198,7 @@
       "id": "item.measurement.absurd.human_hair",
       "domainId": "measurement",
       "subgenreId": "measurement.absurd",
-      "name": "Human hair (width)",
+      "name": "Human hair",
       "description": "Average human hair width reference.",
       "synonyms": [
         "Hair width",
@@ -1238,7 +1218,7 @@
       "id": "item.measurement.absurd.red_blood_cell",
       "domainId": "measurement",
       "subgenreId": "measurement.absurd",
-      "name": "Red blood cell (diameter)",
+      "name": "Red blood cell",
       "description": "Average red blood cell diameter reference.",
       "synonyms": [
         "Red blood cell",
@@ -1258,7 +1238,7 @@
       "id": "item.measurement.absurd.grain_of_rice",
       "domainId": "measurement",
       "subgenreId": "measurement.absurd",
-      "name": "Grain of rice (length)",
+      "name": "Grain of rice",
       "description": "Typical grain of rice length reference.",
       "synonyms": [
         "Rice grain",
@@ -1278,7 +1258,7 @@
       "id": "item.measurement.absurd.ant",
       "domainId": "measurement",
       "subgenreId": "measurement.absurd",
-      "name": "Ant (body length)",
+      "name": "Ant",
       "description": "Typical ant body length reference.",
       "synonyms": [
         "Ant length",
@@ -1298,7 +1278,7 @@
       "id": "item.measurement.absurd.toothbrush",
       "domainId": "measurement",
       "subgenreId": "measurement.absurd",
-      "name": "Toothbrush (length)",
+      "name": "Toothbrush",
       "description": "Standard toothbrush length reference.",
       "synonyms": [
         "Standard toothbrush",
@@ -1318,7 +1298,7 @@
       "id": "item.measurement.absurd.yoga_mat",
       "domainId": "measurement",
       "subgenreId": "measurement.absurd",
-      "name": "Yoga mat (length)",
+      "name": "Yoga mat",
       "description": "Standard yoga mat length reference (6 feet).",
       "synonyms": [
         "Yoga mat",
@@ -1338,7 +1318,7 @@
       "id": "item.measurement.absurd.guitar",
       "domainId": "measurement",
       "subgenreId": "measurement.absurd",
-      "name": "Guitar (total length)",
+      "name": "Guitar",
       "description": "Typical acoustic guitar length reference.",
       "synonyms": [
         "Acoustic guitar",
@@ -1358,7 +1338,7 @@
       "id": "item.measurement.absurd.footlong_sub",
       "domainId": "measurement",
       "subgenreId": "measurement.absurd",
-      "name": "Footlong sub (length)",
+      "name": "Footlong sub",
       "description": "Footlong sandwich length (exactly one foot).",
       "synonyms": [
         "Footlong",
@@ -1378,7 +1358,7 @@
       "id": "item.measurement.absurd.chopstick",
       "domainId": "measurement",
       "subgenreId": "measurement.absurd",
-      "name": "Chopstick (length)",
+      "name": "Chopstick",
       "description": "Typical chopstick length reference.",
       "synonyms": [
         "Chopstick",
@@ -1398,7 +1378,7 @@
       "id": "item.measurement.absurd.newborn_baby",
       "domainId": "measurement",
       "subgenreId": "measurement.absurd",
-      "name": "Newborn baby (length)",
+      "name": "Newborn baby",
       "description": "Average newborn length reference (order-of-magnitude).",
       "synonyms": [
         "Newborn length",
@@ -1418,7 +1398,7 @@
       "id": "item.measurement.absurd.arm_span",
       "domainId": "measurement",
       "subgenreId": "measurement.absurd",
-      "name": "Human arm span",
+      "name": "Arm span",
       "description": "Average human arm span reference (order-of-magnitude).",
       "synonyms": [
         "Arm span",
@@ -1433,6 +1413,364 @@
       ],
       "unitCategoryRaw": "length",
       "converterUnitId": "arm_span"
+    },
+    {
+      "id": "item.measurement.absurd.spider_silk",
+      "domainId": "measurement",
+      "subgenreId": "measurement.absurd",
+      "name": "Spider silk",
+      "description": "Diameter of a spider silk thread.",
+      "synonyms": [
+        "Spider silk thread",
+        "Silk strand",
+        "Spider thread"
+      ],
+      "tags": [
+        "length",
+        "comparison",
+        "tiny",
+        "biology"
+      ],
+      "unitCategoryRaw": "length",
+      "converterUnitId": "spider_silk"
+    },
+    {
+      "id": "item.measurement.absurd.grain_of_sand",
+      "domainId": "measurement",
+      "subgenreId": "measurement.absurd",
+      "name": "Grain of sand",
+      "description": "Medium grain of sand diameter.",
+      "synonyms": [
+        "Sand grain",
+        "Beach sand",
+        "Sand particle"
+      ],
+      "tags": [
+        "length",
+        "comparison",
+        "tiny",
+        "everyday"
+      ],
+      "unitCategoryRaw": "length",
+      "converterUnitId": "grain_of_sand"
+    },
+    {
+      "id": "item.measurement.absurd.wine_bottle",
+      "domainId": "measurement",
+      "subgenreId": "measurement.absurd",
+      "name": "Wine bottle",
+      "description": "Standard wine bottle height.",
+      "synonyms": [
+        "Wine bottle height",
+        "750ml bottle",
+        "Bottle length"
+      ],
+      "tags": [
+        "length",
+        "comparison",
+        "everyday",
+        "food"
+      ],
+      "unitCategoryRaw": "length",
+      "converterUnitId": "wine_bottle"
+    },
+    {
+      "id": "item.measurement.absurd.suitcase",
+      "domainId": "measurement",
+      "subgenreId": "measurement.absurd",
+      "name": "Suitcase",
+      "description": "Checked suitcase height.",
+      "synonyms": [
+        "Checked bag",
+        "Travel suitcase",
+        "Luggage height"
+      ],
+      "tags": [
+        "length",
+        "comparison",
+        "everyday",
+        "travel"
+      ],
+      "unitCategoryRaw": "length",
+      "converterUnitId": "suitcase"
+    },
+    {
+      "id": "item.measurement.absurd.human_height",
+      "domainId": "measurement",
+      "subgenreId": "measurement.absurd",
+      "name": "Average human",
+      "description": "Average human height.",
+      "synonyms": [
+        "Person height",
+        "Human height",
+        "Average height"
+      ],
+      "tags": [
+        "length",
+        "comparison",
+        "everyday",
+        "biology"
+      ],
+      "unitCategoryRaw": "length",
+      "converterUnitId": "human_height"
+    },
+    {
+      "id": "item.measurement.absurd.park_bench",
+      "domainId": "measurement",
+      "subgenreId": "measurement.absurd",
+      "name": "Park bench",
+      "description": "Standard park bench length.",
+      "synonyms": [
+        "Bench length",
+        "Park seat",
+        "Garden bench"
+      ],
+      "tags": [
+        "length",
+        "comparison",
+        "everyday",
+        "home"
+      ],
+      "unitCategoryRaw": "length",
+      "converterUnitId": "park_bench"
+    },
+    {
+      "id": "item.measurement.absurd.swimming_pool_depth",
+      "domainId": "measurement",
+      "subgenreId": "measurement.absurd",
+      "name": "Swimming pool depth",
+      "description": "Standard pool depth.",
+      "synonyms": [
+        "Pool depth",
+        "Deep end",
+        "Pool floor"
+      ],
+      "tags": [
+        "length",
+        "comparison",
+        "sports",
+        "everyday"
+      ],
+      "unitCategoryRaw": "length",
+      "converterUnitId": "swimming_pool_depth"
+    },
+    {
+      "id": "item.measurement.absurd.telephone_pole",
+      "domainId": "measurement",
+      "subgenreId": "measurement.absurd",
+      "name": "Telephone pole",
+      "description": "Standard telephone pole height.",
+      "synonyms": [
+        "Utility pole",
+        "Power pole",
+        "Electric pole"
+      ],
+      "tags": [
+        "length",
+        "comparison",
+        "everyday",
+        "urban"
+      ],
+      "unitCategoryRaw": "length",
+      "converterUnitId": "telephone_pole"
+    },
+    {
+      "id": "item.measurement.absurd.statue_of_liberty",
+      "domainId": "measurement",
+      "subgenreId": "measurement.absurd",
+      "name": "Statue of Liberty",
+      "description": "Statue of Liberty total height.",
+      "synonyms": [
+        "Lady Liberty",
+        "Liberty statue",
+        "New York landmark"
+      ],
+      "tags": [
+        "length",
+        "comparison",
+        "landmark",
+        "distance"
+      ],
+      "unitCategoryRaw": "length",
+      "converterUnitId": "statue_of_liberty"
+    },
+    {
+      "id": "item.measurement.absurd.big_ben",
+      "domainId": "measurement",
+      "subgenreId": "measurement.absurd",
+      "name": "Big Ben tower",
+      "description": "Elizabeth Tower height.",
+      "synonyms": [
+        "Big Ben",
+        "Elizabeth Tower",
+        "London clock tower"
+      ],
+      "tags": [
+        "length",
+        "comparison",
+        "landmark",
+        "distance"
+      ],
+      "unitCategoryRaw": "length",
+      "converterUnitId": "big_ben"
+    },
+    {
+      "id": "item.measurement.absurd.burj_khalifa",
+      "domainId": "measurement",
+      "subgenreId": "measurement.absurd",
+      "name": "Burj Khalifa",
+      "description": "Burj Khalifa total height.",
+      "synonyms": [
+        "Burj Khalifa",
+        "Dubai tower",
+        "World's tallest building"
+      ],
+      "tags": [
+        "length",
+        "comparison",
+        "landmark",
+        "distance"
+      ],
+      "unitCategoryRaw": "length",
+      "converterUnitId": "burj_khalifa"
+    },
+    {
+      "id": "item.measurement.absurd.nile_river",
+      "domainId": "measurement",
+      "subgenreId": "measurement.absurd",
+      "name": "Nile River",
+      "description": "Nile River total length.",
+      "synonyms": [
+        "River Nile",
+        "Nile length",
+        "African river"
+      ],
+      "tags": [
+        "length",
+        "comparison",
+        "geography",
+        "distance"
+      ],
+      "unitCategoryRaw": "length",
+      "converterUnitId": "nile_river"
+    },
+    {
+      "id": "item.measurement.absurd.australia_width",
+      "domainId": "measurement",
+      "subgenreId": "measurement.absurd",
+      "name": "Width of Australia",
+      "description": "Australia east-to-west distance.",
+      "synonyms": [
+        "Australia width",
+        "Continent width",
+        "Australian distance"
+      ],
+      "tags": [
+        "length",
+        "comparison",
+        "geography",
+        "distance"
+      ],
+      "unitCategoryRaw": "length",
+      "converterUnitId": "australia_width"
+    },
+    {
+      "id": "item.measurement.absurd.earth_circumference",
+      "domainId": "measurement",
+      "subgenreId": "measurement.absurd",
+      "name": "Earth's circumference",
+      "description": "Earth equatorial circumference.",
+      "synonyms": [
+        "Around the world",
+        "Earth circumference",
+        "Globe circumference"
+      ],
+      "tags": [
+        "length",
+        "comparison",
+        "geography",
+        "space"
+      ],
+      "unitCategoryRaw": "length",
+      "converterUnitId": "earth_circumference"
+    },
+    {
+      "id": "item.measurement.absurd.london_to_sydney",
+      "domainId": "measurement",
+      "subgenreId": "measurement.absurd",
+      "name": "London to Sydney",
+      "description": "Flight distance London to Sydney.",
+      "synonyms": [
+        "London Sydney flight",
+        "Long haul flight",
+        "UK Australia distance"
+      ],
+      "tags": [
+        "length",
+        "comparison",
+        "geography",
+        "travel"
+      ],
+      "unitCategoryRaw": "length",
+      "converterUnitId": "london_to_sydney"
+    },
+    {
+      "id": "item.measurement.absurd.new_york_to_london",
+      "domainId": "measurement",
+      "subgenreId": "measurement.absurd",
+      "name": "New York to London",
+      "description": "Transatlantic flight distance.",
+      "synonyms": [
+        "Transatlantic",
+        "NY London flight",
+        "Atlantic crossing"
+      ],
+      "tags": [
+        "length",
+        "comparison",
+        "geography",
+        "travel"
+      ],
+      "unitCategoryRaw": "length",
+      "converterUnitId": "new_york_to_london"
+    },
+    {
+      "id": "item.measurement.absurd.distance_light_second",
+      "domainId": "measurement",
+      "subgenreId": "measurement.absurd",
+      "name": "Light-second",
+      "description": "Distance light travels in one second.",
+      "synonyms": [
+        "Light second",
+        "Speed of light second"
+      ],
+      "tags": [
+        "length",
+        "comparison",
+        "astronomy",
+        "space"
+      ],
+      "unitCategoryRaw": "length",
+      "converterUnitId": "distance_light_second"
+    },
+    {
+      "id": "item.measurement.absurd.distance_light_year",
+      "domainId": "measurement",
+      "subgenreId": "measurement.absurd",
+      "name": "Light-year",
+      "description": "Distance light travels in one year.",
+      "synonyms": [
+        "Light year",
+        "Stellar distance"
+      ],
+      "tags": [
+        "length",
+        "comparison",
+        "astronomy",
+        "space"
+      ],
+      "unitCategoryRaw": "length",
+      "converterUnitId": "distance_light_year"
     }
   ]
 }
