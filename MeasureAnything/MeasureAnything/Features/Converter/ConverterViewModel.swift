@@ -337,7 +337,8 @@ final class ConverterViewModel: ObservableObject {
             let notFrom = pool.filter { $0.id != selectedFromUnitID }
             guard !notFrom.isEmpty else { return nil }
             let avoidTo = notFrom.filter { $0.id != selectedToUnitID }
-            return (avoidTo.isEmpty ? notFrom : avoidTo).randomElement()
+            let candidates = avoidTo.isEmpty ? notFrom : avoidTo
+            return Self.weightedRandomUnit(from: candidates)
         }()
 
         let rest = selectedCategory.converterDiceRestDegrees
@@ -387,7 +388,7 @@ final class ConverterViewModel: ObservableObject {
                     }
                     let pool = self.diceToUnitPool().filter { allowed.contains($0.id) }
                     let candidates = pool.filter { $0.id != self.selectedFromUnitID }
-                    return candidates.randomElement()
+                    return Self.weightedRandomUnit(from: candidates)
                 }()
 
                 if let u = resolvedTo {
@@ -441,6 +442,21 @@ final class ConverterViewModel: ObservableObject {
         if !fromAvailable.isEmpty { return fromAvailable }
 
         return availableUnits
+    }
+
+    /// Weighted pick for dice: `interestScore` (default 5) adds proportional weight; clamped to 1…10.
+    private static func weightedRandomUnit(from candidates: [UnitDefinition]) -> UnitDefinition? {
+        guard !candidates.isEmpty else { return nil }
+        var weighted: [UnitDefinition] = []
+        weighted.reserveCapacity(candidates.count * 10)
+        for u in candidates {
+            let raw = u.interestScore ?? 5
+            let w = max(1, min(10, raw))
+            for _ in 0..<w {
+                weighted.append(u)
+            }
+        }
+        return weighted.randomElement()
     }
 
     /// Whether the current from/to pair can be stored as a favorite (pair metadata only).

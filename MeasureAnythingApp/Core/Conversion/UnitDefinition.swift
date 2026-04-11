@@ -41,6 +41,8 @@ public struct UnitDefinition: Identifiable, Codable, Hashable, Sendable {
     public var exampleMeme: String?
     /// Contextual "did you know" fact tied to this unit (may reference the live result via `{result}`).
     public var funFact: String?
+    /// Dice-roll bias (1–10); higher = more likely when weighted. Absent in JSON defaults to 5 in the UI layer.
+    public var interestScore: Int?
 
     public init(
         id: ID,
@@ -53,7 +55,8 @@ public struct UnitDefinition: Identifiable, Codable, Hashable, Sendable {
         iconName: String? = nil,
         description: String? = nil,
         exampleMeme: String? = nil,
-        funFact: String? = nil
+        funFact: String? = nil,
+        interestScore: Int? = nil
     ) throws {
         self.id = id
         self.name = name
@@ -66,6 +69,7 @@ public struct UnitDefinition: Identifiable, Codable, Hashable, Sendable {
         self.description = description
         self.exampleMeme = exampleMeme
         self.funFact = funFact
+        self.interestScore = interestScore
 
         try validate()
     }

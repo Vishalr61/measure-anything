@@ -659,11 +659,11 @@
       "domainId": "measurement",
       "subgenreId": "measurement.absurd",
       "name": "School bus (length)",
-      "description": "Standard school bus length reference.",
+      "description": "Standard school bus length reference (same comparator as the city bus unit).",
       "synonyms": ["School bus", "Yellow bus", "Type C bus"],
       "tags": ["length", "comparison", "vehicle", "everyday"],
       "unitCategoryRaw": "length",
-      "converterUnitId": "school_bus"
+      "converterUnitId": "bus"
     },
     {
       "id": "item.measurement.absurd.double_decker_bus",

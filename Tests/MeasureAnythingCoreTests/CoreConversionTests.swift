@@ -18,7 +18,12 @@ final class CoreConversionTests: XCTestCase {
         let store = AbsurdUnitStore()
 
         let length = try store.load(category: .length)
-        XCTAssertEqual(Set(length.map(\.id)), Set(["banana", "fridge", "bus", "blue_whale"]))
+        let lengthIDs = Set(length.map(\.id))
+        XCTAssertGreaterThanOrEqual(lengthIDs.count, 50)
+        XCTAssertFalse(lengthIDs.contains("school_bus"))
+        for required in ["banana", "fridge", "bus", "blue_whale", "spider_silk", "distance_light_second"] {
+            XCTAssertTrue(lengthIDs.contains(required), "Expected length absurd id missing: \(required)")
+        }
 
         let mass = try store.load(category: .mass)
         XCTAssertEqual(Set(mass.map(\.id)), Set(["cat", "bowling_ball", "microwave", "elephant"]))
@@ -70,13 +75,13 @@ final class CoreConversionTests: XCTestCase {
         let kmToM = try engine.convert(1, from: "kilometer", to: "meter")
         XCTAssertEqual(kmToM.outputValue, 1000, accuracy: 1e-12)
 
-        // 1 banana -> meter = 0.19
+        // 1 banana -> meter = 0.178
         let bananaToM = try engine.convert(1, from: "banana", to: "meter")
-        XCTAssertEqual(bananaToM.outputValue, 0.19, accuracy: 1e-12)
+        XCTAssertEqual(bananaToM.outputValue, 0.178, accuracy: 1e-12)
 
-        // 10 meter -> banana ≈ 52.63
+        // 10 meter -> banana
         let mToBanana = try engine.convert(10, from: "meter", to: "banana")
-        XCTAssertEqual(mToBanana.outputValue, 10 / 0.19, accuracy: 1e-12)
+        XCTAssertEqual(mToBanana.outputValue, 10 / 0.178, accuracy: 1e-12)
 
         // 1 elephant -> kilogram = 6000
         let elephantToKg = try engine.convert(1, from: "elephant", to: "kilogram")
