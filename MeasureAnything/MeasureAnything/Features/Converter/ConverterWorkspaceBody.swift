@@ -390,7 +390,7 @@ struct ConverterWorkspaceBody: View {
                                             .foregroundStyle(categoryAccent)
                                             .padding(.horizontal, 10)
                                             .padding(.vertical, 4)
-                                            .background(Color(hex: "#EAF5F4"))
+                                            .background(categoryAccent.opacity(0.12))
                                             .clipShape(Capsule())
                                     }
                                     .buttonStyle(.plain)

@@ -383,10 +383,15 @@ final class ConverterViewModel: ObservableObject {
                 // `newUnit` was chosen at roll start; mode/category may have changed since — never apply a stale ID.
                 let allowed = Set(self.availableUnits.map(\.id))
                 let resolvedTo: UnitDefinition? = {
-                    if let u = newUnit, allowed.contains(u.id), u.id != self.selectedFromUnitID {
+                    if let u = newUnit,
+                       u.category == self.selectedCategory,
+                       allowed.contains(u.id),
+                       u.id != self.selectedFromUnitID {
                         return u
                     }
-                    let pool = self.diceToUnitPool().filter { allowed.contains($0.id) }
+                    let pool = self.diceToUnitPool().filter {
+                        $0.category == self.selectedCategory && allowed.contains($0.id)
+                    }
                     let candidates = pool.filter { $0.id != self.selectedFromUnitID }
                     return Self.weightedRandomUnit(from: candidates)
                 }()
@@ -428,20 +433,21 @@ final class ConverterViewModel: ObservableObject {
     }
 
     private func diceToUnitPool() -> [UnitDefinition] {
-        // In normal mode: keep it within the current mode's available units.
-        if selectedMode == .normal {
-            return availableUnits
+        // Dice UI is hidden in normal mode; keep pool empty if something calls this anyway.
+        guard selectedMode != .normal else { return [] }
+
+        func inSelectedCategory(_ u: UnitDefinition) -> Bool {
+            u.category == selectedCategory
         }
 
-        // In absurd/custom: prefer "true absurd" units scoped to the current category (not comparators/custom).
-        let absurdOnly = registry.units(in: selectedCategory, includeKinds: [.absurd])
+        // Prefer absurd units in the *selected* category only (defense against stale registry edges).
+        let absurdOnly = registry.units(in: selectedCategory, includeKinds: [.absurd]).filter(inSelectedCategory)
         if !absurdOnly.isEmpty { return absurdOnly }
 
-        // Fallback: use any absurd units already present in the current mode's list.
-        let fromAvailable = availableUnits.filter { $0.kind == .absurd }
+        let fromAvailable = availableUnits.filter { inSelectedCategory($0) && $0.kind == .absurd }
         if !fromAvailable.isEmpty { return fromAvailable }
 
-        return availableUnits
+        return availableUnits.filter(inSelectedCategory)
     }
 
     /// Weighted pick for dice: `interestScore` (default 5) adds proportional weight; clamped to 1…10.
@@ -767,7 +773,8 @@ final class ConverterViewModel: ObservableObject {
             toValue: toVal,
             toUnit: toN,
             funFact: useFact ? trimmedFact : nil,
-            formulaLine: useFact ? nil : formula
+            formulaLine: useFact ? nil : formula,
+            accent: ConverterCategoryAccent.accent(for: selectedCategory)
         )
     }
 }

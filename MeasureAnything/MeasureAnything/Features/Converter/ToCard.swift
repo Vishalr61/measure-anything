@@ -103,9 +103,10 @@ struct ToCard: View {
                 ActionButton(
                     icon: isSaved ? "star.fill" : "star",
                     label: isSaved ? "Saved" : "Save",
-                    background: accent.opacity(0.14),
+                    background: accent.opacity(0.10),
                     foreground: accent,
                     disabled: isSaved || !saveEnabled,
+                    fadeWhenDisabled: !isSaved,
                     iconScale: saveStarScale,
                     action: {
                         guard saveEnabled, !isSaved else { return }

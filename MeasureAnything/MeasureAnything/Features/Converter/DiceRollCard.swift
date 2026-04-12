@@ -19,6 +19,7 @@ struct DiceRollCard: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(cardBackground)
             .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+            .clipped()
             .contentShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
         }
         .buttonStyle(.plain)
@@ -61,13 +62,13 @@ struct DiceRollCard: View {
     }
 
     private var cardBackground: some View {
-        ZStack {
+        ZStack(alignment: .topTrailing) {
             accent
 
             Circle()
-                .stroke(Color.white.opacity(0.06), lineWidth: 2)
-                .frame(width: 110, height: 110)
-                .offset(x: 52, y: -50)
+                .stroke(Color.white.opacity(0.1), lineWidth: 14)
+                .frame(width: 90, height: 90)
+                .offset(x: 30, y: -30)
         }
     }
 }

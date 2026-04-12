@@ -7,6 +7,8 @@ struct ActionButton: View {
     let background: Color
     let foreground: Color
     var disabled: Bool = false
+    /// When `false`, a disabled control (e.g. saved pair) stays at full opacity so filled symbols read clearly.
+    var fadeWhenDisabled: Bool = true
     var iconScale: CGFloat = 1
     let action: () -> Void
 
@@ -32,6 +34,6 @@ struct ActionButton: View {
         }
         .buttonStyle(.plain)
         .disabled(disabled)
-        .opacity(disabled ? 0.4 : 1)
+        .opacity(disabled && fadeWhenDisabled ? 0.4 : 1)
     }
 }
