@@ -102,17 +102,6 @@ final class ConverterViewModel: ObservableObject {
     private var engine: ConverterEngine
     private let taxonomy: AppTaxonomyStore
 
-    private let displayFormatter: NumberFormatter = {
-        let f = NumberFormatter()
-        f.numberStyle = .decimal
-        f.locale = Locale(identifier: "en_US")
-        f.usesGroupingSeparator = true
-        f.roundingMode = .halfUp
-        f.minimumFractionDigits = 0
-        f.maximumFractionDigits = 6
-        return f
-    }()
-
     private static let displayFallbackLocale = Locale(identifier: "en_US")
 
     init(taxonomy: AppTaxonomyStore) {
@@ -865,31 +854,55 @@ final class ConverterViewModel: ObservableObject {
     }
 
     func formatNumberForDisplay(_ value: Double) -> String {
+        guard !value.isNaN else { return "—" }
         guard value.isFinite else { return "—" }
-        if value == 0 { return "0" }
+        guard value != 0 else { return "0" }
 
-        let magnitude = abs(value)
-        let f = displayFormatter
+        let absValue = abs(value)
 
-        switch magnitude {
-        case let m where m >= 10_000_000:
-            f.maximumFractionDigits = 2
-            f.minimumFractionDigits = 0
-        case let m where m >= 1:
-            f.maximumFractionDigits = magnitude < 10 ? 3 : 2
-            f.minimumFractionDigits = 0
-        case let m where m >= 0.0001:
-            f.maximumFractionDigits = 4
-            f.minimumFractionDigits = 0
-        default:
-            f.maximumFractionDigits = 6
-            f.minimumFractionDigits = 0
+        if absValue < 0.0001 || absValue > 9_999_999 {
+            let formatter = NumberFormatter()
+            formatter.numberStyle = .scientific
+            formatter.maximumSignificantDigits = 4
+            formatter.minimumSignificantDigits = 1
+            formatter.locale = Locale(identifier: "en_US")
+            if let raw = formatter.string(from: NSNumber(value: value)) {
+                return raw
+                    .replacingOccurrences(of: "E", with: "×10^")
+                    .replacingOccurrences(of: "e", with: "×10^")
+            }
+            return String(format: "%g", locale: Self.displayFallbackLocale, value)
         }
 
-        if let s = f.string(from: NSNumber(value: value)) {
-            return s
-        }
-        return String(format: "%g", locale: Self.displayFallbackLocale, value)
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .decimal
+        formatter.maximumFractionDigits = 6
+        formatter.minimumFractionDigits = 0
+        formatter.locale = Locale(identifier: "en_US")
+        formatter.usesGroupingSeparator = true
+        formatter.roundingMode = .halfUp
+        return formatter.string(from: NSNumber(value: value))
+            ?? String(format: "%g", locale: Self.displayFallbackLocale, value)
+    }
+
+    /// Main result line with optional superscript exponent when scientific notation is used.
+    var formattedResultAttributed: AttributedString {
+        guard validationError == nil, let r = conversionResult else { return AttributedString("—") }
+        return Self.attributedAdaptiveNumber(formatNumberForDisplay(r.outputValue))
+    }
+
+    /// Converts `3.336×10^-9`-style output into an `AttributedString` with a raised exponent.
+    static func attributedAdaptiveNumber(_ raw: String) -> AttributedString {
+        guard raw.contains("×10^") else { return AttributedString(raw) }
+        let parts = raw.components(separatedBy: "×10^")
+        guard parts.count == 2 else { return AttributedString(raw) }
+
+        var result = AttributedString(parts[0] + "×10")
+        var exponent = AttributedString(parts[1])
+        exponent.font = .system(size: 20, weight: .bold)
+        exponent.baselineOffset = 10
+        result.append(exponent)
+        return result
     }
 
     /// Live formatted converted value for UI copy/share footnotes (`"—"` when invalid or missing).

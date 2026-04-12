@@ -321,6 +321,7 @@ struct ConverterWorkspaceBody: View {
         return ToCard(
             toUnitName: toName,
             resultText: toRowDisplayString,
+            resultAttributed: vm.formattedResultAttributed,
             formulaLine: toRowFootnoteText,
             accent: categoryAccent,
             isSaved: isCurrentPairAlreadyFavorite,

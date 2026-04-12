@@ -5,7 +5,10 @@ import MeasureAnythingCore
 /// “To” card: baseline-aligned result + unit, formula, then Copy / Share / Save grid.
 struct ToCard: View {
     let toUnitName: String
+    /// Plain result string for accessibility and consistency with copy/paste text.
     let resultText: String
+    /// Display string (superscript exponent when scientific).
+    let resultAttributed: AttributedString
     /// Live equivalence (e.g. `50 Meter = 263.16 Kilometer`); `nil` skips formula row only.
     let formulaLine: String?
     /// Category accent for result, unit picker, and Save action (matches chips / swap / dice).
@@ -33,7 +36,7 @@ struct ToCard: View {
                 .padding(.bottom, 6)
 
             HStack(alignment: .lastTextBaseline) {
-                Text(resultText)
+                Text(resultAttributed)
                     .font(.system(size: 36, weight: .bold))
                     .foregroundStyle(usesPlaceholderResult ? Color.secondary.opacity(0.55) : accent)
                     .monospacedDigit()
