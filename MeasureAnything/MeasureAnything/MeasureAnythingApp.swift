@@ -23,6 +23,8 @@ struct MeasureAnythingApp: App {
         WindowGroup {
             HomeView(vm: converterViewModel)
                 .environmentObject(taxonomyStore)
+                .background(Color.white)
+                .preferredColorScheme(.light)
         }
         .modelContainer(for: [CustomUnit.self, FavoriteConversion.self])
     }

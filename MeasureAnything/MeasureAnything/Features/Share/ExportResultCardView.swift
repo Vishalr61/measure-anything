@@ -194,7 +194,7 @@ struct ExportResultCardView: View {
         .padding(ConverterLayout.cardPadding)
         .background(
             RoundedRectangle(cornerRadius: ConverterLayout.cardCornerRadius, style: .continuous)
-                .fill(Color(.secondarySystemBackground))
+                .fill(Color(hex: "#F0F0F3"))
         )
         .overlay(
             RoundedRectangle(cornerRadius: ConverterLayout.cardCornerRadius, style: .continuous)

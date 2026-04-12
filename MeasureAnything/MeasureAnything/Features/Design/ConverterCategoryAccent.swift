@@ -14,7 +14,7 @@ enum ConverterCategoryAccent {
         case .temperature:
             Color(red: 139 / 255, green: 58 / 255, blue: 42 / 255) // #8B3A2A Volcanic
         case .volume:
-            Color(red: 211 / 255, green: 175 / 255, blue: 55 / 255) // #1E7A5E Teal green
+            Color(red: 175 / 255, green: 125 / 255, blue: 42 / 255) // #1E7A5E Teal green
         }
     }
 }

@@ -74,7 +74,7 @@ struct HomeView: View {
 
             BottomNav(selected: $homeTab, selectionTint: categoryAccent)
         }
-        .background(Color(.systemGroupedBackground))
+        .background(Color(hex: "#F0F0F3"))
         .sheet(isPresented: $showTaxonomySearch) {
             TaxonomySearchView { itemId in
                 if let route = taxonomyStore.converterRoute(forTaxonomyItemId: itemId) {
@@ -117,7 +117,7 @@ struct HomeView: View {
                     }
                 }
             }
-            .background(Color(.systemGroupedBackground))
+            .background(Color(hex: "#F0F0F3"))
             .navigationTitle("Measure Anything")
             .navigationBarTitleDisplayMode(.inline)
             .scrollDismissesKeyboard(.interactively)
@@ -177,6 +177,7 @@ struct HomeView: View {
                 }
             }
         }
+        .background(Color.white)
     }
 
     private var favouritesTab: some View {

@@ -24,6 +24,7 @@ final class ConverterViewModel: ObservableObject {
         static let sessionInput = "session.inputValue"
         static let hasSeenAbsurdNudge = "hasSeenAbsurdNudge"
         static let normalConversionCount = "normalConversionCount"
+        static let hasSeenDiceLongPressHint = "hasSeenDiceLongPressHint"
     }
 
     @Published var selectedCategory: UnitCategory = .length {
@@ -78,8 +79,12 @@ final class ConverterViewModel: ObservableObject {
     @Published var diceRotationDegrees: Double = UnitCategory.length.converterDiceRestDegrees
     @Published var showDiceSubtitle: Bool = false
     @Published var diceLandedUnitName: String = ""
+    /// When `true`, `diceLandedUnitName` is the full subtitle (dual roll). When `false`, prefix `"landed on "` is shown before the name.
+    @Published var diceSubtitleIsDualFormat: Bool = false
+    @Published var showDiceLongPressHint: Bool = false
 
     private var diceFlashTimer: Timer?
+    private var diceLongPressHintDismissWorkItem: DispatchWorkItem?
     private var diceRollToken: UUID = UUID()
 
     private func syncDiceTiltToCategory(animated: Bool) {
@@ -264,6 +269,10 @@ final class ConverterViewModel: ObservableObject {
         }
     }
 
+    var hasSeenDiceLongPressHint: Bool {
+        UserDefaults.standard.bool(forKey: SessionKeys.hasSeenDiceLongPressHint)
+    }
+
     private var normalConversionCount: Int {
         get { UserDefaults.standard.integer(forKey: SessionKeys.normalConversionCount) }
         set { UserDefaults.standard.set(newValue, forKey: SessionKeys.normalConversionCount) }
@@ -327,6 +336,7 @@ final class ConverterViewModel: ObservableObject {
         // Fade out subtitle instantly (no animation).
         showDiceSubtitle = false
         diceLandedUnitName = ""
+        diceSubtitleIsDualFormat = false
 
         // Pre-select outcome before animation starts.
         let newFace = Int.random(in: 1...6)
@@ -399,6 +409,8 @@ final class ConverterViewModel: ObservableObject {
                 if let u = resolvedTo {
                     self.selectedToUnitID = u.id
                     self.diceLandedUnitName = u.name
+                    self.diceSubtitleIsDualFormat = false
+                    self.scheduleDiceLongPressHintIfNeeded()
                 } else {
                     self.diceLandedUnitName = ""
                 }
@@ -411,6 +423,165 @@ final class ConverterViewModel: ObservableObject {
                 self.isDiceRolling = false
             }
         }
+    }
+
+    /// Long-press (~0.25s `minimumDuration` on `DiceRollCard`): randomises both FROM and TO to distinct absurd units in the current category.
+    func rollDiceDual() {
+        guard selectedMode != .normal else { return }
+
+        func absurdPoolForDual() -> [UnitDefinition] {
+            registry.units(in: selectedCategory, includeKinds: [.absurd])
+                .filter { $0.category == selectedCategory }
+        }
+
+        let pool = absurdPoolForDual()
+        // Silent no-op: must not cancel an in-flight single roll or invalidate timers.
+        guard pool.count >= 2 else { return }
+
+        diceRollToken = UUID()
+        let token = diceRollToken
+        diceFlashTimer?.invalidate()
+        diceFlashTimer = nil
+        diceLongPressHintDismissWorkItem?.cancel()
+        diceLongPressHintDismissWorkItem = nil
+
+        let softPulse = UIImpactFeedbackGenerator(style: .soft)
+        softPulse.prepare()
+        softPulse.impactOccurred()
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.08) {
+            MainActor.assumeIsolated {
+                guard self.diceRollToken == token else { return }
+                let heavyFire = UIImpactFeedbackGenerator(style: .heavy)
+                heavyFire.prepare()
+                heavyFire.impactOccurred(intensity: 1.0)
+            }
+        }
+
+        isDiceRolling = true
+        showDiceSubtitle = false
+        diceLandedUnitName = ""
+        diceSubtitleIsDualFormat = false
+        showDiceLongPressHint = false
+
+        inputText = "1"
+
+        let newFace = Int.random(in: 1...6)
+        let pickedFrom: UnitDefinition? = Self.weightedRandomUnit(from: pool)
+        let pickedTo: UnitDefinition? = {
+            guard let f = pickedFrom else { return nil }
+            let rest = pool.filter { $0.id != f.id }
+            return Self.weightedRandomUnit(from: rest)
+        }()
+
+        let rest = selectedCategory.converterDiceRestDegrees
+        withAnimation(.linear(duration: 0)) {
+            diceRotationDegrees = rest
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.016) {
+            MainActor.assumeIsolated {
+                guard self.diceRollToken == token else { return }
+                withAnimation(.interpolatingSpring(mass: 1, stiffness: 60, damping: 12, initialVelocity: 8)) {
+                    self.diceRotationDegrees = rest + 1080
+                }
+            }
+        }
+
+        var flashCount = 0
+        let timer = Timer.scheduledTimer(withTimeInterval: 0.07, repeats: true) { t in
+            MainActor.assumeIsolated {
+                guard self.diceRollToken == token else {
+                    t.invalidate()
+                    return
+                }
+                self.diceDisplayFace = Int.random(in: 1...6)
+                flashCount += 1
+                if flashCount >= 12 { t.invalidate() }
+            }
+        }
+        diceFlashTimer = timer
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+            MainActor.assumeIsolated {
+                guard self.diceRollToken == token else { return }
+                timer.invalidate()
+                if self.diceFlashTimer === timer {
+                    self.diceFlashTimer = nil
+                }
+                self.diceDisplayFace = newFace
+
+                let allowedAbsurd = absurdPoolForDual()
+                guard allowedAbsurd.count >= 2 else {
+                    self.isDiceRolling = false
+                    return
+                }
+
+                let resolvedFrom: UnitDefinition? = {
+                    if let f = pickedFrom,
+                       f.category == self.selectedCategory,
+                       allowedAbsurd.contains(where: { $0.id == f.id }) {
+                        return f
+                    }
+                    return Self.weightedRandomUnit(from: allowedAbsurd)
+                }()
+
+                let resolvedTo: UnitDefinition? = {
+                    guard let from = resolvedFrom else { return nil }
+                    let candidates = allowedAbsurd.filter { $0.id != from.id }
+                    if let t = pickedTo,
+                       t.category == self.selectedCategory,
+                       candidates.contains(where: { $0.id == t.id }) {
+                        return t
+                    }
+                    return Self.weightedRandomUnit(from: candidates)
+                }()
+
+                if let from = resolvedFrom, let to = resolvedTo, from.id != to.id {
+                    self.selectedFromUnitID = from.id
+                    self.selectedToUnitID = to.id
+                    self.diceSubtitleIsDualFormat = true
+                    self.diceLandedUnitName = "rolled both — \(from.name) → \(to.name)"
+
+                    let land1 = UIImpactFeedbackGenerator(style: .medium)
+                    land1.prepare()
+                    land1.impactOccurred()
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.12) {
+                        MainActor.assumeIsolated {
+                            guard self.diceRollToken == token else { return }
+                            let land2 = UIImpactFeedbackGenerator(style: .medium)
+                            land2.prepare()
+                            land2.impactOccurred(intensity: 0.7)
+                        }
+                    }
+                } else {
+                    self.diceLandedUnitName = ""
+                    self.diceSubtitleIsDualFormat = false
+                }
+
+                withAnimation(.easeIn(duration: 0.25)) {
+                    self.showDiceSubtitle = !self.diceLandedUnitName.isEmpty
+                }
+                self.isDiceRolling = false
+            }
+        }
+    }
+
+    private func scheduleDiceLongPressHintIfNeeded() {
+        guard !hasSeenDiceLongPressHint, !showDiceLongPressHint else { return }
+        showDiceLongPressHint = true
+        diceLongPressHintDismissWorkItem?.cancel()
+        let work = DispatchWorkItem { [weak self] in
+            guard let self else { return }
+            Task { @MainActor in
+                withAnimation(.easeOut(duration: 0.25)) {
+                    self.showDiceLongPressHint = false
+                }
+                UserDefaults.standard.set(true, forKey: SessionKeys.hasSeenDiceLongPressHint)
+                self.diceLongPressHintDismissWorkItem = nil
+            }
+        }
+        diceLongPressHintDismissWorkItem = work
+        DispatchQueue.main.asyncAfter(deadline: .now() + 3, execute: work)
     }
 
     /// Randomly chooses both `selectedFromUnitID` and `selectedToUnitID` from `availableUnits`.

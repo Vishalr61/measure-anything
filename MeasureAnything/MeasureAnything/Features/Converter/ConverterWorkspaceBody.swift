@@ -434,7 +434,7 @@ struct ConverterWorkspaceBody: View {
             .padding(.vertical, 12)
             .background(
                 Capsule(style: .continuous)
-                    .fill(Color(.systemBackground))
+                    .fill(Color.white)
             )
             .overlay(
                 Capsule(style: .continuous)
@@ -472,7 +472,7 @@ struct ConverterWorkspaceBody: View {
 
     private var referenceUnitCardFill: some View {
         RoundedRectangle(cornerRadius: ConverterLayout.referenceCardCornerRadius, style: .continuous)
-            .fill(Color(.secondarySystemGroupedBackground))
+            .fill(Color(hex: "#F0F0F3"))
     }
 
     private var referenceUnitCardStroke: some View {
@@ -486,7 +486,7 @@ struct ConverterWorkspaceBody: View {
             .padding(ConverterLayout.secondaryBlockPadding)
             .background(
                 RoundedRectangle(cornerRadius: ConverterLayout.secondaryBlockCornerRadius, style: .continuous)
-                    .fill(Color(.tertiarySystemBackground))
+                    .fill(Color(hex: "#F5F5F7"))
             )
             .overlay(
                 RoundedRectangle(cornerRadius: ConverterLayout.secondaryBlockCornerRadius, style: .continuous)
