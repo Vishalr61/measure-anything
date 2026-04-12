@@ -257,15 +257,14 @@ struct ConverterWorkspaceBody: View {
         VStack(alignment: .leading, spacing: 0) {
             VStack(spacing: 0) {
                 fromConversionCard
-                    .overlay(alignment: .bottom) {
-                        referenceSwapButton
-                            .offset(y: 27)
-                    }
-                    .padding(.bottom, 27)
-                    .zIndex(1)
+
+                ZStack {
+                    referenceSwapButton
+                }
+                .padding(.vertical, 12)
+                .zIndex(1)
 
                 expandedToCard
-                    .padding(.top, -27)
             }
 
             if let err = vm.validationError {
