@@ -7,7 +7,7 @@ struct BottomNav: View {
 
     enum Tab: Hashable {
         case convert
-        case favourites
+        case explore
         case settings
     }
 
@@ -22,12 +22,12 @@ struct BottomNav: View {
                 selected = .convert
             }
             NavTab(
-                iconBase: "star",
-                label: "Favourites",
-                isSelected: selected == .favourites,
+                iconBase: "sparkles",
+                label: "Explore",
+                isSelected: selected == .explore,
                 selectionTint: selectionTint
             ) {
-                selected = .favourites
+                selected = .explore
             }
             NavTab(
                 iconBase: "gearshape",
@@ -62,8 +62,8 @@ private struct NavTab: View {
         switch iconBase {
         case "arrow.left.arrow.right":
             return isSelected ? "arrow.left.arrow.right.circle.fill" : "arrow.left.arrow.right"
-        case "star":
-            return isSelected ? "star.fill" : "star"
+        case "sparkles":
+            return "sparkles"
         case "gearshape":
             return isSelected ? "gearshape.fill" : "gearshape"
         default:

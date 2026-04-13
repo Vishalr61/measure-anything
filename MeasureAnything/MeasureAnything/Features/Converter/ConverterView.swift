@@ -11,7 +11,6 @@ struct ConverterView: View {
     @ObservedObject var vm: ConverterViewModel
     @State private var showCustomUnitForm = false
     @State private var showFavorites = false
-    @State private var showGlobalSearch = false
     @State private var mainTab: BottomNav.Tab = .convert
 
     private var categoryAccent: Color {
@@ -36,8 +35,8 @@ struct ConverterView: View {
                 switch mainTab {
                 case .convert:
                     convertTab
-                case .favourites:
-                    favouritesTab
+                case .explore:
+                    ExploreView(vm: vm, selectedTab: $mainTab)
                 case .settings:
                     SettingsTabView()
                 }
@@ -47,9 +46,6 @@ struct ConverterView: View {
             BottomNav(selected: $mainTab, selectionTint: categoryAccent)
         }
         .background(Color(hex: "#F0F0F3"))
-        .sheet(isPresented: $showGlobalSearch) {
-            GlobalUnitSearchView(vm: vm)
-        }
         .sheet(isPresented: $showFavorites) {
             FavoritesListView(registry: vm.currentRegistry) { fav in
                 vm.applyFavoriteRestore(
@@ -77,8 +73,12 @@ struct ConverterView: View {
             .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    Button {
-                        showFavorites = true
+                    Menu {
+                        Button {
+                            showFavorites = true
+                        } label: {
+                            Label("Favourites", systemImage: "star")
+                        }
                     } label: {
                         Image(systemName: "list.bullet")
                             .font(.body.weight(.medium))
@@ -86,22 +86,9 @@ struct ConverterView: View {
                             .frame(width: 44, height: 44)
                             .contentShape(Rectangle())
                     }
-                    .buttonStyle(FavoritesToolbarButtonStyle())
-                    .accessibilityLabel("View favorites")
+                    .accessibilityLabel("Menu")
                 }
                 ToolbarItemGroup(placement: .topBarTrailing) {
-                    Button {
-                        Haptics.tap()
-                        showGlobalSearch = true
-                    } label: {
-                        Image(systemName: "magnifyingglass")
-                            .font(.system(size: 15))
-                            .foregroundStyle(Color(hex: "#5F5E5A"))
-                    }
-                    .buttonStyle(ConverterPressingButtonStyle())
-                    .accessibilityLabel("Search")
-                    .accessibilityHint("Search all units")
-
                     Button {
                         saveCurrentPairAsFavorite()
                     } label: {
@@ -131,21 +118,6 @@ struct ConverterView: View {
             }
         }
         .background(Color.white)
-    }
-
-    private var favouritesTab: some View {
-        FavoritesListView(
-            registry: vm.currentRegistry,
-            onSelect: { fav in
-                vm.applyFavoriteRestore(
-                    categoryRaw: fav.categoryRaw,
-                    fromID: fav.fromUnitID,
-                    toID: fav.toUnitID
-                )
-                mainTab = .convert
-            },
-            presentedAsSheet: false
-        )
     }
 
     private func saveCurrentPairAsFavorite() {
