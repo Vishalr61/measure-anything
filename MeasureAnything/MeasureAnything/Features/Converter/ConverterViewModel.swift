@@ -170,6 +170,10 @@ final class ConverterViewModel: ObservableObject {
         registry.units(in: selectedCategory, includeKinds: selectedMode.includedKinds)
     }
 
+    func units(for category: UnitCategory, mode: UnitRegistry.Mode) -> [UnitDefinition] {
+        registry.units(in: category, includeKinds: mode.includedKinds)
+    }
+
     var fromUnit: UnitDefinition? { try? registry.unit(id: selectedFromUnitID) }
     var toUnit: UnitDefinition? { try? registry.unit(id: selectedToUnitID) }
 
