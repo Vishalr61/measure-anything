@@ -4,6 +4,8 @@ struct BottomNav: View {
     @Binding var selected: Tab
     /// Matches active category accent on the Convert tab.
     var selectionTint: Color
+    /// Fired when the user taps a tab they're already on.
+    var onRetap: ((Tab) -> Void)?
 
     enum Tab: Hashable {
         case convert
@@ -19,6 +21,7 @@ struct BottomNav: View {
                 isSelected: selected == .convert,
                 selectionTint: selectionTint
             ) {
+                if selected == .convert { onRetap?(.convert) }
                 selected = .convert
             }
             NavTab(
@@ -27,6 +30,7 @@ struct BottomNav: View {
                 isSelected: selected == .explore,
                 selectionTint: selectionTint
             ) {
+                if selected == .explore { onRetap?(.explore) }
                 selected = .explore
             }
             NavTab(
@@ -35,6 +39,7 @@ struct BottomNav: View {
                 isSelected: selected == .settings,
                 selectionTint: selectionTint
             ) {
+                if selected == .settings { onRetap?(.settings) }
                 selected = .settings
             }
         }

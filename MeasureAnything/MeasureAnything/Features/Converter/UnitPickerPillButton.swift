@@ -27,14 +27,16 @@ struct UnitPickerPillButton: View {
                 Text(name)
                     .font(.subheadline.weight(.semibold))
                     .foregroundStyle(accent.opacity(0.92))
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.75)
+                    .lineLimit(2)
+                    .minimumScaleFactor(0.6)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .multilineTextAlignment(.trailing)
                 Image(systemName: "chevron.down")
                     .font(.caption.weight(.bold))
                     .foregroundStyle(accent.opacity(0.65))
             }
             .padding(.horizontal, 16)
-            .padding(.vertical, 12)
+            .padding(.vertical, 10)
             .background(
                 Capsule(style: .continuous)
                     .fill(Color.white)
@@ -49,14 +51,16 @@ struct UnitPickerPillButton: View {
             HStack(spacing: 3) {
                 Text(name)
                     .font(.system(size: 12, weight: .semibold))
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.85)
+                    .lineLimit(2)
+                    .minimumScaleFactor(0.6)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .multilineTextAlignment(.trailing)
                 Image(systemName: "chevron.up.chevron.down")
                     .font(.system(size: 9))
             }
             .foregroundStyle(accent)
             .padding(.horizontal, 16)
-            .padding(.vertical, 12)
+            .padding(.vertical, 10)
         }
     }
 }

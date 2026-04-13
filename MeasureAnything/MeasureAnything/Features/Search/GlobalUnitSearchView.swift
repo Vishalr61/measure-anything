@@ -29,6 +29,8 @@ struct GlobalUnitSearchView: View {
 struct GlobalUnitSearchBody: View {
     @ObservedObject var vm: ConverterViewModel
     let onUnitSelected: () -> Void
+    /// Bump this value to reset the view back to the main browse state.
+    var resetToken: Int = 0
 
     @State private var searchText = ""
     @State private var activeCategory: UnitCategory?
@@ -95,7 +97,6 @@ struct GlobalUnitSearchBody: View {
             Divider()
             mainContent
         }
-        .navigationTitle(currentTitle)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             if isExpanded {
@@ -108,16 +109,15 @@ struct GlobalUnitSearchBody: View {
                     } label: {
                         HStack(spacing: 4) {
                             Image(systemName: "chevron.left")
-                                .font(.system(size: 14, weight: .medium))
+                                .font(.system(size: 14, weight: .semibold))
                             Text("Explore")
-                                .font(.system(size: 14))
+                                .font(.system(size: 16))
                         }
                     }
-                    .buttonStyle(.plain)
                 }
             }
-            if let cat = activeCategory {
-                ToolbarItem(placement: .principal) {
+            ToolbarItem(placement: .principal) {
+                if let cat = activeCategory {
                     let config = tileConfigs.first { $0.category == cat }
                     HStack(spacing: 8) {
                         RoundedRectangle(cornerRadius: 8, style: .continuous)
@@ -131,9 +131,7 @@ struct GlobalUnitSearchBody: View {
                         Text(cat.rawValue.capitalized)
                             .font(.system(size: 17, weight: .semibold))
                     }
-                }
-            } else if showAllUnits {
-                ToolbarItem(placement: .principal) {
+                } else if showAllUnits {
                     HStack(spacing: 8) {
                         RoundedRectangle(cornerRadius: 8, style: .continuous)
                             .fill(Color(.systemGray6))
@@ -146,16 +144,21 @@ struct GlobalUnitSearchBody: View {
                         Text("All units")
                             .font(.system(size: 17, weight: .semibold))
                     }
+                } else {
+                    Text("Explore")
+                        .font(.system(size: 17, weight: .semibold))
                 }
+            }
+        }
+        .onChange(of: resetToken) { _, _ in
+            withAnimation(.easeInOut(duration: 0.2)) {
+                activeCategory = nil
+                showAllUnits = false
+                searchText = ""
             }
         }
     }
 
-    private var currentTitle: String {
-        if let cat = activeCategory { return cat.rawValue.capitalized }
-        if showAllUnits { return "All units" }
-        return "Explore"
-    }
 
     // MARK: - Search bar
 

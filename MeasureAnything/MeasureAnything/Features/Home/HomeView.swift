@@ -17,6 +17,7 @@ struct HomeView: View {
     @State private var showCustomUnitForm = false
     @State private var scrollToConverterToken = 0
     @State private var homeTab: BottomNav.Tab = .convert
+    @State private var exploreResetToken = 0
 
     private var categoryAccent: Color {
         ConverterCategoryAccent.accent(for: vm.selectedCategory)
@@ -71,7 +72,11 @@ struct HomeView: View {
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
 
-            BottomNav(selected: $homeTab, selectionTint: categoryAccent)
+            BottomNav(selected: $homeTab, selectionTint: categoryAccent) { tab in
+                if tab == .explore {
+                    exploreResetToken &+= 1
+                }
+            }
         }
         .background(Color(hex: "#F0F0F3"))
         .sheet(isPresented: $showFavorites) {
@@ -159,7 +164,7 @@ struct HomeView: View {
     }
 
     private var exploreTab: some View {
-        ExploreView(vm: vm, selectedTab: $homeTab)
+        ExploreView(vm: vm, selectedTab: $homeTab, resetToken: exploreResetToken)
     }
 
     private var settingsTab: some View {

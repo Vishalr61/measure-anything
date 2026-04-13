@@ -12,6 +12,7 @@ struct ConverterView: View {
     @State private var showCustomUnitForm = false
     @State private var showFavorites = false
     @State private var mainTab: BottomNav.Tab = .convert
+    @State private var exploreResetToken = 0
 
     private var categoryAccent: Color {
         ConverterCategoryAccent.accent(for: vm.selectedCategory)
@@ -36,14 +37,18 @@ struct ConverterView: View {
                 case .convert:
                     convertTab
                 case .explore:
-                    ExploreView(vm: vm, selectedTab: $mainTab)
+                    ExploreView(vm: vm, selectedTab: $mainTab, resetToken: exploreResetToken)
                 case .settings:
                     SettingsTabView()
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
 
-            BottomNav(selected: $mainTab, selectionTint: categoryAccent)
+            BottomNav(selected: $mainTab, selectionTint: categoryAccent) { tab in
+                if tab == .explore {
+                    exploreResetToken &+= 1
+                }
+            }
         }
         .background(Color(hex: "#F0F0F3"))
         .sheet(isPresented: $showFavorites) {

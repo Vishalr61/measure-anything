@@ -11,7 +11,9 @@ enum UnitScaleGroups {
         "Instant", "Seconds", "Minutes", "Hours",
         "Days", "Months", "Years", "Lifescale",
         "Cosmic time",
-        "Human", "Large", "Planetary"
+        "Human", "Large", "Planetary",
+        "Freezing", "Cool", "Warm", "Hot",
+        "Scorching", "Extreme", "Stellar"
     ]
 
     private static let length: [String: String] = [
@@ -93,13 +95,32 @@ enum UnitScaleGroups {
     ]
 
     private static let temperature: [String: String] = [
-        "deep_space": "Cosmic",
-        "comfortable_room": "Everyday",
-        "body_temp": "Human",
-        "pizza_oven": "Everyday",
-        "candle_flame": "Everyday",
-        "lava": "Nature",
-        "sun_surface": "Cosmic"
+        "absolute_zero": "Freezing", "deep_space": "Freezing",
+        "liquid_nitrogen": "Freezing", "liquid_oxygen": "Freezing",
+        "dry_ice": "Freezing", "antarctica_winter": "Freezing",
+
+        "refrigerator": "Cool", "comfortable_room": "Cool",
+        "swimming_pool": "Cool",
+
+        "body_temp": "Warm", "high_fever": "Warm",
+        "comfortable_bath": "Warm", "skin_pain": "Warm",
+        "phone_overheat": "Warm",
+
+        "laptop_lap": "Hot", "coffee_perfect": "Hot",
+        "car_summer": "Hot", "fast_food_hot": "Hot",
+        "sauna": "Hot", "gpu_overheat": "Hot",
+        "cpu_throttle": "Hot", "boiling_water": "Hot",
+
+        "battery_runaway": "Scorching", "paper_ignition": "Scorching",
+        "pizza_oven": "Scorching", "venus_surface": "Scorching",
+        "steel_softening": "Scorching", "aluminum_melting": "Scorching",
+
+        "candle_flame": "Extreme", "lava": "Extreme",
+        "jet_exhaust": "Extreme", "reentry_heat": "Extreme",
+        "reactor_core": "Extreme", "welding_arc": "Extreme",
+
+        "sun_surface": "Stellar", "lightning_bolt": "Stellar",
+        "sun_core": "Stellar"
     ]
 
     static func scaleGroup(for unitID: String) -> String? {
