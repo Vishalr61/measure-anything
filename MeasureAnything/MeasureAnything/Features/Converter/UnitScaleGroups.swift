@@ -109,14 +109,21 @@ enum UnitScaleGroups {
     ]
 
     private static let volume: [String: String] = [
+        "teardrop": "Tiny", "eyedrop": "Tiny",
         "teaspoon_vol": "Tiny",
+        "shot_glass": "Small",
         "can_of_soda": "Small", "soda_can": "Small",
+        "pint": "Small",
         "wine_bottle_vol": "Small", "wine_glass": "Small",
         "milk_carton": "Small", "bucket": "Small",
+        "garden_hose_minute": "Small",
         "stomach": "Human", "blood_volume": "Human",
-        "fuel_tank": "Human",
-        "bathtub": "Home", "hot_tub": "Home",
+        "human_lung": "Human", "fuel_tank": "Human",
+        "wheelie_bin": "Home", "bathtub": "Home", "hot_tub": "Home",
+        "shipping_container": "Large",
         "olympic_pool_vol": "Large",
+        "hot_air_balloon": "Large",
+        "great_barrier_reef_water": "Planetary",
         "earths_ocean": "Planetary"
     ]
 
