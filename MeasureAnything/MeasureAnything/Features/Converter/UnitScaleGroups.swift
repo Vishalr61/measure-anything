@@ -69,17 +69,36 @@ enum UnitScaleGroups {
     ]
 
     private static let mass: [String: String] = [
+        "grain_of_sand_mass": "Tiny", "feather": "Tiny",
         "grain_of_rice_mass": "Tiny", "paperclip_mass": "Tiny",
-        "bag_of_sugar": "Everyday", "chicken": "Everyday",
+        "lego_brick": "Tiny", "hummingbird": "Tiny",
+
+        "aa_battery": "Small", "golf_ball": "Small",
+        "iphone": "Small", "human_heart": "Small",
+        "can_of_soup": "Small",
+
+        "bag_of_sugar": "Everyday", "litre_of_water": "Everyday",
+        "human_brain": "Everyday", "chicken": "Everyday",
         "newborn_baby_mass": "Everyday", "bowling_ball": "Everyday",
-        "house_cat": "Animals", "golden_retriever": "Animals",
-        "rhino": "Large animals", "elephant": "Large animals",
-        "t_rex": "Large animals",
-        "grand_piano": "Vehicles", "small_car": "Vehicles",
+        "human_skin": "Everyday", "human_skeleton": "Everyday",
+
+        "house_cat": "Animals", "corgi": "Animals",
+        "golden_retriever": "Animals", "labrador": "Animals",
+
+        "washing_machine": "Home", "grand_piano": "Home",
+
+        "great_white_shark": "Large animals",
+        "rhino": "Large animals", "orca": "Large animals",
+        "elephant": "Large animals", "t_rex": "Large animals",
+
+        "small_car": "Vehicles",
         "london_double_decker_bus": "Vehicles",
+
+        "blue_whale_mass": "Colossal", "iss": "Colossal",
+
         "eiffel_tower_mass": "Structures",
         "space_shuttle": "Structures",
-        "blue_whale_mass": "Colossal"
+        "great_pyramid": "Structures"
     ]
 
     private static let volume: [String: String] = [
