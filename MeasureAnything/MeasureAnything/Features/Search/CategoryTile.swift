@@ -6,6 +6,7 @@ struct CategoryTile: View {
     let fullName: String
     let count: Int
     let tileBg: Color
+    let iconCircleBg: Color
     let tileIcon: Color
     let tileBorder: Color
     let tileText: Color
@@ -16,7 +17,7 @@ struct CategoryTile: View {
         Button(action: onTap) {
             VStack(spacing: 10) {
                 Circle()
-                    .fill(Color.white.opacity(0.65))
+                    .fill(iconCircleBg)
                     .frame(width: 46, height: 46)
                     .overlay(
                         Image(systemName: icon)
@@ -34,7 +35,7 @@ struct CategoryTile: View {
                     .foregroundStyle(countText)
                     .padding(.horizontal, 9)
                     .padding(.vertical, 2)
-                    .background(Color.white.opacity(0.7))
+                    .background(Color.white)
                     .clipShape(Capsule())
             }
             .frame(maxWidth: .infinity)

@@ -218,6 +218,7 @@ struct GlobalUnitSearchView: View {
         let shortName: String
         let fullName: String
         let tileBg: Color
+        let iconCircleBg: Color
         let tileIcon: Color
         let tileBorder: Color
         let tileText: Color
@@ -229,39 +230,39 @@ struct GlobalUnitSearchView: View {
     private var tileConfigs: [TileConfig] {[
         TileConfig(
             category: .length, icon: "ruler", shortName: "Length", fullName: "Length",
-            tileBg: Color(hex: "#9FE1CB"), tileIcon: Color(hex: "#085041"),
-            tileBorder: Color(hex: "#5DCAA5"), tileText: Color(hex: "#085041"),
-            countText: Color(hex: "#0F6E56")
+            tileBg: Color(hex: "#E1F5EE"), iconCircleBg: Color(hex: "#1A5F73"),
+            tileIcon: .white, tileBorder: Color(hex: "#9FE1CB"),
+            tileText: Color(hex: "#085041"), countText: Color(hex: "#0F6E56")
         ),
         TileConfig(
             category: .mass, icon: "scalemass", shortName: "Mass", fullName: "Mass",
-            tileBg: Color(hex: "#C0DD97"), tileIcon: Color(hex: "#27500A"),
-            tileBorder: Color(hex: "#97C459"), tileText: Color(hex: "#173404"),
-            countText: Color(hex: "#3B6D11")
+            tileBg: Color(hex: "#EAF3DE"), iconCircleBg: Color(hex: "#3D6B4A"),
+            tileIcon: .white, tileBorder: Color(hex: "#C0DD97"),
+            tileText: Color(hex: "#173404"), countText: Color(hex: "#3B6D11")
         ),
         TileConfig(
             category: .time, icon: "clock", shortName: "Time", fullName: "Time",
-            tileBg: Color(hex: "#CECBF6"), tileIcon: Color(hex: "#3C3489"),
-            tileBorder: Color(hex: "#AFA9EC"), tileText: Color(hex: "#26215C"),
-            countText: Color(hex: "#534AB7")
+            tileBg: Color(hex: "#EEEDFE"), iconCircleBg: Color(hex: "#3D3580"),
+            tileIcon: .white, tileBorder: Color(hex: "#CECBF6"),
+            tileText: Color(hex: "#26215C"), countText: Color(hex: "#534AB7")
         ),
         TileConfig(
             category: .temperature, icon: "thermometer.medium", shortName: "Temp", fullName: "Temperature",
-            tileBg: Color(hex: "#F5C4B3"), tileIcon: Color(hex: "#712B13"),
-            tileBorder: Color(hex: "#F0997B"), tileText: Color(hex: "#4A1B0C"),
-            countText: Color(hex: "#993C1D")
+            tileBg: Color(hex: "#FAECE7"), iconCircleBg: Color(hex: "#8B3A2A"),
+            tileIcon: .white, tileBorder: Color(hex: "#F5C4B3"),
+            tileText: Color(hex: "#4A1B0C"), countText: Color(hex: "#993C1D")
         ),
         TileConfig(
             category: .volume, icon: "drop", shortName: "Volume", fullName: "Volume",
-            tileBg: Color(hex: "#B5D4F4"), tileIcon: Color(hex: "#0C447C"),
-            tileBorder: Color(hex: "#85B7EB"), tileText: Color(hex: "#042C53"),
-            countText: Color(hex: "#185FA5")
+            tileBg: Color(hex: "#FAEEDA"), iconCircleBg: Color(hex: "#AF7D2A"),
+            tileIcon: .white, tileBorder: Color(hex: "#FAC775"),
+            tileText: Color(hex: "#412402"), countText: Color(hex: "#854F0B")
         ),
         TileConfig(
             category: nil, icon: "magnifyingglass", shortName: "All", fullName: "All units",
-            tileBg: Color(.systemGray6), tileIcon: Color.secondary,
-            tileBorder: Color.primary.opacity(0.08), tileText: Color.primary,
-            countText: Color.secondary
+            tileBg: Color(.systemGray6), iconCircleBg: Color(.systemGray4),
+            tileIcon: Color.secondary, tileBorder: Color.primary.opacity(0.08),
+            tileText: Color.primary, countText: Color.secondary
         ),
     ]}
 
@@ -328,6 +329,7 @@ struct GlobalUnitSearchView: View {
                     fullName: config.fullName,
                     count: count,
                     tileBg: config.tileBg,
+                    iconCircleBg: config.iconCircleBg,
                     tileIcon: config.tileIcon,
                     tileBorder: config.tileBorder,
                     tileText: config.tileText,
