@@ -24,6 +24,7 @@ final class ConverterViewModel: ObservableObject {
         static let sessionInput = "session.inputValue"
         static let hasSeenAbsurdNudge = "hasSeenAbsurdNudge"
         static let normalConversionCount = "normalConversionCount"
+        static let hasSeenDiceLongPressHint = "hasSeenDiceLongPressHint"
     }
 
     @Published var selectedCategory: UnitCategory = .length {
@@ -78,8 +79,12 @@ final class ConverterViewModel: ObservableObject {
     @Published var diceRotationDegrees: Double = UnitCategory.length.converterDiceRestDegrees
     @Published var showDiceSubtitle: Bool = false
     @Published var diceLandedUnitName: String = ""
+    /// When `true`, `diceLandedUnitName` is the full subtitle (dual roll). When `false`, prefix `"landed on "` is shown before the name.
+    @Published var diceSubtitleIsDualFormat: Bool = false
+    @Published var showDiceLongPressHint: Bool = false
 
     private var diceFlashTimer: Timer?
+    private var diceLongPressHintDismissWorkItem: DispatchWorkItem?
     private var diceRollToken: UUID = UUID()
 
     private func syncDiceTiltToCategory(animated: Bool) {
@@ -96,17 +101,6 @@ final class ConverterViewModel: ObservableObject {
     private var registry: UnitRegistry
     private var engine: ConverterEngine
     private let taxonomy: AppTaxonomyStore
-
-    private let displayFormatter: NumberFormatter = {
-        let f = NumberFormatter()
-        f.numberStyle = .decimal
-        f.locale = Locale(identifier: "en_US")
-        f.usesGroupingSeparator = true
-        f.roundingMode = .halfUp
-        f.minimumFractionDigits = 0
-        f.maximumFractionDigits = 6
-        return f
-    }()
 
     private static let displayFallbackLocale = Locale(identifier: "en_US")
 
@@ -174,6 +168,10 @@ final class ConverterViewModel: ObservableObject {
 
     var availableUnits: [UnitDefinition] {
         registry.units(in: selectedCategory, includeKinds: selectedMode.includedKinds)
+    }
+
+    func units(for category: UnitCategory, mode: UnitRegistry.Mode) -> [UnitDefinition] {
+        registry.units(in: category, includeKinds: mode.includedKinds)
     }
 
     var fromUnit: UnitDefinition? { try? registry.unit(id: selectedFromUnitID) }
@@ -264,6 +262,10 @@ final class ConverterViewModel: ObservableObject {
         }
     }
 
+    var hasSeenDiceLongPressHint: Bool {
+        UserDefaults.standard.bool(forKey: SessionKeys.hasSeenDiceLongPressHint)
+    }
+
     private var normalConversionCount: Int {
         get { UserDefaults.standard.integer(forKey: SessionKeys.normalConversionCount) }
         set { UserDefaults.standard.set(newValue, forKey: SessionKeys.normalConversionCount) }
@@ -327,6 +329,7 @@ final class ConverterViewModel: ObservableObject {
         // Fade out subtitle instantly (no animation).
         showDiceSubtitle = false
         diceLandedUnitName = ""
+        diceSubtitleIsDualFormat = false
 
         // Pre-select outcome before animation starts.
         let newFace = Int.random(in: 1...6)
@@ -383,10 +386,15 @@ final class ConverterViewModel: ObservableObject {
                 // `newUnit` was chosen at roll start; mode/category may have changed since — never apply a stale ID.
                 let allowed = Set(self.availableUnits.map(\.id))
                 let resolvedTo: UnitDefinition? = {
-                    if let u = newUnit, allowed.contains(u.id), u.id != self.selectedFromUnitID {
+                    if let u = newUnit,
+                       u.category == self.selectedCategory,
+                       allowed.contains(u.id),
+                       u.id != self.selectedFromUnitID {
                         return u
                     }
-                    let pool = self.diceToUnitPool().filter { allowed.contains($0.id) }
+                    let pool = self.diceToUnitPool().filter {
+                        $0.category == self.selectedCategory && allowed.contains($0.id)
+                    }
                     let candidates = pool.filter { $0.id != self.selectedFromUnitID }
                     return Self.weightedRandomUnit(from: candidates)
                 }()
@@ -394,6 +402,8 @@ final class ConverterViewModel: ObservableObject {
                 if let u = resolvedTo {
                     self.selectedToUnitID = u.id
                     self.diceLandedUnitName = u.name
+                    self.diceSubtitleIsDualFormat = false
+                    self.scheduleDiceLongPressHintIfNeeded()
                 } else {
                     self.diceLandedUnitName = ""
                 }
@@ -406,6 +416,165 @@ final class ConverterViewModel: ObservableObject {
                 self.isDiceRolling = false
             }
         }
+    }
+
+    /// Long-press (~0.25s `minimumDuration` on `DiceRollCard`): randomises both FROM and TO to distinct absurd units in the current category.
+    func rollDiceDual() {
+        guard selectedMode != .normal else { return }
+
+        func absurdPoolForDual() -> [UnitDefinition] {
+            registry.units(in: selectedCategory, includeKinds: [.absurd])
+                .filter { $0.category == selectedCategory }
+        }
+
+        let pool = absurdPoolForDual()
+        // Silent no-op: must not cancel an in-flight single roll or invalidate timers.
+        guard pool.count >= 2 else { return }
+
+        diceRollToken = UUID()
+        let token = diceRollToken
+        diceFlashTimer?.invalidate()
+        diceFlashTimer = nil
+        diceLongPressHintDismissWorkItem?.cancel()
+        diceLongPressHintDismissWorkItem = nil
+
+        let softPulse = UIImpactFeedbackGenerator(style: .soft)
+        softPulse.prepare()
+        softPulse.impactOccurred()
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.08) {
+            MainActor.assumeIsolated {
+                guard self.diceRollToken == token else { return }
+                let heavyFire = UIImpactFeedbackGenerator(style: .heavy)
+                heavyFire.prepare()
+                heavyFire.impactOccurred(intensity: 1.0)
+            }
+        }
+
+        isDiceRolling = true
+        showDiceSubtitle = false
+        diceLandedUnitName = ""
+        diceSubtitleIsDualFormat = false
+        showDiceLongPressHint = false
+
+        inputText = "1"
+
+        let newFace = Int.random(in: 1...6)
+        let pickedFrom: UnitDefinition? = Self.weightedRandomUnit(from: pool)
+        let pickedTo: UnitDefinition? = {
+            guard let f = pickedFrom else { return nil }
+            let rest = pool.filter { $0.id != f.id }
+            return Self.weightedRandomUnit(from: rest)
+        }()
+
+        let rest = selectedCategory.converterDiceRestDegrees
+        withAnimation(.linear(duration: 0)) {
+            diceRotationDegrees = rest
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.016) {
+            MainActor.assumeIsolated {
+                guard self.diceRollToken == token else { return }
+                withAnimation(.interpolatingSpring(mass: 1, stiffness: 60, damping: 12, initialVelocity: 8)) {
+                    self.diceRotationDegrees = rest + 1080
+                }
+            }
+        }
+
+        var flashCount = 0
+        let timer = Timer.scheduledTimer(withTimeInterval: 0.07, repeats: true) { t in
+            MainActor.assumeIsolated {
+                guard self.diceRollToken == token else {
+                    t.invalidate()
+                    return
+                }
+                self.diceDisplayFace = Int.random(in: 1...6)
+                flashCount += 1
+                if flashCount >= 12 { t.invalidate() }
+            }
+        }
+        diceFlashTimer = timer
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+            MainActor.assumeIsolated {
+                guard self.diceRollToken == token else { return }
+                timer.invalidate()
+                if self.diceFlashTimer === timer {
+                    self.diceFlashTimer = nil
+                }
+                self.diceDisplayFace = newFace
+
+                let allowedAbsurd = absurdPoolForDual()
+                guard allowedAbsurd.count >= 2 else {
+                    self.isDiceRolling = false
+                    return
+                }
+
+                let resolvedFrom: UnitDefinition? = {
+                    if let f = pickedFrom,
+                       f.category == self.selectedCategory,
+                       allowedAbsurd.contains(where: { $0.id == f.id }) {
+                        return f
+                    }
+                    return Self.weightedRandomUnit(from: allowedAbsurd)
+                }()
+
+                let resolvedTo: UnitDefinition? = {
+                    guard let from = resolvedFrom else { return nil }
+                    let candidates = allowedAbsurd.filter { $0.id != from.id }
+                    if let t = pickedTo,
+                       t.category == self.selectedCategory,
+                       candidates.contains(where: { $0.id == t.id }) {
+                        return t
+                    }
+                    return Self.weightedRandomUnit(from: candidates)
+                }()
+
+                if let from = resolvedFrom, let to = resolvedTo, from.id != to.id {
+                    self.selectedFromUnitID = from.id
+                    self.selectedToUnitID = to.id
+                    self.diceSubtitleIsDualFormat = true
+                    self.diceLandedUnitName = "rolled both — \(from.name) → \(to.name)"
+
+                    let land1 = UIImpactFeedbackGenerator(style: .medium)
+                    land1.prepare()
+                    land1.impactOccurred()
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.12) {
+                        MainActor.assumeIsolated {
+                            guard self.diceRollToken == token else { return }
+                            let land2 = UIImpactFeedbackGenerator(style: .medium)
+                            land2.prepare()
+                            land2.impactOccurred(intensity: 0.7)
+                        }
+                    }
+                } else {
+                    self.diceLandedUnitName = ""
+                    self.diceSubtitleIsDualFormat = false
+                }
+
+                withAnimation(.easeIn(duration: 0.25)) {
+                    self.showDiceSubtitle = !self.diceLandedUnitName.isEmpty
+                }
+                self.isDiceRolling = false
+            }
+        }
+    }
+
+    private func scheduleDiceLongPressHintIfNeeded() {
+        guard !hasSeenDiceLongPressHint, !showDiceLongPressHint else { return }
+        showDiceLongPressHint = true
+        diceLongPressHintDismissWorkItem?.cancel()
+        let work = DispatchWorkItem { [weak self] in
+            guard let self else { return }
+            Task { @MainActor in
+                withAnimation(.easeOut(duration: 0.25)) {
+                    self.showDiceLongPressHint = false
+                }
+                UserDefaults.standard.set(true, forKey: SessionKeys.hasSeenDiceLongPressHint)
+                self.diceLongPressHintDismissWorkItem = nil
+            }
+        }
+        diceLongPressHintDismissWorkItem = work
+        DispatchQueue.main.asyncAfter(deadline: .now() + 3, execute: work)
     }
 
     /// Randomly chooses both `selectedFromUnitID` and `selectedToUnitID` from `availableUnits`.
@@ -428,20 +597,21 @@ final class ConverterViewModel: ObservableObject {
     }
 
     private func diceToUnitPool() -> [UnitDefinition] {
-        // In normal mode: keep it within the current mode's available units.
-        if selectedMode == .normal {
-            return availableUnits
+        // Dice UI is hidden in normal mode; keep pool empty if something calls this anyway.
+        guard selectedMode != .normal else { return [] }
+
+        func inSelectedCategory(_ u: UnitDefinition) -> Bool {
+            u.category == selectedCategory
         }
 
-        // In absurd/custom: prefer "true absurd" units scoped to the current category (not comparators/custom).
-        let absurdOnly = registry.units(in: selectedCategory, includeKinds: [.absurd])
+        // Prefer absurd units in the *selected* category only (defense against stale registry edges).
+        let absurdOnly = registry.units(in: selectedCategory, includeKinds: [.absurd]).filter(inSelectedCategory)
         if !absurdOnly.isEmpty { return absurdOnly }
 
-        // Fallback: use any absurd units already present in the current mode's list.
-        let fromAvailable = availableUnits.filter { $0.kind == .absurd }
+        let fromAvailable = availableUnits.filter { inSelectedCategory($0) && $0.kind == .absurd }
         if !fromAvailable.isEmpty { return fromAvailable }
 
-        return availableUnits
+        return availableUnits.filter(inSelectedCategory)
     }
 
     /// Weighted pick for dice: `interestScore` (default 5) adds proportional weight; clamped to 1…10.
@@ -688,31 +858,55 @@ final class ConverterViewModel: ObservableObject {
     }
 
     func formatNumberForDisplay(_ value: Double) -> String {
+        guard !value.isNaN else { return "—" }
         guard value.isFinite else { return "—" }
-        if value == 0 { return "0" }
+        guard value != 0 else { return "0" }
 
-        let magnitude = abs(value)
-        let f = displayFormatter
+        let absValue = abs(value)
 
-        switch magnitude {
-        case let m where m >= 10_000_000:
-            f.maximumFractionDigits = 2
-            f.minimumFractionDigits = 0
-        case let m where m >= 1:
-            f.maximumFractionDigits = magnitude < 10 ? 3 : 2
-            f.minimumFractionDigits = 0
-        case let m where m >= 0.0001:
-            f.maximumFractionDigits = 4
-            f.minimumFractionDigits = 0
-        default:
-            f.maximumFractionDigits = 6
-            f.minimumFractionDigits = 0
+        if absValue < 0.0001 || absValue > 9_999_999 {
+            let formatter = NumberFormatter()
+            formatter.numberStyle = .scientific
+            formatter.maximumSignificantDigits = 4
+            formatter.minimumSignificantDigits = 1
+            formatter.locale = Locale(identifier: "en_US")
+            if let raw = formatter.string(from: NSNumber(value: value)) {
+                return raw
+                    .replacingOccurrences(of: "E", with: "×10^")
+                    .replacingOccurrences(of: "e", with: "×10^")
+            }
+            return String(format: "%g", locale: Self.displayFallbackLocale, value)
         }
 
-        if let s = f.string(from: NSNumber(value: value)) {
-            return s
-        }
-        return String(format: "%g", locale: Self.displayFallbackLocale, value)
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .decimal
+        formatter.maximumFractionDigits = 6
+        formatter.minimumFractionDigits = 0
+        formatter.locale = Locale(identifier: "en_US")
+        formatter.usesGroupingSeparator = true
+        formatter.roundingMode = .halfUp
+        return formatter.string(from: NSNumber(value: value))
+            ?? String(format: "%g", locale: Self.displayFallbackLocale, value)
+    }
+
+    /// Main result line with optional superscript exponent when scientific notation is used.
+    var formattedResultAttributed: AttributedString {
+        guard validationError == nil, let r = conversionResult else { return AttributedString("—") }
+        return Self.attributedAdaptiveNumber(formatNumberForDisplay(r.outputValue))
+    }
+
+    /// Converts `3.336×10^-9`-style output into an `AttributedString` with a raised exponent.
+    static func attributedAdaptiveNumber(_ raw: String) -> AttributedString {
+        guard raw.contains("×10^") else { return AttributedString(raw) }
+        let parts = raw.components(separatedBy: "×10^")
+        guard parts.count == 2 else { return AttributedString(raw) }
+
+        var result = AttributedString(parts[0] + "×10")
+        var exponent = AttributedString(parts[1])
+        exponent.font = .system(size: 20, weight: .bold)
+        exponent.baselineOffset = 10
+        result.append(exponent)
+        return result
     }
 
     /// Live formatted converted value for UI copy/share footnotes (`"—"` when invalid or missing).
@@ -767,7 +961,8 @@ final class ConverterViewModel: ObservableObject {
             toValue: toVal,
             toUnit: toN,
             funFact: useFact ? trimmedFact : nil,
-            formulaLine: useFact ? nil : formula
+            formulaLine: useFact ? nil : formula,
+            accent: ConverterCategoryAccent.accent(for: selectedCategory)
         )
     }
 }

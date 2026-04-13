@@ -9,10 +9,11 @@ struct ShareCardView: View {
     let funFact: String?
     /// Shown when `funFact` is nil — e.g. `1 Meter = 0.001 Kilometer`.
     let formulaLine: String?
+    var accent: Color
 
     var body: some View {
         ZStack {
-            Color(hex: "#2B778A")
+            accent
 
             VStack(alignment: .leading, spacing: 0) {
                 VStack(alignment: .leading, spacing: 4) {
@@ -76,7 +77,8 @@ extension ShareCardView {
         toValue: String,
         toUnit: String,
         funFact: String?,
-        formulaLine: String?
+        formulaLine: String?,
+        accent: Color
     ) -> UIImage? {
         if #available(iOS 16.0, *) {
             let view = ShareCardView(
@@ -85,7 +87,8 @@ extension ShareCardView {
                 toValue: toValue,
                 toUnit: toUnit,
                 funFact: funFact,
-                formulaLine: formulaLine
+                formulaLine: formulaLine,
+                accent: accent
             )
             let renderer = ImageRenderer(content: view)
             renderer.scale = 1.0

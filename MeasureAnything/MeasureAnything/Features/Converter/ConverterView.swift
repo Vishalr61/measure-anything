@@ -11,7 +11,7 @@ struct ConverterView: View {
     @ObservedObject var vm: ConverterViewModel
     @State private var showCustomUnitForm = false
     @State private var showFavorites = false
-    @State private var showTaxonomySearch = false
+    @State private var showGlobalSearch = false
     @State private var mainTab: BottomNav.Tab = .convert
 
     private var categoryAccent: Color {
@@ -46,15 +46,9 @@ struct ConverterView: View {
 
             BottomNav(selected: $mainTab, selectionTint: categoryAccent)
         }
-        .background(Color(.systemGroupedBackground))
-        .sheet(isPresented: $showTaxonomySearch) {
-            TaxonomySearchView { itemId in
-                if let route = taxonomyStore.converterRoute(forTaxonomyItemId: itemId) {
-                    vm.applyTaxonomyRoute(route)
-                }
-                showTaxonomySearch = false
-            }
-            .environmentObject(taxonomyStore)
+        .background(Color(hex: "#F0F0F3"))
+        .sheet(isPresented: $showGlobalSearch) {
+            GlobalUnitSearchView(vm: vm)
         }
         .sheet(isPresented: $showFavorites) {
             FavoritesListView(registry: vm.currentRegistry) { fav in
@@ -77,6 +71,7 @@ struct ConverterView: View {
                 )
             }
             .scrollDismissesKeyboard(.interactively)
+            .background(Color(hex: "#F0F0F3"))
             .navigationTitle("Measure Anything")
             .navigationBarTitleDisplayMode(.inline)
             .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
@@ -97,7 +92,7 @@ struct ConverterView: View {
                 ToolbarItemGroup(placement: .topBarTrailing) {
                     Button {
                         Haptics.tap()
-                        showTaxonomySearch = true
+                        showGlobalSearch = true
                     } label: {
                         Image(systemName: "magnifyingglass")
                             .font(.system(size: 15))
@@ -105,7 +100,7 @@ struct ConverterView: View {
                     }
                     .buttonStyle(ConverterPressingButtonStyle())
                     .accessibilityLabel("Search")
-                    .accessibilityHint("Opens taxonomy search")
+                    .accessibilityHint("Search all units")
 
                     Button {
                         saveCurrentPairAsFavorite()
@@ -135,6 +130,7 @@ struct ConverterView: View {
                 }
             }
         }
+        .background(Color.white)
     }
 
     private var favouritesTab: some View {

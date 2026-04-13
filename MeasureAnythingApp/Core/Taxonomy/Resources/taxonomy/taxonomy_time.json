@@ -144,15 +144,114 @@
       "converterUnitId": "gym_session"
     },
     {
-      "id": "item.measurement.absurd.one_episode",
+      "id": "item.measurement.absurd.song",
       "domainId": "measurement",
       "subgenreId": "measurement.absurd",
-      "name": "One episode",
-      "description": "Typical episode runtime ≈ 45 minutes.",
-      "synonyms": ["Episode", "TV runtime"],
-      "tags": ["time", "comparison", "media", "everyday"],
+      "name": "Song",
+      "description": "Average pop song length ≈ 3.5 minutes.",
+      "synonyms": ["Pop song", "Track length", "3 minute song"],
+      "tags": ["time", "comparison", "media", "music"],
       "unitCategoryRaw": "time",
-      "converterUnitId": "one_episode"
+      "converterUnitId": "song"
+    },
+    {
+      "id": "item.measurement.absurd.toilet_scroll",
+      "domainId": "measurement",
+      "subgenreId": "measurement.absurd",
+      "name": "Toilet scroll",
+      "description": "Average phone session in the bathroom ≈ 8 minutes.",
+      "synonyms": ["Bathroom phone", "Phone in bathroom"],
+      "tags": ["time", "comparison", "humor", "everyday"],
+      "unitCategoryRaw": "time",
+      "converterUnitId": "toilet_scroll"
+    },
+    {
+      "id": "item.measurement.absurd.commute",
+      "domainId": "measurement",
+      "subgenreId": "measurement.absurd",
+      "name": "Average commute",
+      "description": "Average one-way commute ≈ 25 minutes.",
+      "synonyms": ["Commute time", "Travel to work"],
+      "tags": ["time", "comparison", "work", "everyday"],
+      "unitCategoryRaw": "time",
+      "converterUnitId": "commute"
+    },
+    {
+      "id": "item.measurement.absurd.week",
+      "domainId": "measurement",
+      "subgenreId": "measurement.absurd",
+      "name": "Week",
+      "description": "One week = 604,800 seconds.",
+      "synonyms": ["Seven days", "One week"],
+      "tags": ["time", "comparison", "calendar", "everyday"],
+      "unitCategoryRaw": "time",
+      "converterUnitId": "week"
+    },
+    {
+      "id": "item.measurement.absurd.month",
+      "domainId": "measurement",
+      "subgenreId": "measurement.absurd",
+      "name": "Month",
+      "description": "Average calendar month ≈ 2,629,800 seconds.",
+      "synonyms": ["Calendar month", "30 days"],
+      "tags": ["time", "comparison", "calendar", "everyday"],
+      "unitCategoryRaw": "time",
+      "converterUnitId": "month"
+    },
+    {
+      "id": "item.measurement.absurd.year",
+      "domainId": "measurement",
+      "subgenreId": "measurement.absurd",
+      "name": "Year",
+      "description": "One Julian year = 31,557,600 seconds.",
+      "synonyms": ["Julian year", "365 days"],
+      "tags": ["time", "comparison", "calendar", "astronomy"],
+      "unitCategoryRaw": "time",
+      "converterUnitId": "year"
+    },
+    {
+      "id": "item.measurement.absurd.decade",
+      "domainId": "measurement",
+      "subgenreId": "measurement.absurd",
+      "name": "Decade",
+      "description": "One decade = 315,576,000 seconds.",
+      "synonyms": ["Ten years", "10 years"],
+      "tags": ["time", "comparison", "calendar", "history"],
+      "unitCategoryRaw": "time",
+      "converterUnitId": "decade"
+    },
+    {
+      "id": "item.measurement.absurd.human_lifespan",
+      "domainId": "measurement",
+      "subgenreId": "measurement.absurd",
+      "name": "Human lifespan",
+      "description": "Average human lifespan ≈ 72 years ≈ 2.27 billion seconds.",
+      "synonyms": ["Life expectancy", "Average life"],
+      "tags": ["time", "comparison", "biology", "everyday"],
+      "unitCategoryRaw": "time",
+      "converterUnitId": "human_lifespan"
+    },
+    {
+      "id": "item.measurement.absurd.since_dinosaurs",
+      "domainId": "measurement",
+      "subgenreId": "measurement.absurd",
+      "name": "Since the dinosaurs",
+      "description": "Time since non-avian dinosaur extinction ≈ 66 million years.",
+      "synonyms": ["Dinosaur extinction", "Since K-Pg"],
+      "tags": ["time", "comparison", "prehistoric", "science"],
+      "unitCategoryRaw": "time",
+      "converterUnitId": "since_dinosaurs"
+    },
+    {
+      "id": "item.measurement.absurd.age_of_universe",
+      "domainId": "measurement",
+      "subgenreId": "measurement.absurd",
+      "name": "Age of the universe",
+      "description": "Age of the observable universe ≈ 13.8 billion years.",
+      "synonyms": ["Cosmic age", "Universe age"],
+      "tags": ["time", "comparison", "astronomy", "space"],
+      "unitCategoryRaw": "time",
+      "converterUnitId": "age_of_universe"
     },
     {
       "id": "item.measurement.absurd.bad_meeting",

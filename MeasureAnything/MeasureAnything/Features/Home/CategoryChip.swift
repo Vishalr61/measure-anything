@@ -47,7 +47,7 @@ struct CategoryChip: View {
             .padding(.vertical, 6)
             .background(
                 Capsule(style: .continuous)
-                    .fill(isSelected ? accent : Color(.secondarySystemGroupedBackground))
+                    .fill(isSelected ? accent : Color(hex: "#F0F0F3"))
             )
             .overlay(
                 Capsule(style: .continuous)

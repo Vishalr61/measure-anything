@@ -31,7 +31,7 @@ final class CoreConversionTests: XCTestCase {
         XCTAssertTrue(Set(mass.map(\.id)).contains("blue_whale_mass"))
 
         let time = try store.load(category: .time)
-        XCTAssertEqual(time.count, 14)
+        XCTAssertEqual(time.count, 23)
         XCTAssertTrue(Set(time.map(\.id)).contains("coffee_break"))
         XCTAssertTrue(Set(time.map(\.id)).contains("blink"))
 

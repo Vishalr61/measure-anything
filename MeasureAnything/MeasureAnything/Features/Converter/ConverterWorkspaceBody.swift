@@ -20,6 +20,7 @@ struct ConverterWorkspaceBody: View {
     @State private var showShareSheet = false
     @State private var shareActivityItems: [Any] = []
     @State private var swapRotation: Double = 0
+    @State private var showFromPicker = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -257,15 +258,14 @@ struct ConverterWorkspaceBody: View {
         VStack(alignment: .leading, spacing: 0) {
             VStack(spacing: 0) {
                 fromConversionCard
-                    .overlay(alignment: .bottom) {
-                        referenceSwapButton
-                            .offset(y: 27)
-                    }
-                    .padding(.bottom, 27)
-                    .zIndex(1)
+
+                ZStack {
+                    referenceSwapButton
+                }
+                .padding(.vertical, 12)
+                .zIndex(1)
 
                 expandedToCard
-                    .padding(.top, -27)
             }
 
             if let err = vm.validationError {
@@ -322,6 +322,7 @@ struct ConverterWorkspaceBody: View {
         return ToCard(
             toUnitName: toName,
             resultText: toRowDisplayString,
+            resultAttributed: vm.formattedResultAttributed,
             formulaLine: toRowFootnoteText,
             accent: categoryAccent,
             isSaved: isCurrentPairAlreadyFavorite,
@@ -390,7 +391,7 @@ struct ConverterWorkspaceBody: View {
                                             .foregroundStyle(categoryAccent)
                                             .padding(.horizontal, 10)
                                             .padding(.vertical, 4)
-                                            .background(Color(hex: "#EAF5F4"))
+                                            .background(categoryAccent.opacity(0.12))
                                             .clipShape(Capsule())
                                     }
                                     .buttonStyle(.plain)
@@ -416,38 +417,21 @@ struct ConverterWorkspaceBody: View {
 
     private func unitMenuPill(selection: Binding<UnitDefinition.ID>) -> some View {
         let name = vm.fromUnit?.name ?? "—"
-        return Picker(selection: selection) {
-            ForEach(vm.availableUnits, id: \.id) { u in
-                Text(u.name).tag(u.id)
-            }
-        } label: {
-            HStack(spacing: 8) {
-                Text(name)
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(categoryAccent.opacity(0.92))
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.75)
-                Image(systemName: "chevron.down")
-                    .font(.caption.weight(.bold))
-                    .foregroundStyle(categoryAccent.opacity(0.65))
-            }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 12)
-            .background(
-                Capsule(style: .continuous)
-                    .fill(Color(.systemBackground))
-            )
-            .overlay(
-                Capsule(style: .continuous)
-                    .strokeBorder(Color.primary.opacity(0.08), lineWidth: ConverterLayout.strokeHairline)
-            )
-            .shadow(color: .black.opacity(0.06), radius: 3, x: 0, y: 2)
+        return UnitPickerPillButton(
+            name: name,
+            accent: categoryAccent
+        ) {
+            showFromPicker = true
         }
-        .buttonStyle(.plain)
-        .pickerStyle(.menu)
-        .tint(categoryAccent)
-        .accessibilityLabel("\(name) unit, opens menu")
-        .accessibilityHint("Choose a unit")
+        .sheet(isPresented: $showFromPicker) {
+            UnitPickerSheet(
+                units: vm.availableUnits,
+                selectedID: selection.wrappedValue,
+                accent: categoryAccent
+            ) { newID in
+                selection.wrappedValue = newID
+            }
+        }
     }
 
     private var referenceSwapButton: some View {
@@ -473,7 +457,7 @@ struct ConverterWorkspaceBody: View {
 
     private var referenceUnitCardFill: some View {
         RoundedRectangle(cornerRadius: ConverterLayout.referenceCardCornerRadius, style: .continuous)
-            .fill(Color(.secondarySystemGroupedBackground))
+            .fill(Color(hex: "#F0F0F3"))
     }
 
     private var referenceUnitCardStroke: some View {
@@ -487,7 +471,7 @@ struct ConverterWorkspaceBody: View {
             .padding(ConverterLayout.secondaryBlockPadding)
             .background(
                 RoundedRectangle(cornerRadius: ConverterLayout.secondaryBlockCornerRadius, style: .continuous)
-                    .fill(Color(.tertiarySystemBackground))
+                    .fill(Color(hex: "#F5F5F7"))
             )
             .overlay(
                 RoundedRectangle(cornerRadius: ConverterLayout.secondaryBlockCornerRadius, style: .continuous)

@@ -56,6 +56,20 @@
     "interestScore": 8
   },
   {
+    "id": "song",
+    "name": "Song",
+    "category": "time",
+    "baseUnit": "second",
+    "kind": "absurd",
+    "conversionStyle": "multiplicative",
+    "factor": 210,
+    "iconName": "music.note",
+    "description": "Average pop song length ≈ 3.5 minutes.",
+    "exampleMeme": "That's about one song.",
+    "funFact": "The average pop song has gotten shorter since streaming — from 3m 50s in 2013 to under 3m 20s by 2020, partly because artists get paid per stream after 30 seconds.",
+    "interestScore": 8
+  },
+  {
     "id": "nap",
     "name": "Power nap",
     "category": "time",
@@ -67,6 +81,34 @@
     "description": "Optimal power nap ≈ 20 minutes.",
     "exampleMeme": "Nap-sized time.",
     "funFact": "NASA research found that a 26-minute nap improved pilot performance by 34% and alertness by 100%.",
+    "interestScore": 8
+  },
+  {
+    "id": "toilet_scroll",
+    "name": "Toilet scroll",
+    "category": "time",
+    "baseUnit": "second",
+    "kind": "absurd",
+    "conversionStyle": "multiplicative",
+    "factor": 480,
+    "iconName": "iphone",
+    "description": "Average phone session in the bathroom ≈ 8 minutes.",
+    "exampleMeme": "We've all been there.",
+    "funFact": "A study found 75% of people use their phone in the bathroom — and the average session is 8 minutes, longer than most news articles take to read.",
+    "interestScore": 9
+  },
+  {
+    "id": "commute",
+    "name": "Average commute",
+    "category": "time",
+    "baseUnit": "second",
+    "kind": "absurd",
+    "conversionStyle": "multiplicative",
+    "factor": 1500,
+    "iconName": "tram",
+    "description": "Average one-way commute ≈ 25 minutes.",
+    "exampleMeme": "The time you spend regretting your life choices.",
+    "funFact": "The average commute in the US is 27.6 minutes — adding up to about 9 full days per year spent getting to and from work.",
     "interestScore": 8
   },
   {
@@ -95,6 +137,62 @@
     "description": "One lunar cycle ≈ 29.53 days.",
     "exampleMeme": "Moon-cycle time.",
     "funFact": "Every calendar system in history has had to grapple with the fact that 12 lunar months is 11 days shorter than a solar year — solved differently by different cultures.",
+    "interestScore": 7
+  },
+  {
+    "id": "week",
+    "name": "Week",
+    "category": "time",
+    "baseUnit": "second",
+    "kind": "absurd",
+    "conversionStyle": "multiplicative",
+    "factor": 604800,
+    "iconName": "calendar",
+    "description": "One week = 604,800 seconds.",
+    "exampleMeme": "Seven days of trying.",
+    "funFact": "The 7-day week has no astronomical basis — it was invented in ancient Mesopotamia around 600 BC and spread so universally that no culture has successfully replaced it.",
+    "interestScore": 7
+  },
+  {
+    "id": "month",
+    "name": "Month",
+    "category": "time",
+    "baseUnit": "second",
+    "kind": "absurd",
+    "conversionStyle": "multiplicative",
+    "factor": 2629800,
+    "iconName": "calendar",
+    "description": "Average calendar month ≈ 2,629,800 seconds.",
+    "exampleMeme": "Roughly one Netflix binge season.",
+    "funFact": "No month is exactly the same length — February's 28 days exist because Roman emperor Augustus stole a day from it to make his month (August) as long as Julius Caesar's July.",
+    "interestScore": 7
+  },
+  {
+    "id": "year",
+    "name": "Year",
+    "category": "time",
+    "baseUnit": "second",
+    "kind": "absurd",
+    "conversionStyle": "multiplicative",
+    "factor": 31557600,
+    "iconName": "calendar.badge.clock",
+    "description": "One Julian year = 31,557,600 seconds.",
+    "exampleMeme": "Around the Sun once.",
+    "funFact": "A year is not exactly 365 days — it's 365.25 days, which is why we add a leap day every 4 years. Even then we over-correct, so century years skip the leap day unless divisible by 400.",
+    "interestScore": 8
+  },
+  {
+    "id": "decade",
+    "name": "Decade",
+    "category": "time",
+    "baseUnit": "second",
+    "kind": "absurd",
+    "conversionStyle": "multiplicative",
+    "factor": 315576000,
+    "iconName": "clock.badge.checkmark",
+    "description": "One decade = 315,576,000 seconds.",
+    "exampleMeme": "Long enough to regret a haircut.",
+    "funFact": "Humans are notoriously bad at remembering when things happened within a decade — a phenomenon called 'telescoping', where distant events feel more recent than they are.",
     "interestScore": 7
   },
   {
@@ -140,6 +238,48 @@
     "interestScore": 8
   },
   {
+    "id": "human_lifespan",
+    "name": "Human lifespan",
+    "category": "time",
+    "baseUnit": "second",
+    "kind": "absurd",
+    "conversionStyle": "multiplicative",
+    "factor": 2272320000,
+    "iconName": "figure.walk",
+    "description": "Average human lifespan ≈ 72 years ≈ 2.27 billion seconds.",
+    "exampleMeme": "The whole thing.",
+    "funFact": "If you're 30 years old, you've lived approximately 946,080,000 seconds — nearly a billion. You'll hit the billion-second mark at around 31 years and 8 months.",
+    "interestScore": 10
+  },
+  {
+    "id": "since_dinosaurs",
+    "name": "Since the dinosaurs",
+    "category": "time",
+    "baseUnit": "second",
+    "kind": "absurd",
+    "conversionStyle": "multiplicative",
+    "factor": 2.02e15,
+    "iconName": "lizard",
+    "description": "Time since non-avian dinosaur extinction ≈ 66 million years.",
+    "exampleMeme": "Prehistoric scale.",
+    "funFact": "Birds are technically dinosaurs — the Velociraptor was more closely related to a modern pigeon than to a T-Rex. So dinosaurs didn't go extinct; they're outside your window.",
+    "interestScore": 9
+  },
+  {
+    "id": "age_of_universe",
+    "name": "Age of the universe",
+    "category": "time",
+    "baseUnit": "second",
+    "kind": "absurd",
+    "conversionStyle": "multiplicative",
+    "factor": 4.35e17,
+    "iconName": "sparkles",
+    "description": "Age of the observable universe ≈ 13.8 billion years.",
+    "exampleMeme": "Everything, in seconds.",
+    "funFact": "If the entire history of the universe were compressed into one calendar year, modern humans wouldn't appear until 11:59:59 PM on December 31st — the last second.",
+    "interestScore": 9
+  },
+  {
     "id": "light_travel_earth_moon",
     "name": "Light to the Moon",
     "category": "time",
@@ -164,19 +304,6 @@
     "iconName": "figure.strengthtraining.traditional",
     "description": "Gym session ≈ 60 minutes.",
     "exampleMeme": "One session closer to being mysterious.",
-    "interestScore": 7
-  },
-  {
-    "id": "one_episode",
-    "name": "One episode",
-    "category": "time",
-    "baseUnit": "second",
-    "kind": "absurd",
-    "conversionStyle": "multiplicative",
-    "factor": 2700,
-    "iconName": "play.rectangle",
-    "description": "Typical episode runtime ≈ 45 minutes.",
-    "exampleMeme": "\"Just one more\" is never one more.",
     "interestScore": 7
   },
   {

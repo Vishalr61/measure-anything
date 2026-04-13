@@ -5,7 +5,10 @@ import MeasureAnythingCore
 /// “To” card: baseline-aligned result + unit, formula, then Copy / Share / Save grid.
 struct ToCard: View {
     let toUnitName: String
+    /// Plain result string for accessibility and consistency with copy/paste text.
     let resultText: String
+    /// Display string (superscript exponent when scientific).
+    let resultAttributed: AttributedString
     /// Live equivalence (e.g. `50 Meter = 263.16 Kilometer`); `nil` skips formula row only.
     let formulaLine: String?
     /// Category accent for result, unit picker, and Save action (matches chips / swap / dice).
@@ -22,6 +25,7 @@ struct ToCard: View {
     let availableUnits: [UnitDefinition]
 
     @State private var saveStarScale: CGFloat = 1.0
+    @State private var showToPicker = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -33,7 +37,7 @@ struct ToCard: View {
                 .padding(.bottom, 6)
 
             HStack(alignment: .lastTextBaseline) {
-                Text(resultText)
+                Text(resultAttributed)
                     .font(.system(size: 36, weight: .bold))
                     .foregroundStyle(usesPlaceholderResult ? Color.secondary.opacity(0.55) : accent)
                     .monospacedDigit()
@@ -44,24 +48,22 @@ struct ToCard: View {
 
                 Spacer()
 
-                Picker(selection: $selectedToUnitID) {
-                    ForEach(availableUnits, id: \.id) { u in
-                        Text(u.name).tag(u.id)
-                    }
-                } label: {
-                    HStack(spacing: 3) {
-                        Text(toUnitName)
-                            .font(.system(size: 12, weight: .semibold))
-                            .lineLimit(1)
-                            .minimumScaleFactor(0.85)
-                        Image(systemName: "chevron.up.chevron.down")
-                            .font(.system(size: 9))
-                    }
-                    .foregroundStyle(accent)
+                UnitPickerPillButton(
+                    name: toUnitName,
+                    accent: accent,
+                    style: .inline
+                ) {
+                    showToPicker = true
                 }
-                .buttonStyle(.plain)
-                .pickerStyle(.menu)
-                .tint(accent)
+                .sheet(isPresented: $showToPicker) {
+                    UnitPickerSheet(
+                        units: availableUnits,
+                        selectedID: selectedToUnitID,
+                        accent: accent
+                    ) { newID in
+                        selectedToUnitID = newID
+                    }
+                }
             }
             .padding(.bottom, 8)
 
@@ -103,9 +105,10 @@ struct ToCard: View {
                 ActionButton(
                     icon: isSaved ? "star.fill" : "star",
                     label: isSaved ? "Saved" : "Save",
-                    background: accent.opacity(0.14),
+                    background: accent.opacity(0.10),
                     foreground: accent,
                     disabled: isSaved || !saveEnabled,
+                    fadeWhenDisabled: !isSaved,
                     iconScale: saveStarScale,
                     action: {
                         guard saveEnabled, !isSaved else { return }

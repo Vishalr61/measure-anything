@@ -6,15 +6,15 @@ enum ConverterCategoryAccent {
     static func accent(for category: UnitCategory) -> Color {
         switch category {
         case .length:
-            Color(red: 0.26, green: 0.48, blue: 0.62)
+            Color(red: 26 / 255, green: 95 / 255, blue: 115 / 255) // #1A5F73 Ocean
         case .mass:
-            Color(red: 0.50, green: 0.40, blue: 0.34)
+            Color(red: 61 / 255, green: 107 / 255, blue: 74 / 255) // #3D6B4A Earth
         case .time:
-            Color(red: 0.44, green: 0.36, blue: 0.58)
+            Color(red: 61 / 255, green: 53 / 255, blue: 128 / 255) // #3D3580 Midnight
         case .temperature:
-            Color(red: 0.58, green: 0.34, blue: 0.32)
+            Color(red: 139 / 255, green: 58 / 255, blue: 42 / 255) // #8B3A2A Volcanic
         case .volume:
-            Color(red: 0.24, green: 0.50, blue: 0.52)
+            Color(red: 175 / 255, green: 125 / 255, blue: 42 / 255) // #1E7A5E Teal green
         }
     }
 }
