@@ -114,12 +114,8 @@ struct HomeView: View {
             .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    Menu {
-                        Button {
-                            showFavorites = true
-                        } label: {
-                            Label("Favourites", systemImage: "star")
-                        }
+                    Button {
+                        showFavorites = true
                     } label: {
                         Image(systemName: "list.bullet")
                             .font(.body.weight(.medium))
@@ -127,7 +123,8 @@ struct HomeView: View {
                             .frame(width: 44, height: 44)
                             .contentShape(Rectangle())
                     }
-                    .accessibilityLabel("Menu")
+                    .buttonStyle(FavoritesToolbarButtonStyle())
+                    .accessibilityLabel("View favorites")
                 }
                 ToolbarItemGroup(placement: .topBarTrailing) {
                     Button {
