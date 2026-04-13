@@ -1,14 +1,40 @@
 import SwiftUI
 import MeasureAnythingCore
 
+// MARK: - Sheet wrapper (kept for reuse)
+
 struct GlobalUnitSearchView: View {
     @ObservedObject var vm: ConverterViewModel
     @Environment(\.dismiss) private var dismiss
 
+    var body: some View {
+        NavigationStack {
+            GlobalUnitSearchBody(vm: vm, onUnitSelected: { dismiss() })
+                .navigationTitle("Search")
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button("Done") { dismiss() }
+                            .fontWeight(.semibold)
+                    }
+                }
+        }
+        .presentationDetents([.large])
+        .presentationDragIndicator(.visible)
+    }
+}
+
+// MARK: - Reusable body (works in sheet or full-screen tab)
+
+struct GlobalUnitSearchBody: View {
+    @ObservedObject var vm: ConverterViewModel
+    let onUnitSelected: () -> Void
+    /// Bump this value to reset the view back to the main browse state.
+    var resetToken: Int = 0
+
     @State private var searchText = ""
     @State private var activeCategory: UnitCategory?
     @State private var showAllUnits = false
-    @State private var selectedDetent: PresentationDetent = .medium
     @FocusState private var searchFocused: Bool
 
     private let horizontalInset: CGFloat = 16
@@ -60,108 +86,79 @@ struct GlobalUnitSearchView: View {
         searchText.trimmingCharacters(in: .whitespaces).isEmpty
     }
 
+    /// Whether we're in a sub-state (category or all units).
+    var isExpanded: Bool { activeCategory != nil || showAllUnits }
+
     // MARK: - Body
 
     var body: some View {
-        NavigationStack {
-            VStack(spacing: 0) {
-                if activeCategory != nil || showAllUnits {
-                    expandedHeader
+        VStack(spacing: 0) {
+            searchBar
+            Divider()
+            mainContent
+        }
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            if isExpanded {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button {
+                        withAnimation(.easeInOut(duration: 0.2)) {
+                            activeCategory = nil
+                            showAllUnits = false
+                        }
+                    } label: {
+                        HStack(spacing: 4) {
+                            Image(systemName: "chevron.left")
+                                .font(.system(size: 14, weight: .semibold))
+                            Text("Explore")
+                                .font(.system(size: 16))
+                        }
+                    }
+                }
+            }
+            ToolbarItem(placement: .principal) {
+                if let cat = activeCategory {
+                    let config = tileConfigs.first { $0.category == cat }
+                    HStack(spacing: 8) {
+                        RoundedRectangle(cornerRadius: 8, style: .continuous)
+                            .fill(config?.tileBg ?? Color(.systemGray6))
+                            .frame(width: 28, height: 28)
+                            .overlay(
+                                Image(systemName: SearchCategoryIcon.symbol(for: cat))
+                                    .font(.system(size: 13, weight: .medium))
+                                    .foregroundStyle(config?.iconCircleBg ?? Color.secondary)
+                            )
+                        Text(cat.rawValue.capitalized)
+                            .font(.system(size: 17, weight: .semibold))
+                    }
+                } else if showAllUnits {
+                    HStack(spacing: 8) {
+                        RoundedRectangle(cornerRadius: 8, style: .continuous)
+                            .fill(Color(.systemGray6))
+                            .frame(width: 28, height: 28)
+                            .overlay(
+                                Image(systemName: "magnifyingglass")
+                                    .font(.system(size: 13, weight: .medium))
+                                    .foregroundStyle(Color.secondary)
+                            )
+                        Text("All units")
+                            .font(.system(size: 17, weight: .semibold))
+                    }
                 } else {
-                    browseHeader
-                }
-                searchBar
-                Divider()
-                mainContent
-            }
-            .navigationBarHidden(true)
-        }
-        .presentationDetents([.medium, .large], selection: $selectedDetent)
-        .presentationDragIndicator(.visible)
-        .onChange(of: activeCategory) { cat in
-            selectedDetent = cat != nil ? .large : .medium
-        }
-        .onChange(of: showAllUnits) { show in
-            selectedDetent = show ? .large : .medium
-        }
-        .onAppear { searchFocused = true }
-    }
-
-    // MARK: - Headers
-
-    private var browseHeader: some View {
-        HStack {
-            Text("Search")
-                .font(.system(size: 17, weight: .semibold))
-            Spacer()
-            Button("Done") { dismiss() }
-                .font(.system(size: 14, weight: .medium))
-                .foregroundStyle(Color.primary)
-        }
-        .padding(.horizontal, 20)
-        .padding(.vertical, 12)
-    }
-
-    private var expandedHeader: some View {
-        HStack {
-            Button {
-                withAnimation(.easeInOut(duration: 0.2)) {
-                    activeCategory = nil
-                    showAllUnits = false
-                }
-            } label: {
-                HStack(spacing: 5) {
-                    Image(systemName: "chevron.left")
-                        .font(.system(size: 14, weight: .medium))
-                    Text("Search")
-                        .font(.system(size: 14))
-                }
-                .foregroundStyle(Color.secondary)
-            }
-            .buttonStyle(.plain)
-
-            Spacer()
-
-            if let cat = activeCategory {
-                let config = tileConfigs.first { $0.category == cat }
-                HStack(spacing: 8) {
-                    RoundedRectangle(cornerRadius: 8, style: .continuous)
-                        .fill(config?.tileBg ?? Color(.systemGray6))
-                        .frame(width: 28, height: 28)
-                        .overlay(
-                            Image(systemName: SearchCategoryIcon.symbol(for: cat))
-                                .font(.system(size: 13, weight: .medium))
-                                .foregroundStyle(config?.tileIcon ?? Color.secondary)
-                        )
-                    Text(cat.rawValue.capitalized)
-                        .font(.system(size: 17, weight: .medium))
-                        .foregroundStyle(Color.primary)
-                }
-            } else if showAllUnits {
-                HStack(spacing: 8) {
-                    RoundedRectangle(cornerRadius: 8, style: .continuous)
-                        .fill(Color(.systemGray6))
-                        .frame(width: 28, height: 28)
-                        .overlay(
-                            Image(systemName: "magnifyingglass")
-                                .font(.system(size: 13, weight: .medium))
-                                .foregroundStyle(Color.secondary)
-                        )
-                    Text("All units")
-                        .font(.system(size: 17, weight: .medium))
-                        .foregroundStyle(Color.primary)
+                    Text("Explore")
+                        .font(.system(size: 17, weight: .semibold))
                 }
             }
-
-            Spacer()
-
-            Button("Done") { dismiss() }
-                .font(.system(size: 14, weight: .medium))
-                .foregroundStyle(Color.primary)
         }
-        .padding(.horizontal, 20)
-        .padding(.vertical, 12)
+        .onChange(of: resetToken) { _, _ in
+            withAnimation(.easeInOut(duration: 0.2)) {
+                activeCategory = nil
+                showAllUnits = false
+                searchText = ""
+            }
+        }
     }
+
 
     // MARK: - Search bar
 
@@ -193,7 +190,7 @@ struct GlobalUnitSearchView: View {
         .padding(.bottom, 8)
     }
 
-    // MARK: - Main content (3 states)
+    // MARK: - Main content (states)
 
     @ViewBuilder
     private var mainContent: some View {
@@ -218,6 +215,7 @@ struct GlobalUnitSearchView: View {
         let shortName: String
         let fullName: String
         let tileBg: Color
+        let iconCircleBg: Color
         let tileIcon: Color
         let tileBorder: Color
         let tileText: Color
@@ -229,39 +227,39 @@ struct GlobalUnitSearchView: View {
     private var tileConfigs: [TileConfig] {[
         TileConfig(
             category: .length, icon: "ruler", shortName: "Length", fullName: "Length",
-            tileBg: Color(hex: "#9FE1CB"), tileIcon: Color(hex: "#085041"),
-            tileBorder: Color(hex: "#5DCAA5"), tileText: Color(hex: "#085041"),
-            countText: Color(hex: "#0F6E56")
+            tileBg: Color(hex: "#E1F5EE"), iconCircleBg: Color(hex: "#1A5F73"),
+            tileIcon: .white, tileBorder: Color(hex: "#9FE1CB"),
+            tileText: Color(hex: "#085041"), countText: Color(hex: "#0F6E56")
         ),
         TileConfig(
             category: .mass, icon: "scalemass", shortName: "Mass", fullName: "Mass",
-            tileBg: Color(hex: "#C0DD97"), tileIcon: Color(hex: "#27500A"),
-            tileBorder: Color(hex: "#97C459"), tileText: Color(hex: "#173404"),
-            countText: Color(hex: "#3B6D11")
+            tileBg: Color(hex: "#EAF3DE"), iconCircleBg: Color(hex: "#3D6B4A"),
+            tileIcon: .white, tileBorder: Color(hex: "#C0DD97"),
+            tileText: Color(hex: "#173404"), countText: Color(hex: "#3B6D11")
         ),
         TileConfig(
             category: .time, icon: "clock", shortName: "Time", fullName: "Time",
-            tileBg: Color(hex: "#CECBF6"), tileIcon: Color(hex: "#3C3489"),
-            tileBorder: Color(hex: "#AFA9EC"), tileText: Color(hex: "#26215C"),
-            countText: Color(hex: "#534AB7")
+            tileBg: Color(hex: "#EEEDFE"), iconCircleBg: Color(hex: "#3D3580"),
+            tileIcon: .white, tileBorder: Color(hex: "#CECBF6"),
+            tileText: Color(hex: "#26215C"), countText: Color(hex: "#534AB7")
         ),
         TileConfig(
             category: .temperature, icon: "thermometer.medium", shortName: "Temp", fullName: "Temperature",
-            tileBg: Color(hex: "#F5C4B3"), tileIcon: Color(hex: "#712B13"),
-            tileBorder: Color(hex: "#F0997B"), tileText: Color(hex: "#4A1B0C"),
-            countText: Color(hex: "#993C1D")
+            tileBg: Color(hex: "#FAECE7"), iconCircleBg: Color(hex: "#8B3A2A"),
+            tileIcon: .white, tileBorder: Color(hex: "#F5C4B3"),
+            tileText: Color(hex: "#4A1B0C"), countText: Color(hex: "#993C1D")
         ),
         TileConfig(
             category: .volume, icon: "drop", shortName: "Volume", fullName: "Volume",
-            tileBg: Color(hex: "#B5D4F4"), tileIcon: Color(hex: "#0C447C"),
-            tileBorder: Color(hex: "#85B7EB"), tileText: Color(hex: "#042C53"),
-            countText: Color(hex: "#185FA5")
+            tileBg: Color(hex: "#FAEEDA"), iconCircleBg: Color(hex: "#AF7D2A"),
+            tileIcon: .white, tileBorder: Color(hex: "#FAC775"),
+            tileText: Color(hex: "#412402"), countText: Color(hex: "#854F0B")
         ),
         TileConfig(
             category: nil, icon: "magnifyingglass", shortName: "All", fullName: "All units",
-            tileBg: Color(.systemGray6), tileIcon: Color.secondary,
-            tileBorder: Color.primary.opacity(0.08), tileText: Color.primary,
-            countText: Color.secondary
+            tileBg: Color(.systemGray6), iconCircleBg: Color(.systemGray4),
+            tileIcon: Color.secondary, tileBorder: Color.primary.opacity(0.08),
+            tileText: Color.primary, countText: Color.secondary
         ),
     ]}
 
@@ -278,15 +276,7 @@ struct GlobalUnitSearchView: View {
                 let pairs = resolvedPairs()
                 if !pairs.isEmpty {
                     VStack(alignment: .leading, spacing: 10) {
-                        HStack {
-                            sectionLabel("Recently used")
-                            Spacer()
-                            Button("Clear") {
-                                ConversionHistory.shared.clearRecentPairs()
-                            }
-                            .font(.system(size: 12))
-                            .foregroundStyle(.secondary)
-                        }
+                        sectionLabel("Recently used")
                         VStack(spacing: 8) {
                             ForEach(Array(pairs.prefix(3).enumerated()), id: \.offset) { _, item in
                                 RecentPairRow(
@@ -328,6 +318,7 @@ struct GlobalUnitSearchView: View {
                     fullName: config.fullName,
                     count: count,
                     tileBg: config.tileBg,
+                    iconCircleBg: config.iconCircleBg,
                     tileIcon: config.tileIcon,
                     tileBorder: config.tileBorder,
                     tileText: config.tileText,
@@ -431,7 +422,7 @@ struct GlobalUnitSearchView: View {
         }
     }
 
-    // MARK: - State C: Search results (unchanged)
+    // MARK: - State C: Search results
 
     private var searchResultsState: some View {
         VStack(spacing: 0) {
@@ -582,7 +573,7 @@ struct GlobalUnitSearchView: View {
         vm.selectedMode = result.mode
         vm.selectedToUnitID = result.unit.id
         Haptics.tap()
-        dismiss()
+        onUnitSelected()
     }
 
     // MARK: - Recent pairs
@@ -614,7 +605,7 @@ struct GlobalUnitSearchView: View {
         vm.selectedFromUnitID = pair.fromUnit.id
         vm.selectedToUnitID = pair.toUnit.id
         Haptics.tap()
-        dismiss()
+        onUnitSelected()
     }
 }
 

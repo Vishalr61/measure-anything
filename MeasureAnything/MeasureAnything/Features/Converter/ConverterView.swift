@@ -11,8 +11,8 @@ struct ConverterView: View {
     @ObservedObject var vm: ConverterViewModel
     @State private var showCustomUnitForm = false
     @State private var showFavorites = false
-    @State private var showGlobalSearch = false
     @State private var mainTab: BottomNav.Tab = .convert
+    @State private var exploreResetToken = 0
 
     private var categoryAccent: Color {
         ConverterCategoryAccent.accent(for: vm.selectedCategory)
@@ -36,20 +36,21 @@ struct ConverterView: View {
                 switch mainTab {
                 case .convert:
                     convertTab
-                case .favourites:
-                    favouritesTab
+                case .explore:
+                    ExploreView(vm: vm, selectedTab: $mainTab, resetToken: exploreResetToken)
                 case .settings:
                     SettingsTabView()
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
 
-            BottomNav(selected: $mainTab, selectionTint: categoryAccent)
+            BottomNav(selected: $mainTab, selectionTint: categoryAccent) { tab in
+                if tab == .explore {
+                    exploreResetToken &+= 1
+                }
+            }
         }
         .background(Color(hex: "#F0F0F3"))
-        .sheet(isPresented: $showGlobalSearch) {
-            GlobalUnitSearchView(vm: vm)
-        }
         .sheet(isPresented: $showFavorites) {
             FavoritesListView(registry: vm.currentRegistry) { fav in
                 vm.applyFavoriteRestore(
@@ -91,18 +92,6 @@ struct ConverterView: View {
                 }
                 ToolbarItemGroup(placement: .topBarTrailing) {
                     Button {
-                        Haptics.tap()
-                        showGlobalSearch = true
-                    } label: {
-                        Image(systemName: "magnifyingglass")
-                            .font(.system(size: 15))
-                            .foregroundStyle(Color(hex: "#5F5E5A"))
-                    }
-                    .buttonStyle(ConverterPressingButtonStyle())
-                    .accessibilityLabel("Search")
-                    .accessibilityHint("Search all units")
-
-                    Button {
                         saveCurrentPairAsFavorite()
                     } label: {
                         Image(systemName: isCurrentPairAlreadyFavorite ? "star.fill" : "star")
@@ -131,21 +120,6 @@ struct ConverterView: View {
             }
         }
         .background(Color.white)
-    }
-
-    private var favouritesTab: some View {
-        FavoritesListView(
-            registry: vm.currentRegistry,
-            onSelect: { fav in
-                vm.applyFavoriteRestore(
-                    categoryRaw: fav.categoryRaw,
-                    fromID: fav.fromUnitID,
-                    toID: fav.toUnitID
-                )
-                mainTab = .convert
-            },
-            presentedAsSheet: false
-        )
     }
 
     private func saveCurrentPairAsFavorite() {

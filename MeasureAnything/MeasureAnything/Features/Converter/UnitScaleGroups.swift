@@ -11,7 +11,9 @@ enum UnitScaleGroups {
         "Instant", "Seconds", "Minutes", "Hours",
         "Days", "Months", "Years", "Lifescale",
         "Cosmic time",
-        "Human", "Large", "Planetary"
+        "Human", "Large", "Planetary",
+        "Freezing", "Cool", "Warm", "Hot",
+        "Scorching", "Extreme", "Stellar"
     ]
 
     private static let length: [String: String] = [
@@ -50,56 +52,108 @@ enum UnitScaleGroups {
     ]
 
     private static let time: [String: String] = [
+        "camera_shutter": "Instant",
         "blink": "Instant", "heartbeat": "Instant",
         "light_travel_earth_moon": "Instant",
-        "olympic_100m": "Seconds",
+        "youtube_ad": "Seconds", "olympic_100m": "Seconds",
         "nap": "Minutes", "coffee_break": "Minutes",
+        "half_time": "Minutes",
         "tv_episode": "Minutes", "gym_session": "Minutes",
         "bad_meeting": "Minutes", "song": "Minutes",
         "toilet_scroll": "Minutes", "commute": "Minutes",
         "work_day": "Hours", "mars_day": "Hours",
         "week": "Days", "lunar_month": "Days",
         "month": "Months",
+        "pregnancy": "Months",
         "dog_year": "Years", "year": "Years", "decade": "Years",
+        "voyager_travel": "Lifescale",
         "human_lifespan": "Lifescale",
+        "roman_empire": "Cosmic time",
+        "since_pyramids": "Cosmic time",
         "since_dinosaurs": "Cosmic time",
+        "milky_way_light": "Cosmic time",
         "age_of_universe": "Cosmic time"
     ]
 
     private static let mass: [String: String] = [
+        "grain_of_sand_mass": "Tiny", "feather": "Tiny",
         "grain_of_rice_mass": "Tiny", "paperclip_mass": "Tiny",
-        "bag_of_sugar": "Everyday", "chicken": "Everyday",
+        "lego_brick": "Tiny", "hummingbird": "Tiny",
+
+        "aa_battery": "Small", "golf_ball": "Small",
+        "iphone": "Small", "human_heart": "Small",
+        "can_of_soup": "Small",
+
+        "bag_of_sugar": "Everyday", "litre_of_water": "Everyday",
+        "human_brain": "Everyday", "chicken": "Everyday",
         "newborn_baby_mass": "Everyday", "bowling_ball": "Everyday",
-        "house_cat": "Animals", "golden_retriever": "Animals",
-        "rhino": "Large animals", "elephant": "Large animals",
-        "t_rex": "Large animals",
-        "grand_piano": "Vehicles", "small_car": "Vehicles",
+        "human_skin": "Everyday", "human_skeleton": "Everyday",
+
+        "house_cat": "Animals", "corgi": "Animals",
+        "golden_retriever": "Animals", "labrador": "Animals",
+
+        "washing_machine": "Home", "grand_piano": "Home",
+
+        "great_white_shark": "Large animals",
+        "rhino": "Large animals", "orca": "Large animals",
+        "elephant": "Large animals", "t_rex": "Large animals",
+
+        "small_car": "Vehicles",
         "london_double_decker_bus": "Vehicles",
+
+        "blue_whale_mass": "Colossal", "iss": "Colossal",
+
         "eiffel_tower_mass": "Structures",
         "space_shuttle": "Structures",
-        "blue_whale_mass": "Colossal"
+        "great_pyramid": "Structures"
     ]
 
     private static let volume: [String: String] = [
+        "teardrop": "Tiny", "eyedrop": "Tiny",
         "teaspoon_vol": "Tiny",
+        "shot_glass": "Small",
         "can_of_soda": "Small", "soda_can": "Small",
+        "pint": "Small",
         "wine_bottle_vol": "Small", "wine_glass": "Small",
         "milk_carton": "Small", "bucket": "Small",
+        "garden_hose_minute": "Small",
         "stomach": "Human", "blood_volume": "Human",
-        "fuel_tank": "Human",
-        "bathtub": "Home", "hot_tub": "Home",
+        "human_lung": "Human", "fuel_tank": "Human",
+        "wheelie_bin": "Home", "bathtub": "Home", "hot_tub": "Home",
+        "shipping_container": "Large",
         "olympic_pool_vol": "Large",
+        "hot_air_balloon": "Large",
+        "great_barrier_reef_water": "Planetary",
         "earths_ocean": "Planetary"
     ]
 
     private static let temperature: [String: String] = [
-        "deep_space": "Cosmic",
-        "comfortable_room": "Everyday",
-        "body_temp": "Human",
-        "pizza_oven": "Everyday",
-        "candle_flame": "Everyday",
-        "lava": "Nature",
-        "sun_surface": "Cosmic"
+        "absolute_zero": "Freezing", "deep_space": "Freezing",
+        "liquid_nitrogen": "Freezing", "liquid_oxygen": "Freezing",
+        "dry_ice": "Freezing", "antarctica_winter": "Freezing",
+
+        "refrigerator": "Cool", "comfortable_room": "Cool",
+        "swimming_pool": "Cool",
+
+        "body_temp": "Warm", "high_fever": "Warm",
+        "comfortable_bath": "Warm", "skin_pain": "Warm",
+        "phone_overheat": "Warm",
+
+        "laptop_lap": "Hot", "coffee_perfect": "Hot",
+        "car_summer": "Hot", "fast_food_hot": "Hot",
+        "sauna": "Hot", "gpu_overheat": "Hot",
+        "cpu_throttle": "Hot", "boiling_water": "Hot",
+
+        "battery_runaway": "Scorching", "paper_ignition": "Scorching",
+        "pizza_oven": "Scorching", "venus_surface": "Scorching",
+        "steel_softening": "Scorching", "aluminum_melting": "Scorching",
+
+        "candle_flame": "Extreme", "lava": "Extreme",
+        "jet_exhaust": "Extreme", "reentry_heat": "Extreme",
+        "reactor_core": "Extreme", "welding_arc": "Extreme",
+
+        "sun_surface": "Stellar", "lightning_bolt": "Stellar",
+        "sun_core": "Stellar"
     ]
 
     static func scaleGroup(for unitID: String) -> String? {

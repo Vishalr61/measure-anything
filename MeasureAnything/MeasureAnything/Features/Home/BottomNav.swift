@@ -4,10 +4,12 @@ struct BottomNav: View {
     @Binding var selected: Tab
     /// Matches active category accent on the Convert tab.
     var selectionTint: Color
+    /// Fired when the user taps a tab they're already on.
+    var onRetap: ((Tab) -> Void)?
 
     enum Tab: Hashable {
         case convert
-        case favourites
+        case explore
         case settings
     }
 
@@ -19,15 +21,17 @@ struct BottomNav: View {
                 isSelected: selected == .convert,
                 selectionTint: selectionTint
             ) {
+                if selected == .convert { onRetap?(.convert) }
                 selected = .convert
             }
             NavTab(
-                iconBase: "star",
-                label: "Favourites",
-                isSelected: selected == .favourites,
+                iconBase: "sparkles",
+                label: "Explore",
+                isSelected: selected == .explore,
                 selectionTint: selectionTint
             ) {
-                selected = .favourites
+                if selected == .explore { onRetap?(.explore) }
+                selected = .explore
             }
             NavTab(
                 iconBase: "gearshape",
@@ -35,6 +39,7 @@ struct BottomNav: View {
                 isSelected: selected == .settings,
                 selectionTint: selectionTint
             ) {
+                if selected == .settings { onRetap?(.settings) }
                 selected = .settings
             }
         }
@@ -62,8 +67,8 @@ private struct NavTab: View {
         switch iconBase {
         case "arrow.left.arrow.right":
             return isSelected ? "arrow.left.arrow.right.circle.fill" : "arrow.left.arrow.right"
-        case "star":
-            return isSelected ? "star.fill" : "star"
+        case "sparkles":
+            return "sparkles"
         case "gearshape":
             return isSelected ? "gearshape.fill" : "gearshape"
         default:
