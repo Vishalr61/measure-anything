@@ -20,6 +20,7 @@ struct ConverterWorkspaceBody: View {
     @State private var showShareSheet = false
     @State private var shareActivityItems: [Any] = []
     @State private var swapRotation: Double = 0
+    @State private var showFromPicker = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -416,38 +417,21 @@ struct ConverterWorkspaceBody: View {
 
     private func unitMenuPill(selection: Binding<UnitDefinition.ID>) -> some View {
         let name = vm.fromUnit?.name ?? "—"
-        return Picker(selection: selection) {
-            ForEach(vm.availableUnits, id: \.id) { u in
-                Text(u.name).tag(u.id)
-            }
-        } label: {
-            HStack(spacing: 8) {
-                Text(name)
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(categoryAccent.opacity(0.92))
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.75)
-                Image(systemName: "chevron.down")
-                    .font(.caption.weight(.bold))
-                    .foregroundStyle(categoryAccent.opacity(0.65))
-            }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 12)
-            .background(
-                Capsule(style: .continuous)
-                    .fill(Color.white)
-            )
-            .overlay(
-                Capsule(style: .continuous)
-                    .strokeBorder(Color.primary.opacity(0.08), lineWidth: ConverterLayout.strokeHairline)
-            )
-            .shadow(color: .black.opacity(0.06), radius: 3, x: 0, y: 2)
+        return UnitPickerPillButton(
+            name: name,
+            accent: categoryAccent
+        ) {
+            showFromPicker = true
         }
-        .buttonStyle(.plain)
-        .pickerStyle(.menu)
-        .tint(categoryAccent)
-        .accessibilityLabel("\(name) unit, opens menu")
-        .accessibilityHint("Choose a unit")
+        .sheet(isPresented: $showFromPicker) {
+            UnitPickerSheet(
+                units: vm.availableUnits,
+                selectedID: selection.wrappedValue,
+                accent: categoryAccent
+            ) { newID in
+                selection.wrappedValue = newID
+            }
+        }
     }
 
     private var referenceSwapButton: some View {

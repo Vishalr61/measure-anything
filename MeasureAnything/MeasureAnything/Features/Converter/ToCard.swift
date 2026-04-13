@@ -25,6 +25,7 @@ struct ToCard: View {
     let availableUnits: [UnitDefinition]
 
     @State private var saveStarScale: CGFloat = 1.0
+    @State private var showToPicker = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -47,24 +48,22 @@ struct ToCard: View {
 
                 Spacer()
 
-                Picker(selection: $selectedToUnitID) {
-                    ForEach(availableUnits, id: \.id) { u in
-                        Text(u.name).tag(u.id)
-                    }
-                } label: {
-                    HStack(spacing: 3) {
-                        Text(toUnitName)
-                            .font(.system(size: 12, weight: .semibold))
-                            .lineLimit(1)
-                            .minimumScaleFactor(0.85)
-                        Image(systemName: "chevron.up.chevron.down")
-                            .font(.system(size: 9))
-                    }
-                    .foregroundStyle(accent)
+                UnitPickerPillButton(
+                    name: toUnitName,
+                    accent: accent,
+                    style: .inline
+                ) {
+                    showToPicker = true
                 }
-                .buttonStyle(.plain)
-                .pickerStyle(.menu)
-                .tint(accent)
+                .sheet(isPresented: $showToPicker) {
+                    UnitPickerSheet(
+                        units: availableUnits,
+                        selectedID: selectedToUnitID,
+                        accent: accent
+                    ) { newID in
+                        selectedToUnitID = newID
+                    }
+                }
             }
             .padding(.bottom, 8)
 
