@@ -52,19 +52,26 @@ enum UnitScaleGroups {
     ]
 
     private static let time: [String: String] = [
+        "camera_shutter": "Instant",
         "blink": "Instant", "heartbeat": "Instant",
         "light_travel_earth_moon": "Instant",
-        "olympic_100m": "Seconds",
+        "youtube_ad": "Seconds", "olympic_100m": "Seconds",
         "nap": "Minutes", "coffee_break": "Minutes",
+        "half_time": "Minutes",
         "tv_episode": "Minutes", "gym_session": "Minutes",
         "bad_meeting": "Minutes", "song": "Minutes",
         "toilet_scroll": "Minutes", "commute": "Minutes",
         "work_day": "Hours", "mars_day": "Hours",
         "week": "Days", "lunar_month": "Days",
         "month": "Months",
+        "pregnancy": "Months",
         "dog_year": "Years", "year": "Years", "decade": "Years",
+        "voyager_travel": "Lifescale",
         "human_lifespan": "Lifescale",
+        "roman_empire": "Cosmic time",
+        "since_pyramids": "Cosmic time",
         "since_dinosaurs": "Cosmic time",
+        "milky_way_light": "Cosmic time",
         "age_of_universe": "Cosmic time"
     ]
 
