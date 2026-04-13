@@ -19,12 +19,25 @@ final class ConversionHistory {
         frequency.values.reduce(0, +)
     }
 
+    private let recencyKey = "recentToUnits"
+
     func record(from: String, to: String) {
         guard from != to else { return }
         let pairKey = "\(from)→\(to)"
         var next = frequency
         next[pairKey, default: 0] += 1
         frequency = next
+
+        var recent = UserDefaults.standard.stringArray(forKey: recencyKey) ?? []
+        recent.removeAll { $0 == to }
+        recent.insert(to, at: 0)
+        if recent.count > 20 { recent = Array(recent.prefix(20)) }
+        UserDefaults.standard.set(recent, forKey: recencyKey)
+    }
+
+    func recentToUnits(limit: Int) -> [String] {
+        let raw = UserDefaults.standard.stringArray(forKey: recencyKey) ?? []
+        return Array(raw.prefix(limit))
     }
 
     /// Top destination unit IDs for this `from` unit, excluding self-conversions (`from→from`).
