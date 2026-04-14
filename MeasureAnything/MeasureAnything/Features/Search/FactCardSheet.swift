@@ -7,6 +7,8 @@ struct FactCardNavigationShell: View {
     @ObservedObject var viewModel: ConverterViewModel
 
     @State private var path: [String] = []
+    /// Shuffled comparison rows per unit for this sheet session only (cleared when the sheet is dismissed).
+    @State private var sessionComparisonSlices: [String: [FactCardComparison]] = [:]
 
     var body: some View {
         Group {
@@ -16,6 +18,7 @@ struct FactCardNavigationShell: View {
                         unit: root,
                         viewModel: viewModel,
                         navigationPath: $path,
+                        sessionComparisonSlices: $sessionComparisonSlices,
                         isNavigationRoot: true
                     )
                     .navigationDestination(for: String.self) { pushedID in
@@ -24,6 +27,7 @@ struct FactCardNavigationShell: View {
                                 unit: u,
                                 viewModel: viewModel,
                                 navigationPath: $path,
+                                sessionComparisonSlices: $sessionComparisonSlices,
                                 isNavigationRoot: false
                             )
                         } else {
@@ -49,6 +53,7 @@ struct FactCardSheet: View {
     let unit: UnitDefinition
     @ObservedObject var viewModel: ConverterViewModel
     @Binding var navigationPath: [String]
+    @Binding var sessionComparisonSlices: [String: [FactCardComparison]]
     /// `true` for the shell’s root page only (no back chevron in header).
     var isNavigationRoot: Bool
 
@@ -62,10 +67,8 @@ struct FactCardSheet: View {
         FactCardStore.shared.entry(for: unit.id)
     }
 
-    /// Step 2: static first four; shuffle arrives in a later step.
     private var previewComparisons: [FactCardComparison] {
-        guard let curated else { return [] }
-        return Array(curated.comparisons.prefix(4))
+        sessionComparisonSlices[unit.id] ?? []
     }
 
     var body: some View {
@@ -85,6 +88,9 @@ struct FactCardSheet: View {
                 }
                 Color.clear.frame(height: 60)
             }
+        }
+        .task(id: unit.id) {
+            ensureSessionComparisonSlice()
         }
     }
 
@@ -219,6 +225,25 @@ struct FactCardSheet: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal, 16)
+    }
+
+    /// Fisher–Yates shuffle, then keep up to four comparisons. Stored once per unit id for this sheet session.
+    private func ensureSessionComparisonSlice() {
+        guard let curated else { return }
+        let all = curated.comparisons
+        guard !all.isEmpty, sessionComparisonSlices[unit.id] == nil else { return }
+        var next = sessionComparisonSlices
+        next[unit.id] = Self.shuffledPrefix(all, take: 4)
+        sessionComparisonSlices = next
+    }
+
+    private static func shuffledPrefix(_ items: [FactCardComparison], take: Int) -> [FactCardComparison] {
+        var copy = items
+        guard copy.count > 1 else { return Array(copy.prefix(take)) }
+        for i in stride(from: copy.count - 1, through: 1, by: -1) {
+            copy.swapAt(i, Int.random(in: 0...i))
+        }
+        return Array(copy.prefix(min(take, copy.count)))
     }
 
     @ViewBuilder
