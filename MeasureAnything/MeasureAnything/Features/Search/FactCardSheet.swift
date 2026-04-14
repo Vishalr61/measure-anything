@@ -59,8 +59,8 @@ struct FactCardSheet: View {
 
     @Environment(\.dismiss) private var dismiss
 
-    private var accent: Color {
-        ConverterCategoryAccent.accent(for: unit.category)
+    private var palette: CategoryPalette {
+        ConverterCategoryPalette.palette(for: unit.category)
     }
 
     private var curated: FactCardEntry? {
@@ -81,20 +81,33 @@ struct FactCardSheet: View {
         previewComparisons.map { "\($0.targetUnitID)\u{1e}\($0.template)" }.joined(separator: "\u{1f}")
     }
 
+    private var unitIconSystemName: String {
+        if let raw = unit.iconName?.trimmingCharacters(in: .whitespacesAndNewlines), !raw.isEmpty {
+            return raw
+        }
+        return SearchCategoryIcon.symbol(for: unit.category)
+    }
+
+    /// Tier 1 with comparisons draws 60pt inside the white band; everyone else needs tail spacer.
+    private var needsTrailingBottomSpacer: Bool {
+        guard curated != nil else { return true }
+        return previewComparisons.isEmpty
+    }
+
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 0) {
-                header
-                Divider()
-                    .padding(.top, 12)
-                funFactSection
+                headerBand
+                funFactBand
                 if let curated {
-                    curatedValueSection(curated)
+                    valueBand(entry: curated)
                     if !previewComparisons.isEmpty {
-                        comparisonsSection
+                        comparisonsBand
                     }
                 }
-                Color.clear.frame(height: 60)
+                if needsTrailingBottomSpacer {
+                    Color.clear.frame(height: 72)
+                }
             }
         }
         .task(id: unit.id) {
@@ -104,124 +117,157 @@ struct FactCardSheet: View {
         .toolbar(isNavigationRoot ? .automatic : .hidden, for: .navigationBar)
     }
 
-    // MARK: - Header
+    // MARK: - Band 1 — header (deep + pattern)
 
-    private var header: some View {
-        HStack(alignment: .top, spacing: 12) {
-            if !isNavigationRoot {
-                Button {
-                    if !navigationPath.isEmpty {
-                        navigationPath.removeLast()
+    private var headerBand: some View {
+        ZStack(alignment: .topLeading) {
+            palette.deep
+            CategoryTilePattern(category: unit.category, color: palette.onDeep, patternOpacity: 0.18)
+
+            VStack(alignment: .leading, spacing: 0) {
+                HStack(alignment: .center, spacing: 8) {
+                    if !isNavigationRoot {
+                        Button {
+                            if !navigationPath.isEmpty {
+                                navigationPath.removeLast()
+                            }
+                        } label: {
+                            Image(systemName: "chevron.backward")
+                                .font(.system(size: 14, weight: .semibold))
+                                .foregroundStyle(palette.onDeep)
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityLabel("Back")
                     }
-                } label: {
-                    Image(systemName: "chevron.left")
-                        .font(.system(size: 14, weight: .semibold))
-                        .foregroundStyle(Color.primary)
+
+                    Text(unit.category.rawValue)
+                        .font(.system(size: 8, weight: .medium))
+                        .foregroundStyle(palette.onDeepMuted)
+                        .textCase(.uppercase)
+                        .tracking(1)
+
+                    Spacer(minLength: 0)
+
+                    headerCloseButton
                 }
-                .buttonStyle(.plain)
-                .accessibilityLabel("Back")
-            }
-
-            RoundedRectangle(cornerRadius: 8, style: .continuous)
-                .fill(accent.opacity(0.12))
-                .frame(width: 28, height: 28)
-                .overlay(
-                    Image(systemName: SearchCategoryIcon.symbol(for: unit.category))
-                        .font(.system(size: 13, weight: .medium))
-                        .foregroundStyle(accent)
-                )
-
-            VStack(alignment: .leading, spacing: 2) {
-                Text(unit.name)
-                    .font(.system(size: 18, weight: .medium))
-                    .foregroundStyle(Color.primary)
-                Text(unit.category.rawValue)
-                    .font(.system(size: 10, weight: .medium))
-                    .foregroundStyle(Color.secondary)
-                    .textCase(.uppercase)
-                    .tracking(0.6)
-            }
-
-            Spacer()
-
-            Button {
-                dismiss()
-            } label: {
-                Image(systemName: "xmark.circle.fill")
-                    .font(.system(size: 22, weight: .regular))
-                    .symbolRenderingMode(.hierarchical)
-                    .foregroundStyle(Color.secondary, Color(.tertiarySystemFill))
-            }
-            .buttonStyle(.plain)
-            .accessibilityLabel("Close")
-        }
-        .padding(.horizontal, 16)
-        .padding(.top, 16)
-    }
-
-    // MARK: - Fun fact
-
-    private var funFactSection: some View {
-        Group {
-            if let fact = unit.funFact, !fact.isEmpty {
-                Text(Self.resolvedFunFact(fact))
-                    .font(.system(size: 15))
-                    .foregroundStyle(Color.primary)
-                    .lineSpacing(5.5)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.horizontal, 22)
-                    .padding(.vertical, 12)
-            }
-        }
-    }
-
-    // MARK: - Value (curated)
-
-    private func curatedValueSection(_ entry: FactCardEntry) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text(entry.valueHeadline)
-                .font(.system(size: 10, weight: .semibold))
-                .foregroundStyle(Color.secondary)
-                .textCase(.uppercase)
-                .tracking(0.65)
-            Text(entry.valueDisplay)
-                .font(.system(size: 28, weight: .medium))
-                .foregroundStyle(accent)
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(.horizontal, 16)
-        .padding(.top, 20)
-    }
-
-    // MARK: - Comparisons
-
-    private var comparisonsSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("About the same as")
-                .font(.system(size: 10, weight: .semibold))
-                .foregroundStyle(Color.secondary)
-                .textCase(.uppercase)
-                .tracking(0.65)
                 .padding(.top, 24)
 
-            VStack(alignment: .leading, spacing: 14) {
+                Spacer()
+                    .frame(height: 22)
+
+                HStack(alignment: .center, spacing: 14) {
+                    RoundedRectangle(cornerRadius: 9, style: .continuous)
+                        .fill(palette.onDeep)
+                        .frame(width: 32, height: 32)
+                        .overlay(
+                            Image(systemName: unitIconSystemName)
+                                .font(.system(size: 15, weight: .medium))
+                                .foregroundStyle(palette.deep)
+                        )
+
+                    Text(unit.name)
+                        .font(.system(size: 22, weight: .medium))
+                        .foregroundStyle(palette.onDeep)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                .padding(.bottom, 8)
+            }
+            .padding(.horizontal, 24)
+            .padding(.bottom, 34)
+        }
+        .frame(maxWidth: .infinity)
+    }
+
+    private var headerCloseButton: some View {
+        Button {
+            dismiss()
+        } label: {
+            ZStack {
+                Circle()
+                    .fill(palette.onDeep.opacity(0.2))
+                    .frame(width: 20, height: 20)
+                Image(systemName: "xmark")
+                    .font(.system(size: 10, weight: .semibold))
+                    .foregroundStyle(palette.onDeep)
+            }
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("Close")
+    }
+
+    // MARK: - Band 2 — fun fact (light)
+
+    @ViewBuilder
+    private var funFactBand: some View {
+        if let raw = unit.funFact, !raw.isEmpty {
+            Text(Self.resolvedFunFact(raw))
+                .font(.system(size: 15))
+                .foregroundStyle(Color.primary)
+                .lineSpacing(5.5)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal, 24)
+                .padding(.top, 24)
+                .padding(.bottom, 26)
+                .frame(maxWidth: .infinity)
+                .background(palette.light)
+        }
+    }
+
+    // MARK: - Band 3 — value (medium, Tier 1 only)
+
+    private func valueBand(entry: FactCardEntry) -> some View {
+        VStack(spacing: 10) {
+            Text(entry.valueHeadline)
+                .font(.system(size: 11, weight: .semibold))
+                .foregroundStyle(palette.deep)
+                .textCase(.uppercase)
+                .tracking(0.85)
+                .multilineTextAlignment(.center)
+            Text(entry.valueDisplay)
+                .font(.system(size: 26, weight: .medium))
+                .foregroundStyle(palette.valueProclamation)
+                .multilineTextAlignment(.center)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.horizontal, 24)
+        .padding(.top, 22)
+        .padding(.bottom, 24)
+        .background(palette.medium)
+    }
+
+    // MARK: - Band 4 — comparisons (system background)
+
+    private var comparisonsBand: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            Text("About the same as")
+                .font(.system(size: 11, weight: .semibold))
+                .foregroundStyle(Color.secondary)
+                .textCase(.uppercase)
+                .tracking(0.85)
+                .padding(.top, 22)
+
+            VStack(alignment: .leading, spacing: 16) {
                 ForEach(Array(previewComparisons.enumerated()), id: \.offset) { _, row in
                     comparisonSentence(row)
                 }
             }
+            .padding(.top, 12)
             .id(comparisonRowsAnimationIdentity)
             .transition(.opacity)
 
             if shouldShowComparisonShuffle {
-                comparisonShufflePill
-                    .padding(.top, 4)
+                comparisonShuffleControl
+                    .padding(.top, 20)
             }
+
+            Color.clear.frame(height: 72)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(.horizontal, 16)
+        .padding(.horizontal, 24)
+        .background(Color(.systemBackground))
     }
 
-    private var comparisonShufflePill: some View {
+    private var comparisonShuffleControl: some View {
         Button {
             Haptics.tap()
             withAnimation(.easeInOut(duration: 0.22)) {
@@ -229,17 +275,13 @@ struct FactCardSheet: View {
             }
         } label: {
             Text("↻ Shuffle")
-                .font(.system(size: 13, weight: .medium))
-                .foregroundStyle(accent.opacity(0.92))
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundStyle(palette.deep)
                 .padding(.horizontal, 18)
-                .padding(.vertical, 9)
+                .padding(.vertical, 11)
                 .background(
-                    Capsule(style: .continuous)
-                        .fill(accent.opacity(0.09))
-                )
-                .overlay(
-                    Capsule(style: .continuous)
-                        .strokeBorder(accent.opacity(0.38), lineWidth: 0.75)
+                    RoundedRectangle(cornerRadius: 14, style: .continuous)
+                        .fill(palette.light)
                 )
         }
         .buttonStyle(.plain)
@@ -291,9 +333,9 @@ struct FactCardSheet: View {
                 FactCardComparisonSentenceView(
                     template: row.template,
                     targetUnitName: target.name,
-                    accent: accent
+                    linkAccent: palette.deep
                 )
-                .font(.system(size: 14))
+                .font(.system(size: 15))
                 .foregroundStyle(Color.primary)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .multilineTextAlignment(.leading)
@@ -301,7 +343,7 @@ struct FactCardSheet: View {
             .buttonStyle(.plain)
         } else {
             Text(row.template)
-                .font(.system(size: 14))
+                .font(.system(size: 15))
                 .foregroundStyle(Color.primary)
                 .frame(maxWidth: .infinity, alignment: .leading)
         }
@@ -335,7 +377,7 @@ struct FactCardSheet: View {
 private struct FactCardComparisonSentenceView: View {
     let template: String
     let targetUnitName: String
-    let accent: Color
+    let linkAccent: Color
 
     var body: some View {
         buildText()
@@ -348,7 +390,7 @@ private struct FactCardComparisonSentenceView: View {
         }
         return Text(pieces.leading)
             + Text(pieces.link)
-            .foregroundStyle(accent)
+            .foregroundStyle(linkAccent)
             .underline(pattern: .dot)
             + Text(pieces.trailing)
     }

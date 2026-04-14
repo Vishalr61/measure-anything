@@ -10,6 +10,8 @@ let kCategoryPatternOpacity: Double = 0.15
 struct CategoryTilePattern: View {
     let category: UnitCategory?
     let color: Color
+    /// Stroke layer opacity (Explore tiles use `kCategoryPatternOpacity`).
+    var patternOpacity: Double = kCategoryPatternOpacity
 
     var body: some View {
         Canvas { context, size in
@@ -29,7 +31,7 @@ struct CategoryTilePattern: View {
             }
         }
         .allowsHitTesting(false)
-        .opacity(kCategoryPatternOpacity)
+        .opacity(patternOpacity)
     }
 
     // MARK: - Length: vertical ruler ticks
