@@ -120,62 +120,63 @@ struct FactCardSheet: View {
     // MARK: - Band 1 — header (deep + pattern)
 
     private var headerBand: some View {
-        ZStack(alignment: .topLeading) {
-            palette.deep
-            CategoryTilePattern(category: unit.category, color: palette.onDeep, patternOpacity: 0.18)
-
-            VStack(alignment: .leading, spacing: 0) {
-                HStack(alignment: .center, spacing: 8) {
-                    if !isNavigationRoot {
-                        Button {
-                            if !navigationPath.isEmpty {
-                                navigationPath.removeLast()
-                            }
-                        } label: {
-                            Image(systemName: "chevron.backward")
-                                .font(.system(size: 14, weight: .semibold))
-                                .foregroundStyle(palette.onDeep)
+        VStack(alignment: .leading, spacing: 0) {
+            HStack(alignment: .center, spacing: 8) {
+                if !isNavigationRoot {
+                    Button {
+                        if !navigationPath.isEmpty {
+                            navigationPath.removeLast()
                         }
-                        .buttonStyle(.plain)
-                        .accessibilityLabel("Back")
+                    } label: {
+                        Image(systemName: "chevron.backward")
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundStyle(palette.onDeep)
                     }
-
-                    Text(unit.category.rawValue)
-                        .font(.system(size: 8, weight: .medium))
-                        .foregroundStyle(palette.onDeepMuted)
-                        .textCase(.uppercase)
-                        .tracking(1)
-
-                    Spacer(minLength: 0)
-
-                    headerCloseButton
+                    .buttonStyle(.plain)
+                    .accessibilityLabel("Back")
                 }
-                .padding(.top, 24)
 
-                Spacer()
-                    .frame(height: 22)
+                Text(unit.category.rawValue)
+                    .font(.system(size: 8, weight: .medium))
+                    .foregroundStyle(palette.onDeepMuted)
+                    .textCase(.uppercase)
+                    .tracking(1)
 
-                HStack(alignment: .center, spacing: 14) {
-                    RoundedRectangle(cornerRadius: 9, style: .continuous)
-                        .fill(palette.onDeep)
-                        .frame(width: 32, height: 32)
-                        .overlay(
-                            Image(systemName: unitIconSystemName)
-                                .font(.system(size: 15, weight: .medium))
-                                .foregroundStyle(palette.deep)
-                        )
+                Spacer(minLength: 0)
 
-                    Text(unit.name)
-                        .font(.system(size: 22, weight: .medium))
-                        .foregroundStyle(palette.onDeep)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                }
-                .padding(.bottom, 8)
+                headerCloseButton
             }
-            .padding(.horizontal, 24)
-            .padding(.bottom, 34)
+            .padding(.top, 24)
+
+            Spacer()
+                .frame(height: 22)
+
+            HStack(alignment: .center, spacing: 14) {
+                RoundedRectangle(cornerRadius: 9, style: .continuous)
+                    .fill(palette.onDeep)
+                    .frame(width: 32, height: 32)
+                    .overlay(
+                        Image(systemName: unitIconSystemName)
+                            .font(.system(size: 15, weight: .medium))
+                            .foregroundStyle(palette.deep)
+                    )
+
+                Text(unit.name)
+                    .font(.system(size: 22, weight: .medium))
+                    .foregroundStyle(palette.onDeep)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
+            .padding(.bottom, 8)
         }
+        .padding(.horizontal, 24)
+        .padding(.bottom, 34)
         .frame(maxWidth: .infinity)
+        .background {
+            ZStack(alignment: .topLeading) {
+                palette.deep
+                CategoryTilePattern(category: unit.category, color: palette.onDeep, patternOpacity: 0.18)
+            }
+        }
     }
 
     private var headerCloseButton: some View {
