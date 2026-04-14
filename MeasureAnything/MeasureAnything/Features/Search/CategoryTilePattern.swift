@@ -3,7 +3,7 @@ import MeasureAnythingCore
 
 /// Opacity applied to every category tile background pattern.
 /// Tune this single value to make patterns more/less visible.
-let kCategoryPatternOpacity: Double = 0.18
+let kCategoryPatternOpacity: Double = 0.15
 
 /// Draws a subtle, category-specific repeating pattern via `Canvas`.
 /// Pass `category: nil` for the "All" tile (plus-mark grid).
