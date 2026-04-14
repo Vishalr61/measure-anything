@@ -93,8 +93,6 @@ struct FactCardSheet: View {
                     if !previewComparisons.isEmpty {
                         comparisonsSection
                     }
-                } else if let parts = Self.computedCanonicalParts(for: unit) {
-                    computedValueSection(parts)
                 }
                 Color.clear.frame(height: 60)
             }
@@ -102,6 +100,8 @@ struct FactCardSheet: View {
         .task(id: unit.id) {
             ensureSessionComparisonSlice()
         }
+        .navigationBarBackButtonHidden(!isNavigationRoot)
+        .toolbar(isNavigationRoot ? .automatic : .hidden, for: .navigationBar)
     }
 
     // MARK: - Header
@@ -185,29 +185,6 @@ struct FactCardSheet: View {
                 .textCase(.uppercase)
                 .tracking(0.65)
             Text(entry.valueDisplay)
-                .font(.system(size: 28, weight: .medium))
-                .foregroundStyle(accent)
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(.horizontal, 16)
-        .padding(.top, 20)
-    }
-
-    // MARK: - Value (computed)
-
-    private struct ComputedCanonical {
-        let headlineUpper: String
-        let valueLine: String
-    }
-
-    private func computedValueSection(_ parts: ComputedCanonical) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text(parts.headlineUpper)
-                .font(.system(size: 10, weight: .semibold))
-                .foregroundStyle(Color.secondary)
-                .textCase(.uppercase)
-                .tracking(0.65)
-            Text(parts.valueLine)
                 .font(.system(size: 28, weight: .medium))
                 .foregroundStyle(accent)
         }
@@ -350,29 +327,6 @@ struct FactCardSheet: View {
             out.removeSubrange(open...close)
         }
         return out
-    }
-
-    private static func computedCanonicalParts(for unit: UnitDefinition) -> ComputedCanonical? {
-        guard let factor = unit.factor else { return nil }
-        let nameLower = unit.name.lowercased()
-        let headline: String = {
-            switch unit.category {
-            case .mass: return "One \(nameLower) weighs"
-            case .length: return "One \(nameLower) is"
-            case .volume: return "One \(nameLower) holds"
-            case .time: return "One \(nameLower) lasts"
-            case .temperature: return "One \(nameLower) is"
-            }
-        }()
-        let nf = NumberFormatter()
-        nf.numberStyle = .decimal
-        nf.maximumFractionDigits = 6
-        nf.minimumFractionDigits = 0
-        nf.usesGroupingSeparator = true
-        nf.locale = Locale(identifier: "en_US")
-        let num = nf.string(from: NSNumber(value: factor)) ?? String(format: "%g", factor)
-        let valueLine = "\(num) \(unit.baseUnit)"
-        return ComputedCanonical(headlineUpper: headline, valueLine: valueLine)
     }
 }
 

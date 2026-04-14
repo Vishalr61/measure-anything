@@ -961,7 +961,7 @@ struct SearchResult: Identifiable {
     var accent: Color { ConverterCategoryAccent.accent(for: category) }
 
     var factorDisplayString: String {
-        guard let factor = unit.factor else { return unit.baseUnit }
+        guard let factor = unit.factor else { return unit.baseUnitSymbol }
         let absVal = abs(factor)
         if absVal < 0.001 || absVal > 9_999_999 {
             let f = NumberFormatter()
@@ -972,13 +972,13 @@ struct SearchResult: Identifiable {
             return raw
                 .replacingOccurrences(of: "E", with: "\u{00D7}10^")
                 .replacingOccurrences(of: "e", with: "\u{00D7}10^")
-                + " " + unit.baseUnit
+                + " " + unit.baseUnitSymbol
         }
         let f = NumberFormatter()
         f.numberStyle = .decimal
         f.maximumFractionDigits = 3
         f.minimumFractionDigits = 0
         f.locale = Locale(identifier: "en_US")
-        return (f.string(from: NSNumber(value: factor)) ?? "\(factor)") + " " + unit.baseUnit
+        return (f.string(from: NSNumber(value: factor)) ?? "\(factor)") + " " + unit.baseUnitSymbol
     }
 }

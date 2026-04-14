@@ -162,5 +162,22 @@ public extension UnitDefinition {
             throw ValidationError.baseUnitMismatch(expected: expected, actual: baseUnit)
         }
     }
+
+    /// Short symbol for the category base unit (e.g. `kg`, `m`, `L`). Falls back to `baseUnit` when unknown.
+    public var baseUnitSymbol: String {
+        Self.symbol(forBaseUnitName: baseUnit)
+    }
+
+    private static func symbol(forBaseUnitName name: String) -> String {
+        switch name.lowercased() {
+        case "meter", "meters": return "m"
+        case "kilogram", "kilograms": return "kg"
+        case "gram", "grams": return "g"
+        case "second", "seconds": return "s"
+        case "liter", "liters", "litre", "litres": return "L"
+        case "kelvin", "kelvins": return "K"
+        default: return name
+        }
+    }
 }
 
