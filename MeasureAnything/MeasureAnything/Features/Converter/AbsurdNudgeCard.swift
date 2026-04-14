@@ -6,6 +6,25 @@ struct AbsurdNudgeCard: View {
     let onTryAbsurd: () -> Void
     let onDismiss: () -> Void
 
+    private var absurdModeBodyLine: AttributedString {
+        let bodyColor = Color(hex: "#2C2C2A")
+        var prefix = AttributedString("That's also ")
+        prefix.font = .system(size: 13)
+        prefix.foregroundColor = bodyColor
+
+        var boldPart = AttributedString(absurdResult)
+        boldPart.font = .system(size: 13, weight: .bold)
+        boldPart.foregroundColor = bodyColor
+
+        var suffix = AttributedString(" in Absurd mode.")
+        suffix.font = .system(size: 13)
+        suffix.foregroundColor = bodyColor
+
+        prefix.append(boldPart)
+        prefix.append(suffix)
+        return prefix
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
@@ -28,8 +47,7 @@ struct AbsurdNudgeCard: View {
                 .buttonStyle(.plain)
             }
 
-            (Text("That's also ") + Text(absurdResult).fontWeight(.bold) + Text(" in Absurd mode."))
-                .font(.system(size: 13))
+            Text(absurdModeBodyLine)
                 .foregroundStyle(Color(hex: "#2C2C2A"))
 
             Button(action: onTryAbsurd) {

@@ -18,7 +18,16 @@ enum ShareImageRenderer {
             meme: meme
         )
         let renderer = ImageRenderer(content: view)
-        renderer.scale = UIScreen.main.scale
+        renderer.scale = Self.renderScale
         return renderer.uiImage
+    }
+
+    /// Avoid `UIScreen.main` (deprecated iOS 26+); use an attached window scene when available.
+    private static var renderScale: CGFloat {
+        for scene in UIApplication.shared.connectedScenes {
+            guard let windowScene = scene as? UIWindowScene else { continue }
+            return windowScene.screen.scale
+        }
+        return 3.0
     }
 }
