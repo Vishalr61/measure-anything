@@ -322,7 +322,9 @@ struct GlobalUnitSearchBody: View {
                     tileIcon: config.tileIcon,
                     tileBorder: config.tileBorder,
                     tileText: config.tileText,
-                    countText: config.countText
+                    countText: config.countText,
+                    patternCategory: config.category,
+                    showsPattern: true
                 ) {
                     Haptics.tap()
                     if let cat = config.category {
@@ -569,9 +571,11 @@ struct GlobalUnitSearchBody: View {
     }
 
     private func apply(_ result: SearchResult) {
-        vm.selectedCategory = result.category
-        vm.selectedMode = result.mode
-        vm.selectedToUnitID = result.unit.id
+        vm.applyExploreUnitSelection(
+            category: result.category,
+            mode: result.mode,
+            toUnitID: result.unit.id
+        )
         Haptics.tap()
         onUnitSelected()
     }
@@ -586,24 +590,33 @@ struct GlobalUnitSearchBody: View {
     }
 
     private func resolvedPairs() -> [ResolvedPair] {
-        ConversionHistory.shared.recentPairs(limit: 6).compactMap { pair in
+        var seen = Set<String>()
+        return ConversionHistory.shared.recentPairs(limit: 20).compactMap { pair in
+            let dedup = "\(pair.fromUnitID)→\(pair.toUnitID)"
+            guard !seen.contains(dedup) else { return nil }
+            seen.insert(dedup)
+
             guard let from = allUnits.first(where: { $0.unit.id == pair.fromUnitID }),
                   let to = allUnits.first(where: { $0.unit.id == pair.toUnitID })
             else { return nil }
+
+            let category = pair.category ?? from.category
             return ResolvedPair(
                 fromUnit: from.unit,
                 toUnit: to.unit,
-                category: from.category,
+                category: category,
                 mode: from.mode
             )
         }
     }
 
     private func applyPair(_ pair: ResolvedPair) {
-        vm.selectedCategory = pair.category
-        vm.selectedMode = pair.mode
-        vm.selectedFromUnitID = pair.fromUnit.id
-        vm.selectedToUnitID = pair.toUnit.id
+        vm.applyExplorePairSelection(
+            category: pair.category,
+            mode: pair.mode,
+            fromID: pair.fromUnit.id,
+            toID: pair.toUnit.id
+        )
         Haptics.tap()
         onUnitSelected()
     }

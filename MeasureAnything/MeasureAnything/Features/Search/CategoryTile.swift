@@ -1,4 +1,5 @@
 import SwiftUI
+import MeasureAnythingCore
 
 struct CategoryTile: View {
     let icon: String
@@ -11,39 +12,52 @@ struct CategoryTile: View {
     let tileBorder: Color
     let tileText: Color
     let countText: Color
+    /// `nil` means "All" tile — draws the plus-mark grid pattern.
+    let patternCategory: UnitCategory?
+    /// Whether a pattern should be drawn at all (false for the "All" tile when no pattern is desired).
+    let showsPattern: Bool
     let onTap: () -> Void
+
+    private let cornerRadius: CGFloat = 16
 
     var body: some View {
         Button(action: onTap) {
-            VStack(spacing: 10) {
-                Circle()
-                    .fill(iconCircleBg)
-                    .frame(width: 46, height: 46)
-                    .overlay(
-                        Image(systemName: icon)
-                            .font(.system(size: 20, weight: .medium))
-                            .foregroundStyle(tileIcon)
-                    )
+            ZStack {
+                tileBg
 
-                Text(name)
-                    .font(.system(size: 13, weight: .medium))
-                    .foregroundStyle(tileText)
-                    .lineLimit(1)
+                if showsPattern {
+                    CategoryTilePattern(category: patternCategory, color: iconCircleBg)
+                }
 
-                Text("\(count)")
-                    .font(.system(size: 11))
-                    .foregroundStyle(countText)
-                    .padding(.horizontal, 9)
-                    .padding(.vertical, 2)
-                    .background(Color.white)
-                    .clipShape(Capsule())
+                VStack(spacing: 10) {
+                    Circle()
+                        .fill(iconCircleBg)
+                        .frame(width: 46, height: 46)
+                        .overlay(
+                            Image(systemName: icon)
+                                .font(.system(size: 20, weight: .medium))
+                                .foregroundStyle(tileIcon)
+                        )
+
+                    Text(name)
+                        .font(.system(size: 13, weight: .medium))
+                        .foregroundStyle(tileText)
+                        .lineLimit(1)
+
+                    Text("\(count)")
+                        .font(.system(size: 11))
+                        .foregroundStyle(countText)
+                        .padding(.horizontal, 9)
+                        .padding(.vertical, 2)
+                        .background(Color.white)
+                        .clipShape(Capsule())
+                }
+                .padding(.vertical, 18)
             }
             .frame(maxWidth: .infinity)
-            .padding(.vertical, 18)
-            .background(tileBg)
-            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+            .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
             .overlay(
-                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
                     .stroke(tileBorder, lineWidth: 0.5)
             )
         }

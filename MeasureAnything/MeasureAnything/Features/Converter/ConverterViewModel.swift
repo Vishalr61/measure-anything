@@ -651,6 +651,56 @@ final class ConverterViewModel: ObservableObject {
         recompute()
     }
 
+    /// Batch-applies a unit picked from the Explore browse list.
+    /// Suppresses intermediate `didSet` → `recompute()` calls so only one
+    /// settled record is written to history.
+    func applyExploreUnitSelection(category: UnitCategory, mode: UnitRegistry.Mode, toUnitID: String) {
+        isApplyingFavoriteRestore = true
+        selectedCategory = category
+        selectedMode = mode
+
+        let units = registry.units(in: category, includeKinds: mode.includedKinds)
+        let ids = Set(units.map(\.id))
+
+        let preferred = preferredDefaultPair(for: category)
+        if ids.contains(preferred.from) {
+            selectedFromUnitID = preferred.from
+        } else if let base = category.canonicalBaseUnit, ids.contains(base) {
+            selectedFromUnitID = base
+        } else if let first = units.first {
+            selectedFromUnitID = first.id
+        }
+
+        if ids.contains(toUnitID), toUnitID != selectedFromUnitID {
+            selectedToUnitID = toUnitID
+        } else {
+            selectedToUnitID = firstDistinctToUnit(from: selectedFromUnitID, in: units)
+        }
+
+        isApplyingFavoriteRestore = false
+        ensureDistinctFromTo(in: units)
+        syncDiceTiltToCategory(animated: true)
+        recompute()
+    }
+
+    /// Batch-applies a recently-used pair from the Explore page.
+    func applyExplorePairSelection(
+        category: UnitCategory,
+        mode: UnitRegistry.Mode,
+        fromID: String,
+        toID: String
+    ) {
+        isApplyingFavoriteRestore = true
+        selectedCategory = category
+        selectedMode = mode
+        selectedFromUnitID = fromID
+        selectedToUnitID = toID
+        isApplyingFavoriteRestore = false
+        reconcileSelectionsAfterModeChange()
+        syncDiceTiltToCategory(animated: true)
+        recompute()
+    }
+
     /// Applies taxonomy search selection: category/mode from taxonomy JSON, optional `converterUnitId` when that unit exists for the current registry.
     func applyTaxonomyRoute(_ route: TaxonomyConverterRoute) {
         guard route.hasAnyResolvableInput else { return }
@@ -847,7 +897,11 @@ final class ConverterViewModel: ObservableObject {
                 includeMemeExplanation: includeMeme
             )
             if sessionPersistenceEnabled {
-                ConversionHistory.shared.record(from: selectedFromUnitID, to: selectedToUnitID)
+                ConversionHistory.shared.record(
+                    from: selectedFromUnitID,
+                    to: selectedToUnitID,
+                    category: selectedCategory
+                )
                 if selectedMode == .normal {
                     normalConversionCount = normalConversionCount + 1
                 }

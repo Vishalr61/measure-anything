@@ -1,4 +1,5 @@
 import Foundation
+import MeasureAnythingCore
 
 final class ConversionHistory {
     static let shared = ConversionHistory()
@@ -23,7 +24,7 @@ final class ConversionHistory {
 
     private let pairsKey = "recentConversionPairs"
 
-    func record(from: String, to: String) {
+    func record(from: String, to: String, category: UnitCategory) {
         guard from != to else { return }
         let pairKey = "\(from)→\(to)"
         var next = frequency
@@ -37,7 +38,11 @@ final class ConversionHistory {
         UserDefaults.standard.set(recent, forKey: recencyKey)
 
         var pairs = UserDefaults.standard.array(forKey: pairsKey) as? [[String: String]] ?? []
-        let newPair: [String: String] = ["from": from, "to": to]
+        let newPair: [String: String] = [
+            "from": from,
+            "to": to,
+            "category": category.rawValue
+        ]
         pairs.removeAll { $0["from"] == from && $0["to"] == to }
         pairs.insert(newPair, at: 0)
         if pairs.count > 20 { pairs = Array(pairs.prefix(20)) }
@@ -52,13 +57,17 @@ final class ConversionHistory {
     struct ConversionPair {
         let fromUnitID: String
         let toUnitID: String
+        /// Stored at write time so the Explore page can display the correct category
+        /// label without re-deriving it from unit lookups.
+        let category: UnitCategory?
     }
 
     func recentPairs(limit: Int) -> [ConversionPair] {
         let raw = UserDefaults.standard.array(forKey: pairsKey) as? [[String: String]] ?? []
         return raw.prefix(limit).compactMap { dict in
             guard let from = dict["from"], let to = dict["to"] else { return nil }
-            return ConversionPair(fromUnitID: from, toUnitID: to)
+            let cat = dict["category"].flatMap { UnitCategory(rawValue: $0) }
+            return ConversionPair(fromUnitID: from, toUnitID: to, category: cat)
         }
     }
 
