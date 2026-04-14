@@ -76,6 +76,12 @@ final class ConversionHistory {
         UserDefaults.standard.removeObject(forKey: recencyKey)
     }
 
+    /// Most-recently-used FROM unit in the given category, or `nil` if no history exists.
+    func mostRecentFromUnit(in category: UnitCategory) -> String? {
+        let pairs = recentPairs(limit: 20)
+        return pairs.first { $0.category == category }?.fromUnitID
+    }
+
     /// Top destination unit IDs for this `from` unit, excluding self-conversions (`from→from`).
     func suggestions(for fromUnit: String, limit: Int = 3) -> [String] {
         let prefix = "\(fromUnit)→"

@@ -37,6 +37,13 @@ struct GlobalUnitSearchBody: View {
     @State private var showAllUnits = false
     @FocusState private var searchFocused: Bool
 
+    // MARK: Two-step selection state (ephemeral, in-memory only)
+
+    @State private var fromSelection: SearchResult?
+    @State private var crossCategoryToast: String?
+
+    @Environment(\.scenePhase) private var scenePhase
+
     private let horizontalInset: CGFloat = 16
 
     // MARK: - Data
@@ -89,76 +96,217 @@ struct GlobalUnitSearchBody: View {
     /// Whether we're in a sub-state (category or all units).
     var isExpanded: Bool { activeCategory != nil || showAllUnits }
 
-    // MARK: - Body
+    // MARK: - Two-step selection logic
 
-    var body: some View {
-        VStack(spacing: 0) {
-            searchBar
-            Divider()
-            mainContent
+    private func handleUnitTap(_ result: SearchResult) {
+        guard let from = fromSelection else {
+            withAnimation(.easeInOut(duration: 0.15)) {
+                fromSelection = result
+            }
+            Haptics.tap()
+            return
         }
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            if isExpanded {
-                ToolbarItem(placement: .topBarLeading) {
-                    Button {
-                        withAnimation(.easeInOut(duration: 0.2)) {
-                            activeCategory = nil
-                            showAllUnits = false
-                        }
-                    } label: {
-                        HStack(spacing: 4) {
-                            Image(systemName: "chevron.left")
-                                .font(.system(size: 14, weight: .semibold))
-                            Text("Explore")
-                                .font(.system(size: 16))
-                        }
-                    }
+
+        if from.unit.id == result.unit.id {
+            withAnimation(.easeInOut(duration: 0.15)) {
+                fromSelection = nil
+            }
+            Haptics.tap()
+            return
+        }
+
+        if from.category != result.category {
+            crossCategoryToast = "Can't convert \(from.category.rawValue) to \(result.category.rawValue)"
+            Haptics.tap()
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2.2) {
+                withAnimation(.easeOut(duration: 0.25)) {
+                    if crossCategoryToast != nil { crossCategoryToast = nil }
                 }
             }
-            ToolbarItem(placement: .principal) {
-                if let cat = activeCategory {
-                    let config = tileConfigs.first { $0.category == cat }
-                    HStack(spacing: 8) {
-                        RoundedRectangle(cornerRadius: 8, style: .continuous)
-                            .fill(config?.tileBg ?? Color(.systemGray6))
-                            .frame(width: 28, height: 28)
-                            .overlay(
-                                Image(systemName: SearchCategoryIcon.symbol(for: cat))
-                                    .font(.system(size: 13, weight: .medium))
-                                    .foregroundStyle(config?.iconCircleBg ?? Color.secondary)
-                            )
-                        Text(cat.rawValue.capitalized)
-                            .font(.system(size: 17, weight: .semibold))
-                    }
-                } else if showAllUnits {
-                    HStack(spacing: 8) {
-                        RoundedRectangle(cornerRadius: 8, style: .continuous)
-                            .fill(Color(.systemGray6))
-                            .frame(width: 28, height: 28)
-                            .overlay(
-                                Image(systemName: "magnifyingglass")
-                                    .font(.system(size: 13, weight: .medium))
-                                    .foregroundStyle(Color.secondary)
-                            )
-                        Text("All units")
-                            .font(.system(size: 17, weight: .semibold))
-                    }
-                } else {
-                    Text("Explore")
-                        .font(.system(size: 17, weight: .semibold))
-                }
-            }
+            return
         }
-        .onChange(of: resetToken) { _, _ in
-            withAnimation(.easeInOut(duration: 0.2)) {
-                activeCategory = nil
-                showAllUnits = false
-                searchText = ""
-            }
+
+        let mode: UnitRegistry.Mode = (from.mode == .absurd || result.mode == .absurd) ? .absurd : .normal
+        let fromID = from.unit.id
+        let toID = result.unit.id
+        let category = from.category
+
+        withAnimation(.easeInOut(duration: 0.15)) {
+            fromSelection = nil
+        }
+
+        vm.applyExplorePairSelection(
+            category: category,
+            mode: mode,
+            fromID: fromID,
+            toID: toID
+        )
+        Haptics.tap()
+        onUnitSelected()
+    }
+
+    private func clearSelection() {
+        withAnimation(.easeInOut(duration: 0.15)) {
+            fromSelection = nil
+            crossCategoryToast = nil
         }
     }
 
+    // MARK: - Color helpers
+
+    private func lightShade(for category: UnitCategory) -> Color {
+        tileConfigs.first { $0.category == category }?.tileBg ?? Color(.systemGray6)
+    }
+
+    private func darkShade(for category: UnitCategory) -> Color {
+        ConverterCategoryAccent.accent(for: category)
+    }
+
+    // MARK: - Body
+
+    var body: some View {
+        ZStack(alignment: .top) {
+            VStack(spacing: 0) {
+                searchBar
+                Divider()
+                if let from = fromSelection {
+                    selectionHintStrip(from: from)
+                        .transition(.opacity.combined(with: .move(edge: .top)))
+                }
+                mainContent
+            }
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                if isExpanded {
+                    ToolbarItem(placement: .topBarLeading) {
+                        Button {
+                            withAnimation(.easeInOut(duration: 0.2)) {
+                                activeCategory = nil
+                                showAllUnits = false
+                            }
+                        } label: {
+                            HStack(spacing: 4) {
+                                Image(systemName: "chevron.left")
+                                    .font(.system(size: 14, weight: .semibold))
+                                Text("Explore")
+                                    .font(.system(size: 16))
+                            }
+                        }
+                    }
+                }
+                ToolbarItem(placement: .principal) {
+                    if let cat = activeCategory {
+                        let config = tileConfigs.first { $0.category == cat }
+                        HStack(spacing: 8) {
+                            RoundedRectangle(cornerRadius: 8, style: .continuous)
+                                .fill(config?.tileBg ?? Color(.systemGray6))
+                                .frame(width: 28, height: 28)
+                                .overlay(
+                                    Image(systemName: SearchCategoryIcon.symbol(for: cat))
+                                        .font(.system(size: 13, weight: .medium))
+                                        .foregroundStyle(config?.iconCircleBg ?? Color.secondary)
+                                )
+                            Text(cat.rawValue.capitalized)
+                                .font(.system(size: 17, weight: .semibold))
+                        }
+                    } else if showAllUnits {
+                        HStack(spacing: 8) {
+                            RoundedRectangle(cornerRadius: 8, style: .continuous)
+                                .fill(Color(.systemGray6))
+                                .frame(width: 28, height: 28)
+                                .overlay(
+                                    Image(systemName: "magnifyingglass")
+                                        .font(.system(size: 13, weight: .medium))
+                                        .foregroundStyle(Color.secondary)
+                                )
+                            Text("All units")
+                                .font(.system(size: 17, weight: .semibold))
+                        }
+                    } else {
+                        Text("Explore")
+                            .font(.system(size: 17, weight: .semibold))
+                    }
+                }
+            }
+            .onChange(of: resetToken) { _, _ in
+                withAnimation(.easeInOut(duration: 0.2)) {
+                    activeCategory = nil
+                    showAllUnits = false
+                    searchText = ""
+                    fromSelection = nil
+                    crossCategoryToast = nil
+                }
+            }
+            .onChange(of: activeCategory) { old, new in
+                if old != nil && new == nil {
+                    clearSelection()
+                }
+            }
+            .onChange(of: scenePhase) { _, phase in
+                if phase != .active {
+                    clearSelection()
+                }
+            }
+
+            // Cross-category toast overlay
+            if let toast = crossCategoryToast {
+                crossCategoryToastView(toast)
+                    .transition(.move(edge: .top).combined(with: .opacity))
+                    .zIndex(10)
+            }
+        }
+        .animation(.easeInOut(duration: 0.2), value: crossCategoryToast != nil)
+    }
+
+    // MARK: - Selection hint strip
+
+    private func selectionHintStrip(from: SearchResult) -> some View {
+        let bg = lightShade(for: from.category)
+        let dark = darkShade(for: from.category)
+
+        return HStack(spacing: 0) {
+            HStack(spacing: 0) {
+                Text("From: \(from.unit.name)")
+                    .font(.system(size: 13, weight: .medium))
+                    .foregroundStyle(dark)
+                Text(" — now pick a 'to' unit")
+                    .font(.system(size: 13))
+                    .foregroundStyle(dark.opacity(0.7))
+            }
+            .lineLimit(1)
+
+            Spacer(minLength: 8)
+
+            Button {
+                clearSelection()
+            } label: {
+                Image(systemName: "xmark")
+                    .font(.system(size: 10, weight: .semibold))
+                    .foregroundStyle(dark.opacity(0.5))
+                    .frame(width: 44, height: 28)
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+        }
+        .padding(.leading, horizontalInset)
+        .frame(height: 28)
+        .background(bg)
+    }
+
+    // MARK: - Cross-category toast
+
+    private func crossCategoryToastView(_ message: String) -> some View {
+        Text(message)
+            .font(.system(size: 13, weight: .medium))
+            .foregroundStyle(.white)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 8)
+            .background(
+                Capsule(style: .continuous)
+                    .fill(Color(.systemGray2))
+            )
+            .padding(.top, 8)
+    }
 
     // MARK: - Search bar
 
@@ -345,6 +493,7 @@ struct GlobalUnitSearchBody: View {
 
     private func categoryExpandedState(_ category: UnitCategory) -> some View {
         let accent = ConverterCategoryAccent.accent(for: category)
+        let light = lightShade(for: category)
         let allForCategory = allUnits.filter { $0.category == category }
         let normalUnits = allForCategory.filter { $0.unit.kind == .normal }
         let absurdUnits = allForCategory.filter { $0.unit.kind != .normal }
@@ -358,8 +507,13 @@ struct GlobalUnitSearchBody: View {
                         .padding(.top, 18)
                         .padding(.bottom, 4)
                     ForEach(normalUnits, id: \.id) { result in
-                        UnitBrowseRow(unit: result.unit, accent: accent) {
-                            apply(result)
+                        UnitBrowseRow(
+                            unit: result.unit,
+                            accent: accent,
+                            isSelected: fromSelection?.unit.id == result.unit.id,
+                            selectionLightShade: light
+                        ) {
+                            handleUnitTap(result)
                         }
                         .padding(.horizontal, horizontalInset)
                     }
@@ -372,8 +526,13 @@ struct GlobalUnitSearchBody: View {
                         .padding(.bottom, 4)
                     ForEach(group.units, id: \.id) { unit in
                         if let result = allForCategory.first(where: { $0.unit.id == unit.id }) {
-                            UnitBrowseRow(unit: unit, accent: accent) {
-                                apply(result)
+                            UnitBrowseRow(
+                                unit: unit,
+                                accent: accent,
+                                isSelected: fromSelection?.unit.id == unit.id,
+                                selectionLightShade: light
+                            ) {
+                                handleUnitTap(result)
                             }
                             .padding(.horizontal, horizontalInset)
                         }
@@ -391,6 +550,7 @@ struct GlobalUnitSearchBody: View {
             VStack(alignment: .leading, spacing: 0) {
                 ForEach(vm.categories, id: \.self) { cat in
                     let accent = ConverterCategoryAccent.accent(for: cat)
+                    let light = lightShade(for: cat)
                     let catResults = allUnits.filter { $0.category == cat }
                     let normalUnits = catResults.filter { $0.unit.kind == .normal }
                     let absurdUnits = catResults.filter { $0.unit.kind != .normal }
@@ -402,8 +562,13 @@ struct GlobalUnitSearchBody: View {
                         .padding(.bottom, 4)
 
                     ForEach(normalUnits, id: \.id) { result in
-                        UnitBrowseRow(unit: result.unit, accent: accent) {
-                            apply(result)
+                        UnitBrowseRow(
+                            unit: result.unit,
+                            accent: accent,
+                            isSelected: fromSelection?.unit.id == result.unit.id,
+                            selectionLightShade: light
+                        ) {
+                            handleUnitTap(result)
                         }
                         .padding(.horizontal, horizontalInset)
                     }
@@ -411,8 +576,13 @@ struct GlobalUnitSearchBody: View {
                     ForEach(grouped, id: \.title) { group in
                         ForEach(group.units, id: \.id) { unit in
                             if let result = catResults.first(where: { $0.unit.id == unit.id }) {
-                                UnitBrowseRow(unit: unit, accent: accent) {
-                                    apply(result)
+                                UnitBrowseRow(
+                                    unit: unit,
+                                    accent: accent,
+                                    isSelected: fromSelection?.unit.id == unit.id,
+                                    selectionLightShade: light
+                                ) {
+                                    handleUnitTap(result)
                                 }
                                 .padding(.horizontal, horizontalInset)
                             }
@@ -431,11 +601,15 @@ struct GlobalUnitSearchBody: View {
             resultCountBadge
             List {
                 ForEach(filteredResults, id: \.id) { result in
-                    Button { apply(result) } label: {
+                    Button { handleUnitTap(result) } label: {
                         searchResultRow(result, query: searchText)
                     }
                     .buttonStyle(.plain)
-                    .listRowBackground(Color.clear)
+                    .listRowBackground(
+                        fromSelection?.unit.id == result.unit.id
+                            ? lightShade(for: result.category).opacity(0.5)
+                            : Color.clear
+                    )
                 }
 
                 searchDisclaimer
@@ -483,7 +657,8 @@ struct GlobalUnitSearchBody: View {
     }
 
     private func searchResultRow(_ result: SearchResult, query: String) -> some View {
-        HStack(spacing: 10) {
+        let isSelected = fromSelection?.unit.id == result.unit.id
+        return HStack(spacing: 10) {
             RoundedRectangle(cornerRadius: 2, style: .continuous)
                 .fill(result.accent)
                 .frame(width: 3)
@@ -491,7 +666,7 @@ struct GlobalUnitSearchBody: View {
 
             VStack(alignment: .leading, spacing: 2) {
                 highlightedText(result.unit.name, query: query)
-                    .font(.system(size: 14, weight: .medium))
+                    .font(.system(size: 14, weight: isSelected ? .semibold : .medium))
 
                 HStack(spacing: 4) {
                     Text(result.categoryDisplayName)
@@ -508,9 +683,15 @@ struct GlobalUnitSearchBody: View {
 
             Spacer()
 
-            Image(systemName: "arrow.right")
-                .font(.system(size: 11, weight: .medium))
-                .foregroundStyle(.tertiary)
+            if isSelected {
+                Image(systemName: "checkmark.circle.fill")
+                    .font(.system(size: 14, weight: .medium))
+                    .foregroundStyle(result.accent)
+            } else {
+                Image(systemName: "arrow.right")
+                    .font(.system(size: 11, weight: .medium))
+                    .foregroundStyle(.tertiary)
+            }
         }
         .padding(.vertical, 7)
         .contentShape(Rectangle())
@@ -568,16 +749,6 @@ struct GlobalUnitSearchBody: View {
         return Text(before).foregroundStyle(Color.secondary)
             + Text(match).foregroundStyle(Color.primary).fontWeight(.semibold)
             + Text(after).foregroundStyle(Color.secondary)
-    }
-
-    private func apply(_ result: SearchResult) {
-        vm.applyExploreUnitSelection(
-            category: result.category,
-            mode: result.mode,
-            toUnitID: result.unit.id
-        )
-        Haptics.tap()
-        onUnitSelected()
     }
 
     // MARK: - Recent pairs

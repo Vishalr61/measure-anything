@@ -651,38 +651,6 @@ final class ConverterViewModel: ObservableObject {
         recompute()
     }
 
-    /// Batch-applies a unit picked from the Explore browse list.
-    /// Suppresses intermediate `didSet` → `recompute()` calls so only one
-    /// settled record is written to history.
-    func applyExploreUnitSelection(category: UnitCategory, mode: UnitRegistry.Mode, toUnitID: String) {
-        isApplyingFavoriteRestore = true
-        selectedCategory = category
-        selectedMode = mode
-
-        let units = registry.units(in: category, includeKinds: mode.includedKinds)
-        let ids = Set(units.map(\.id))
-
-        let preferred = preferredDefaultPair(for: category)
-        if ids.contains(preferred.from) {
-            selectedFromUnitID = preferred.from
-        } else if let base = category.canonicalBaseUnit, ids.contains(base) {
-            selectedFromUnitID = base
-        } else if let first = units.first {
-            selectedFromUnitID = first.id
-        }
-
-        if ids.contains(toUnitID), toUnitID != selectedFromUnitID {
-            selectedToUnitID = toUnitID
-        } else {
-            selectedToUnitID = firstDistinctToUnit(from: selectedFromUnitID, in: units)
-        }
-
-        isApplyingFavoriteRestore = false
-        ensureDistinctFromTo(in: units)
-        syncDiceTiltToCategory(animated: true)
-        recompute()
-    }
-
     /// Batch-applies a recently-used pair from the Explore page.
     func applyExplorePairSelection(
         category: UnitCategory,
@@ -771,17 +739,23 @@ final class ConverterViewModel: ObservableObject {
         }
 
         let ids = Set(units.map(\.id))
-        let preferred = preferredDefaultPair(for: selectedCategory)
 
-        if ids.contains(preferred.from), ids.contains(preferred.to) {
-            selectedFromUnitID = preferred.from
-            selectedToUnitID = preferred.to
-        } else if let base = selectedCategory.canonicalBaseUnit, ids.contains(base) {
-            selectedFromUnitID = base
-            selectedToUnitID = firstDistinctToUnit(from: base, in: units)
+        if let recentFrom = ConversionHistory.shared.mostRecentFromUnit(in: selectedCategory),
+           ids.contains(recentFrom) {
+            selectedFromUnitID = recentFrom
+            selectedToUnitID = firstDistinctToUnit(from: recentFrom, in: units)
         } else {
-            selectedFromUnitID = units[0].id
-            selectedToUnitID = firstDistinctToUnit(from: units[0].id, in: units)
+            let preferred = preferredDefaultPair(for: selectedCategory)
+            if ids.contains(preferred.from), ids.contains(preferred.to) {
+                selectedFromUnitID = preferred.from
+                selectedToUnitID = preferred.to
+            } else if let base = selectedCategory.canonicalBaseUnit, ids.contains(base) {
+                selectedFromUnitID = base
+                selectedToUnitID = firstDistinctToUnit(from: base, in: units)
+            } else {
+                selectedFromUnitID = units[0].id
+                selectedToUnitID = firstDistinctToUnit(from: units[0].id, in: units)
+            }
         }
 
         ensureDistinctFromTo(in: units)
