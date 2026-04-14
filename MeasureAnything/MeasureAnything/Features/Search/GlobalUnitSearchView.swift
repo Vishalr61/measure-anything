@@ -24,6 +24,13 @@ struct GlobalUnitSearchView: View {
     }
 }
 
+// MARK: - Fact card sheet presentation
+
+private struct FactCardSheetItem: Identifiable {
+    var id: String { unitID }
+    let unitID: String
+}
+
 // MARK: - Reusable body (works in sheet or full-screen tab)
 
 struct GlobalUnitSearchBody: View {
@@ -31,8 +38,11 @@ struct GlobalUnitSearchBody: View {
     let onUnitSelected: () -> Void
     /// Bump this value to reset the view back to the main browse state.
     var resetToken: Int = 0
+    /// When `true`, Explore-only chrome (subtitle, rotating placeholder) is enabled.
+    var isExploreTab: Bool = false
 
     @State private var searchText = ""
+    @State private var searchPlaceholder = ExplorePlaceholders.defaultPlaceholder
     @State private var activeCategory: UnitCategory?
     @State private var showAllUnits = false
     @FocusState private var searchFocused: Bool
@@ -41,6 +51,9 @@ struct GlobalUnitSearchBody: View {
 
     @State private var fromSelection: SearchResult?
     @State private var crossCategoryToast: String?
+
+    @State private var factCardSheetItem: FactCardSheetItem?
+    @State private var factSheetDetent: PresentationDetent = .large
 
     @Environment(\.scenePhase) private var scenePhase
 
@@ -218,6 +231,19 @@ struct GlobalUnitSearchBody: View {
                             Text("All units")
                                 .font(.system(size: 17, weight: .semibold))
                         }
+                    } else if isExploreTab {
+                        VStack(alignment: .center, spacing: 4) {
+                            Text("Explore")
+                                .font(.system(size: 17, weight: .semibold))
+                            Text("Meters, whales, and everything between.")
+                                .font(.system(size: 13))
+                                .foregroundStyle(.secondary)
+                                .multilineTextAlignment(.center)
+                                .lineLimit(2)
+                                .minimumScaleFactor(0.9)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+                        .frame(maxWidth: .infinity)
                     } else {
                         Text("Explore")
                             .font(.system(size: 17, weight: .semibold))
@@ -231,6 +257,8 @@ struct GlobalUnitSearchBody: View {
                     searchText = ""
                     fromSelection = nil
                     crossCategoryToast = nil
+                    factCardSheetItem = nil
+                    factSheetDetent = .large
                 }
             }
             .onChange(of: activeCategory) { old, new in
@@ -250,6 +278,11 @@ struct GlobalUnitSearchBody: View {
                     .transition(.move(edge: .top).combined(with: .opacity))
                     .zIndex(10)
             }
+        }
+        .sheet(item: $factCardSheetItem) { item in
+            FactCardNavigationShell(initialUnitID: item.unitID, viewModel: vm)
+                .presentationDetents([.medium, .large], selection: $factSheetDetent)
+                .presentationDragIndicator(.visible)
         }
         .animation(.easeInOut(duration: 0.2), value: crossCategoryToast != nil)
     }
@@ -311,7 +344,11 @@ struct GlobalUnitSearchBody: View {
             Image(systemName: "magnifyingglass")
                 .foregroundStyle(Color(hex: "#B4B2A9"))
                 .font(.system(size: 15))
-            TextField("Search units...", text: $searchText)
+            TextField(
+                "",
+                text: $searchText,
+                prompt: Text(isExploreTab ? searchPlaceholder : ExplorePlaceholders.defaultPlaceholder)
+            )
                 .font(.system(size: 16))
                 .autocorrectionDisabled()
                 .focused($searchFocused)
@@ -330,7 +367,7 @@ struct GlobalUnitSearchBody: View {
         .background(Color(hex: "#F0F0F3"))
         .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
         .padding(.horizontal, horizontalInset)
-        .padding(.top, 8)
+        .padding(.top, (isExploreTab && !isExpanded) ? 12 : 8)
         .padding(.bottom, 8)
     }
 
@@ -417,29 +454,102 @@ struct GlobalUnitSearchBody: View {
                     categoryGrid
                 }
 
-                let pairs = resolvedPairs()
-                if !pairs.isEmpty {
-                    VStack(alignment: .leading, spacing: 10) {
-                        sectionLabel("Recently used")
-                        VStack(spacing: 8) {
-                            ForEach(Array(pairs.prefix(3).enumerated()), id: \.offset) { _, item in
-                                RecentPairRow(
-                                    fromUnit: item.fromUnit,
-                                    toUnit: item.toUnit,
-                                    category: item.category,
-                                    accent: ConverterCategoryAccent.accent(for: item.category)
-                                ) {
-                                    applyPair(item)
-                                }
-                            }
-                        }
-                    }
-                }
+                exploreBrowseListSection
             }
             .padding(.horizontal, horizontalInset)
             .padding(.top, 16)
             .padding(.bottom, 24)
         }
+        .onAppear {
+            refreshExplorePlaceholderIfNeeded()
+        }
+    }
+
+    @ViewBuilder
+    private var exploreBrowseListSection: some View {
+        let pairs = resolvedPairs()
+        if ConversionHistory.shared.hasRecentPairs {
+            if !pairs.isEmpty {
+                VStack(alignment: .leading, spacing: 10) {
+                    sectionLabel("Recently used")
+                    VStack(spacing: 8) {
+                        ForEach(Array(pairs.prefix(3).enumerated()), id: \.offset) { _, item in
+                            RecentPairRow(
+                                fromUnit: item.fromUnit,
+                                toUnit: item.toUnit,
+                                category: item.category,
+                                accent: ConverterCategoryAccent.accent(for: item.category)
+                            ) {
+                                applyPair(item)
+                            }
+                        }
+                    }
+                }
+            }
+        } else {
+            tryTheseBrowseSection
+        }
+    }
+
+    @ViewBuilder
+    private var tryTheseBrowseSection: some View {
+        let rows = tryTheseDisplayRows()
+        if !rows.isEmpty {
+            VStack(alignment: .leading, spacing: 10) {
+                sectionLabel("Try these")
+                VStack(spacing: 8) {
+                    ForEach(rows) { row in
+                        RecentPairRow(
+                            fromUnit: row.pair.fromUnit,
+                            toUnit: row.pair.toUnit,
+                            category: row.pair.category,
+                            accent: ConverterCategoryAccent.accent(for: row.pair.category)
+                        ) {
+                            applyTryTheseRow(spec: row.spec, pair: row.pair)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private struct TryTheseDisplayRow: Identifiable {
+        var id: String { "\(spec.fromID)→\(spec.toID)" }
+        let spec: TryTheseSuggestions.RowSpec
+        let pair: ResolvedPair
+    }
+
+    private func tryTheseDisplayRows() -> [TryTheseDisplayRow] {
+        TryTheseSuggestions.rows.compactMap { spec in
+            guard
+                let fr = allUnits.first(where: { $0.unit.id == spec.fromID && $0.category == spec.category }),
+                let t = allUnits.first(where: { $0.unit.id == spec.toID && $0.category == spec.category })
+            else { return nil }
+            let pair = ResolvedPair(
+                fromUnit: fr.unit,
+                toUnit: t.unit,
+                category: spec.category,
+                mode: spec.mode
+            )
+            return TryTheseDisplayRow(spec: spec, pair: pair)
+        }
+    }
+
+    private func refreshExplorePlaceholderIfNeeded() {
+        guard isExploreTab else { return }
+        guard activeCategory == nil, !showAllUnits else { return }
+        ExplorePlaceholders.refreshPlaceholder(searchPlaceholder: &searchPlaceholder)
+    }
+
+    private func applyTryTheseRow(spec: TryTheseSuggestions.RowSpec, pair: ResolvedPair) {
+        vm.applyTryThesePair(
+            category: spec.category,
+            mode: spec.mode,
+            fromID: pair.fromUnit.id,
+            toID: pair.toUnit.id
+        )
+        Haptics.tap()
+        onUnitSelected()
     }
 
     private var categoryGrid: some View {
@@ -511,10 +621,13 @@ struct GlobalUnitSearchBody: View {
                             isSelected: fromSelection?.unit.id == result.unit.id,
                             nextRowSelected: nextIsSelected,
                             selectionLightShade: light,
-                            horizontalInset: horizontalInset
-                        ) {
-                            handleUnitTap(result)
-                        }
+                            horizontalInset: horizontalInset,
+                            onTap: { handleUnitTap(result) },
+                            onOpenFactCard: {
+                                factCardSheetItem = FactCardSheetItem(unitID: result.unit.id)
+                                Haptics.tap()
+                            }
+                        )
                     }
                 }
 
@@ -533,10 +646,13 @@ struct GlobalUnitSearchBody: View {
                                 isSelected: fromSelection?.unit.id == unit.id,
                                 nextRowSelected: nextIsSelected,
                                 selectionLightShade: light,
-                                horizontalInset: horizontalInset
-                            ) {
-                                handleUnitTap(result)
-                            }
+                                horizontalInset: horizontalInset,
+                                onTap: { handleUnitTap(result) },
+                                onOpenFactCard: {
+                                    factCardSheetItem = FactCardSheetItem(unitID: unit.id)
+                                    Haptics.tap()
+                                }
+                            )
                         }
                     }
                 }
@@ -572,10 +688,13 @@ struct GlobalUnitSearchBody: View {
                             isSelected: fromSelection?.unit.id == result.unit.id,
                             nextRowSelected: nextIsSelected,
                             selectionLightShade: light,
-                            horizontalInset: horizontalInset
-                        ) {
-                            handleUnitTap(result)
-                        }
+                            horizontalInset: horizontalInset,
+                            onTap: { handleUnitTap(result) },
+                            onOpenFactCard: {
+                                factCardSheetItem = FactCardSheetItem(unitID: result.unit.id)
+                                Haptics.tap()
+                            }
+                        )
                     }
 
                     ForEach(grouped, id: \.title) { group in
@@ -589,10 +708,13 @@ struct GlobalUnitSearchBody: View {
                                     isSelected: fromSelection?.unit.id == unit.id,
                                     nextRowSelected: nextIsSelected,
                                     selectionLightShade: light,
-                                    horizontalInset: horizontalInset
-                                ) {
-                                    handleUnitTap(result)
-                                }
+                                    horizontalInset: horizontalInset,
+                                    onTap: { handleUnitTap(result) },
+                                    onOpenFactCard: {
+                                        factCardSheetItem = FactCardSheetItem(unitID: unit.id)
+                                        Haptics.tap()
+                                    }
+                                )
                             }
                         }
                     }
@@ -833,7 +955,7 @@ struct SearchResult: Identifiable {
     var accent: Color { ConverterCategoryAccent.accent(for: category) }
 
     var factorDisplayString: String {
-        guard let factor = unit.factor else { return unit.baseUnit }
+        guard let factor = unit.factor else { return unit.baseUnitSymbol }
         let absVal = abs(factor)
         if absVal < 0.001 || absVal > 9_999_999 {
             let f = NumberFormatter()
@@ -844,13 +966,13 @@ struct SearchResult: Identifiable {
             return raw
                 .replacingOccurrences(of: "E", with: "\u{00D7}10^")
                 .replacingOccurrences(of: "e", with: "\u{00D7}10^")
-                + " " + unit.baseUnit
+                + " " + unit.baseUnitSymbol
         }
         let f = NumberFormatter()
         f.numberStyle = .decimal
         f.maximumFractionDigits = 3
         f.minimumFractionDigits = 0
         f.locale = Locale(identifier: "en_US")
-        return (f.string(from: NSNumber(value: factor)) ?? "\(factor)") + " " + unit.baseUnit
+        return (f.string(from: NSNumber(value: factor)) ?? "\(factor)") + " " + unit.baseUnitSymbol
     }
 }

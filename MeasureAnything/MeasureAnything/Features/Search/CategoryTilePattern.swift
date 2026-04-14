@@ -10,6 +10,8 @@ let kCategoryPatternOpacity: Double = 0.15
 struct CategoryTilePattern: View {
     let category: UnitCategory?
     let color: Color
+    /// Stroke layer opacity (Explore tiles use `kCategoryPatternOpacity`).
+    var patternOpacity: Double = kCategoryPatternOpacity
 
     var body: some View {
         Canvas { context, size in
@@ -23,13 +25,15 @@ struct CategoryTilePattern: View {
             case .temperature:
                 drawScatteredDashes(context: context, size: size)
             case .volume:
-                drawRippleArcs(context: context, size: size)
+                drawVolumeWaveLines(context: context, size: size)
             case nil:
                 drawPlusGrid(context: context, size: size)
             }
         }
         .allowsHitTesting(false)
-        .opacity(kCategoryPatternOpacity)
+        // Canvas often gets 0×0 in a ZStack next to Color unless it expands to the stack’s proposal.
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .opacity(patternOpacity)
     }
 
     // MARK: - Length: vertical ruler ticks
@@ -132,27 +136,40 @@ struct CategoryTilePattern: View {
         }
     }
 
-    // MARK: - Volume: concentric ripple arcs from bottom center
+    // MARK: - Volume: horizontal sine wave lines
 
-    private func drawRippleArcs(context: GraphicsContext, size: CGSize) {
-        // Center slightly below the tile so the arc cap curves *into* the rect. A full
-        // upper semicircle (180→0) with clockwise:true draws the lower half in y-down
-        // coords and was fully clipped — hence the “empty” tile regression.
-        let center = CGPoint(x: size.width / 2, y: size.height + 3)
-        let spacing: CGFloat = 9
-        let strokeW: CGFloat = 0.8
-        let maxR = hypot(size.width / 2, size.height) + spacing * 2
+    private func drawVolumeWaveLines(context: GraphicsContext, size: CGSize) {
+        guard size.width > 0.5, size.height > 0.5 else { return }
 
-        var r = spacing
-        while r <= maxR {
+        let amplitude: CGFloat = 5
+        let wavelength: CGFloat = 44
+        let rowStep: CGFloat = 16
+        let strokeW: CGFloat = 1.0
+        let xStride: CGFloat = 2
+        let twoPi = Double.pi * 2
+
+        var row = 0
+        var baseY = amplitude
+        while baseY < size.height + amplitude {
+            let phase = Double(row) * 0.75
             var path = Path()
-            path.addArc(
-                center: center, radius: r,
-                startAngle: .degrees(195), endAngle: .degrees(345),
-                clockwise: false
-            )
+            var x: CGFloat = 0
+            var first = true
+            while x <= size.width + xStride {
+                let angle = twoPi * Double(x / wavelength) + phase
+                let y = baseY + amplitude * CGFloat(sin(angle))
+                let p = CGPoint(x: x, y: y)
+                if first {
+                    path.move(to: p)
+                    first = false
+                } else {
+                    path.addLine(to: p)
+                }
+                x += xStride
+            }
             context.stroke(path, with: .color(color), lineWidth: strokeW)
-            r += spacing
+            row += 1
+            baseY += rowStep
         }
     }
 

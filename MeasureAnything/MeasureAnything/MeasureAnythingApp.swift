@@ -17,6 +17,7 @@ struct MeasureAnythingApp: App {
         let taxonomy = AppTaxonomyStore()
         _taxonomyStore = StateObject(wrappedValue: taxonomy)
         _converterViewModel = StateObject(wrappedValue: ConverterViewModel(taxonomy: taxonomy))
+        _ = FactCardStore.shared
     }
 
     var body: some Scene {
