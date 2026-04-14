@@ -651,6 +651,24 @@ final class ConverterViewModel: ObservableObject {
         recompute()
     }
 
+    /// Batch-applies a recently-used pair from the Explore page.
+    func applyExplorePairSelection(
+        category: UnitCategory,
+        mode: UnitRegistry.Mode,
+        fromID: String,
+        toID: String
+    ) {
+        isApplyingFavoriteRestore = true
+        selectedCategory = category
+        selectedMode = mode
+        selectedFromUnitID = fromID
+        selectedToUnitID = toID
+        isApplyingFavoriteRestore = false
+        reconcileSelectionsAfterModeChange()
+        syncDiceTiltToCategory(animated: true)
+        recompute()
+    }
+
     /// Applies taxonomy search selection: category/mode from taxonomy JSON, optional `converterUnitId` when that unit exists for the current registry.
     func applyTaxonomyRoute(_ route: TaxonomyConverterRoute) {
         guard route.hasAnyResolvableInput else { return }
@@ -721,17 +739,23 @@ final class ConverterViewModel: ObservableObject {
         }
 
         let ids = Set(units.map(\.id))
-        let preferred = preferredDefaultPair(for: selectedCategory)
 
-        if ids.contains(preferred.from), ids.contains(preferred.to) {
-            selectedFromUnitID = preferred.from
-            selectedToUnitID = preferred.to
-        } else if let base = selectedCategory.canonicalBaseUnit, ids.contains(base) {
-            selectedFromUnitID = base
-            selectedToUnitID = firstDistinctToUnit(from: base, in: units)
+        if let recentFrom = ConversionHistory.shared.mostRecentFromUnit(in: selectedCategory),
+           ids.contains(recentFrom) {
+            selectedFromUnitID = recentFrom
+            selectedToUnitID = firstDistinctToUnit(from: recentFrom, in: units)
         } else {
-            selectedFromUnitID = units[0].id
-            selectedToUnitID = firstDistinctToUnit(from: units[0].id, in: units)
+            let preferred = preferredDefaultPair(for: selectedCategory)
+            if ids.contains(preferred.from), ids.contains(preferred.to) {
+                selectedFromUnitID = preferred.from
+                selectedToUnitID = preferred.to
+            } else if let base = selectedCategory.canonicalBaseUnit, ids.contains(base) {
+                selectedFromUnitID = base
+                selectedToUnitID = firstDistinctToUnit(from: base, in: units)
+            } else {
+                selectedFromUnitID = units[0].id
+                selectedToUnitID = firstDistinctToUnit(from: units[0].id, in: units)
+            }
         }
 
         ensureDistinctFromTo(in: units)
@@ -847,7 +871,11 @@ final class ConverterViewModel: ObservableObject {
                 includeMemeExplanation: includeMeme
             )
             if sessionPersistenceEnabled {
-                ConversionHistory.shared.record(from: selectedFromUnitID, to: selectedToUnitID)
+                ConversionHistory.shared.record(
+                    from: selectedFromUnitID,
+                    to: selectedToUnitID,
+                    category: selectedCategory
+                )
                 if selectedMode == .normal {
                     normalConversionCount = normalConversionCount + 1
                 }
