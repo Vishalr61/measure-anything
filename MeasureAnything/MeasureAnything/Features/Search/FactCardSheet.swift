@@ -1,10 +1,56 @@
 import SwiftUI
 import MeasureAnythingCore
 
-/// Explore fact card (modal). Step 2: single card, first four comparisons, no shuffle / no rabbit-hole navigation yet.
+/// Hosts the fact card stack inside the Explore sheet (`NavigationStack(path: [String])`).
+struct FactCardNavigationShell: View {
+    let initialUnitID: String
+    @ObservedObject var viewModel: ConverterViewModel
+
+    @State private var path: [String] = []
+
+    var body: some View {
+        Group {
+            if let root = try? viewModel.currentRegistry.unit(id: initialUnitID) {
+                NavigationStack(path: $path) {
+                    FactCardSheet(
+                        unit: root,
+                        viewModel: viewModel,
+                        navigationPath: $path,
+                        isNavigationRoot: true
+                    )
+                    .navigationDestination(for: String.self) { pushedID in
+                        if let u = try? viewModel.currentRegistry.unit(id: pushedID) {
+                            FactCardSheet(
+                                unit: u,
+                                viewModel: viewModel,
+                                navigationPath: $path,
+                                isNavigationRoot: false
+                            )
+                        } else {
+                            Text("This unit isn’t in the catalog.")
+                                .font(.system(size: 15))
+                                .foregroundStyle(.secondary)
+                                .padding(24)
+                        }
+                    }
+                }
+            } else {
+                Text("This unit isn’t available in the catalog.")
+                    .font(.system(size: 15))
+                    .foregroundStyle(.secondary)
+                    .padding(24)
+            }
+        }
+    }
+}
+
+/// Single fact card page (root or pushed). `navigationPath` is shared across the stack; comparisons append a unit id.
 struct FactCardSheet: View {
     let unit: UnitDefinition
     @ObservedObject var viewModel: ConverterViewModel
+    @Binding var navigationPath: [String]
+    /// `true` for the shell’s root page only (no back chevron in header).
+    var isNavigationRoot: Bool
 
     @Environment(\.dismiss) private var dismiss
 
@@ -46,6 +92,20 @@ struct FactCardSheet: View {
 
     private var header: some View {
         HStack(alignment: .top, spacing: 12) {
+            if !isNavigationRoot {
+                Button {
+                    if !navigationPath.isEmpty {
+                        navigationPath.removeLast()
+                    }
+                } label: {
+                    Image(systemName: "chevron.left")
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundStyle(Color.primary)
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("Back")
+            }
+
             RoundedRectangle(cornerRadius: 8, style: .continuous)
                 .fill(accent.opacity(0.12))
                 .frame(width: 28, height: 28)
@@ -165,14 +225,20 @@ struct FactCardSheet: View {
     private func comparisonSentence(_ row: FactCardComparison) -> some View {
         let target = try? viewModel.currentRegistry.unit(id: row.targetUnitID)
         if let target {
-            FactCardComparisonSentenceView(
-                template: row.template,
-                targetUnitName: target.name,
-                accent: accent
-            )
-            .font(.system(size: 14))
-            .foregroundStyle(Color.primary)
-            .frame(maxWidth: .infinity, alignment: .leading)
+            Button {
+                navigationPath.append(row.targetUnitID)
+            } label: {
+                FactCardComparisonSentenceView(
+                    template: row.template,
+                    targetUnitName: target.name,
+                    accent: accent
+                )
+                .font(.system(size: 14))
+                .foregroundStyle(Color.primary)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .multilineTextAlignment(.leading)
+            }
+            .buttonStyle(.plain)
         } else {
             Text(row.template)
                 .font(.system(size: 14))
@@ -311,16 +377,7 @@ private struct FactCardComparisonSentenceView: View {
     let taxonomy = AppTaxonomyStore()
     let vm = ConverterViewModel(taxonomy: taxonomy)
     let id = FactCardStore.devPreviewUnitID
-    Group {
-        if let unit = try? vm.currentRegistry.unit(id: id) {
-            NavigationStack {
-                FactCardSheet(unit: unit, viewModel: vm)
-            }
-            .presentationDetents([.medium, .large])
-        } else {
-            Text("Preview: registry missing unit “\(id)”.")
-                .padding()
-        }
-    }
+    FactCardNavigationShell(initialUnitID: id, viewModel: vm)
+        .presentationDetents([.medium, .large])
 }
 #endif

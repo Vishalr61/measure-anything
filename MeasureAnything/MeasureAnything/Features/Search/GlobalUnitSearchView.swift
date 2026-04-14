@@ -286,18 +286,9 @@ struct GlobalUnitSearchBody: View {
             }
         }
         .sheet(item: $factCardSheetItem) { item in
-            Group {
-                if let unit = try? vm.currentRegistry.unit(id: item.unitID) {
-                    FactCardSheet(unit: unit, viewModel: vm)
-                } else {
-                    Text("This unit isn’t available in the catalog.")
-                        .font(.system(size: 15))
-                        .foregroundStyle(.secondary)
-                        .padding(24)
-                }
-            }
-            .presentationDetents([.medium, .large], selection: $factSheetDetent)
-            .presentationDragIndicator(.visible)
+            FactCardNavigationShell(initialUnitID: item.unitID, viewModel: vm)
+                .presentationDetents([.medium, .large], selection: $factSheetDetent)
+                .presentationDragIndicator(.visible)
         }
         .animation(.easeInOut(duration: 0.2), value: crossCategoryToast != nil)
     }
