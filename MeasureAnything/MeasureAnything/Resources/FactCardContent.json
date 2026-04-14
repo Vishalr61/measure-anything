@@ -1,0 +1,80 @@
+{
+  "cards": {
+    "blue_whale_mass": {
+      "valueHeadline": "One blue whale weighs",
+      "valueDisplay": "150,000 kg",
+      "comparisons": [
+        {
+          "targetUnitID": "elephant",
+          "template": "About 25 African elephants, trunks to tails."
+        },
+        {
+          "targetUnitID": "small_car",
+          "template": "125 small cars, if you stacked them into a cube."
+        },
+        {
+          "targetUnitID": "grand_piano",
+          "template": "Over 300 concert grand pianos — enough for every seat in a mid-sized orchestra hall."
+        },
+        {
+          "targetUnitID": "london_double_decker_bus",
+          "template": "12 full London buses, minus the passengers."
+        },
+        {
+          "targetUnitID": "t_rex",
+          "template": "Nearly 19 T-Rex, which still wouldn't tip the scale."
+        },
+        {
+          "targetUnitID": "eiffel_tower_mass",
+          "template": "About 1/48th of the Eiffel Tower's iron frame — the tower is in a league of its own."
+        },
+        {
+          "targetUnitID": "iss",
+          "template": "A little over a third of the International Space Station, which orbits at 7.7 km per second."
+        },
+        {
+          "targetUnitID": "human_brain",
+          "template": "The combined weight of around 107,000 human brains, give or take."
+        }
+      ]
+    },
+    "feather": {
+      "valueHeadline": "One feather weighs",
+      "valueDisplay": "0.01 g",
+      "comparisons": [
+        {
+          "targetUnitID": "grain_of_rice_mass",
+          "template": "A single grain of rice weighs about 2.5 feathers — rice is denser than it looks."
+        },
+        {
+          "targetUnitID": "hummingbird",
+          "template": "A hummingbird weighs as much as 300 feathers, and needs every gram to stay airborne."
+        },
+        {
+          "targetUnitID": "paperclip_mass",
+          "template": "A standard paperclip equals 100 feathers, which makes paperclips feel surprisingly substantial."
+        },
+        {
+          "targetUnitID": "aa_battery",
+          "template": "An AA battery weighs 2,300 feathers — batteries really are denser than you'd think."
+        },
+        {
+          "targetUnitID": "iphone",
+          "template": "Your iPhone weighs 17,100 feathers, which is roughly 2.5 bald eagles' worth."
+        },
+        {
+          "targetUnitID": "human_heart",
+          "template": "Your own heart is the weight of 30,000 feathers, pumping 24 hours a day."
+        },
+        {
+          "targetUnitID": "bag_of_sugar",
+          "template": "A kilogram of sugar equals 100,000 feathers — more than 14 full eagles' worth."
+        },
+        {
+          "targetUnitID": "blue_whale_mass",
+          "template": "You'd need 15 billion feathers to match a single blue whale."
+        }
+      ]
+    }
+  }
+}

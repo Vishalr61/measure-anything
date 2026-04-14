@@ -24,6 +24,13 @@ struct GlobalUnitSearchView: View {
     }
 }
 
+// MARK: - Fact card sheet presentation
+
+private struct FactCardSheetItem: Identifiable {
+    var id: String { unitID }
+    let unitID: String
+}
+
 // MARK: - Reusable body (works in sheet or full-screen tab)
 
 struct GlobalUnitSearchBody: View {
@@ -44,6 +51,9 @@ struct GlobalUnitSearchBody: View {
 
     @State private var fromSelection: SearchResult?
     @State private var crossCategoryToast: String?
+
+    @State private var factCardSheetItem: FactCardSheetItem?
+    @State private var factSheetDetent: PresentationDetent = .large
 
     @Environment(\.scenePhase) private var scenePhase
 
@@ -234,6 +244,17 @@ struct GlobalUnitSearchBody: View {
                             .font(.system(size: 17, weight: .semibold))
                     }
                 }
+#if DEBUG
+                if isExploreTab {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button("Card") {
+                            factCardSheetItem = FactCardSheetItem(unitID: FactCardStore.devPreviewUnitID)
+                        }
+                        .font(.system(size: 15, weight: .semibold))
+                        .accessibilityLabel("Open fact card design preview")
+                    }
+                }
+#endif
             }
             .onChange(of: resetToken) { _, _ in
                 withAnimation(.easeInOut(duration: 0.2)) {
@@ -242,6 +263,8 @@ struct GlobalUnitSearchBody: View {
                     searchText = ""
                     fromSelection = nil
                     crossCategoryToast = nil
+                    factCardSheetItem = nil
+                    factSheetDetent = .large
                 }
             }
             .onChange(of: activeCategory) { old, new in
@@ -261,6 +284,20 @@ struct GlobalUnitSearchBody: View {
                     .transition(.move(edge: .top).combined(with: .opacity))
                     .zIndex(10)
             }
+        }
+        .sheet(item: $factCardSheetItem) { item in
+            Group {
+                if let unit = try? vm.currentRegistry.unit(id: item.unitID) {
+                    FactCardSheet(unit: unit, viewModel: vm)
+                } else {
+                    Text("This unit isn’t available in the catalog.")
+                        .font(.system(size: 15))
+                        .foregroundStyle(.secondary)
+                        .padding(24)
+                }
+            }
+            .presentationDetents([.medium, .large], selection: $factSheetDetent)
+            .presentationDragIndicator(.visible)
         }
         .animation(.easeInOut(duration: 0.2), value: crossCategoryToast != nil)
     }
@@ -599,10 +636,13 @@ struct GlobalUnitSearchBody: View {
                             isSelected: fromSelection?.unit.id == result.unit.id,
                             nextRowSelected: nextIsSelected,
                             selectionLightShade: light,
-                            horizontalInset: horizontalInset
-                        ) {
-                            handleUnitTap(result)
-                        }
+                            horizontalInset: horizontalInset,
+                            onTap: { handleUnitTap(result) },
+                            onOpenFactCard: {
+                                factCardSheetItem = FactCardSheetItem(unitID: result.unit.id)
+                                Haptics.tap()
+                            }
+                        )
                     }
                 }
 
@@ -621,10 +661,13 @@ struct GlobalUnitSearchBody: View {
                                 isSelected: fromSelection?.unit.id == unit.id,
                                 nextRowSelected: nextIsSelected,
                                 selectionLightShade: light,
-                                horizontalInset: horizontalInset
-                            ) {
-                                handleUnitTap(result)
-                            }
+                                horizontalInset: horizontalInset,
+                                onTap: { handleUnitTap(result) },
+                                onOpenFactCard: {
+                                    factCardSheetItem = FactCardSheetItem(unitID: unit.id)
+                                    Haptics.tap()
+                                }
+                            )
                         }
                     }
                 }
@@ -660,10 +703,13 @@ struct GlobalUnitSearchBody: View {
                             isSelected: fromSelection?.unit.id == result.unit.id,
                             nextRowSelected: nextIsSelected,
                             selectionLightShade: light,
-                            horizontalInset: horizontalInset
-                        ) {
-                            handleUnitTap(result)
-                        }
+                            horizontalInset: horizontalInset,
+                            onTap: { handleUnitTap(result) },
+                            onOpenFactCard: {
+                                factCardSheetItem = FactCardSheetItem(unitID: result.unit.id)
+                                Haptics.tap()
+                            }
+                        )
                     }
 
                     ForEach(grouped, id: \.title) { group in
@@ -677,10 +723,13 @@ struct GlobalUnitSearchBody: View {
                                     isSelected: fromSelection?.unit.id == unit.id,
                                     nextRowSelected: nextIsSelected,
                                     selectionLightShade: light,
-                                    horizontalInset: horizontalInset
-                                ) {
-                                    handleUnitTap(result)
-                                }
+                                    horizontalInset: horizontalInset,
+                                    onTap: { handleUnitTap(result) },
+                                    onOpenFactCard: {
+                                        factCardSheetItem = FactCardSheetItem(unitID: unit.id)
+                                        Haptics.tap()
+                                    }
+                                )
                             }
                         }
                     }
