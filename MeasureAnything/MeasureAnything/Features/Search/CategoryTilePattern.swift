@@ -45,7 +45,7 @@ struct CategoryTilePattern: View {
         while baseY < size.height + rowSpacing {
             var x: CGFloat = spacing
             var index = 0
-            while x < size.width {
+            while x < size.width + spacing {
                 let h = index % 2 == 0 ? tallH : shortH
                 var path = Path()
                 path.move(to: CGPoint(x: x, y: baseY))
@@ -65,9 +65,9 @@ struct CategoryTilePattern: View {
         let radius: CGFloat = 1.3
 
         var y: CGFloat = spacing / 2
-        while y < size.height {
+        while y < size.height + spacing {
             var x: CGFloat = spacing / 2
-            while x < size.width {
+            while x < size.width + spacing {
                 let rect = CGRect(
                     x: x - radius, y: y - radius,
                     width: radius * 2, height: radius * 2
@@ -117,9 +117,9 @@ struct CategoryTilePattern: View {
         let offsets: [(CGFloat, CGFloat)] = [(2, 3), (7, 7), (4, 10)]
 
         var y: CGFloat = 0
-        while y < size.height {
+        while y < size.height + cellSize {
             var x: CGFloat = 0
-            while x < size.width {
+            while x < size.width + cellSize {
                 for (dx, dy) in offsets {
                     var path = Path()
                     path.move(to: CGPoint(x: x + dx, y: y + dy))
@@ -135,16 +135,20 @@ struct CategoryTilePattern: View {
     // MARK: - Volume: concentric ripple arcs from bottom center
 
     private func drawRippleArcs(context: GraphicsContext, size: CGSize) {
-        let center = CGPoint(x: size.width / 2, y: size.height + 4)
-        let spacing: CGFloat = 10
+        // Center slightly below the tile so the arc cap curves *into* the rect. A full
+        // upper semicircle (180→0) with clockwise:true draws the lower half in y-down
+        // coords and was fully clipped — hence the “empty” tile regression.
+        let center = CGPoint(x: size.width / 2, y: size.height + 3)
+        let spacing: CGFloat = 9
         let strokeW: CGFloat = 0.8
-        var r: CGFloat = spacing
+        let maxR = hypot(size.width / 2, size.height) + spacing * 2
 
-        while r < max(size.width, size.height) * 1.2 {
+        var r = spacing
+        while r <= maxR {
             var path = Path()
             path.addArc(
                 center: center, radius: r,
-                startAngle: .degrees(200), endAngle: .degrees(340),
+                startAngle: .degrees(195), endAngle: .degrees(345),
                 clockwise: false
             )
             context.stroke(path, with: .color(color), lineWidth: strokeW)
@@ -160,9 +164,9 @@ struct CategoryTilePattern: View {
         let strokeW: CGFloat = 1.0
 
         var y: CGFloat = cellSize / 2
-        while y < size.height {
+        while y < size.height + cellSize {
             var x: CGFloat = cellSize / 2
-            while x < size.width {
+            while x < size.width + cellSize {
                 var h = Path()
                 h.move(to: CGPoint(x: x - arm, y: y))
                 h.addLine(to: CGPoint(x: x + arm, y: y))

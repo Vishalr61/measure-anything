@@ -185,12 +185,8 @@ struct GlobalUnitSearchBody: View {
                                 showAllUnits = false
                             }
                         } label: {
-                            HStack(spacing: 4) {
-                                Image(systemName: "chevron.left")
-                                    .font(.system(size: 14, weight: .semibold))
-                                Text("Explore")
-                                    .font(.system(size: 16))
-                            }
+                            Image(systemName: "chevron.left")
+                                .font(.system(size: 14, weight: .semibold))
                         }
                     }
                 }
