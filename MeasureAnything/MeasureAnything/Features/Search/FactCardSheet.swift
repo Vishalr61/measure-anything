@@ -71,6 +71,16 @@ struct FactCardSheet: View {
         sessionComparisonSlices[unit.id] ?? []
     }
 
+    /// Tier 1 only: pool larger than the visible slice — reroll can change which four appear.
+    private var shouldShowComparisonShuffle: Bool {
+        guard let curated else { return false }
+        return curated.comparisons.count > 4
+    }
+
+    private var comparisonRowsAnimationIdentity: String {
+        previewComparisons.map { "\($0.targetUnitID)\u{1e}\($0.template)" }.joined(separator: "\u{1f}")
+    }
+
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 0) {
@@ -222,9 +232,41 @@ struct FactCardSheet: View {
                     comparisonSentence(row)
                 }
             }
+            .id(comparisonRowsAnimationIdentity)
+            .transition(.opacity)
+
+            if shouldShowComparisonShuffle {
+                comparisonShufflePill
+                    .padding(.top, 4)
+            }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal, 16)
+    }
+
+    private var comparisonShufflePill: some View {
+        Button {
+            Haptics.tap()
+            withAnimation(.easeInOut(duration: 0.22)) {
+                reshuffleSessionComparisons()
+            }
+        } label: {
+            Text("↻ Shuffle")
+                .font(.system(size: 13, weight: .medium))
+                .foregroundStyle(accent.opacity(0.92))
+                .padding(.horizontal, 18)
+                .padding(.vertical, 9)
+                .background(
+                    Capsule(style: .continuous)
+                        .fill(accent.opacity(0.09))
+                )
+                .overlay(
+                    Capsule(style: .continuous)
+                        .strokeBorder(accent.opacity(0.38), lineWidth: 0.75)
+                )
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("Shuffle comparisons")
     }
 
     /// Fisher–Yates shuffle, then keep up to four comparisons. Stored once per unit id for this sheet session.
@@ -244,6 +286,22 @@ struct FactCardSheet: View {
             copy.swapAt(i, Int.random(in: 0...i))
         }
         return Array(copy.prefix(min(take, copy.count)))
+    }
+
+    /// New random four from the full pool; avoids repeating the same multiset when the pool has more than four.
+    private func reshuffleSessionComparisons() {
+        guard let curated, curated.comparisons.count > 4 else { return }
+        let pool = curated.comparisons
+        let previous = sessionComparisonSlices[unit.id] ?? []
+        var nextSlice = Self.shuffledPrefix(pool, take: 4)
+        var attempts = 0
+        while nextSlice == previous && attempts < 64 {
+            nextSlice = Self.shuffledPrefix(pool, take: 4)
+            attempts += 1
+        }
+        var next = sessionComparisonSlices
+        next[unit.id] = nextSlice
+        sessionComparisonSlices = next
     }
 
     @ViewBuilder

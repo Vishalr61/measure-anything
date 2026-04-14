@@ -10,7 +10,7 @@ struct FactCardEntry: Codable {
     let comparisons: [FactCardComparison]
 }
 
-struct FactCardComparison: Codable {
+struct FactCardComparison: Codable, Equatable {
     let targetUnitID: String
     let template: String
 }
