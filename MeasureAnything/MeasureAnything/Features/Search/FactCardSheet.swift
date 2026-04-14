@@ -121,35 +121,27 @@ struct FactCardSheet: View {
 
     private var headerBand: some View {
         VStack(alignment: .leading, spacing: 0) {
-            HStack(alignment: .center, spacing: 8) {
+            // Back + close only — category sits on the next row so it isn’t squeezed beside the back control.
+            HStack(alignment: .center, spacing: 0) {
                 if !isNavigationRoot {
-                    Button {
-                        if !navigationPath.isEmpty {
-                            navigationPath.removeLast()
-                        }
-                    } label: {
-                        Image(systemName: "chevron.backward")
-                            .font(.system(size: 14, weight: .semibold))
-                            .foregroundStyle(palette.onDeep)
-                    }
-                    .buttonStyle(.plain)
-                    .accessibilityLabel("Back")
+                    headerBackButton
+                } else {
+                    Color.clear
+                        .frame(width: 44, height: 44)
+                        .accessibilityHidden(true)
                 }
-
-                Text(unit.category.rawValue)
-                    .font(.system(size: 8, weight: .medium))
-                    .foregroundStyle(palette.onDeepMuted)
-                    .textCase(.uppercase)
-                    .tracking(1)
-
                 Spacer(minLength: 0)
-
                 headerCloseButton
             }
             .padding(.top, 24)
 
-            Spacer()
-                .frame(height: 22)
+            Text(unit.category.rawValue)
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundStyle(palette.onDeepMuted)
+                .textCase(.uppercase)
+                .tracking(1.15)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.top, 10)
 
             HStack(alignment: .center, spacing: 14) {
                 RoundedRectangle(cornerRadius: 9, style: .continuous)
@@ -166,6 +158,7 @@ struct FactCardSheet: View {
                     .foregroundStyle(palette.onDeep)
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
+            .padding(.top, 18)
             .padding(.bottom, 8)
         }
         .padding(.horizontal, 24)
@@ -179,18 +172,41 @@ struct FactCardSheet: View {
         }
     }
 
+    private var headerBackButton: some View {
+        Button {
+            if !navigationPath.isEmpty {
+                navigationPath.removeLast()
+            }
+        } label: {
+            ZStack {
+                Circle()
+                    .fill(palette.onDeep.opacity(0.24))
+                    .frame(width: 30, height: 30)
+                Image(systemName: "chevron.backward")
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundStyle(palette.onDeep)
+            }
+            .frame(width: 44, height: 44)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("Back")
+    }
+
     private var headerCloseButton: some View {
         Button {
             dismiss()
         } label: {
             ZStack {
                 Circle()
-                    .fill(palette.onDeep.opacity(0.2))
-                    .frame(width: 20, height: 20)
+                    .fill(palette.onDeep.opacity(0.24))
+                    .frame(width: 30, height: 30)
                 Image(systemName: "xmark")
-                    .font(.system(size: 10, weight: .semibold))
+                    .font(.system(size: 13, weight: .semibold))
                     .foregroundStyle(palette.onDeep)
             }
+            .frame(width: 44, height: 44)
+            .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
         .accessibilityLabel("Close")

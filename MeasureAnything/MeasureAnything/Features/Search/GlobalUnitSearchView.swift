@@ -232,29 +232,23 @@ struct GlobalUnitSearchBody: View {
                                 .font(.system(size: 17, weight: .semibold))
                         }
                     } else if isExploreTab {
-                        VStack(spacing: 2) {
+                        VStack(alignment: .center, spacing: 4) {
                             Text("Explore")
                                 .font(.system(size: 17, weight: .semibold))
                             Text("Meters, whales, and everything between.")
                                 .font(.system(size: 13))
                                 .foregroundStyle(.secondary)
+                                .multilineTextAlignment(.center)
+                                .lineLimit(2)
+                                .minimumScaleFactor(0.9)
+                                .fixedSize(horizontal: false, vertical: true)
                         }
+                        .frame(maxWidth: .infinity)
                     } else {
                         Text("Explore")
                             .font(.system(size: 17, weight: .semibold))
                     }
                 }
-#if DEBUG
-                if isExploreTab {
-                    ToolbarItem(placement: .topBarTrailing) {
-                        Button("Card") {
-                            factCardSheetItem = FactCardSheetItem(unitID: FactCardStore.devPreviewUnitID)
-                        }
-                        .font(.system(size: 15, weight: .semibold))
-                        .accessibilityLabel("Open fact card design preview")
-                    }
-                }
-#endif
             }
             .onChange(of: resetToken) { _, _ in
                 withAnimation(.easeInOut(duration: 0.2)) {
