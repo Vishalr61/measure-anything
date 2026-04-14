@@ -180,7 +180,7 @@ struct FactCardSheet: View {
         } label: {
             ZStack {
                 Circle()
-                    .fill(palette.onDeep.opacity(0.24))
+                    .fill(palette.onDeep.opacity(0.25))
                     .frame(width: 30, height: 30)
                 Image(systemName: "chevron.backward")
                     .font(.system(size: 14, weight: .semibold))
@@ -199,7 +199,7 @@ struct FactCardSheet: View {
         } label: {
             ZStack {
                 Circle()
-                    .fill(palette.onDeep.opacity(0.24))
+                    .fill(palette.onDeep.opacity(0.25))
                     .frame(width: 30, height: 30)
                 Image(systemName: "xmark")
                     .font(.system(size: 13, weight: .semibold))
@@ -263,7 +263,7 @@ struct FactCardSheet: View {
                 .tracking(0.85)
                 .padding(.top, 22)
 
-            VStack(alignment: .leading, spacing: 16) {
+            VStack(alignment: .leading, spacing: 12) {
                 ForEach(Array(previewComparisons.enumerated()), id: \.offset) { _, row in
                     comparisonSentence(row)
                 }
@@ -340,9 +340,17 @@ struct FactCardSheet: View {
         sessionComparisonSlices = next
     }
 
-    @ViewBuilder
     private func comparisonSentence(_ row: FactCardComparison) -> some View {
         let target = try? viewModel.currentRegistry.unit(id: row.targetUnitID)
+        return ComparisonLeadingRailLayout {
+            RoundedRectangle(cornerRadius: 1.5, style: .continuous)
+                .fill(palette.deep)
+            comparisonRowBody(row, target: target)
+        }
+    }
+
+    @ViewBuilder
+    private func comparisonRowBody(_ row: FactCardComparison, target: UnitDefinition?) -> some View {
         if let target {
             Button {
                 navigationPath.append(row.targetUnitID)
@@ -386,6 +394,46 @@ struct FactCardSheet: View {
             out.removeSubrange(open...close)
         }
         return out
+    }
+}
+
+// MARK: - Comparison leading rail (Design 3)
+
+/// 3pt rail + 11pt gap; rail height matches the comparison text block (including multi-line).
+private struct ComparisonLeadingRailLayout: Layout {
+    private let railWidth: CGFloat = 3
+    private let gap: CGFloat = 11
+
+    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
+        guard subviews.count == 2 else { return .zero }
+        let maxTextW: CGFloat = {
+            guard let w = proposal.width else { return .infinity }
+            return max(0, w - railWidth - gap)
+        }()
+        let textSize = subviews[1].sizeThatFits(ProposedViewSize(width: maxTextW, height: proposal.height))
+        let totalW = railWidth + gap + textSize.width
+        if let cap = proposal.width {
+            return CGSize(width: min(cap, totalW), height: textSize.height)
+        }
+        return CGSize(width: totalW, height: textSize.height)
+    }
+
+    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
+        guard subviews.count == 2 else { return }
+        let textW = max(0, bounds.width - railWidth - gap)
+        let textSize = subviews[1].sizeThatFits(ProposedViewSize(width: textW, height: bounds.height))
+        let h = textSize.height
+
+        subviews[0].place(
+            at: CGPoint(x: bounds.minX, y: bounds.minY),
+            anchor: .topLeading,
+            proposal: ProposedViewSize(width: railWidth, height: h)
+        )
+        subviews[1].place(
+            at: CGPoint(x: bounds.minX + railWidth + gap, y: bounds.minY),
+            anchor: .topLeading,
+            proposal: ProposedViewSize(width: textW, height: h)
+        )
     }
 }
 
