@@ -514,11 +514,11 @@ struct GlobalUnitSearchBody: View {
                             accent: accent,
                             isSelected: fromSelection?.unit.id == result.unit.id,
                             nextRowSelected: nextIsSelected,
-                            selectionLightShade: light
+                            selectionLightShade: light,
+                            horizontalInset: horizontalInset
                         ) {
                             handleUnitTap(result)
                         }
-                        .padding(.horizontal, horizontalInset)
                     }
                 }
 
@@ -536,11 +536,11 @@ struct GlobalUnitSearchBody: View {
                                 accent: accent,
                                 isSelected: fromSelection?.unit.id == unit.id,
                                 nextRowSelected: nextIsSelected,
-                                selectionLightShade: light
+                                selectionLightShade: light,
+                                horizontalInset: horizontalInset
                             ) {
                                 handleUnitTap(result)
                             }
-                            .padding(.horizontal, horizontalInset)
                         }
                     }
                 }
@@ -575,11 +575,11 @@ struct GlobalUnitSearchBody: View {
                             accent: accent,
                             isSelected: fromSelection?.unit.id == result.unit.id,
                             nextRowSelected: nextIsSelected,
-                            selectionLightShade: light
+                            selectionLightShade: light,
+                            horizontalInset: horizontalInset
                         ) {
                             handleUnitTap(result)
                         }
-                        .padding(.horizontal, horizontalInset)
                     }
 
                     ForEach(grouped, id: \.title) { group in
@@ -592,11 +592,11 @@ struct GlobalUnitSearchBody: View {
                                     accent: accent,
                                     isSelected: fromSelection?.unit.id == unit.id,
                                     nextRowSelected: nextIsSelected,
-                                    selectionLightShade: light
+                                    selectionLightShade: light,
+                                    horizontalInset: horizontalInset
                                 ) {
                                     handleUnitTap(result)
                                 }
-                                .padding(.horizontal, horizontalInset)
                             }
                         }
                     }

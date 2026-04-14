@@ -7,6 +7,7 @@ struct UnitBrowseRow: View {
     var isSelected: Bool = false
     var nextRowSelected: Bool = false
     var selectionLightShade: Color = .clear
+    var horizontalInset: CGFloat = 0
     let onTap: () -> Void
 
     var body: some View {
@@ -40,6 +41,7 @@ struct UnitBrowseRow: View {
                     .foregroundStyle(Color(.tertiaryLabel))
             }
             .padding(.vertical, 12)
+            .padding(.horizontal, horizontalInset)
             .background(isSelected ? selectionLightShade.opacity(0.5) : .clear)
             .contentShape(Rectangle())
         }
@@ -48,6 +50,7 @@ struct UnitBrowseRow: View {
             Group {
                 if !isSelected && !nextRowSelected {
                     Divider().frame(maxWidth: .infinity)
+                        .padding(.horizontal, horizontalInset)
                 }
             },
             alignment: .bottom
