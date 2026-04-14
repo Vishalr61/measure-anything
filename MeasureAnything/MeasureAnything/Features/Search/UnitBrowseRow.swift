@@ -5,6 +5,7 @@ struct UnitBrowseRow: View {
     let unit: UnitDefinition
     let accent: Color
     var isSelected: Bool = false
+    var nextRowSelected: Bool = false
     var selectionLightShade: Color = .clear
     let onTap: () -> Void
 
@@ -44,7 +45,11 @@ struct UnitBrowseRow: View {
         }
         .buttonStyle(.plain)
         .overlay(
-            Divider().frame(maxWidth: .infinity),
+            Group {
+                if !isSelected && !nextRowSelected {
+                    Divider().frame(maxWidth: .infinity)
+                }
+            },
             alignment: .bottom
         )
     }

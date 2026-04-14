@@ -506,11 +506,14 @@ struct GlobalUnitSearchBody: View {
                         .padding(.horizontal, horizontalInset)
                         .padding(.top, 18)
                         .padding(.bottom, 4)
-                    ForEach(normalUnits, id: \.id) { result in
+                    ForEach(Array(normalUnits.enumerated()), id: \.element.id) { idx, result in
+                        let nextIsSelected = idx + 1 < normalUnits.count
+                            && fromSelection?.unit.id == normalUnits[idx + 1].unit.id
                         UnitBrowseRow(
                             unit: result.unit,
                             accent: accent,
                             isSelected: fromSelection?.unit.id == result.unit.id,
+                            nextRowSelected: nextIsSelected,
                             selectionLightShade: light
                         ) {
                             handleUnitTap(result)
@@ -524,12 +527,15 @@ struct GlobalUnitSearchBody: View {
                         .padding(.horizontal, horizontalInset)
                         .padding(.top, 16)
                         .padding(.bottom, 4)
-                    ForEach(group.units, id: \.id) { unit in
+                    ForEach(Array(group.units.enumerated()), id: \.element.id) { idx, unit in
                         if let result = allForCategory.first(where: { $0.unit.id == unit.id }) {
+                            let nextIsSelected = idx + 1 < group.units.count
+                                && fromSelection?.unit.id == group.units[idx + 1].id
                             UnitBrowseRow(
                                 unit: unit,
                                 accent: accent,
                                 isSelected: fromSelection?.unit.id == unit.id,
+                                nextRowSelected: nextIsSelected,
                                 selectionLightShade: light
                             ) {
                                 handleUnitTap(result)
@@ -561,11 +567,14 @@ struct GlobalUnitSearchBody: View {
                         .padding(.top, 16)
                         .padding(.bottom, 4)
 
-                    ForEach(normalUnits, id: \.id) { result in
+                    ForEach(Array(normalUnits.enumerated()), id: \.element.id) { idx, result in
+                        let nextIsSelected = idx + 1 < normalUnits.count
+                            && fromSelection?.unit.id == normalUnits[idx + 1].unit.id
                         UnitBrowseRow(
                             unit: result.unit,
                             accent: accent,
                             isSelected: fromSelection?.unit.id == result.unit.id,
+                            nextRowSelected: nextIsSelected,
                             selectionLightShade: light
                         ) {
                             handleUnitTap(result)
@@ -574,12 +583,15 @@ struct GlobalUnitSearchBody: View {
                     }
 
                     ForEach(grouped, id: \.title) { group in
-                        ForEach(group.units, id: \.id) { unit in
+                        ForEach(Array(group.units.enumerated()), id: \.element.id) { idx, unit in
                             if let result = catResults.first(where: { $0.unit.id == unit.id }) {
+                                let nextIsSelected = idx + 1 < group.units.count
+                                    && fromSelection?.unit.id == group.units[idx + 1].id
                                 UnitBrowseRow(
                                     unit: unit,
                                     accent: accent,
                                     isSelected: fromSelection?.unit.id == unit.id,
+                                    nextRowSelected: nextIsSelected,
                                     selectionLightShade: light
                                 ) {
                                     handleUnitTap(result)
