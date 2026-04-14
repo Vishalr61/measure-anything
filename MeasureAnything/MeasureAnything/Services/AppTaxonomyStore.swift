@@ -266,12 +266,12 @@ final class AppTaxonomyStore: ObservableObject {
     /// Sections inside one domain (subgenre / unit category / flat), after filter normalization.
     func browseSections(
         in domainId: String,
-        filters: TaxonomySearchFilters = TaxonomySearchFilters(),
+        filters: TaxonomySearchFilters? = nil,
         limitPerSection: Int = 200,
         maxSections: Int = 100
     ) -> [TaxonomyBrowseSection] {
         guard let index = searchIndex else { return [] }
-        var merged = filters
+        var merged = filters ?? TaxonomySearchFilters()
         merged.domainId = domainId
         let nf = normalizedFilters(merged)
         return index.browseSections(
@@ -286,11 +286,11 @@ final class AppTaxonomyStore: ObservableObject {
     /// Ranked search and flattened browse use the same normalized filters.
     func searchItems(
         query: String,
-        filters: TaxonomySearchFilters = TaxonomySearchFilters(),
+        filters: TaxonomySearchFilters? = nil,
         limit: Int = 100
     ) -> [TaxonomyItemSearchResult] {
         guard let index = searchIndex else { return [] }
-        let nf = normalizedFilters(filters)
+        let nf = normalizedFilters(filters ?? TaxonomySearchFilters())
         let trimmed = query.trimmingCharacters(in: .whitespacesAndNewlines)
         if trimmed.isEmpty {
             return index.browse(
