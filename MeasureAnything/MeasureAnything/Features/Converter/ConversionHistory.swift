@@ -71,6 +71,11 @@ final class ConversionHistory {
         }
     }
 
+    /// Whether there is at least one stored recent pair (Explore uses this for Try these vs Recently used).
+    var hasRecentPairs: Bool {
+        !recentPairs(limit: 1).isEmpty
+    }
+
     func clearRecentPairs() {
         UserDefaults.standard.removeObject(forKey: pairsKey)
         UserDefaults.standard.removeObject(forKey: recencyKey)

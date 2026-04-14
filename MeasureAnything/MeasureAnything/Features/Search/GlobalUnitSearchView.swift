@@ -31,8 +31,11 @@ struct GlobalUnitSearchBody: View {
     let onUnitSelected: () -> Void
     /// Bump this value to reset the view back to the main browse state.
     var resetToken: Int = 0
+    /// When `true`, Explore-only chrome (subtitle, rotating placeholder) is enabled.
+    var isExploreTab: Bool = false
 
     @State private var searchText = ""
+    @State private var searchPlaceholder = ExplorePlaceholders.defaultPlaceholder
     @State private var activeCategory: UnitCategory?
     @State private var showAllUnits = false
     @FocusState private var searchFocused: Bool
@@ -218,6 +221,14 @@ struct GlobalUnitSearchBody: View {
                             Text("All units")
                                 .font(.system(size: 17, weight: .semibold))
                         }
+                    } else if isExploreTab {
+                        VStack(spacing: 2) {
+                            Text("Explore")
+                                .font(.system(size: 17, weight: .semibold))
+                            Text("Meters, whales, and everything between.")
+                                .font(.system(size: 13))
+                                .foregroundStyle(.secondary)
+                        }
                     } else {
                         Text("Explore")
                             .font(.system(size: 17, weight: .semibold))
@@ -311,7 +322,11 @@ struct GlobalUnitSearchBody: View {
             Image(systemName: "magnifyingglass")
                 .foregroundStyle(Color(hex: "#B4B2A9"))
                 .font(.system(size: 15))
-            TextField("Search units...", text: $searchText)
+            TextField(
+                "",
+                text: $searchText,
+                prompt: Text(isExploreTab ? searchPlaceholder : ExplorePlaceholders.defaultPlaceholder)
+            )
                 .font(.system(size: 16))
                 .autocorrectionDisabled()
                 .focused($searchFocused)
@@ -330,7 +345,7 @@ struct GlobalUnitSearchBody: View {
         .background(Color(hex: "#F0F0F3"))
         .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
         .padding(.horizontal, horizontalInset)
-        .padding(.top, 8)
+        .padding(.top, (isExploreTab && !isExpanded) ? 12 : 8)
         .padding(.bottom, 8)
     }
 
@@ -417,29 +432,102 @@ struct GlobalUnitSearchBody: View {
                     categoryGrid
                 }
 
-                let pairs = resolvedPairs()
-                if !pairs.isEmpty {
-                    VStack(alignment: .leading, spacing: 10) {
-                        sectionLabel("Recently used")
-                        VStack(spacing: 8) {
-                            ForEach(Array(pairs.prefix(3).enumerated()), id: \.offset) { _, item in
-                                RecentPairRow(
-                                    fromUnit: item.fromUnit,
-                                    toUnit: item.toUnit,
-                                    category: item.category,
-                                    accent: ConverterCategoryAccent.accent(for: item.category)
-                                ) {
-                                    applyPair(item)
-                                }
-                            }
-                        }
-                    }
-                }
+                exploreBrowseListSection
             }
             .padding(.horizontal, horizontalInset)
             .padding(.top, 16)
             .padding(.bottom, 24)
         }
+        .onAppear {
+            refreshExplorePlaceholderIfNeeded()
+        }
+    }
+
+    @ViewBuilder
+    private var exploreBrowseListSection: some View {
+        let pairs = resolvedPairs()
+        if ConversionHistory.shared.hasRecentPairs {
+            if !pairs.isEmpty {
+                VStack(alignment: .leading, spacing: 10) {
+                    sectionLabel("Recently used")
+                    VStack(spacing: 8) {
+                        ForEach(Array(pairs.prefix(3).enumerated()), id: \.offset) { _, item in
+                            RecentPairRow(
+                                fromUnit: item.fromUnit,
+                                toUnit: item.toUnit,
+                                category: item.category,
+                                accent: ConverterCategoryAccent.accent(for: item.category)
+                            ) {
+                                applyPair(item)
+                            }
+                        }
+                    }
+                }
+            }
+        } else {
+            tryTheseBrowseSection
+        }
+    }
+
+    @ViewBuilder
+    private var tryTheseBrowseSection: some View {
+        let rows = tryTheseDisplayRows()
+        if !rows.isEmpty {
+            VStack(alignment: .leading, spacing: 10) {
+                sectionLabel("Try these")
+                VStack(spacing: 8) {
+                    ForEach(rows) { row in
+                        RecentPairRow(
+                            fromUnit: row.pair.fromUnit,
+                            toUnit: row.pair.toUnit,
+                            category: row.pair.category,
+                            accent: ConverterCategoryAccent.accent(for: row.pair.category)
+                        ) {
+                            applyTryTheseRow(spec: row.spec, pair: row.pair)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private struct TryTheseDisplayRow: Identifiable {
+        var id: String { "\(spec.fromID)→\(spec.toID)" }
+        let spec: TryTheseSuggestions.RowSpec
+        let pair: ResolvedPair
+    }
+
+    private func tryTheseDisplayRows() -> [TryTheseDisplayRow] {
+        TryTheseSuggestions.rows.compactMap { spec in
+            guard
+                let fr = allUnits.first(where: { $0.unit.id == spec.fromID && $0.category == spec.category }),
+                let t = allUnits.first(where: { $0.unit.id == spec.toID && $0.category == spec.category })
+            else { return nil }
+            let pair = ResolvedPair(
+                fromUnit: fr.unit,
+                toUnit: t.unit,
+                category: spec.category,
+                mode: spec.mode
+            )
+            return TryTheseDisplayRow(spec: spec, pair: pair)
+        }
+    }
+
+    private func refreshExplorePlaceholderIfNeeded() {
+        guard isExploreTab else { return }
+        guard activeCategory == nil, !showAllUnits else { return }
+        ExplorePlaceholders.refreshPlaceholder(searchPlaceholder: &searchPlaceholder)
+    }
+
+    private func applyTryTheseRow(spec: TryTheseSuggestions.RowSpec, pair: ResolvedPair) {
+        vm.applyTryThesePair(
+            category: spec.category,
+            mode: spec.mode,
+            fromID: pair.fromUnit.id,
+            toID: pair.toUnit.id
+        )
+        Haptics.tap()
+        onUnitSelected()
     }
 
     private var categoryGrid: some View {

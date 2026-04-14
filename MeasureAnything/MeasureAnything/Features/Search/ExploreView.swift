@@ -8,9 +8,14 @@ struct ExploreView: View {
 
     var body: some View {
         NavigationStack {
-            GlobalUnitSearchBody(vm: vm, onUnitSelected: {
-                selectedTab = .convert
-            }, resetToken: resetToken)
+            GlobalUnitSearchBody(
+                vm: vm,
+                onUnitSelected: {
+                    selectedTab = .convert
+                },
+                resetToken: resetToken,
+                isExploreTab: true
+            )
         }
     }
 }

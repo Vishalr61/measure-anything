@@ -13,6 +13,8 @@ final class ConverterViewModel: ObservableObject {
     private var isRestoringSession = false
     /// Skips `selectedFromUnitID` / `selectedToUnitID` `didSet` → `recompute` while batching ID fixes (avoids re-entrancy).
     private var isSanitisingSelections = false
+    /// While rebuilding registry from SwiftData, skip persisting “conversions” into `ConversionHistory`.
+    private var isSyncingCustomUnitsCatalog = false
     private var sessionPersistenceEnabled = false
 
     private enum SessionKeys {
@@ -46,7 +48,7 @@ final class ConverterViewModel: ObservableObject {
 
     @Published var inputText: String = "1" {
         didSet {
-            guard !isRestoringSession else { return }
+            guard !isRestoringSession, !isApplyingFavoriteRestore else { return }
             recompute()
         }
     }
@@ -144,6 +146,9 @@ final class ConverterViewModel: ObservableObject {
 
     /// Rebuilds engine + registry when SwiftData custom rows change.
     func sync(customUnits: [CustomUnit]) {
+        isSyncingCustomUnitsCatalog = true
+        defer { isSyncingCustomUnitsCatalog = false }
+
         let pair = Self.makeRegistry(customUnits: customUnits)
         registry = pair.registry
         engine = pair.engine
@@ -669,6 +674,27 @@ final class ConverterViewModel: ObservableObject {
         recompute()
     }
 
+    /// Explore “Try these”: pre-fill units with empty input, then record the pair in history (no conversion run).
+    func applyTryThesePair(
+        category: UnitCategory,
+        mode: UnitRegistry.Mode,
+        fromID: String,
+        toID: String
+    ) {
+        isApplyingFavoriteRestore = true
+        selectedCategory = category
+        selectedMode = mode
+        selectedFromUnitID = fromID
+        selectedToUnitID = toID
+        inputText = ""
+        isApplyingFavoriteRestore = false
+        reconcileSelectionsAfterModeChange()
+        syncDiceTiltToCategory(animated: true)
+        recompute()
+        ConversionHistory.shared.record(from: fromID, to: toID, category: category)
+        objectWillChange.send()
+    }
+
     /// Applies taxonomy search selection: category/mode from taxonomy JSON, optional `converterUnitId` when that unit exists for the current registry.
     func applyTaxonomyRoute(_ route: TaxonomyConverterRoute) {
         guard route.hasAnyResolvableInput else { return }
@@ -870,7 +896,7 @@ final class ConverterViewModel: ObservableObject {
                 to: selectedToUnitID,
                 includeMemeExplanation: includeMeme
             )
-            if sessionPersistenceEnabled {
+            if sessionPersistenceEnabled, !isSyncingCustomUnitsCatalog {
                 ConversionHistory.shared.record(
                     from: selectedFromUnitID,
                     to: selectedToUnitID,
