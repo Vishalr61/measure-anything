@@ -263,7 +263,7 @@ struct FactCardSheet: View {
                 .tracking(0.85)
                 .padding(.top, 22)
 
-            VStack(alignment: .leading, spacing: 12) {
+            VStack(alignment: .leading, spacing: 15) {
                 ForEach(Array(previewComparisons.enumerated()), id: \.offset) { _, row in
                     comparisonSentence(row)
                 }
