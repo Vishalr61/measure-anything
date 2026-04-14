@@ -185,12 +185,8 @@ struct GlobalUnitSearchBody: View {
                                 showAllUnits = false
                             }
                         } label: {
-                            HStack(spacing: 4) {
-                                Image(systemName: "chevron.left")
-                                    .font(.system(size: 14, weight: .semibold))
-                                Text("Explore")
-                                    .font(.system(size: 16))
-                            }
+                            Image(systemName: "chevron.left")
+                                .font(.system(size: 14, weight: .semibold))
                         }
                     }
                 }
@@ -677,8 +673,11 @@ struct GlobalUnitSearchBody: View {
                 .frame(maxHeight: .infinity)
 
             VStack(alignment: .leading, spacing: 2) {
-                highlightedText(result.unit.name, query: query)
-                    .font(.system(size: 14, weight: isSelected ? .semibold : .medium))
+                highlightedText(
+                    result.unit.name,
+                    query: query,
+                    lineWeight: isSelected ? .semibold : .medium
+                )
 
                 HStack(spacing: 4) {
                     Text(result.categoryDisplayName)
@@ -747,20 +746,36 @@ struct GlobalUnitSearchBody: View {
             .padding(.top, 4)
     }
 
-    private func highlightedText(_ text: String, query: String) -> Text {
-        let queryLower = query.trimmingCharacters(in: .whitespaces).lowercased()
-        guard !queryLower.isEmpty,
-              let range = text.lowercased().range(of: queryLower)
+    /// Search highlight without `Text` + `Text` (deprecated on newer SDKs); uses `AttributedString` runs.
+    private func highlightedText(_ text: String, query: String, lineWeight: Font.Weight) -> Text {
+        let trimmed = query.trimmingCharacters(in: .whitespaces)
+        var attributed = AttributedString(text)
+
+        guard !trimmed.isEmpty,
+              let matchRange = attributed.range(of: trimmed, options: .caseInsensitive)
         else {
             return Text(text).foregroundStyle(Color.primary)
         }
-        let before = String(text[text.startIndex..<range.lowerBound])
-        let match = String(text[range])
-        let after = String(text[range.upperBound...])
 
-        return Text(before).foregroundStyle(Color.secondary)
-            + Text(match).foregroundStyle(Color.primary).fontWeight(.semibold)
-            + Text(after).foregroundStyle(Color.secondary)
+        let start = attributed.startIndex
+        let end = attributed.endIndex
+
+        if matchRange.lowerBound > start {
+            let beforeRange = start..<matchRange.lowerBound
+            attributed[beforeRange].foregroundColor = .secondary
+            attributed[beforeRange].font = .system(size: 14, weight: lineWeight)
+        }
+
+        attributed[matchRange].foregroundColor = .primary
+        attributed[matchRange].font = .system(size: 14, weight: .semibold)
+
+        if matchRange.upperBound < end {
+            let afterRange = matchRange.upperBound..<end
+            attributed[afterRange].foregroundColor = .secondary
+            attributed[afterRange].font = .system(size: 14, weight: lineWeight)
+        }
+
+        return Text(attributed)
     }
 
     // MARK: - Recent pairs
