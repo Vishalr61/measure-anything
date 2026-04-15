@@ -455,6 +455,382 @@
           "template": "300 paperclips — one for every heartbeat in about four minutes."
         }
       ]
+    },
+    "elephant": {
+      "valueHeadline": "One African elephant weighs",
+      "valueDisplay": "6,000 kg",
+      "comparisons": [
+        {
+          "targetUnitID": "small_car",
+          "template": "5 small cars, which is roughly the weight elephants can lift with their trunks alone."
+        },
+        {
+          "targetUnitID": "blue_whale_mass",
+          "template": "Just 4% of a blue whale, the only mammal that outweighs an elephant on land or sea."
+        },
+        {
+          "targetUnitID": "human_brain",
+          "template": "The combined weight of 4,286 human brains, though an elephant's own brain is around 5 kg."
+        },
+        {
+          "targetUnitID": "grand_piano",
+          "template": "About 12.5 concert grand pianos."
+        },
+        {
+          "targetUnitID": "iphone",
+          "template": "Around 35,088 iPhones, or roughly the daily output of a single Apple manufacturing line."
+        },
+        {
+          "targetUnitID": "feather",
+          "template": "600 million feathers — more feathers than exist on every eagle in North America."
+        }
+      ]
+    },
+    "grand_piano": {
+      "valueHeadline": "One concert grand piano weighs",
+      "valueDisplay": "480 kg",
+      "comparisons": [
+        {
+          "targetUnitID": "human_brain",
+          "template": "About 343 human brains, which is the cognitive output you'd need to compose for one."
+        },
+        {
+          "targetUnitID": "washing_machine",
+          "template": "Roughly 6.9 washing machines."
+        },
+        {
+          "targetUnitID": "iphone",
+          "template": "Around 2,807 iPhones, all of which can play piano music but none of which sound like one."
+        },
+        {
+          "targetUnitID": "small_car",
+          "template": "About 40% of a small car, distributed across 12,000 individual moving parts."
+        },
+        {
+          "targetUnitID": "bag_of_sugar",
+          "template": "480 bags of sugar, or about half a tonne of polished hardwood and steel."
+        }
+      ]
+    },
+    "paperclip_mass": {
+      "valueHeadline": "One paperclip weighs",
+      "valueDisplay": "1 g",
+      "comparisons": [
+        {
+          "targetUnitID": "feather",
+          "template": "100 feathers, which is roughly the weight of one wing of a small songbird."
+        },
+        {
+          "targetUnitID": "grain_of_rice_mass",
+          "template": "40 grains of rice — and a single gram is exactly how the gram was originally defined."
+        },
+        {
+          "targetUnitID": "iphone",
+          "template": "About 1/171st of an iPhone."
+        },
+        {
+          "targetUnitID": "aa_battery",
+          "template": "Around 1/23rd of an AA battery, despite both being made mostly of metal."
+        },
+        {
+          "targetUnitID": "bag_of_sugar",
+          "template": "1/1000th of a bag of sugar — a thousand paperclips weigh exactly one kilogram."
+        }
+      ]
+    },
+    "aa_battery": {
+      "valueHeadline": "One AA battery weighs",
+      "valueDisplay": "23 g",
+      "comparisons": [
+        {
+          "targetUnitID": "iphone",
+          "template": "About 13% of an iPhone, despite holding only a fraction of an iPhone's energy."
+        },
+        {
+          "targetUnitID": "paperclip_mass",
+          "template": "23 paperclips, or roughly one box of office paperclips."
+        },
+        {
+          "targetUnitID": "feather",
+          "template": "2,300 feathers, which is more feathers than most small birds have in total."
+        },
+        {
+          "targetUnitID": "golf_ball",
+          "template": "Half a regulation golf ball, though far less aerodynamic."
+        },
+        {
+          "targetUnitID": "human_heart",
+          "template": "About 7.7% of a human heart — your heart outputs more power per gram than any battery."
+        }
+      ]
+    },
+    "golf_ball": {
+      "valueHeadline": "One golf ball weighs",
+      "valueDisplay": "45.93 g",
+      "comparisons": [
+        {
+          "targetUnitID": "iphone",
+          "template": "About 27% of an iPhone, in a body designed to fly 300 yards on a single hit."
+        },
+        {
+          "targetUnitID": "aa_battery",
+          "template": "Almost exactly 2 AA batteries."
+        },
+        {
+          "targetUnitID": "paperclip_mass",
+          "template": "Around 46 paperclips, packed into a sphere small enough to swallow."
+        },
+        {
+          "targetUnitID": "human_heart",
+          "template": "About 15% of a human heart — coincidentally the heart's stroke volume per beat."
+        }
+      ]
+    },
+    "hummingbird": {
+      "valueHeadline": "One hummingbird weighs",
+      "valueDisplay": "3 g",
+      "comparisons": [
+        {
+          "targetUnitID": "feather",
+          "template": "300 feathers, and a hummingbird has roughly 1,000 of them on its own body."
+        },
+        {
+          "targetUnitID": "paperclip_mass",
+          "template": "About 3 paperclips, which is light enough to be carried by a strong gust of wind."
+        },
+        {
+          "targetUnitID": "grain_of_rice_mass",
+          "template": "Around 120 grains of rice — and a hummingbird eats roughly its own weight in nectar daily."
+        },
+        {
+          "targetUnitID": "iphone",
+          "template": "1.75% of an iPhone, with a heart that beats up to 1,260 times per minute."
+        }
+      ]
+    },
+    "london_double_decker_bus": {
+      "valueHeadline": "One double-decker bus weighs",
+      "valueDisplay": "12,000 kg",
+      "comparisons": [
+        {
+          "targetUnitID": "elephant",
+          "template": "Exactly 2 African elephants."
+        },
+        {
+          "targetUnitID": "small_car",
+          "template": "10 small cars, which is roughly the seating capacity ratio in reverse."
+        },
+        {
+          "targetUnitID": "blue_whale_mass",
+          "template": "Just 8% of a blue whale, despite carrying up to 87 passengers."
+        },
+        {
+          "targetUnitID": "t_rex",
+          "template": "About 1.5 T-Rex, and a similar overall length."
+        },
+        {
+          "targetUnitID": "iphone",
+          "template": "Around 70,175 iPhones — more than the entire iPhone fleet of a small country."
+        }
+      ]
+    },
+    "golden_retriever": {
+      "valueHeadline": "One golden retriever weighs",
+      "valueDisplay": "32 kg",
+      "comparisons": [
+        {
+          "targetUnitID": "human_brain",
+          "template": "The combined weight of about 23 human brains."
+        },
+        {
+          "targetUnitID": "bag_of_sugar",
+          "template": "32 bags of sugar, which is also roughly a golden retriever's daily preferred snack volume."
+        },
+        {
+          "targetUnitID": "iphone",
+          "template": "Around 187 iPhones, none of which fetch nearly as well."
+        },
+        {
+          "targetUnitID": "newborn_baby_mass",
+          "template": "About 9 newborn babies, which is one reason large dogs and infants don't mix unattended."
+        },
+        {
+          "targetUnitID": "elephant",
+          "template": "Just 0.5% of an African elephant."
+        }
+      ]
+    },
+    "rhino": {
+      "valueHeadline": "One white rhinoceros weighs",
+      "valueDisplay": "2,300 kg",
+      "comparisons": [
+        {
+          "targetUnitID": "small_car",
+          "template": "Just under 2 small cars, with horns made of the same protein as your fingernails."
+        },
+        {
+          "targetUnitID": "elephant",
+          "template": "About 38% of an African elephant — rhinos are heavier than they look."
+        },
+        {
+          "targetUnitID": "human_brain",
+          "template": "Roughly 1,643 human brains, though rhinos themselves have rather small ones for their size."
+        },
+        {
+          "targetUnitID": "grand_piano",
+          "template": "Around 4.8 concert grand pianos."
+        },
+        {
+          "targetUnitID": "blue_whale_mass",
+          "template": "1.5% of a blue whale, despite being one of the largest land animals alive."
+        }
+      ]
+    },
+    "grain_of_rice_mass": {
+      "valueHeadline": "One grain of rice weighs",
+      "valueDisplay": "25 mg",
+      "comparisons": [
+        {
+          "targetUnitID": "feather",
+          "template": "About 2.5 feathers."
+        },
+        {
+          "targetUnitID": "paperclip_mass",
+          "template": "1/40th of a paperclip, which is heavier than rice by surprising margins."
+        },
+        {
+          "targetUnitID": "bag_of_sugar",
+          "template": "1/40,000th of a kilogram bag of sugar — a single bag holds 40,000 grains."
+        },
+        {
+          "targetUnitID": "hummingbird",
+          "template": "About 0.83% of a hummingbird, which would still be a substantial meal for one."
+        },
+        {
+          "targetUnitID": "iphone",
+          "template": "1/6,840th of an iPhone."
+        }
+      ]
+    },
+    "lego_brick": {
+      "valueHeadline": "One LEGO 2×4 brick weighs",
+      "valueDisplay": "1.6 g",
+      "comparisons": [
+        {
+          "targetUnitID": "paperclip_mass",
+          "template": "About 1.6 paperclips, despite being able to support 270 kg of stacked LEGO above it."
+        },
+        {
+          "targetUnitID": "feather",
+          "template": "The weight of 160 feathers, which is roughly the down on one duckling."
+        },
+        {
+          "targetUnitID": "iphone",
+          "template": "Just under 1% of an iPhone — and yet 375,000 stacked bricks would crush the bottom one."
+        },
+        {
+          "targetUnitID": "grain_of_rice_mass",
+          "template": "Around 64 grains of rice, packed into 6 grams of moulded ABS plastic."
+        },
+        {
+          "targetUnitID": "aa_battery",
+          "template": "About 7% of an AA battery, in a shape that's been unchanged since 1958."
+        },
+        {
+          "targetUnitID": "golf_ball",
+          "template": "Around 3.5% of a regulation golf ball."
+        }
+      ]
+    },
+    "human_skin": {
+      "valueHeadline": "Your skin weighs",
+      "valueDisplay": "4 kg",
+      "comparisons": [
+        {
+          "targetUnitID": "human_brain",
+          "template": "About 2.9 times the weight of your brain — skin is your heaviest organ."
+        },
+        {
+          "targetUnitID": "human_heart",
+          "template": "Roughly 13.3 human hearts, covering about 2 square metres of surface area."
+        },
+        {
+          "targetUnitID": "human_skeleton",
+          "template": "About 80% of your skeleton, despite being only millimetres thick."
+        },
+        {
+          "targetUnitID": "bag_of_sugar",
+          "template": "4 bags of sugar — and you shed roughly 30,000 cells of it every hour."
+        },
+        {
+          "targetUnitID": "iphone",
+          "template": "About 23 iPhones, replaced cell by cell every 2 to 3 weeks."
+        },
+        {
+          "targetUnitID": "house_cat",
+          "template": "Roughly 89% of an average house cat."
+        }
+      ]
+    },
+    "great_white_shark": {
+      "valueHeadline": "One great white shark weighs",
+      "valueDisplay": "700 kg",
+      "comparisons": [
+        {
+          "targetUnitID": "small_car",
+          "template": "About 58% of a small car, and faster than most cars in city traffic."
+        },
+        {
+          "targetUnitID": "blue_whale_mass",
+          "template": "Just 0.47% of a blue whale — the ocean's apex predator is small compared to its largest resident."
+        },
+        {
+          "targetUnitID": "orca",
+          "template": "About 14% of an orca, which actually preys on great whites."
+        },
+        {
+          "targetUnitID": "elephant",
+          "template": "Around 12% of an African elephant."
+        },
+        {
+          "targetUnitID": "rhino",
+          "template": "Roughly 30% of a white rhino, with similar levels of don't-mess-with-it energy."
+        },
+        {
+          "targetUnitID": "human_brain",
+          "template": "The combined weight of 500 human brains, though a great white's own brain is just 30 grams."
+        }
+      ]
+    },
+    "orca": {
+      "valueHeadline": "One orca weighs",
+      "valueDisplay": "5,000 kg",
+      "comparisons": [
+        {
+          "targetUnitID": "great_white_shark",
+          "template": "About 7 great white sharks — and orcas are documented to hunt them."
+        },
+        {
+          "targetUnitID": "elephant",
+          "template": "Roughly 83% of an African elephant, in a body built for ocean speed."
+        },
+        {
+          "targetUnitID": "blue_whale_mass",
+          "template": "Just 3.3% of a blue whale, despite both being called whales — orcas are technically dolphins."
+        },
+        {
+          "targetUnitID": "small_car",
+          "template": "About 4 small cars."
+        },
+        {
+          "targetUnitID": "t_rex",
+          "template": "Around 63% of a T-Rex, and considerably better organised in groups."
+        },
+        {
+          "targetUnitID": "grand_piano",
+          "template": "About 10 concert grand pianos."
+        }
+      ]
     }
   }
 }
