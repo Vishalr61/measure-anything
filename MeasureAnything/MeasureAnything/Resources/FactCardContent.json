@@ -711,6 +711,126 @@
           "template": "1/6,840th of an iPhone."
         }
       ]
+    },
+    "lego_brick": {
+      "valueHeadline": "One LEGO 2×4 brick weighs",
+      "valueDisplay": "1.6 g",
+      "comparisons": [
+        {
+          "targetUnitID": "paperclip_mass",
+          "template": "About 1.6 paperclips, despite being able to support 270 kg of stacked LEGO above it."
+        },
+        {
+          "targetUnitID": "feather",
+          "template": "The weight of 160 feathers, which is roughly the down on one duckling."
+        },
+        {
+          "targetUnitID": "iphone",
+          "template": "Just under 1% of an iPhone — and yet 375,000 stacked bricks would crush the bottom one."
+        },
+        {
+          "targetUnitID": "grain_of_rice_mass",
+          "template": "Around 64 grains of rice, packed into 6 grams of moulded ABS plastic."
+        },
+        {
+          "targetUnitID": "aa_battery",
+          "template": "About 7% of an AA battery, in a shape that's been unchanged since 1958."
+        },
+        {
+          "targetUnitID": "golf_ball",
+          "template": "Around 3.5% of a regulation golf ball."
+        }
+      ]
+    },
+    "human_skin": {
+      "valueHeadline": "Your skin weighs",
+      "valueDisplay": "4 kg",
+      "comparisons": [
+        {
+          "targetUnitID": "human_brain",
+          "template": "About 2.9 times the weight of your brain — skin is your heaviest organ."
+        },
+        {
+          "targetUnitID": "human_heart",
+          "template": "Roughly 13.3 human hearts, covering about 2 square metres of surface area."
+        },
+        {
+          "targetUnitID": "human_skeleton",
+          "template": "About 80% of your skeleton, despite being only millimetres thick."
+        },
+        {
+          "targetUnitID": "bag_of_sugar",
+          "template": "4 bags of sugar — and you shed roughly 30,000 cells of it every hour."
+        },
+        {
+          "targetUnitID": "iphone",
+          "template": "About 23 iPhones, replaced cell by cell every 2 to 3 weeks."
+        },
+        {
+          "targetUnitID": "house_cat",
+          "template": "Roughly 89% of an average house cat."
+        }
+      ]
+    },
+    "great_white_shark": {
+      "valueHeadline": "One great white shark weighs",
+      "valueDisplay": "700 kg",
+      "comparisons": [
+        {
+          "targetUnitID": "small_car",
+          "template": "About 58% of a small car, and faster than most cars in city traffic."
+        },
+        {
+          "targetUnitID": "blue_whale_mass",
+          "template": "Just 0.47% of a blue whale — the ocean's apex predator is small compared to its largest resident."
+        },
+        {
+          "targetUnitID": "orca",
+          "template": "About 14% of an orca, which actually preys on great whites."
+        },
+        {
+          "targetUnitID": "elephant",
+          "template": "Around 12% of an African elephant."
+        },
+        {
+          "targetUnitID": "rhino",
+          "template": "Roughly 30% of a white rhino, with similar levels of don't-mess-with-it energy."
+        },
+        {
+          "targetUnitID": "human_brain",
+          "template": "The combined weight of 500 human brains, though a great white's own brain is just 30 grams."
+        }
+      ]
+    },
+    "orca": {
+      "valueHeadline": "One orca weighs",
+      "valueDisplay": "5,000 kg",
+      "comparisons": [
+        {
+          "targetUnitID": "great_white_shark",
+          "template": "About 7 great white sharks — and orcas are documented to hunt them."
+        },
+        {
+          "targetUnitID": "elephant",
+          "template": "Roughly 83% of an African elephant, in a body built for ocean speed."
+        },
+        {
+          "targetUnitID": "blue_whale_mass",
+          "template": "Just 3.3% of a blue whale, despite both being called whales — orcas are technically dolphins."
+        },
+        {
+          "targetUnitID": "small_car",
+          "template": "About 4 small cars."
+        },
+        {
+          "targetUnitID": "t_rex",
+          "template": "Around 63% of a T-Rex, and considerably better organised in groups."
+        },
+        {
+          "targetUnitID": "grand_piano",
+          "template": "About 10 concert grand pianos."
+        }
+      ]
     }
   }
 }
