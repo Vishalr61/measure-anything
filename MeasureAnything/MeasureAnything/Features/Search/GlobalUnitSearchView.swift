@@ -280,9 +280,13 @@ struct GlobalUnitSearchBody: View {
             }
         }
         .sheet(item: $factCardSheetItem) { item in
-            FactCardNavigationShell(initialUnitID: item.unitID, viewModel: vm)
-                .presentationDetents([.medium, .large], selection: $factSheetDetent)
-                .presentationDragIndicator(.visible)
+            FactCardNavigationShell(
+                initialUnitID: item.unitID,
+                viewModel: vm,
+                dismissEntireFactCardFlow: { factCardSheetItem = nil }
+            )
+            .presentationDetents([.medium, .large], selection: $factSheetDetent)
+            .presentationDragIndicator(.visible)
         }
         .animation(.easeInOut(duration: 0.2), value: crossCategoryToast != nil)
     }
