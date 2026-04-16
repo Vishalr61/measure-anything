@@ -40,6 +40,11 @@ struct DiceRollCard: View {
                 .foregroundStyle(Color.white)
                 .fixedSize(horizontal: false, vertical: true)
 
+            Text("Get a random weird conversion")
+                .font(.system(size: 12, weight: .regular, design: .rounded))
+                .foregroundStyle(Color.white.opacity(0.78))
+                .fixedSize(horizontal: false, vertical: true)
+
             subtitleRow
         }
     }

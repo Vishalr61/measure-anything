@@ -8,6 +8,9 @@ struct ConverterWorkspaceBody: View {
     /// When `false`, category is controlled by the host (e.g. home pill bar).
     var showsCategoryPicker: Bool = true
 
+    /// When set (e.g. on the home tab), “Did you know” opens the fact card sheet for the given unit id.
+    var onOpenFactCard: ((String) -> Void)? = nil
+
     @Binding var showCustomUnitForm: Bool
 
     @Query(sort: \CustomUnit.name) private var customUnits: [CustomUnit]
@@ -36,7 +39,7 @@ struct ConverterWorkspaceBody: View {
             categoryModeBlock
 
             Spacer()
-                .frame(height: ConverterLayout.majorBlockSpacing)
+                .frame(height: showsCategoryPicker ? ConverterLayout.majorBlockSpacing : ConverterLayout.rhythm12)
 
             conversionInputBlock
         }
@@ -193,16 +196,22 @@ struct ConverterWorkspaceBody: View {
                     .padding(.top, ConverterLayout.rhythm12)
             }
 
-            DiceRollCard(vm: vm, accent: categoryAccent)
-                .transition(.move(edge: .bottom).combined(with: .opacity))
-                .padding(.top, 10)
+            if !vm.standardUnitsOnly {
+                DiceRollCard(vm: vm, accent: categoryAccent)
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+                    .padding(.top, 10)
+            }
 
             if let toUnit = vm.toUnit, toUnit.funFact != nil {
-                DidYouKnowCard(unit: toUnit, accent: categoryAccent)
-                    .id(toUnit.id)
-                    .transition(.opacity)
-                    .animation(.easeIn(duration: 0.25), value: toUnit.id)
-                    .padding(.top, 10)
+                DidYouKnowCard(
+                    unit: toUnit,
+                    accent: categoryAccent,
+                    onOpenFactCard: onOpenFactCard.map { cb in { cb(toUnit.id) } }
+                )
+                .id(toUnit.id)
+                .transition(.opacity)
+                .animation(.easeIn(duration: 0.25), value: toUnit.id)
+                .padding(.top, 10)
             }
         }
     }
@@ -392,7 +401,7 @@ struct ConverterWorkspaceBody: View {
 
 #Preview {
     let taxonomy = AppTaxonomyStore()
-    ConverterWorkspaceBody(showsCategoryPicker: true, showCustomUnitForm: .constant(false), vm: ConverterViewModel(taxonomy: taxonomy))
+    ConverterWorkspaceBody(showsCategoryPicker: true, onOpenFactCard: nil, showCustomUnitForm: .constant(false), vm: ConverterViewModel(taxonomy: taxonomy))
         .environmentObject(taxonomy)
         .modelContainer(for: [CustomUnit.self, FavoriteConversion.self], inMemory: true)
 }

@@ -18,6 +18,8 @@ struct HomeView: View {
     @State private var scrollToConverterToken = 0
     @State private var homeTab: BottomNav.Tab = .convert
     @State private var exploreResetToken = 0
+    @State private var factCardSheetItem: FactCardSheetItem?
+    @State private var factCardSheetDetent: PresentationDetent = .large
 
     private var categoryAccent: Color {
         ConverterCategoryAccent.accent(for: vm.selectedCategory)
@@ -88,17 +90,34 @@ struct HomeView: View {
                 )
             }
         }
+        .sheet(item: $factCardSheetItem) { item in
+            FactCardNavigationShell(
+                initialUnitID: item.unitID,
+                viewModel: vm,
+                dismissEntireFactCardFlow: { factCardSheetItem = nil }
+            )
+            .presentationDetents([.medium, .large], selection: $factCardSheetDetent)
+            .presentationDragIndicator(.visible)
+        }
+    }
+
+    private struct FactCardSheetItem: Identifiable {
+        var id: String { unitID }
+        let unitID: String
     }
 
     private var convertTab: some View {
         NavigationStack {
             ScrollViewReader { proxy in
                 ScrollView {
-                    VStack(alignment: .leading, spacing: ConverterLayout.rhythm16) {
+                    VStack(alignment: .leading, spacing: ConverterLayout.rhythm12) {
                         categoryPillBar
 
                         ConverterWorkspaceBody(
                             showsCategoryPicker: false,
+                            onOpenFactCard: { unitID in
+                                factCardSheetItem = FactCardSheetItem(unitID: unitID)
+                            },
                             showCustomUnitForm: $showCustomUnitForm,
                             vm: vm
                         )
@@ -144,16 +163,18 @@ struct HomeView: View {
                     .buttonStyle(ConverterPressingButtonStyle())
                     .accessibilityLabel(isCurrentPairAlreadyFavorite ? "Already a favorite" : "Save as favorite")
 
-                    Button {
-                        Haptics.tap()
-                        showCustomUnitForm = true
-                    } label: {
-                        Image(systemName: "plus")
-                            .font(.body.weight(.regular))
-                            .imageScale(.medium)
+                    if !vm.standardUnitsOnly {
+                        Button {
+                            Haptics.tap()
+                            showCustomUnitForm = true
+                        } label: {
+                            Image(systemName: "plus")
+                                .font(.body.weight(.regular))
+                                .imageScale(.medium)
+                        }
+                        .buttonStyle(ConverterPressingButtonStyle())
+                        .accessibilityLabel("Add custom unit")
                     }
-                    .buttonStyle(ConverterPressingButtonStyle())
-                    .accessibilityLabel("Add custom unit")
                 }
             }
         }
@@ -199,7 +220,9 @@ struct HomeView: View {
 
 #Preview {
     let taxonomy = AppTaxonomyStore()
-    HomeView(vm: ConverterViewModel(taxonomy: taxonomy))
+    let vm = ConverterViewModel(taxonomy: taxonomy)
+    HomeView(vm: vm)
         .environmentObject(taxonomy)
+        .environmentObject(vm)
         .modelContainer(for: [CustomUnit.self, FavoriteConversion.self], inMemory: true)
 }

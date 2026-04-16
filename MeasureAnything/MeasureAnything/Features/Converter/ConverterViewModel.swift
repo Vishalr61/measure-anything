@@ -27,6 +27,10 @@ final class ConverterViewModel: ObservableObject {
         static let hasSeenDiceLongPressHint = "hasSeenDiceLongPressHint"
     }
 
+    private enum SettingsKeys {
+        static let standardUnitsOnly = "settings.standardUnitsOnly"
+    }
+
     @Published var selectedCategory: UnitCategory = .length {
         didSet {
             guard oldValue != selectedCategory else { return }
@@ -67,6 +71,16 @@ final class ConverterViewModel: ObservableObject {
 
     @Published var isMemeExplanationEnabled: Bool = false {
         didSet { recompute() }
+    }
+
+    /// When `true`, Convert uses normal units only (Settings escape hatch).
+    @Published var standardUnitsOnly: Bool = false {
+        didSet {
+            guard !isRestoringSession else { return }
+            UserDefaults.standard.set(standardUnitsOnly, forKey: SettingsKeys.standardUnitsOnly)
+            reconcileSelectionsAfterModeChange()
+            recompute()
+        }
     }
 
     @Published private(set) var conversionResult: ConversionResult?
@@ -126,6 +140,7 @@ final class ConverterViewModel: ObservableObject {
         }
 
         isRestoringSession = true
+        standardUnitsOnly = UserDefaults.standard.bool(forKey: SettingsKeys.standardUnitsOnly)
         let restored = performSessionRestore()
         isRestoringSession = false
 
@@ -169,8 +184,12 @@ final class ConverterViewModel: ObservableObject {
     var categories: [UnitCategory] { taxonomy.converterCategories }
     var modes: [UnitRegistry.Mode] { taxonomy.converterModes }
 
+    private var converterIncludeKinds: Set<UnitKind> {
+        standardUnitsOnly ? [.normal] : UnitRegistry.allKinds
+    }
+
     var availableUnits: [UnitDefinition] {
-        registry.units(in: selectedCategory, includeKinds: UnitRegistry.allKinds)
+        registry.units(in: selectedCategory, includeKinds: converterIncludeKinds)
     }
 
     func units(for category: UnitCategory, mode: UnitRegistry.Mode) -> [UnitDefinition] {
@@ -207,7 +226,7 @@ final class ConverterViewModel: ObservableObject {
             selectedMode = mode
         }
 
-        let units = registry.units(in: selectedCategory, includeKinds: UnitRegistry.allKinds)
+        let units = registry.units(in: selectedCategory, includeKinds: converterIncludeKinds)
         let idSet = Set(units.map(\.id))
 
         if let from = d.string(forKey: SessionKeys.sessionFrom), idSet.contains(from) {
