@@ -192,6 +192,11 @@ final class ConverterViewModel: ObservableObject {
         registry.units(in: selectedCategory, includeKinds: converterIncludeKinds)
     }
 
+    /// Units shown in Explore for a category (respects **Standard units only**).
+    func exploreUnitDefinitions(for category: UnitCategory) -> [UnitDefinition] {
+        registry.units(in: category, includeKinds: converterIncludeKinds)
+    }
+
     func units(for category: UnitCategory, mode: UnitRegistry.Mode) -> [UnitDefinition] {
         registry.units(in: category, includeKinds: mode.includedKinds)
     }
