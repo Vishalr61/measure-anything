@@ -346,7 +346,7 @@ struct CustomUnitFormView: View {
             if af > 0 {
                 let count = factor / af
                 previewLine1 = line1
-                previewLine2 = "= \(vm.formatNumberForDisplay(count)) \(absurd.name)"
+                previewLine2 = absurdComparisonSecondLine(count: count, unitName: absurd.name)
                 return
             }
         }
@@ -366,6 +366,50 @@ struct CustomUnitFormView: View {
         }
         let idx = abs(h) % list.count
         return list[idx]
+    }
+
+    /// Second preview line for absurd comparison: rounded display, "≈" unless exactly 1.0, simple pluralization.
+    private func absurdComparisonSecondLine(count: Double, unitName: String) -> String {
+        let exactOne = abs(count - 1.0) < 1e-9
+
+        let displayNum: String
+        let quantityForPlural: Double
+
+        if exactOne {
+            displayNum = "1"
+            quantityForPlural = 1
+        } else {
+            let nearest = round(count)
+            if abs(count - nearest) <= 0.05 {
+                let v = Int(nearest)
+                displayNum = String(v)
+                quantityForPlural = Double(v)
+            } else {
+                let r = (count * 10).rounded() / 10
+                if abs(r - Double(Int(r))) < 1e-9 {
+                    let intVal = Int(r)
+                    displayNum = String(intVal)
+                    quantityForPlural = Double(intVal)
+                } else {
+                    displayNum = String(format: "%.1f", locale: Locale(identifier: "en_US"), arguments: [r])
+                    quantityForPlural = r
+                }
+            }
+        }
+
+        let prefix = exactOne ? "=" : "≈"
+        let label = pluralizedAbsurdUnitName(unitName, quantity: quantityForPlural)
+        return "\(prefix) \(displayNum) \(label)"
+    }
+
+    /// v1: append "s" when quantity ≠ 1; skip if the name already ends with "s".
+    private func pluralizedAbsurdUnitName(_ name: String, quantity: Double) -> String {
+        let isSingular = abs(quantity - 1.0) < 1e-9
+        if isSingular { return name }
+        let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return name }
+        if trimmed.lowercased().hasSuffix("s") { return name }
+        return trimmed + "s"
     }
 
     // MARK: - Parsing & helpers
