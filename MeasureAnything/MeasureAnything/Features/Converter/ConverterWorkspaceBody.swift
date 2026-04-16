@@ -46,8 +46,8 @@ struct ConverterWorkspaceBody: View {
         .padding(.horizontal, ConverterLayout.horizontalInset)
         .padding(.vertical, ConverterLayout.rhythm20)
         .sheet(isPresented: $showCustomUnitForm) {
-            CustomUnitFormView()
-                .environmentObject(taxonomyStore)
+            CustomUnitFormView(initialCategory: vm.selectedCategory)
+                .environmentObject(vm)
         }
         .sheet(isPresented: $showShareSheet) {
             ActivityView(activityItems: shareActivityItems)
