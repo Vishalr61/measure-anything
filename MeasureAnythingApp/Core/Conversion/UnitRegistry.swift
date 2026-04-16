@@ -64,6 +64,9 @@ public struct UnitRegistry: Sendable {
             .sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
     }
 
+    /// Kinds included in the main Convert surface (standard + absurd + custom). Not a `Mode` case so taxonomy / Explore can keep using `Mode` unchanged.
+    public static let allKinds: Set<UnitKind> = [.normal, .absurd, .custom]
+
     /// Mode behavior helper:
     /// - Normal: normal only
     /// - Absurd: normal + absurd

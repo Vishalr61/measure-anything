@@ -24,8 +24,6 @@ final class ConverterViewModel: ObservableObject {
         static let sessionTo = "session.toUnit"
         static let sessionMode = "session.mode"
         static let sessionInput = "session.inputValue"
-        static let hasSeenAbsurdNudge = "hasSeenAbsurdNudge"
-        static let normalConversionCount = "normalConversionCount"
         static let hasSeenDiceLongPressHint = "hasSeenDiceLongPressHint"
     }
 
@@ -74,7 +72,7 @@ final class ConverterViewModel: ObservableObject {
     @Published private(set) var conversionResult: ConversionResult?
     @Published private(set) var validationError: String?
 
-    // MARK: - Dice roll (Absurd-mode TO randomiser)
+    // MARK: - Dice roll (random TO unit; long-press randomises both absurd units)
 
     @Published var isDiceRolling: Bool = false
     @Published var diceDisplayFace: Int = 5
@@ -172,7 +170,7 @@ final class ConverterViewModel: ObservableObject {
     var modes: [UnitRegistry.Mode] { taxonomy.converterModes }
 
     var availableUnits: [UnitDefinition] {
-        registry.units(in: selectedCategory, includeKinds: selectedMode.includedKinds)
+        registry.units(in: selectedCategory, includeKinds: UnitRegistry.allKinds)
     }
 
     func units(for category: UnitCategory, mode: UnitRegistry.Mode) -> [UnitDefinition] {
@@ -209,7 +207,7 @@ final class ConverterViewModel: ObservableObject {
             selectedMode = mode
         }
 
-        let units = registry.units(in: selectedCategory, includeKinds: selectedMode.includedKinds)
+        let units = registry.units(in: selectedCategory, includeKinds: UnitRegistry.allKinds)
         let idSet = Set(units.map(\.id))
 
         if let from = d.string(forKey: SessionKeys.sessionFrom), idSet.contains(from) {
@@ -257,58 +255,8 @@ final class ConverterViewModel: ObservableObject {
         recompute()
     }
 
-    // MARK: - Absurd mode nudge (one-time)
-
-    var hasSeenAbsurdNudge: Bool {
-        get { UserDefaults.standard.bool(forKey: SessionKeys.hasSeenAbsurdNudge) }
-        set {
-            UserDefaults.standard.set(newValue, forKey: SessionKeys.hasSeenAbsurdNudge)
-            objectWillChange.send()
-        }
-    }
-
     var hasSeenDiceLongPressHint: Bool {
         UserDefaults.standard.bool(forKey: SessionKeys.hasSeenDiceLongPressHint)
-    }
-
-    private var normalConversionCount: Int {
-        get { UserDefaults.standard.integer(forKey: SessionKeys.normalConversionCount) }
-        set { UserDefaults.standard.set(newValue, forKey: SessionKeys.normalConversionCount) }
-    }
-
-    /// Fixed absurd unit per category for the nudge preview (registry must include it).
-    private var absurdNudgeTargetUnitID: String? {
-        switch selectedCategory {
-        case .length: "giraffe"
-        case .mass: "elephant"
-        case .time: "coffee_break"
-        case .volume: "soda_can"
-        case .temperature: nil
-        }
-    }
-
-    /// Human-readable absurd conversion for the nudge (empty when unavailable).
-    var absurdEquivalentDisplay: String {
-        guard let targetID = absurdNudgeTargetUnitID,
-              let absurdDef = try? registry.unit(id: targetID),
-              let value = parsedInput(),
-              let result = try? engine.convert(
-                  value,
-                  from: selectedFromUnitID,
-                  to: targetID,
-                  includeMemeExplanation: false
-              )
-        else { return "" }
-
-        return "\(formatNumberForDisplay(result.outputValue)) \(absurdDef.name)"
-    }
-
-    var showAbsurdNudge: Bool {
-        selectedMode == .normal
-            && !hasSeenAbsurdNudge
-            && normalConversionCount >= 1
-            && absurdNudgeTargetUnitID != nil
-            && !absurdEquivalentDisplay.isEmpty
     }
 
     /// Exposed for favorites UI (read-only snapshot of the live registry).
@@ -425,8 +373,6 @@ final class ConverterViewModel: ObservableObject {
 
     /// Long-press (~0.25s `minimumDuration` on `DiceRollCard`): randomises both FROM and TO to distinct absurd units in the current category.
     func rollDiceDual() {
-        guard selectedMode != .normal else { return }
-
         func absurdPoolForDual() -> [UnitDefinition] {
             registry.units(in: selectedCategory, includeKinds: [.absurd])
                 .filter { $0.category == selectedCategory }
@@ -602,9 +548,6 @@ final class ConverterViewModel: ObservableObject {
     }
 
     private func diceToUnitPool() -> [UnitDefinition] {
-        // Dice UI is hidden in normal mode; keep pool empty if something calls this anyway.
-        guard selectedMode != .normal else { return [] }
-
         func inSelectedCategory(_ u: UnitDefinition) -> Bool {
             u.category == selectedCategory
         }
@@ -902,9 +845,6 @@ final class ConverterViewModel: ObservableObject {
                     to: selectedToUnitID,
                     category: selectedCategory
                 )
-                if selectedMode == .normal {
-                    normalConversionCount = normalConversionCount + 1
-                }
             }
         } catch {
             validationError = "Conversion couldn’t be completed."
