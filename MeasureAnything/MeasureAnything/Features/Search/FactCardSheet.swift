@@ -5,6 +5,9 @@ import MeasureAnythingCore
 struct FactCardNavigationShell: View {
     let initialUnitID: String
     @ObservedObject var viewModel: ConverterViewModel
+    /// Dismisses the entire fact-card presentation (not just popping one navigation level).
+    /// When `nil` (e.g. Xcode Preview), Close falls back to `Environment.dismiss`.
+    var dismissEntireFactCardFlow: (() -> Void)? = nil
 
     @State private var path: [String] = []
     /// Shuffled comparison rows per unit for this sheet session only (cleared when the sheet is dismissed).
@@ -19,7 +22,8 @@ struct FactCardNavigationShell: View {
                         viewModel: viewModel,
                         navigationPath: $path,
                         sessionComparisonSlices: $sessionComparisonSlices,
-                        isNavigationRoot: true
+                        isNavigationRoot: true,
+                        dismissEntireFactCardFlow: dismissEntireFactCardFlow
                     )
                     .navigationDestination(for: String.self) { pushedID in
                         if let u = try? viewModel.currentRegistry.unit(id: pushedID) {
@@ -28,7 +32,8 @@ struct FactCardNavigationShell: View {
                                 viewModel: viewModel,
                                 navigationPath: $path,
                                 sessionComparisonSlices: $sessionComparisonSlices,
-                                isNavigationRoot: false
+                                isNavigationRoot: false,
+                                dismissEntireFactCardFlow: dismissEntireFactCardFlow
                             )
                         } else {
                             Text("This unit isn’t in the catalog.")
@@ -56,6 +61,8 @@ struct FactCardSheet: View {
     @Binding var sessionComparisonSlices: [String: [FactCardComparison]]
     /// `true` for the shell’s root page only (no back chevron in header).
     var isNavigationRoot: Bool
+    /// See `FactCardNavigationShell.dismissEntireFactCardFlow`.
+    var dismissEntireFactCardFlow: (() -> Void)? = nil
 
     @Environment(\.dismiss) private var dismiss
 
@@ -195,7 +202,12 @@ struct FactCardSheet: View {
 
     private var headerCloseButton: some View {
         Button {
-            dismiss()
+            navigationPath.removeAll()
+            if let dismissEntireFactCardFlow {
+                dismissEntireFactCardFlow()
+            } else {
+                dismiss()
+            }
         } label: {
             ZStack {
                 Circle()
