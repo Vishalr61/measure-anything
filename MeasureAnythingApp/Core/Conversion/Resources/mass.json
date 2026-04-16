@@ -217,7 +217,7 @@
     "kind": "absurd",
     "conversionStyle": "multiplicative",
     "factor": 2.5e-05,
-    "iconName": "leaf",
+    "iconName": "leaf.fill",
     "description": "Single grain of rice mass ≈ 25 mg.",
     "exampleMeme": "Micro-weight.",
     "funFact": "There are roughly 29,000 grains of rice in a standard 1 kg bag.",
