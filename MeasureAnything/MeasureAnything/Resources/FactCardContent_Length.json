@@ -1,0 +1,34 @@
+{
+  "cards": {
+    "distance_light_year": {
+      "valueHeadline": "One light-year equals",
+      "valueDisplay": "9.46 trillion km",
+      "comparisons": [
+        {
+          "targetUnitID": "marathon",
+          "template": "About 224 billion Marathons laid end to end span one light-year."
+        },
+        {
+          "targetUnitID": "blue_whale",
+          "template": "Trillions of Blue whales nose to tail still wouldn't cover one light-year."
+        },
+        {
+          "targetUnitID": "smartphone",
+          "template": "Over 60 quadrillion Smartphones end to end would match one light-year."
+        },
+        {
+          "targetUnitID": "human_height",
+          "template": "More than 5 trillion Average humans stacked head to toe would reach one light-year."
+        },
+        {
+          "targetUnitID": "earth_circumference",
+          "template": "Over 236 million trips around Earth's circumference span one light-year."
+        },
+        {
+          "targetUnitID": "grain_of_sand",
+          "template": "Every Grain of sand on Earth in a single line wouldn't come close to one light-year."
+        }
+      ]
+    }
+  }
+}

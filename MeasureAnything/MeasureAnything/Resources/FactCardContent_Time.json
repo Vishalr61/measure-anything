@@ -1,0 +1,30 @@
+{
+  "cards": {
+    "human_lifespan": {
+      "valueHeadline": "An average human lifespan is",
+      "valueDisplay": "≈72 years",
+      "comparisons": [
+        {
+          "targetUnitID": "year",
+          "template": "About 72 Years make a typical Human lifespan."
+        },
+        {
+          "targetUnitID": "decade",
+          "template": "Just over 7 Decades of living fit in one Human lifespan."
+        },
+        {
+          "targetUnitID": "week",
+          "template": "Around 3,750 Weeks in one Human lifespan."
+        },
+        {
+          "targetUnitID": "coffee_break",
+          "template": "You could take millions of Coffee breaks across a Human lifespan."
+        },
+        {
+          "targetUnitID": "blink",
+          "template": "Billions of Blinks happen during a Human lifespan."
+        }
+      ]
+    }
+  }
+}

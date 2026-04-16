@@ -1,0 +1,34 @@
+{
+  "cards": {
+    "olympic_pool_vol": {
+      "valueHeadline": "One Olympic pool holds",
+      "valueDisplay": "2,500,000 L",
+      "comparisons": [
+        {
+          "targetUnitID": "bathtub",
+          "template": "Roughly 250 Bathtubs of water fill one Olympic pool."
+        },
+        {
+          "targetUnitID": "teaspoon_vol",
+          "template": "About 500 million Teaspoons make one Olympic pool."
+        },
+        {
+          "targetUnitID": "wine_bottle_vol",
+          "template": "Over 3.3 million Wine bottles hold the same volume."
+        },
+        {
+          "targetUnitID": "soda_can",
+          "template": "About 7.4 million Soda cans match one Olympic pool."
+        },
+        {
+          "targetUnitID": "bucket",
+          "template": "250,000 Buckets equal one Olympic pool."
+        },
+        {
+          "targetUnitID": "stomach",
+          "template": "One Olympic pool equals about 2.5 million Human stomach fills at capacity."
+        }
+      ]
+    }
+  }
+}

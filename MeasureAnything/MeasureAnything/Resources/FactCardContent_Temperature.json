@@ -1,0 +1,34 @@
+{
+  "cards": {
+    "sun_surface": {
+      "valueHeadline": "The Sun's surface reaches",
+      "valueDisplay": "5,500 °C",
+      "comparisons": [
+        {
+          "targetUnitID": "boiling_water",
+          "template": "The Sun's surface is far hotter than Boiling water at 100 °C."
+        },
+        {
+          "targetUnitID": "lava",
+          "template": "The Sun's surface is several times hotter than Lava."
+        },
+        {
+          "targetUnitID": "pizza_oven",
+          "template": "The Sun's surface is an order of magnitude hotter than a Pizza oven."
+        },
+        {
+          "targetUnitID": "body_temp",
+          "template": "Body temperature is tiny next to the Sun's surface."
+        },
+        {
+          "targetUnitID": "comfortable_room",
+          "template": "A Comfortable room feels cryogenic compared to the Sun's surface."
+        },
+        {
+          "targetUnitID": "deep_space",
+          "template": "Deep space is cold; the Sun's surface is not."
+        }
+      ]
+    }
+  }
+}
