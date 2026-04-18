@@ -24,6 +24,7 @@ struct ConverterWorkspaceBody: View {
     @State private var shareActivityItems: [Any] = []
     @State private var swapRotation: Double = 0
     @State private var showFromPicker = false
+    @State private var customUnitSheetDetent: PresentationDetent = .medium
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -48,6 +49,13 @@ struct ConverterWorkspaceBody: View {
         .sheet(isPresented: $showCustomUnitForm) {
             CustomUnitFormView(initialCategory: vm.selectedCategory)
                 .environmentObject(vm)
+                .presentationDetents([.medium, .large], selection: $customUnitSheetDetent)
+                .presentationDragIndicator(.visible)
+        }
+        .onChange(of: showCustomUnitForm) { _, isPresented in
+            if isPresented {
+                customUnitSheetDetent = .medium
+            }
         }
         .sheet(isPresented: $showShareSheet) {
             ActivityView(activityItems: shareActivityItems)

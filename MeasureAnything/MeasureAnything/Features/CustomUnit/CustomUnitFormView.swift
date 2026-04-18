@@ -203,12 +203,15 @@ struct CustomUnitFormView: View {
 
     private var optionalSection: some View {
         Section {
-            LabeledContent("Fun fact") {
-                TextField("e.g. Takes 45 mins in traffic", text: $detail, axis: .vertical)
+            VStack(alignment: .leading, spacing: 6) {
+                TextField("Fun fact (optional)", text: $detail, axis: .vertical)
                     .lineLimit(3 ... 6)
+                Text("e.g. Takes 45 mins in traffic")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
             }
-        } header: {
-            sectionHeader("OPTIONAL")
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
     }
 
