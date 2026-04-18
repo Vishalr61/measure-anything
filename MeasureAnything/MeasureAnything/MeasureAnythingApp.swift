@@ -24,6 +24,7 @@ struct MeasureAnythingApp: App {
         WindowGroup {
             HomeView(vm: converterViewModel)
                 .environmentObject(taxonomyStore)
+                .environmentObject(converterViewModel)
                 .background(Color.white)
                 .preferredColorScheme(.light)
         }

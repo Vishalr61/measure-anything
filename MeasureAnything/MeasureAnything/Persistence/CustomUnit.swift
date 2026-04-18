@@ -14,6 +14,8 @@ final class CustomUnit {
     var baseUnit: String
     /// Factor: value in base units for **one** of this custom unit.
     var factor: Double
+    /// Normal unit id chosen at creation (e.g. `kilometer`) so Settings can show "12.4 km" instead of raw base units.
+    var referenceUnitID: String?
     var iconName: String?
     /// Optional user-facing notes (SwiftData model avoids naming this `description`).
     var detail: String?
@@ -24,6 +26,7 @@ final class CustomUnit {
         category: UnitCategory,
         baseUnit: String,
         factor: Double,
+        referenceUnitID: String? = nil,
         iconName: String? = nil,
         detail: String? = nil
     ) {
@@ -32,6 +35,7 @@ final class CustomUnit {
         self.categoryRaw = category.rawValue
         self.baseUnit = baseUnit
         self.factor = factor
+        self.referenceUnitID = referenceUnitID
         self.iconName = iconName
         self.detail = detail
     }

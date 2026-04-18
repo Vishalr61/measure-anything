@@ -50,6 +50,7 @@ struct ConverterView: View {
                 }
             }
         }
+        .environmentObject(vm)
         .background(Color(hex: "#F0F0F3"))
         .sheet(isPresented: $showFavorites) {
             FavoritesListView(registry: vm.currentRegistry) { fav in
@@ -103,10 +104,9 @@ struct ConverterView: View {
                     .buttonStyle(ConverterPressingButtonStyle())
                     .accessibilityLabel(isCurrentPairAlreadyFavorite ? "Already a favorite" : "Save as favorite")
 
-                    if vm.selectedMode != .normal {
+                    if !vm.standardUnitsOnly {
                         Button {
                             Haptics.tap()
-                            vm.selectedMode = .custom
                             showCustomUnitForm = true
                         } label: {
                             Image(systemName: "plus")
@@ -137,7 +137,9 @@ struct ConverterView: View {
 
 #Preview {
     let taxonomy = AppTaxonomyStore()
-    ConverterView(vm: ConverterViewModel(taxonomy: taxonomy))
+    let vm = ConverterViewModel(taxonomy: taxonomy)
+    ConverterView(vm: vm)
         .environmentObject(taxonomy)
+        .environmentObject(vm)
         .modelContainer(for: [CustomUnit.self, FavoriteConversion.self], inMemory: true)
 }

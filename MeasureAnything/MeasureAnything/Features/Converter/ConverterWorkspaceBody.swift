@@ -3,10 +3,13 @@ import SwiftData
 import UIKit
 import MeasureAnythingCore
 
-/// Live conversion blocks (mode, amount, units, result) shared by `HomeView` and standalone `ConverterView`.
+/// Live conversion blocks (amount, units, result) shared by `HomeView` and standalone `ConverterView`.
 struct ConverterWorkspaceBody: View {
-    /// When `false`, category is controlled by the host (e.g. home pill bar); only mode + result tone appear here.
+    /// When `false`, category is controlled by the host (e.g. home pill bar).
     var showsCategoryPicker: Bool = true
+
+    /// When set (e.g. on the home tab), “Did you know” opens the fact card sheet for the given unit id.
+    var onOpenFactCard: ((String) -> Void)? = nil
 
     @Binding var showCustomUnitForm: Bool
 
@@ -21,6 +24,7 @@ struct ConverterWorkspaceBody: View {
     @State private var shareActivityItems: [Any] = []
     @State private var swapRotation: Double = 0
     @State private var showFromPicker = false
+    @State private var customUnitSheetDetent: PresentationDetent = .medium
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -36,15 +40,22 @@ struct ConverterWorkspaceBody: View {
             categoryModeBlock
 
             Spacer()
-                .frame(height: ConverterLayout.majorBlockSpacing)
+                .frame(height: showsCategoryPicker ? ConverterLayout.majorBlockSpacing : ConverterLayout.rhythm12)
 
             conversionInputBlock
         }
         .padding(.horizontal, ConverterLayout.horizontalInset)
         .padding(.vertical, ConverterLayout.rhythm20)
         .sheet(isPresented: $showCustomUnitForm) {
-            CustomUnitFormView()
-                .environmentObject(taxonomyStore)
+            CustomUnitFormView(initialCategory: vm.selectedCategory)
+                .environmentObject(vm)
+                .presentationDetents([.medium, .large], selection: $customUnitSheetDetent)
+                .presentationDragIndicator(.visible)
+        }
+        .onChange(of: showCustomUnitForm) { _, isPresented in
+            if isPresented {
+                customUnitSheetDetent = .medium
+            }
         }
         .sheet(isPresented: $showShareSheet) {
             ActivityView(activityItems: shareActivityItems)
@@ -134,19 +145,14 @@ struct ConverterWorkspaceBody: View {
         return "\(inStr) \(fromU.name) = \(outStr) \(toU.name)"
     }
 
-    /// Category chips (optional) + compact mode capsule — no card wrapper or “MODE” label.
+    /// Category chips (optional) when this body owns category selection.
     private var categoryModeBlock: some View {
-        VStack(alignment: .leading, spacing: ConverterLayout.rhythm12) {
+        Group {
             if showsCategoryPicker {
-                categoryChipScroll
+                VStack(alignment: .leading, spacing: ConverterLayout.rhythm12) {
+                    categoryChipScroll
+                }
             }
-            HStack {
-                Spacer(minLength: 0)
-                compactModeToggle
-                    .disabled(!supportsAbsurdMode)
-                Spacer(minLength: 0)
-            }
-            .padding(.vertical, 2)
         }
     }
 
@@ -171,89 +177,14 @@ struct ConverterWorkspaceBody: View {
         }
     }
 
-    private var supportsAbsurdMode: Bool {
-        vm.modes.contains(.absurd)
-    }
-
-    private var compactModeToggle: some View {
-        let selection = effectiveTopModeBinding.wrappedValue
-        return HStack(spacing: 0) {
-            compactModePill(title: "Normal", selected: selection == .normal) {
-                effectiveTopModeBinding.wrappedValue = .normal
-            }
-            compactModePill(title: "Absurd", selected: selection == .absurd) {
-                effectiveTopModeBinding.wrappedValue = .absurd
-            }
-        }
-        .background(
-            Capsule(style: .continuous)
-                .fill(Color(hex: "#E0E0E2"))
-        )
-        .accessibilityElement(children: .combine)
-        .accessibilityLabel("Mode")
-        .accessibilityValue(selection == .normal ? "Normal" : "Absurd")
-    }
-
-    private func compactModePill(title: String, selected: Bool, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            Text(title)
-                .font(.system(size: 13, weight: selected ? .semibold : .regular))
-                .foregroundStyle(selected ? Color.white : Color(hex: "#888780"))
-                .padding(.horizontal, 20)
-                .padding(.vertical, 7)
-                .background(
-                    Capsule(style: .continuous)
-                        .fill(selected ? categoryAccent : Color.clear)
-                )
-        }
-        .buttonStyle(.plain)
-        .accessibilityAddTraits(selected ? .isSelected : [])
-    }
-
-    /// Top mode control is always normal/absurd. If the VM is in `.custom`, treat it as `.absurd` at the top level.
-    private var effectiveTopModeBinding: Binding<UnitRegistry.Mode> {
-        Binding(
-            get: {
-                switch vm.selectedMode {
-                case .custom: return .absurd
-                default: return vm.selectedMode
-                }
-            },
-            set: { next in
-                // When leaving absurd, always go to normal (not custom).
-                if next == .normal {
-                    vm.selectedMode = .normal
-                    return
-                }
-                // Entering absurd prefers `.absurd`, unless the user explicitly chose custom via submode.
-                vm.selectedMode = .absurd
-            }
-        )
-    }
-
-    // Custom mode is entered via the + button in the top bar while Absurd is selected.
-
     /// Block 2: amount and unit pickers — reference-style stacked white cards + floating swap.
     private var conversionInputBlock: some View {
         VStack(alignment: .leading, spacing: ConverterLayout.rhythm16) {
             referenceConversionColumn
-            if vm.selectedMode == .custom {
-                secondarySurface {
-                    customUnitsSection
-                }
-            }
         }
     }
 
     /// From/To: left column = amounts (input / converted output), right column = white unit pills — same `HStack` template so edges align. Swap on the seam.
-    /// Absurd pill treats `.custom` like absurd for dice visibility.
-    private var showsDiceCard: Bool {
-        switch vm.selectedMode {
-        case .normal: return false
-        case .absurd, .custom: return true
-        }
-    }
-
     private var referenceConversionColumn: some View {
         VStack(alignment: .leading, spacing: 0) {
             VStack(spacing: 0) {
@@ -273,37 +204,24 @@ struct ConverterWorkspaceBody: View {
                     .padding(.top, ConverterLayout.rhythm12)
             }
 
-            if showsDiceCard {
+            if !vm.standardUnitsOnly {
                 DiceRollCard(vm: vm, accent: categoryAccent)
                     .transition(.move(edge: .bottom).combined(with: .opacity))
                     .padding(.top, 10)
             }
 
-            if vm.showAbsurdNudge {
-                AbsurdNudgeCard(
-                    absurdResult: vm.absurdEquivalentDisplay,
+            if let toUnit = vm.toUnit, toUnit.funFact != nil {
+                DidYouKnowCard(
+                    unit: toUnit,
                     accent: categoryAccent,
-                    onTryAbsurd: {
-                        withAnimation {
-                            vm.selectedMode = .absurd
-                        }
-                        vm.hasSeenAbsurdNudge = true
-                    },
-                    onDismiss: {
-                        vm.hasSeenAbsurdNudge = true
-                    }
+                    onOpenFactCard: onOpenFactCard.map { cb in { cb(toUnit.id) } }
                 )
-                .padding(.top, 10)
+                .id(toUnit.id)
                 .transition(.opacity)
-            } else if let toUnit = vm.toUnit, toUnit.funFact != nil {
-                DidYouKnowCard(unit: toUnit, accent: categoryAccent)
-                    .id(toUnit.id)
-                    .transition(.opacity)
-                    .animation(.easeIn(duration: 0.25), value: toUnit.id)
-                    .padding(.top, 10)
+                .animation(.easeIn(duration: 0.25), value: toUnit.id)
+                .padding(.top, 10)
             }
         }
-        .animation(.spring(response: 0.4, dampingFraction: 0.8), value: showsDiceCard)
     }
 
     private var toRowDisplayString: String {
@@ -465,88 +383,6 @@ struct ConverterWorkspaceBody: View {
             .strokeBorder(Color.primary.opacity(ConverterLayout.strokeOpacitySubtle * 0.85), lineWidth: ConverterLayout.strokeHairline)
     }
 
-    private func secondarySurface<Content: View>(@ViewBuilder content: () -> Content) -> some View {
-        content()
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(ConverterLayout.secondaryBlockPadding)
-            .background(
-                RoundedRectangle(cornerRadius: ConverterLayout.secondaryBlockCornerRadius, style: .continuous)
-                    .fill(Color(hex: "#F5F5F7"))
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: ConverterLayout.secondaryBlockCornerRadius, style: .continuous)
-                    .strokeBorder(
-                        Color.primary.opacity(ConverterLayout.strokeOpacitySubtle),
-                        lineWidth: ConverterLayout.strokeHairline
-                    )
-            )
-    }
-
-    private var customUnitsSection: some View {
-        VStack(alignment: .leading, spacing: ConverterLayout.rhythm12) {
-            Divider()
-            sectionLabel("My custom units")
-
-            if customUnits.isEmpty {
-                emptyCustomUnitsPlaceholder
-            } else {
-                ForEach(customUnits) { unit in
-                    HStack(alignment: .center) {
-                        VStack(alignment: .leading, spacing: ConverterLayout.rhythm8) {
-                            Text(unit.name)
-                                .font(.body.weight(.medium))
-                            Text(unit.categoryRaw.capitalized)
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                        }
-                        Spacer()
-                        Button(role: .destructive) {
-                            Haptics.tap()
-                            modelContext.delete(unit)
-                        } label: {
-                            Image(systemName: "trash")
-                                .font(.body.weight(.medium))
-                                .foregroundStyle(.red)
-                                .frame(minWidth: 44, minHeight: 44)
-                                .contentShape(Rectangle())
-                        }
-                        .buttonStyle(.plain)
-                        .accessibilityLabel("Delete \(unit.name)")
-                    }
-                    .padding(.vertical, 2)
-                }
-            }
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(.top, ConverterLayout.rhythm8)
-    }
-
-    private var emptyCustomUnitsPlaceholder: some View {
-        HStack(alignment: .top, spacing: ConverterLayout.rhythm12) {
-            Image(systemName: "square.dashed")
-                .font(.title2)
-                .foregroundStyle(.tertiary)
-                .frame(width: 28)
-            VStack(alignment: .leading, spacing: ConverterLayout.rhythm8) {
-                Text("No custom units yet")
-                    .font(.subheadline.weight(.medium))
-                Text("Tap + above to add one. It will appear in Custom mode for that category.")
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
-        }
-        .padding(.vertical, 4)
-    }
-
-    private func sectionLabel(_ title: String) -> some View {
-        Text(title)
-            .font(.footnote.weight(.semibold))
-            .foregroundStyle(.secondary)
-            .textCase(.uppercase)
-            .tracking(0.55)
-    }
-
     private func validationErrorView(message: String) -> some View {
         HStack(alignment: .top, spacing: ConverterLayout.rhythm12) {
             Image(systemName: "exclamationmark.circle.fill")
@@ -573,7 +409,7 @@ struct ConverterWorkspaceBody: View {
 
 #Preview {
     let taxonomy = AppTaxonomyStore()
-    ConverterWorkspaceBody(showsCategoryPicker: true, showCustomUnitForm: .constant(false), vm: ConverterViewModel(taxonomy: taxonomy))
+    ConverterWorkspaceBody(showsCategoryPicker: true, onOpenFactCard: nil, showCustomUnitForm: .constant(false), vm: ConverterViewModel(taxonomy: taxonomy))
         .environmentObject(taxonomy)
         .modelContainer(for: [CustomUnit.self, FavoriteConversion.self], inMemory: true)
 }
