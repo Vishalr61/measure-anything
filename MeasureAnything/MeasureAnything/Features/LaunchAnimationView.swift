@@ -25,15 +25,17 @@ struct LaunchAnimationView: View {
 
     private let subtitleText = "meters, whales, and everything between"
     private let subtitleGray = Color(hex: "#9A9A94")
-    private let tapPromptText = "tap to start"
+    private let tapPromptText = "slide to start"
     private let tapPromptGray = Color(hex: "#C0C0B8")
 
     var onFinished: () -> Void
 
     @State private var didStart = false
     @State private var rootOpacity: Double = 1
+    @State private var rootOffsetY: CGFloat = 0
     @State private var allowsTouches = true
     @State private var phase: Phase = .animating
+    @State private var dragTranslationY: CGFloat = 0
 
     @State private var measureOpacity: Double = 0
     @State private var measureY: CGFloat = 8
@@ -64,22 +66,31 @@ struct LaunchAnimationView: View {
                     .font(.system(size: 14, weight: .regular))
                     .foregroundStyle(subtitleGray)
                     .opacity(subtitleOpacity)
-                    .offset(y: subtitleY)
+                    .offset(x: 10, y: subtitleY)
                     .accessibilityHidden(true)
             }
             .padding(.horizontal, 24)
+            .offset(y: -24)
 
             VStack {
                 Spacer()
-                Text(tapPromptText)
-                    .font(.system(size: 12, weight: .regular))
-                    .foregroundStyle(tapPromptGray)
-                    .opacity(tapPromptVisibleOpacity * tapPromptPulse)
-                    .padding(.bottom, 80)
-                    .accessibilityHidden(true)
+                VStack(spacing: 6) {
+                    Image(systemName: "chevron.up")
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundStyle(tapPromptGray)
+                        .opacity(tapPromptVisibleOpacity * tapPromptPulse)
+
+                    Text(tapPromptText)
+                        .font(.system(size: 12, weight: .regular))
+                        .foregroundStyle(tapPromptGray)
+                        .opacity(tapPromptVisibleOpacity * tapPromptPulse)
+                }
+                .padding(.bottom, 80)
+                .accessibilityHidden(true)
             }
         }
         .opacity(rootOpacity)
+        .offset(y: rootOffsetY + dragTranslationY)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .contentShape(Rectangle())
         .allowsHitTesting(allowsTouches)
@@ -88,9 +99,35 @@ struct LaunchAnimationView: View {
         }
         .gesture(
             DragGesture(minimumDistance: 12, coordinateSpace: .local)
+                .onChanged { value in
+                    guard allowsTouches else { return }
+                    let t = value.translation.height
+                    switch phase {
+                    case .held:
+                        dragTranslationY = min(0, t)
+                    case .animating:
+                        // If user starts swiping up early, treat it like "skip to held".
+                        if t < -50 {
+                            handleProceedGesture()
+                        }
+                    case .dismissing:
+                        break
+                    }
+                }
                 .onEnded { value in
-                    guard value.translation.height < -20 else { return }
-                    handleProceedGesture()
+                    guard allowsTouches else { return }
+                    let t = value.translation.height
+                    if phase == .held {
+                        if t < -120 {
+                            Task { await finishWithSlide() }
+                        } else {
+                            withAnimation(.spring(response: 0.35, dampingFraction: 0.86)) {
+                                dragTranslationY = 0
+                            }
+                        }
+                    } else {
+                        dragTranslationY = 0
+                    }
                 }
         )
         .task {
@@ -227,6 +264,22 @@ struct LaunchAnimationView: View {
         allowsTouches = false
         withAnimation(.easeOut(duration: 0.3)) {
             rootOpacity = 0
+            rootOffsetY = -80
+        }
+        await sleep(0.32)
+        onFinished()
+    }
+
+    private func finishWithSlide() async {
+        // Dismiss from an interactive drag position.
+        guard allowsTouches else { return }
+        phase = .dismissing
+        allowsTouches = false
+        let target = -max(220, UIScreen.main.bounds.height * 0.35)
+        withAnimation(.easeOut(duration: 0.3)) {
+            rootOpacity = 0
+            rootOffsetY = target
+            dragTranslationY = 0
         }
         await sleep(0.32)
         onFinished()
