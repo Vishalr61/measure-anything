@@ -20,12 +20,9 @@ struct MeasureAnythingApp: App {
         _converterViewModel = StateObject(wrappedValue: ConverterViewModel(taxonomy: taxonomy))
         _ = FactCardStore.shared
 
-        let defaults = UserDefaults.standard
-        let count = defaults.integer(forKey: "launchAnimationPlayCount")
-        shouldShowLaunchAnimation = count < 5
-        if shouldShowLaunchAnimation {
-            defaults.set(count + 1, forKey: "launchAnimationPlayCount")
-        }
+        // Play the launch animation on every cold launch (new process).
+        // `LaunchAnimationView.hasPlayedThisSession` prevents replays on background/foreground.
+        shouldShowLaunchAnimation = true
     }
 
     var body: some Scene {
