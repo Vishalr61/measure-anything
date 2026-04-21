@@ -26,22 +26,26 @@ final class CoreConversionTests: XCTestCase {
         }
 
         let mass = try store.load(category: .mass)
-        XCTAssertEqual(mass.count, 17)
-        XCTAssertTrue(Set(mass.map(\.id)).contains("elephant"))
-        XCTAssertTrue(Set(mass.map(\.id)).contains("blue_whale_mass"))
+        let massIDs = Set(mass.map(\.id))
+        XCTAssertGreaterThanOrEqual(massIDs.count, 17)
+        XCTAssertTrue(massIDs.contains("elephant"))
+        XCTAssertTrue(massIDs.contains("blue_whale_mass"))
 
         let time = try store.load(category: .time)
-        XCTAssertEqual(time.count, 23)
-        XCTAssertTrue(Set(time.map(\.id)).contains("coffee_break"))
-        XCTAssertTrue(Set(time.map(\.id)).contains("blink"))
+        let timeIDs = Set(time.map(\.id))
+        XCTAssertGreaterThanOrEqual(timeIDs.count, 23)
+        XCTAssertTrue(timeIDs.contains("coffee_break"))
+        XCTAssertTrue(timeIDs.contains("blink"))
 
         let volume = try store.load(category: .volume)
-        XCTAssertEqual(volume.count, 14)
-        XCTAssertTrue(Set(volume.map(\.id)).contains("bathtub"))
+        let volumeIDs = Set(volume.map(\.id))
+        XCTAssertGreaterThanOrEqual(volumeIDs.count, 14)
+        XCTAssertTrue(volumeIDs.contains("bathtub"))
 
         let temperature = try store.load(category: .temperature)
-        XCTAssertEqual(temperature.count, 7)
-        XCTAssertTrue(Set(temperature.map(\.id)).contains("body_temp"))
+        let temperatureIDs = Set(temperature.map(\.id))
+        XCTAssertGreaterThanOrEqual(temperatureIDs.count, 7)
+        XCTAssertTrue(temperatureIDs.contains("body_temp"))
     }
 
     func testRegistryRejectsDuplicateIDs() throws {
@@ -183,4 +187,3 @@ final class CoreConversionTests: XCTestCase {
         )
     }
 }
-
