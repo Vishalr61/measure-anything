@@ -68,6 +68,20 @@
     "interestScore": 7
   },
   {
+    "id": "coffee_cup_vol",
+    "name": "Coffee cup",
+    "category": "volume",
+    "baseUnit": "liter",
+    "kind": "absurd",
+    "conversionStyle": "multiplicative",
+    "factor": 0.25,
+    "iconName": "cup.and.saucer",
+    "description": "Standard coffee cup ≈ 250 ml.",
+    "exampleMeme": "The unit of morning productivity.",
+    "funFact": "A 'cup' as a unit of measurement varies wildly: a US customary cup is 236 ml, a US legal cup is 240 ml, a metric cup is 250 ml, and a Japanese cup is 200 ml. The average Starbucks Grande is 473 ml — nearly two metric cups, which explains a lot about American caffeine intake.",
+    "interestScore": 8
+  },
+  {
     "id": "bathtub",
     "name": "Bathtub",
     "category": "volume",
@@ -219,6 +233,20 @@
     "exampleMeme": "Medical precision volume.",
     "funFact": "The human eye can only hold about 30 microlitres of fluid — meaning roughly 40% of every eye drop immediately overflows down the tear duct. Pharmaceutical companies know this but still make standard drops 50 microlitres, since a too-small drop is worse than an overflow.",
     "interestScore": 7
+  },
+  {
+    "id": "raindrop_vol",
+    "name": "Raindrop",
+    "category": "volume",
+    "baseUnit": "liter",
+    "kind": "absurd",
+    "conversionStyle": "multiplicative",
+    "factor": 5e-05,
+    "iconName": "cloud.rain",
+    "description": "Average raindrop ≈ 0.05 ml (50 microlitres).",
+    "exampleMeme": "Sky-delivered measurement.",
+    "funFact": "Raindrops aren't teardrop-shaped — they're actually shaped like tiny hamburger buns, flattened on the bottom by air resistance as they fall. Small drops are nearly perfect spheres. A typical rainstorm delivers about 1 billion drops per square kilometre per minute.",
+    "interestScore": 9
   },
   {
     "id": "shot_glass",

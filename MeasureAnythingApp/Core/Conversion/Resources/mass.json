@@ -140,6 +140,20 @@
     "interestScore": 8
   },
   {
+    "id": "hippopotamus",
+    "name": "Hippopotamus",
+    "category": "mass",
+    "baseUnit": "kilogram",
+    "kind": "absurd",
+    "conversionStyle": "multiplicative",
+    "factor": 1500,
+    "iconName": "pawprint",
+    "description": "Adult hippopotamus ≈ 1,500 kg.",
+    "exampleMeme": "Heavier than it looks. Angrier than you'd think.",
+    "funFact": "Hippos kill roughly 500 people per year in Africa — more than any other large animal. Despite weighing 1,500 kg they can run at 30 km/h on land and are surprisingly agile underwater, where they don't swim but rather gallop along the river bottom.",
+    "interestScore": 9
+  },
+  {
     "id": "rhino",
     "name": "Rhinoceros",
     "category": "mass",
@@ -350,6 +364,20 @@
     "interestScore": 9
   },
   {
+    "id": "coffee_mug_mass",
+    "name": "Coffee mug",
+    "category": "mass",
+    "baseUnit": "kilogram",
+    "kind": "absurd",
+    "conversionStyle": "multiplicative",
+    "factor": 0.35,
+    "iconName": "cup.and.saucer",
+    "description": "Ceramic coffee mug with coffee ≈ 350 g.",
+    "exampleMeme": "Morning ritual weight.",
+    "funFact": "The average office worker drinks about 3 cups of coffee per day — meaning you lift roughly 1 kg of coffee mug to your face every workday. Over a 40-year career, that's about 14,600 lifts of the same mug, totalling over 5 tonnes of cumulative mug-lifting.",
+    "interestScore": 8
+  },
+  {
     "id": "human_brain",
     "name": "Human brain",
     "category": "mass",
@@ -418,6 +446,20 @@
     "exampleMeme": "The scaffolding inside you weighs less than a laptop.",
     "funFact": "Your skeleton accounts for about 15% of your body weight — roughly 5 kg for an average adult. Bones are not rigid permanent structures: the entire skeleton is replaced cell by cell roughly every 10 years.",
     "interestScore": 8
+  },
+  {
+    "id": "carry_on_luggage",
+    "name": "Carry-on luggage",
+    "category": "mass",
+    "baseUnit": "kilogram",
+    "kind": "absurd",
+    "conversionStyle": "multiplicative",
+    "factor": 7,
+    "iconName": "suitcase",
+    "description": "Standard carry-on weight limit = 7 kg.",
+    "exampleMeme": "The weight of anxiety at the gate.",
+    "funFact": "Airline carry-on weight limits range from 5 kg (some budget carriers) to 12 kg (Emirates first class). The 7 kg standard was set by IATA in the 1990s based on the maximum weight a flight attendant could safely lift into an overhead bin — it was designed for crew safety, not passenger convenience.",
+    "interestScore": 9
   },
   {
     "id": "corgi",

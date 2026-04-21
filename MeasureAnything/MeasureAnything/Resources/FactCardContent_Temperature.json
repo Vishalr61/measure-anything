@@ -29,6 +29,72 @@
           "template": "Deep space is cold; the Sun's surface is not."
         }
       ]
+    },
+    "freezer_temp": {
+      "valueHeadline": "A home freezer runs at",
+      "valueDisplay": "−18 °C",
+      "comparisons": [
+        {
+          "targetUnitID": "freshly_baked_bread",
+          "template": "113°C colder than freshly baked bread — the difference between preserving food and creating it."
+        },
+        {
+          "targetUnitID": "cast_iron_sear",
+          "template": "248°C colder than a cast iron sear — the full range of a home kitchen in one number."
+        },
+        {
+          "targetUnitID": "sun_surface",
+          "template": "5,518°C colder than the surface of the Sun."
+        },
+        {
+          "targetUnitID": "absolute_zero",
+          "template": "255°C warmer than absolute zero — your freezer is actually quite warm by physics standards."
+        }
+      ]
+    },
+    "freshly_baked_bread": {
+      "valueHeadline": "Freshly baked bread reaches",
+      "valueDisplay": "95 °C",
+      "comparisons": [
+        {
+          "targetUnitID": "freezer_temp",
+          "template": "113°C warmer than your freezer — bread goes from frozen dough to done across this exact range."
+        },
+        {
+          "targetUnitID": "cast_iron_sear",
+          "template": "135°C cooler than a cast iron sear — bread bakes gently while steaks need violence."
+        },
+        {
+          "targetUnitID": "sun_surface",
+          "template": "5,405°C cooler than the surface of the Sun."
+        },
+        {
+          "targetUnitID": "absolute_zero",
+          "template": "368°C warmer than absolute zero."
+        }
+      ]
+    },
+    "cast_iron_sear": {
+      "valueHeadline": "A cast iron sear reaches",
+      "valueDisplay": "230 °C",
+      "comparisons": [
+        {
+          "targetUnitID": "freshly_baked_bread",
+          "template": "135°C hotter than freshly baked bread — the Maillard reaction needs real heat."
+        },
+        {
+          "targetUnitID": "freezer_temp",
+          "template": "248°C hotter than your freezer — the full thermal range of cooking in one jump."
+        },
+        {
+          "targetUnitID": "sun_surface",
+          "template": "5,270°C cooler than the surface of the Sun — your cast iron is impressive but not that impressive."
+        },
+        {
+          "targetUnitID": "absolute_zero",
+          "template": "503°C warmer than absolute zero."
+        }
+      ]
     }
   }
 }

@@ -553,5 +553,50 @@
     "exampleMeme": "Actual nuclear fusion.",
     "funFact": "The Sun's core is 15 million°C — hot enough to fuse hydrogen nuclei into helium despite their electromagnetic repulsion. A single photon of light generated there takes 100,000 years to reach the surface, bouncing between particles the whole time.",
     "interestScore": 9
+  },
+  {
+    "id": "freezer_temp",
+    "name": "Freezer",
+    "category": "temperature",
+    "baseUnit": "celsius",
+    "kind": "absurd",
+    "conversionStyle": "offset",
+    "factor": 1,
+    "offset": 18,
+    "iconName": "snowflake",
+    "description": "Standard home freezer ≈ −18 °C (255.15 K).",
+    "exampleMeme": "Where leftovers go to be forgotten.",
+    "funFact": "The −18°C standard for home freezers was set in the 1930s by Clarence Birdseye, who discovered that flash-freezing food at this temperature preserved texture far better than slow freezing. He got the idea from watching Inuit fishermen in Labrador freeze fish almost instantly in −40°C Arctic air.",
+    "interestScore": 9
+  },
+  {
+    "id": "freshly_baked_bread",
+    "name": "Freshly baked bread",
+    "category": "temperature",
+    "baseUnit": "celsius",
+    "kind": "absurd",
+    "conversionStyle": "offset",
+    "factor": 1,
+    "offset": -95,
+    "iconName": "oven",
+    "description": "Internal temperature of freshly baked bread ≈ 95 °C (368.15 K).",
+    "exampleMeme": "The smell is the best thermometer.",
+    "funFact": "Professional bakers determine doneness by internal temperature, not colour or time — bread is done at exactly 93-96°C internally, regardless of what the crust looks like. At this temperature, the starches have fully gelatinised and the proteins have set. Every degree matters: pull it at 88°C and the centre will be gummy.",
+    "interestScore": 8
+  },
+  {
+    "id": "cast_iron_sear",
+    "name": "Cast iron sear",
+    "category": "temperature",
+    "baseUnit": "celsius",
+    "kind": "absurd",
+    "conversionStyle": "offset",
+    "factor": 1,
+    "offset": -230,
+    "iconName": "frying.pan",
+    "description": "Optimal cast iron searing temperature ≈ 230 °C (503.15 K).",
+    "exampleMeme": "Where the Maillard reaction lives.",
+    "funFact": "The perfect sear happens at 230°C because that's where the Maillard reaction — the chemical process that creates browning and flavour — runs fastest without burning. Below 150°C the reaction barely happens. Above 260°C you get charring instead. The sweet spot is surprisingly narrow for something every culture figured out independently.",
+    "interestScore": 8
   }
 ]

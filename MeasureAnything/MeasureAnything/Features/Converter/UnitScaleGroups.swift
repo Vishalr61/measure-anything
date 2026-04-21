@@ -19,6 +19,7 @@ enum UnitScaleGroups {
     private static let length: [String: String] = [
         "spider_silk": "Tiny", "red_blood_cell": "Tiny",
         "human_hair": "Tiny", "grain_of_sand": "Tiny",
+        "lego_minifigure": "Tiny",
         "ant": "Small", "paperclip": "Small",
         "grain_of_rice": "Small", "credit_card": "Small",
         "pencil": "Small", "toothbrush": "Small",
@@ -32,11 +33,13 @@ enum UnitScaleGroups {
         "basketball_hoop": "Room & street",
         "swimming_pool_depth": "Room & street",
         "car": "Room & street", "double_decker_bus": "Room & street",
+        "school_bus": "Room & street",
         "bus": "Room & street", "telephone_pole": "Room & street",
         "bowling_lane": "Room & street", "tennis_court": "Room & street",
         "short_pool": "Room & street", "city_block": "Room & street",
         "subway_car": "Room & street", "football_field": "Room & street",
         "olympic_pool": "Landmark", "boeing_747": "Landmark",
+        "golden_gate_bridge": "Landmark",
         "aircraft_carrier": "Landmark", "statue_of_liberty": "Landmark",
         "eiffel_tower": "Landmark", "big_ben": "Landmark",
         "empire_state_building": "Landmark", "burj_khalifa": "Landmark",
@@ -52,27 +55,41 @@ enum UnitScaleGroups {
     ]
 
     private static let time: [String: String] = [
+        "planck_time": "Instant",
+        "jiffy_physics": "Instant",
+        "shake": "Instant",
         "camera_shutter": "Instant",
         "blink": "Instant", "heartbeat": "Instant",
         "light_travel_earth_moon": "Instant",
         "youtube_ad": "Seconds", "olympic_100m": "Seconds",
+        "microwave_minute": "Seconds",
+        "moment_medieval": "Seconds",
+        "traffic_light_cycle": "Seconds",
         "nap": "Minutes", "coffee_break": "Minutes",
         "half_time": "Minutes",
         "tv_episode": "Minutes", "gym_session": "Minutes",
         "bad_meeting": "Minutes", "song": "Minutes",
         "toilet_scroll": "Minutes", "commute": "Minutes",
+        "pomodoro": "Minutes",
+        "microcentury": "Minutes",
         "work_day": "Hours", "mars_day": "Hours",
+        "watch_naval": "Hours",
+        "feature_film": "Hours",
+        "sidereal_day": "Hours",
         "week": "Days", "lunar_month": "Days",
+        "fortnight": "Days",
         "month": "Months",
         "pregnancy": "Months",
         "dog_year": "Years", "year": "Years", "decade": "Years",
         "voyager_travel": "Lifescale",
         "human_lifespan": "Lifescale",
+        "human_generation": "Lifescale",
         "roman_empire": "Cosmic time",
         "since_pyramids": "Cosmic time",
         "since_dinosaurs": "Cosmic time",
         "milky_way_light": "Cosmic time",
-        "age_of_universe": "Cosmic time"
+        "age_of_universe": "Cosmic time",
+        "galactic_year": "Cosmic time"
     ]
 
     private static let mass: [String: String] = [
@@ -83,11 +100,13 @@ enum UnitScaleGroups {
         "aa_battery": "Small", "golf_ball": "Small",
         "iphone": "Small", "human_heart": "Small",
         "can_of_soup": "Small",
+        "coffee_mug_mass": "Small",
 
         "bag_of_sugar": "Everyday", "litre_of_water": "Everyday",
         "human_brain": "Everyday", "chicken": "Everyday",
         "newborn_baby_mass": "Everyday", "bowling_ball": "Everyday",
         "human_skin": "Everyday", "human_skeleton": "Everyday",
+        "carry_on_luggage": "Everyday",
 
         "house_cat": "Animals", "corgi": "Animals",
         "golden_retriever": "Animals", "labrador": "Animals",
@@ -95,6 +114,7 @@ enum UnitScaleGroups {
         "washing_machine": "Home", "grand_piano": "Home",
 
         "great_white_shark": "Large animals",
+        "hippopotamus": "Large animals",
         "rhino": "Large animals", "orca": "Large animals",
         "elephant": "Large animals", "t_rex": "Large animals",
 
@@ -110,11 +130,13 @@ enum UnitScaleGroups {
 
     private static let volume: [String: String] = [
         "teardrop": "Tiny", "eyedrop": "Tiny",
+        "raindrop_vol": "Tiny",
         "teaspoon_vol": "Tiny",
         "shot_glass": "Small",
         "can_of_soda": "Small", "soda_can": "Small",
         "pint": "Small",
         "wine_bottle_vol": "Small", "wine_glass": "Small",
+        "coffee_cup_vol": "Small",
         "milk_carton": "Small", "bucket": "Small",
         "garden_hose_minute": "Small",
         "stomach": "Human", "blood_volume": "Human",
@@ -131,6 +153,7 @@ enum UnitScaleGroups {
         "absolute_zero": "Freezing", "deep_space": "Freezing",
         "liquid_nitrogen": "Freezing", "liquid_oxygen": "Freezing",
         "dry_ice": "Freezing", "antarctica_winter": "Freezing",
+        "freezer_temp": "Freezing",
 
         "refrigerator": "Cool", "comfortable_room": "Cool",
         "swimming_pool": "Cool",
@@ -143,8 +166,10 @@ enum UnitScaleGroups {
         "car_summer": "Hot", "fast_food_hot": "Hot",
         "sauna": "Hot", "gpu_overheat": "Hot",
         "cpu_throttle": "Hot", "boiling_water": "Hot",
+        "freshly_baked_bread": "Hot",
 
         "battery_runaway": "Scorching", "paper_ignition": "Scorching",
+        "cast_iron_sear": "Scorching",
         "pizza_oven": "Scorching", "venus_surface": "Scorching",
         "steel_softening": "Scorching", "aluminum_melting": "Scorching",
 

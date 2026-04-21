@@ -395,6 +395,50 @@
           "template": "507 billion bathtubs — it took 500,000 years of coral growth to fill them."
         }
       ]
+    },
+    "raindrop_vol": {
+      "valueHeadline": "One raindrop holds",
+      "valueDisplay": "0.05 ml",
+      "comparisons": [
+        {
+          "targetUnitID": "teardrop",
+          "template": "About 7.7 teardrops — rain is bigger than crying."
+        },
+        {
+          "targetUnitID": "eyedrop",
+          "template": "Almost exactly 1 eye drop — nature's dosage matches pharmaceutical precision."
+        },
+        {
+          "targetUnitID": "coffee_cup_vol",
+          "template": "A coffee cup holds 5,000 raindrops."
+        },
+        {
+          "targetUnitID": "olympic_pool_vol",
+          "template": "An Olympic pool holds 50 billion raindrops — roughly one minute of a heavy storm over a small suburb."
+        }
+      ]
+    },
+    "coffee_cup_vol": {
+      "valueHeadline": "One coffee cup holds",
+      "valueDisplay": "250 ml",
+      "comparisons": [
+        {
+          "targetUnitID": "shot_glass",
+          "template": "About 5.7 shots — which is one way to make mornings more interesting."
+        },
+        {
+          "targetUnitID": "raindrop_vol",
+          "template": "5,000 raindrops — a small cloud's contribution to your morning."
+        },
+        {
+          "targetUnitID": "eyedrop",
+          "template": "5,000 eye drops."
+        },
+        {
+          "targetUnitID": "blood_volume",
+          "template": "Your body holds about 20 coffee cups of blood — roughly your daily intake if you work in tech."
+        }
+      ]
     }
   }
 }

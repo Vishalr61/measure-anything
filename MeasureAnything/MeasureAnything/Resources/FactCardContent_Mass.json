@@ -831,6 +831,72 @@
           "template": "About 10 concert grand pianos."
         }
       ]
+    },
+    "coffee_mug_mass": {
+      "valueHeadline": "One coffee mug weighs",
+      "valueDisplay": "350 g",
+      "comparisons": [
+        {
+          "targetUnitID": "iphone",
+          "template": "About 2 iPhones — your morning ritual is heavier than your pocket."
+        },
+        {
+          "targetUnitID": "human_heart",
+          "template": "Roughly 1.17 human hearts — you're lifting a heart's worth of ceramic to your face every morning."
+        },
+        {
+          "targetUnitID": "aa_battery",
+          "template": "About 15 AA batteries."
+        },
+        {
+          "targetUnitID": "feather",
+          "template": "35,000 feathers — the full plumage of about 5 bald eagles."
+        }
+      ]
+    },
+    "carry_on_luggage": {
+      "valueHeadline": "One carry-on weighs",
+      "valueDisplay": "7 kg",
+      "comparisons": [
+        {
+          "targetUnitID": "human_brain",
+          "template": "5 human brains — you're hauling significant cognitive weight through the airport."
+        },
+        {
+          "targetUnitID": "iphone",
+          "template": "About 41 iPhones, which is roughly the number of devices you see on an average flight."
+        },
+        {
+          "targetUnitID": "bag_of_sugar",
+          "template": "7 bags of sugar — the limit was set for crew safety, not passenger convenience."
+        },
+        {
+          "targetUnitID": "bowling_ball",
+          "template": "About 1.1 bowling balls — similar weight, similar overhead bin anxiety."
+        }
+      ]
+    },
+    "hippopotamus": {
+      "valueHeadline": "One hippopotamus weighs",
+      "valueDisplay": "1,500 kg",
+      "comparisons": [
+        {
+          "targetUnitID": "small_car",
+          "template": "About 1.25 small cars — and considerably more dangerous in a collision."
+        },
+        {
+          "targetUnitID": "elephant",
+          "template": "25% of an African elephant, though hippos kill 10 times more people per year."
+        },
+        {
+          "targetUnitID": "rhino",
+          "template": "About 65% of a white rhino, despite looking considerably rounder."
+        },
+        {
+          "targetUnitID": "grand_piano",
+          "template": "About 3.1 concert grand pianos — and hippos can run at 30 km/h carrying all of it."
+        }
+      ]
     }
   }
 }

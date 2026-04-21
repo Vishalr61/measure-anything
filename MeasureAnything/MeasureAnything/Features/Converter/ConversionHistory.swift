@@ -5,13 +5,18 @@ final class ConversionHistory {
     static let shared = ConversionHistory()
 
     private let key = "conversionPairFrequency"
+    private let defaults: UserDefaults
+
+    init(defaults: UserDefaults = .standard) {
+        self.defaults = defaults
+    }
 
     private var frequency: [String: Int] {
         get {
-            (UserDefaults.standard.dictionary(forKey: key) as? [String: Int]) ?? [:]
+            (defaults.dictionary(forKey: key) as? [String: Int]) ?? [:]
         }
         set {
-            UserDefaults.standard.set(newValue, forKey: key)
+            defaults.set(newValue, forKey: key)
         }
     }
 
@@ -31,13 +36,13 @@ final class ConversionHistory {
         next[pairKey, default: 0] += 1
         frequency = next
 
-        var recent = UserDefaults.standard.stringArray(forKey: recencyKey) ?? []
+        var recent = defaults.stringArray(forKey: recencyKey) ?? []
         recent.removeAll { $0 == to }
         recent.insert(to, at: 0)
         if recent.count > 20 { recent = Array(recent.prefix(20)) }
-        UserDefaults.standard.set(recent, forKey: recencyKey)
+        defaults.set(recent, forKey: recencyKey)
 
-        var pairs = UserDefaults.standard.array(forKey: pairsKey) as? [[String: String]] ?? []
+        var pairs = defaults.array(forKey: pairsKey) as? [[String: String]] ?? []
         let newPair: [String: String] = [
             "from": from,
             "to": to,
@@ -46,11 +51,11 @@ final class ConversionHistory {
         pairs.removeAll { $0["from"] == from && $0["to"] == to }
         pairs.insert(newPair, at: 0)
         if pairs.count > 20 { pairs = Array(pairs.prefix(20)) }
-        UserDefaults.standard.set(pairs, forKey: pairsKey)
+        defaults.set(pairs, forKey: pairsKey)
     }
 
     func recentToUnits(limit: Int) -> [String] {
-        let raw = UserDefaults.standard.stringArray(forKey: recencyKey) ?? []
+        let raw = defaults.stringArray(forKey: recencyKey) ?? []
         return Array(raw.prefix(limit))
     }
 
@@ -63,7 +68,7 @@ final class ConversionHistory {
     }
 
     func recentPairs(limit: Int) -> [ConversionPair] {
-        let raw = UserDefaults.standard.array(forKey: pairsKey) as? [[String: String]] ?? []
+        let raw = defaults.array(forKey: pairsKey) as? [[String: String]] ?? []
         return raw.prefix(limit).compactMap { dict in
             guard let from = dict["from"], let to = dict["to"] else { return nil }
             let cat = dict["category"].flatMap { UnitCategory(rawValue: $0) }
@@ -77,8 +82,9 @@ final class ConversionHistory {
     }
 
     func clearRecentPairs() {
-        UserDefaults.standard.removeObject(forKey: pairsKey)
-        UserDefaults.standard.removeObject(forKey: recencyKey)
+        defaults.removeObject(forKey: pairsKey)
+        defaults.removeObject(forKey: recencyKey)
+        defaults.removeObject(forKey: key)
     }
 
     /// Most-recently-used FROM unit in the given category, or `nil` if no history exists.

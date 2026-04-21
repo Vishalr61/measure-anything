@@ -76,6 +76,21 @@ This runs `**MeasureAnythingCoreTests**` and `**MeasureAnythingTaxonomyTests**` 
 
 Additional **MeasureAnythingTests** (app target) and **MeasureAnythingUITests** run from the Xcode project’s test actions for the **MeasureAnything** scheme.
 
+To run just the iOS app unit tests from the terminal with an explicitly booted simulator:
+
+```bash
+./scripts/run-app-unit-tests.sh
+```
+
+This helper boots a known simulator first, waits for it to become ready, and then runs only `MeasureAnythingTests`.
+
+Optional overrides:
+
+```bash
+SIMULATOR_NAME="iPhone 16" SIMULATOR_OS="18.6" ./scripts/run-app-unit-tests.sh
+SIMULATOR_ID="<simulator-udid>" ./scripts/run-app-unit-tests.sh
+```
+
 ---
 
 ## Content and assets
