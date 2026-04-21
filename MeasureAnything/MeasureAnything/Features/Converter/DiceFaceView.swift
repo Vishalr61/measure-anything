@@ -4,7 +4,7 @@ struct DiceFaceView: View {
     @Binding var face: Int // 1...6
     var faceColor: Color
     var pipOpacity: Double = 1
-    let size: CGFloat = 46
+    var size: CGFloat = 56
 
     private let pipPositions: [Int: [(CGFloat, CGFloat)]] = [
         1: [(22, 22)],
@@ -19,13 +19,17 @@ struct DiceFaceView: View {
         Canvas { ctx, _ in
             // Filled rounded rect, inset 2pt on each side.
             let rect = CGRect(x: 2, y: 2, width: size - 4, height: size - 4)
-            let rr = Path(roundedRect: rect, cornerRadius: 9)
+            let rr = Path(roundedRect: rect, cornerRadius: size * 0.20)
             ctx.fill(rr, with: .color(faceColor))
 
-            // White pips (radius 3.2) in a 44×44 viewBox coordinates.
+            // White pips scaled from a 44×44 viewBox.
             let dots = pipPositions[clampedFace] ?? pipPositions[1]!
+            let scale = size / 46
+            let r = 3.2 * scale
             for (x, y) in dots {
-                let pip = CGRect(x: x - 3.2, y: y - 3.2, width: 6.4, height: 6.4)
+                let sx = x * scale
+                let sy = y * scale
+                let pip = CGRect(x: sx - r, y: sy - r, width: r * 2, height: r * 2)
                 ctx.opacity = pipOpacity
                 ctx.fill(Path(ellipseIn: pip), with: .color(.white))
             }
