@@ -163,18 +163,16 @@ struct HomeView: View {
                     .buttonStyle(ConverterPressingButtonStyle())
                     .accessibilityLabel(isCurrentPairAlreadyFavorite ? "Already a favorite" : "Save as favorite")
 
-                    if !vm.standardUnitsOnly {
-                        Button {
-                            Haptics.tap()
-                            showCustomUnitForm = true
-                        } label: {
-                            Image(systemName: "plus")
-                                .font(.body.weight(.regular))
-                                .imageScale(.medium)
-                        }
-                        .buttonStyle(ConverterPressingButtonStyle())
-                        .accessibilityLabel("Add custom unit")
+                    Button {
+                        Haptics.tap()
+                        showCustomUnitForm = true
+                    } label: {
+                        Image(systemName: "plus")
+                            .font(.body.weight(.regular))
+                            .imageScale(.medium)
                     }
+                    .buttonStyle(ConverterPressingButtonStyle())
+                    .accessibilityLabel("Add custom unit")
                 }
             }
         }

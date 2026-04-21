@@ -204,11 +204,9 @@ struct ConverterWorkspaceBody: View {
                     .padding(.top, ConverterLayout.rhythm12)
             }
 
-            if !vm.standardUnitsOnly {
-                DiceRollCard(vm: vm, accent: categoryAccent)
-                    .transition(.move(edge: .bottom).combined(with: .opacity))
-                    .padding(.top, 10)
-            }
+            DiceRollCard(vm: vm, accent: categoryAccent)
+                .transition(.move(edge: .bottom).combined(with: .opacity))
+                .padding(.top, 10)
 
             if let toUnit = vm.toUnit, toUnit.funFact != nil {
                 DidYouKnowCard(
