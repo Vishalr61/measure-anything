@@ -598,5 +598,33 @@
     "exampleMeme": "One lap around the Milky Way.",
     "funFact": "A galactic year is the time it takes our solar system to orbit the centre of the Milky Way once — roughly 230 million years. The Sun has completed about 20 galactic years since it formed. The dinosaurs went extinct about 0.3 galactic years ago. All of recorded human history is about 0.00002 galactic years.",
     "interestScore": 10
+  },
+  {
+    "id": "feature_film",
+    "name": "Feature film",
+    "category": "time",
+    "baseUnit": "second",
+    "kind": "absurd",
+    "conversionStyle": "multiplicative",
+    "factor": 7200,
+    "iconName": "film",
+    "description": "Average feature film ≈ 120 minutes.",
+    "exampleMeme": "Two hours in the dark.",
+    "funFact": "The Academy defines a feature film as any motion picture 40 minutes or longer — but the average Hollywood film has steadily crept from 95 minutes in the 1980s to over 130 minutes today. Marvel films average 148 minutes, which is why your bladder has opinions about the MCU.",
+    "interestScore": 9
+  },
+  {
+    "id": "human_generation",
+    "name": "Human generation",
+    "category": "time",
+    "baseUnit": "second",
+    "kind": "absurd",
+    "conversionStyle": "multiplicative",
+    "factor": 852075000,
+    "iconName": "figure.2.and.child.holdinghands",
+    "description": "One human generation ≈ 27 years.",
+    "exampleMeme": "The gap between you and your parents.",
+    "funFact": "A generation was historically considered 25 years, but modern demographers put it closer to 27-29 years in developed countries as the average age of first parenthood rises. There have been roughly 7,500 human generations since Homo sapiens emerged — and you share DNA with every single one of them.",
+    "interestScore": 9
   }
 ]

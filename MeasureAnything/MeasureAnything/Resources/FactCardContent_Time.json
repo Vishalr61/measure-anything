@@ -835,6 +835,50 @@
           "template": "About 105 heartbeats — the average driver experiences this roughly 20,000 times per year."
         }
       ]
+    },
+    "feature_film": {
+      "valueHeadline": "One feature film lasts",
+      "valueDisplay": "120 minutes",
+      "comparisons": [
+        {
+          "targetUnitID": "tv_episode",
+          "template": "About 2.7 TV episodes — which is why films feel like a commitment and TV doesn't."
+        },
+        {
+          "targetUnitID": "pomodoro",
+          "template": "4.8 pomodoros — a film is basically a focused work session with better visuals."
+        },
+        {
+          "targetUnitID": "youtube_ad",
+          "template": "1,440 unskippable YouTube ads — the cumulative ad load of a year of free-tier streaming."
+        },
+        {
+          "targetUnitID": "microwave_minute",
+          "template": "120 microwave minutes, each of which feels longer than the entire film."
+        }
+      ]
+    },
+    "human_generation": {
+      "valueHeadline": "One human generation spans",
+      "valueDisplay": "~27 years",
+      "comparisons": [
+        {
+          "targetUnitID": "human_lifespan",
+          "template": "About 37.5% of an average lifetime — most people see 2-3 generations after their own."
+        },
+        {
+          "targetUnitID": "decade",
+          "template": "About 2.7 decades."
+        },
+        {
+          "targetUnitID": "since_pyramids",
+          "template": "The pyramids were built about 167 generations ago — a chain of parents and children stretching back 4,500 years."
+        },
+        {
+          "targetUnitID": "roman_empire",
+          "template": "The Western Roman Empire lasted about 46 generations."
+        }
+      ]
     }
   }
 }

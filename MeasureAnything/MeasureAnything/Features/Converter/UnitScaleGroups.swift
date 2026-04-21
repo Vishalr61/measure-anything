@@ -74,6 +74,7 @@ enum UnitScaleGroups {
         "microcentury": "Minutes",
         "work_day": "Hours", "mars_day": "Hours",
         "watch_naval": "Hours",
+        "feature_film": "Hours",
         "sidereal_day": "Hours",
         "week": "Days", "lunar_month": "Days",
         "fortnight": "Days",
@@ -82,6 +83,7 @@ enum UnitScaleGroups {
         "dog_year": "Years", "year": "Years", "decade": "Years",
         "voyager_travel": "Lifescale",
         "human_lifespan": "Lifescale",
+        "human_generation": "Lifescale",
         "roman_empire": "Cosmic time",
         "since_pyramids": "Cosmic time",
         "since_dinosaurs": "Cosmic time",
@@ -128,11 +130,13 @@ enum UnitScaleGroups {
 
     private static let volume: [String: String] = [
         "teardrop": "Tiny", "eyedrop": "Tiny",
+        "raindrop_vol": "Tiny",
         "teaspoon_vol": "Tiny",
         "shot_glass": "Small",
         "can_of_soda": "Small", "soda_can": "Small",
         "pint": "Small",
         "wine_bottle_vol": "Small", "wine_glass": "Small",
+        "coffee_cup_vol": "Small",
         "milk_carton": "Small", "bucket": "Small",
         "garden_hose_minute": "Small",
         "stomach": "Human", "blood_volume": "Human",
@@ -149,6 +153,7 @@ enum UnitScaleGroups {
         "absolute_zero": "Freezing", "deep_space": "Freezing",
         "liquid_nitrogen": "Freezing", "liquid_oxygen": "Freezing",
         "dry_ice": "Freezing", "antarctica_winter": "Freezing",
+        "freezer_temp": "Freezing",
 
         "refrigerator": "Cool", "comfortable_room": "Cool",
         "swimming_pool": "Cool",
@@ -161,8 +166,10 @@ enum UnitScaleGroups {
         "car_summer": "Hot", "fast_food_hot": "Hot",
         "sauna": "Hot", "gpu_overheat": "Hot",
         "cpu_throttle": "Hot", "boiling_water": "Hot",
+        "freshly_baked_bread": "Hot",
 
         "battery_runaway": "Scorching", "paper_ignition": "Scorching",
+        "cast_iron_sear": "Scorching",
         "pizza_oven": "Scorching", "venus_surface": "Scorching",
         "steel_softening": "Scorching", "aluminum_melting": "Scorching",
 

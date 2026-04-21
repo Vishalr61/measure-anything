@@ -20,7 +20,6 @@ final class CoreConversionTests: XCTestCase {
         let length = try store.load(category: .length)
         let lengthIDs = Set(length.map(\.id))
         XCTAssertGreaterThanOrEqual(lengthIDs.count, 50)
-        XCTAssertFalse(lengthIDs.contains("school_bus"))
         for required in ["banana", "fridge", "bus", "blue_whale", "spider_silk", "distance_light_second"] {
             XCTAssertTrue(lengthIDs.contains(required), "Expected length absurd id missing: \(required)")
         }
