@@ -2,7 +2,8 @@ import SwiftUI
 
 struct DiceFaceView: View {
     @Binding var face: Int // 1...6
-    var pipColor: Color
+    var faceColor: Color
+    var pipOpacity: Double = 1
     let size: CGFloat = 46
 
     private let pipPositions: [Int: [(CGFloat, CGFloat)]] = [
@@ -16,16 +17,17 @@ struct DiceFaceView: View {
 
     var body: some View {
         Canvas { ctx, _ in
-            // White filled rounded rect, inset 2pt on each side.
+            // Filled rounded rect, inset 2pt on each side.
             let rect = CGRect(x: 2, y: 2, width: size - 4, height: size - 4)
             let rr = Path(roundedRect: rect, cornerRadius: 9)
-            ctx.fill(rr, with: .color(.white))
+            ctx.fill(rr, with: .color(faceColor))
 
-            // Blue pips (radius 3.2) in a 44×44 viewBox coordinates.
+            // White pips (radius 3.2) in a 44×44 viewBox coordinates.
             let dots = pipPositions[clampedFace] ?? pipPositions[1]!
             for (x, y) in dots {
                 let pip = CGRect(x: x - 3.2, y: y - 3.2, width: 6.4, height: 6.4)
-                ctx.fill(Path(ellipseIn: pip), with: .color(pipColor))
+                ctx.opacity = pipOpacity
+                ctx.fill(Path(ellipseIn: pip), with: .color(.white))
             }
         }
         .frame(width: size, height: size)

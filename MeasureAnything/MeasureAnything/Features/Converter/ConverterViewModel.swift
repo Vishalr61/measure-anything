@@ -24,7 +24,7 @@ final class ConverterViewModel: ObservableObject {
         static let sessionTo = "session.toUnit"
         static let sessionMode = "session.mode"
         static let sessionInput = "session.inputValue"
-        static let hasSeenDiceLongPressHint = "hasSeenDiceLongPressHint"
+        static let hasUsedLongPressRoll = "hasUsedLongPressRoll"
     }
 
     private enum SettingsKeys {
@@ -95,7 +95,7 @@ final class ConverterViewModel: ObservableObject {
     @Published var diceLandedUnitName: String = ""
     /// When `true`, `diceLandedUnitName` is the full subtitle (dual roll). When `false`, prefix `"landed on "` is shown before the name.
     @Published var diceSubtitleIsDualFormat: Bool = false
-    @Published var showDiceLongPressHint: Bool = false
+    // Long-press discoverability hint is driven by `DiceRollCard` + UserDefaults.
 
     private var diceFlashTimer: Timer?
     private var diceLongPressHintDismissWorkItem: DispatchWorkItem?
@@ -279,8 +279,12 @@ final class ConverterViewModel: ObservableObject {
         recompute()
     }
 
-    var hasSeenDiceLongPressHint: Bool {
-        UserDefaults.standard.bool(forKey: SessionKeys.hasSeenDiceLongPressHint)
+    var shouldShowLongPressDiscoverabilityHint: Bool {
+        !UserDefaults.standard.bool(forKey: SessionKeys.hasUsedLongPressRoll)
+    }
+
+    func setHasUsedLongPressRoll() {
+        UserDefaults.standard.set(true, forKey: SessionKeys.hasUsedLongPressRoll)
     }
 
     /// Exposed for favorites UI (read-only snapshot of the live registry).
@@ -299,7 +303,7 @@ final class ConverterViewModel: ObservableObject {
         diceFlashTimer?.invalidate()
         diceFlashTimer = nil
 
-        let impact = UIImpactFeedbackGenerator(style: .medium)
+        let impact = UIImpactFeedbackGenerator(style: .light)
         impact.impactOccurred()
 
         isDiceRolling = true
@@ -321,43 +325,13 @@ final class ConverterViewModel: ObservableObject {
             return Self.weightedRandomUnit(from: candidates)
         }()
 
-        let rest = selectedCategory.converterDiceRestDegrees
-        // Snap to category rest angle, then spin two full turns from there.
-        withAnimation(.linear(duration: 0)) {
-            diceRotationDegrees = rest
-        }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.016) {
-            MainActor.assumeIsolated {
-                guard self.diceRollToken == token else { return }
-                withAnimation(.interpolatingSpring(mass: 1, stiffness: 80, damping: 14, initialVelocity: 8)) {
-                    self.diceRotationDegrees = rest + 720
-                }
-            }
-        }
-
-        // Flash loop.
-        var flashCount = 0
-        let timer = Timer.scheduledTimer(withTimeInterval: 0.07, repeats: true) { t in
-            MainActor.assumeIsolated {
-                guard self.diceRollToken == token else {
-                    t.invalidate()
-                    return
-                }
-                self.diceDisplayFace = Int.random(in: 1...6)
-                flashCount += 1
-                if flashCount >= 9 { t.invalidate() }
-            }
-        }
-        diceFlashTimer = timer
+        // Keep dice resting tilt stable; the dice face animation is decorative and handled in `DiceRollCard`.
+        syncDiceTiltToCategory(animated: true)
 
         // Land.
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.72) {
             MainActor.assumeIsolated {
                 guard self.diceRollToken == token else { return }
-                timer.invalidate()
-                if self.diceFlashTimer === timer {
-                    self.diceFlashTimer = nil
-                }
                 self.diceDisplayFace = newFace
 
                 // `newUnit` was chosen at roll start; mode/category may have changed since — never apply a stale ID.
@@ -380,7 +354,6 @@ final class ConverterViewModel: ObservableObject {
                     self.selectedToUnitID = u.id
                     self.diceLandedUnitName = u.name
                     self.diceSubtitleIsDualFormat = false
-                    self.scheduleDiceLongPressHintIfNeeded()
                 } else {
                     self.diceLandedUnitName = ""
                 }
@@ -388,8 +361,6 @@ final class ConverterViewModel: ObservableObject {
                 withAnimation(.easeIn(duration: 0.25)) {
                     self.showDiceSubtitle = (self.diceLandedUnitName.isEmpty == false)
                 }
-                let notification = UINotificationFeedbackGenerator()
-                notification.notificationOccurred(.success)
                 self.isDiceRolling = false
             }
         }
@@ -413,25 +384,10 @@ final class ConverterViewModel: ObservableObject {
         diceLongPressHintDismissWorkItem?.cancel()
         diceLongPressHintDismissWorkItem = nil
 
-        let softPulse = UIImpactFeedbackGenerator(style: .soft)
-        softPulse.prepare()
-        softPulse.impactOccurred()
-
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.08) {
-            MainActor.assumeIsolated {
-                guard self.diceRollToken == token else { return }
-                let heavyFire = UIImpactFeedbackGenerator(style: .heavy)
-                heavyFire.prepare()
-                heavyFire.impactOccurred(intensity: 1.0)
-            }
-        }
-
         isDiceRolling = true
         showDiceSubtitle = false
         diceLandedUnitName = ""
         diceSubtitleIsDualFormat = false
-        showDiceLongPressHint = false
-
         inputText = "1"
 
         let newFace = Int.random(in: 1...6)
@@ -442,40 +398,12 @@ final class ConverterViewModel: ObservableObject {
             return Self.weightedRandomUnit(from: rest)
         }()
 
-        let rest = selectedCategory.converterDiceRestDegrees
-        withAnimation(.linear(duration: 0)) {
-            diceRotationDegrees = rest
-        }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.016) {
-            MainActor.assumeIsolated {
-                guard self.diceRollToken == token else { return }
-                withAnimation(.interpolatingSpring(mass: 1, stiffness: 60, damping: 12, initialVelocity: 8)) {
-                    self.diceRotationDegrees = rest + 1080
-                }
-            }
-        }
-
-        var flashCount = 0
-        let timer = Timer.scheduledTimer(withTimeInterval: 0.07, repeats: true) { t in
-            MainActor.assumeIsolated {
-                guard self.diceRollToken == token else {
-                    t.invalidate()
-                    return
-                }
-                self.diceDisplayFace = Int.random(in: 1...6)
-                flashCount += 1
-                if flashCount >= 12 { t.invalidate() }
-            }
-        }
-        diceFlashTimer = timer
+        // Keep dice resting tilt stable; the dice face animation is decorative and handled in `DiceRollCard`.
+        syncDiceTiltToCategory(animated: true)
 
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
             MainActor.assumeIsolated {
                 guard self.diceRollToken == token else { return }
-                timer.invalidate()
-                if self.diceFlashTimer === timer {
-                    self.diceFlashTimer = nil
-                }
                 self.diceDisplayFace = newFace
 
                 let allowedAbsurd = absurdPoolForDual()
@@ -510,17 +438,7 @@ final class ConverterViewModel: ObservableObject {
                     self.diceSubtitleIsDualFormat = true
                     self.diceLandedUnitName = "rolled both — \(from.name) → \(to.name)"
 
-                    let land1 = UIImpactFeedbackGenerator(style: .medium)
-                    land1.prepare()
-                    land1.impactOccurred()
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.12) {
-                        MainActor.assumeIsolated {
-                            guard self.diceRollToken == token else { return }
-                            let land2 = UIImpactFeedbackGenerator(style: .medium)
-                            land2.prepare()
-                            land2.impactOccurred(intensity: 0.7)
-                        }
-                    }
+                    // Haptics for long-press completion are driven by `DiceRollCard` when the hold completes.
                 } else {
                     self.diceLandedUnitName = ""
                     self.diceSubtitleIsDualFormat = false
@@ -534,23 +452,7 @@ final class ConverterViewModel: ObservableObject {
         }
     }
 
-    private func scheduleDiceLongPressHintIfNeeded() {
-        guard !hasSeenDiceLongPressHint, !showDiceLongPressHint else { return }
-        showDiceLongPressHint = true
-        diceLongPressHintDismissWorkItem?.cancel()
-        let work = DispatchWorkItem { [weak self] in
-            guard let self else { return }
-            Task { @MainActor in
-                withAnimation(.easeOut(duration: 0.25)) {
-                    self.showDiceLongPressHint = false
-                }
-                UserDefaults.standard.set(true, forKey: SessionKeys.hasSeenDiceLongPressHint)
-                self.diceLongPressHintDismissWorkItem = nil
-            }
-        }
-        diceLongPressHintDismissWorkItem = work
-        DispatchQueue.main.asyncAfter(deadline: .now() + 3, execute: work)
-    }
+    // Long-press discoverability hint logic is handled by `DiceRollCard`.
 
     /// Randomly chooses both `selectedFromUnitID` and `selectedToUnitID` from `availableUnits`.
     /// Keeps them distinct and stays within the current category + mode set.
