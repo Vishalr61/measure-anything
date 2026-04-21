@@ -57,7 +57,7 @@ struct LaunchAnimationView: View {
             Color.white
                 .ignoresSafeArea()
 
-            VStack(spacing: 10) {
+            VStack(alignment: .leading, spacing: 10) {
                 HStack(alignment: .firstTextBaseline, spacing: 8) {
                     measureText
                     cyclingWordStack
@@ -67,11 +67,13 @@ struct LaunchAnimationView: View {
                     .font(.system(size: 14, weight: .regular))
                     .foregroundStyle(subtitleGray)
                     .opacity(subtitleOpacity)
-                    .offset(x: 10, y: subtitleY)
+                    .offset(y: subtitleY)
                     .accessibilityHidden(true)
             }
+            .fixedSize(horizontal: true, vertical: false)
+            .frame(maxWidth: .infinity)
             .padding(.horizontal, 24)
-            .offset(y: -24)
+            .offset(x: 6, y: -24)
 
             VStack {
                 Spacer()
