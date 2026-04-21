@@ -26,12 +26,24 @@ struct DiceFaceView: View {
             let dots = pipPositions[clampedFace] ?? pipPositions[1]!
             let scale = size / 46
             let r = 3.2 * scale
+            let insetShift = 0.5 * scale
+            let insetR = max(0.1, r - 0.5 * scale) // ~1pt smaller diameter in source coords
             for (x, y) in dots {
                 let sx = x * scale
                 let sy = y * scale
                 let pip = CGRect(x: sx - r, y: sy - r, width: r * 2, height: r * 2)
                 ctx.opacity = pipOpacity
                 ctx.fill(Path(ellipseIn: pip), with: .color(.white))
+
+                // Subtle "inset" highlight to make pips feel pressed in.
+                ctx.opacity = pipOpacity * 0.15
+                let inset = CGRect(
+                    x: sx - insetR + insetShift,
+                    y: sy - insetR + insetShift,
+                    width: insetR * 2,
+                    height: insetR * 2
+                )
+                ctx.fill(Path(ellipseIn: inset), with: .color(.white))
             }
         }
         .frame(width: size, height: size)

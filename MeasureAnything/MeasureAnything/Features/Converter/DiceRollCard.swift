@@ -25,6 +25,8 @@ struct DiceRollCard: View {
     @State private var toShakeOffsetX: CGFloat = 0
     @State private var fromPulseScale: Double = 1
     @State private var toPulseScale: Double = 1
+    @State private var restingRandomTilt: Double = 0
+    @State private var idleBreathOn: Bool = false
 
     private enum RollKind {
         case single
@@ -53,6 +55,7 @@ struct DiceRollCard: View {
         .onChange(of: vm.diceLandedUnitName) { _, newValue in
             guard !newValue.isEmpty else { return }
             animateResultTransitionIn()
+            scheduleRestingTiltRandomize()
             switch lastRollKind {
             case .single:
                 shakeToPill()
@@ -107,7 +110,7 @@ struct DiceRollCard: View {
         ZStack {
             ring
             dieContainer
-                .rotationEffect(.degrees(vm.diceRotationDegrees + extraDieRotation))
+                .rotationEffect(.degrees(vm.diceRotationDegrees + restingRandomTilt + extraDieRotation))
         }
     }
 
@@ -120,7 +123,20 @@ struct DiceRollCard: View {
                 color: .white,
                 patternOpacity: 0.14 * patternPulseMultiplier
             )
+            .overlay(patternSpotlightFade)
         }
+    }
+
+    private var patternSpotlightFade: some View {
+        RadialGradient(
+            colors: [
+                accent.opacity(0.0),
+                accent.opacity(0.60)
+            ],
+            center: UnitPoint(x: 0.82, y: 0.50),
+            startRadius: 18,
+            endRadius: 240
+        )
     }
 
     private var innerBorder: some View {
@@ -131,13 +147,25 @@ struct DiceRollCard: View {
     }
 
     private var dieContainer: some View {
-        DiceFaceView(
+        let isResting = !isPressed && !vm.isDiceRolling
+        let breathScale: Double = idleBreathOn ? 1.02 : 1.0
+        let baseFaceOpacity: Double = 0.22
+        let faceOpacity: Double = isResting ? (baseFaceOpacity + (idleBreathOn ? 0.03 : 0)) : baseFaceOpacity
+
+        return DiceFaceView(
             face: $decorativeFace,
-            faceColor: Color.white.opacity(0.22),
+            faceColor: Color.white.opacity(faceOpacity),
             pipOpacity: pipOpacity,
             size: 56
         )
         .overlay(bevelOverlay)
+        .shadow(color: .black.opacity(0.25), radius: 4, x: 2, y: 3)
+        .scaleEffect(isResting ? breathScale : 1.0)
+        .onAppear {
+            withAnimation(.easeInOut(duration: 3).repeatForever(autoreverses: true)) {
+                idleBreathOn = true
+            }
+        }
     }
 
     private var bevelOverlay: some View {
@@ -174,22 +202,12 @@ struct DiceRollCard: View {
 
     private var resultBadge: some View {
         HStack(spacing: 8) {
-            if vm.diceSubtitleIsDualFormat {
-                Text("rolled both")
-                    .font(.system(size: 11, weight: .semibold, design: .rounded))
-                    .foregroundStyle(Color.white.opacity(0.78))
-            } else {
-                Text("latest")
-                    .font(.system(size: 11, weight: .semibold, design: .rounded))
-                    .foregroundStyle(Color.white.opacity(0.78))
-            }
-
             Text(fromName)
                 .font(.system(size: 11, weight: .semibold, design: .rounded))
                 .foregroundStyle(.white)
                 .scaleEffect(fromPulseScale)
 
-            Text("→")
+            Text(lastRollKind == .dual ? "⇄" : "→")
                 .font(.system(size: 11, weight: .semibold, design: .rounded))
                 .foregroundStyle(Color.white.opacity(0.78))
 
@@ -202,8 +220,8 @@ struct DiceRollCard: View {
                 .scaleEffect(toPulseScale)
                 .offset(x: toShakeOffsetX)
         }
-        .lineLimit(1)
-        .minimumScaleFactor(0.75)
+        .lineLimit(2)
+        .multilineTextAlignment(.leading)
         .padding(.horizontal, 10)
         .padding(.vertical, 4)
         .background(Color.white.opacity(0.12), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
@@ -236,6 +254,7 @@ struct DiceRollCard: View {
     private func beginPress() {
         isPressed = true
         didCompleteLongPress = false
+        idleBreathOn = false
 
         ringOpacity = 1
         holdProgress = 0
@@ -420,6 +439,14 @@ struct DiceRollCard: View {
                 withAnimation(.easeIn(duration: 0.1)) {
                     cardLandingScale = 1.0
                 }
+            }
+        }
+    }
+
+    private func scheduleRestingTiltRandomize() {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.55) {
+            withAnimation(.easeOut(duration: 0.22)) {
+                restingRandomTilt = Double.random(in: -8...8)
             }
         }
     }
