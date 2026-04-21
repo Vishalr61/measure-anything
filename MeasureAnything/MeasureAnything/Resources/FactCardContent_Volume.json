@@ -263,6 +263,138 @@
           "template": "A comfortable stomach holds about 1.3 wine bottles — which is why a bottle over dinner feels about right."
         }
       ]
+    },
+    "fuel_tank": {
+      "valueHeadline": "One car fuel tank holds",
+      "valueDisplay": "55 litres",
+      "comparisons": [
+        {
+          "targetUnitID": "blood_volume",
+          "template": "11 times your total blood volume — your car carries more fuel than your body carries blood."
+        },
+        {
+          "targetUnitID": "wine_bottle_vol",
+          "template": "About 73 wine bottles, which is roughly the fuel cost of driving from London to Edinburgh and back."
+        },
+        {
+          "targetUnitID": "bathtub",
+          "template": "A bathtub holds about 5.5 fuel tanks' worth of water."
+        },
+        {
+          "targetUnitID": "stomach",
+          "template": "55 full stomachs — your car's tank holds 55 times what your digestive system can."
+        }
+      ]
+    },
+    "wine_glass": {
+      "valueHeadline": "One wine glass holds",
+      "valueDisplay": "150 ml",
+      "comparisons": [
+        {
+          "targetUnitID": "shot_glass",
+          "template": "About 3.4 shots, which is roughly what a standard pour is meant to limit you to."
+        },
+        {
+          "targetUnitID": "wine_bottle_vol",
+          "template": "A wine bottle holds 5 glasses — the standard pour that restaurants rely on for pricing."
+        },
+        {
+          "targetUnitID": "eyedrop",
+          "template": "3,000 eye drops, which puts the precision of pharmaceutical dosing into perspective."
+        },
+        {
+          "targetUnitID": "blood_volume",
+          "template": "Your total blood volume holds about 33 wine glasses' worth."
+        }
+      ]
+    },
+    "earths_ocean": {
+      "valueHeadline": "Earth's oceans hold",
+      "valueDisplay": "1.335 × 10²¹ litres",
+      "comparisons": [
+        {
+          "targetUnitID": "olympic_pool_vol",
+          "template": "About 534 trillion Olympic pools — a number so large it stops meaning anything."
+        },
+        {
+          "targetUnitID": "great_barrier_reef_water",
+          "template": "Roughly 8,800 times the volume of water covering the Great Barrier Reef."
+        },
+        {
+          "targetUnitID": "hot_air_balloon",
+          "template": "About 477 trillion hot air balloons, which would blanket the Earth's surface several times over."
+        },
+        {
+          "targetUnitID": "bathtub",
+          "template": "4.45 quintillion bathtubs — more bathtubs than atoms in a grain of sand."
+        }
+      ]
+    },
+    "wheelie_bin": {
+      "valueHeadline": "One wheelie bin holds",
+      "valueDisplay": "240 litres",
+      "comparisons": [
+        {
+          "targetUnitID": "bathtub",
+          "template": "80% of a standard bathtub, which is why bins always seem almost-but-not-quite big enough."
+        },
+        {
+          "targetUnitID": "pint",
+          "template": "About 423 pints — more beer than most pubs serve on a quiet Tuesday."
+        },
+        {
+          "targetUnitID": "blood_volume",
+          "template": "48 times your total blood volume."
+        },
+        {
+          "targetUnitID": "wine_bottle_vol",
+          "template": "320 wine bottles, which is roughly how many a restaurant generates in empties per month."
+        }
+      ]
+    },
+    "can_of_soda": {
+      "valueHeadline": "One soda can holds",
+      "valueDisplay": "355 ml",
+      "comparisons": [
+        {
+          "targetUnitID": "shot_glass",
+          "template": "About 8 shots, which is roughly the caffeine-to-regret ratio of an energy drink."
+        },
+        {
+          "targetUnitID": "pint",
+          "template": "About 63% of a UK pint — which is why a can never quite feels like enough."
+        },
+        {
+          "targetUnitID": "eyedrop",
+          "template": "7,100 eye drops, standardised at this size in 1953 to match a serving glass."
+        },
+        {
+          "targetUnitID": "stomach",
+          "template": "About 35% of a comfortable stomach — which is why you can drink one in a few gulps."
+        }
+      ]
+    },
+    "great_barrier_reef_water": {
+      "valueHeadline": "The Great Barrier Reef holds",
+      "valueDisplay": "152 trillion litres",
+      "comparisons": [
+        {
+          "targetUnitID": "olympic_pool_vol",
+          "template": "About 60.8 million Olympic pools, built by organisms you need a microscope to see."
+        },
+        {
+          "targetUnitID": "earths_ocean",
+          "template": "Earth's total ocean volume is about 8,800 times larger — the reef is a sliver of the whole."
+        },
+        {
+          "targetUnitID": "shipping_container",
+          "template": "About 4.6 billion shipping containers, spread across 2,300 km of coastline."
+        },
+        {
+          "targetUnitID": "bathtub",
+          "template": "507 billion bathtubs — it took 500,000 years of coral growth to fill them."
+        }
+      ]
     }
   }
 }
