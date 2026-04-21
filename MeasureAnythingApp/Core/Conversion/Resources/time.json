@@ -474,6 +474,20 @@
     "interestScore": 9
   },
   {
+    "id": "microwave_minute",
+    "name": "Microwave minute",
+    "category": "time",
+    "baseUnit": "second",
+    "kind": "absurd",
+    "conversionStyle": "multiplicative",
+    "factor": 60,
+    "iconName": "microwave",
+    "description": "One microwave minute = 60 seconds (but feels like 300).",
+    "exampleMeme": "The longest minute known to science.",
+    "funFact": "A microwave minute is physically identical to a regular minute — 60 seconds — but psychologists have documented that people consistently perceive waiting in front of a microwave as 2-3 times longer than the same duration spent doing anything else. The effect is called 'temporal dilation under boredom' and it's measurably stronger when you can see a countdown timer.",
+    "interestScore": 10
+  },
+  {
     "id": "moment_medieval",
     "name": "Moment",
     "category": "time",
@@ -485,6 +499,20 @@
     "description": "Medieval moment = exactly 90 seconds.",
     "exampleMeme": "Longer than you'd think.",
     "funFact": "In medieval timekeeping, a 'moment' was a precise unit equal to 90 seconds — 1/40th of an hour. Monks used it to schedule prayers throughout the day. When someone says 'just a moment,' they're accidentally referencing a 12th-century monastic schedule.",
+    "interestScore": 9
+  },
+  {
+    "id": "traffic_light_cycle",
+    "name": "Traffic light cycle",
+    "category": "time",
+    "baseUnit": "second",
+    "kind": "absurd",
+    "conversionStyle": "multiplicative",
+    "factor": 90,
+    "iconName": "light.beacon.max",
+    "description": "Average full traffic light cycle ≈ 90 seconds.",
+    "exampleMeme": "The universe's way of testing your patience.",
+    "funFact": "The average driver spends about 2 weeks of their life waiting at red lights. Traffic engineers call the moment when you're too far to stop but too close to make the yellow a 'dilemma zone' — and intersections are specifically timed to minimise how often drivers enter it.",
     "interestScore": 9
   },
   {

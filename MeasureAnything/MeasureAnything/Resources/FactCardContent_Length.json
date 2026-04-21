@@ -29,6 +29,72 @@
           "template": "Every Grain of sand on Earth in a single line wouldn't come close to one light-year."
         }
       ]
+    },
+    "school_bus": {
+      "valueHeadline": "One school bus is",
+      "valueDisplay": "10.67 m",
+      "comparisons": [
+        {
+          "targetUnitID": "lego_minifigure",
+          "template": "About 267 LEGO minifigures laid end to end."
+        },
+        {
+          "targetUnitID": "golden_gate_bridge",
+          "template": "The Golden Gate Bridge spans about 256 school buses."
+        },
+        {
+          "targetUnitID": "blue_whale",
+          "template": "About 36% of a blue whale — the whale is nearly 3 buses long."
+        },
+        {
+          "targetUnitID": "aircraft_carrier",
+          "template": "An aircraft carrier is about 31 school buses long."
+        }
+      ]
+    },
+    "lego_minifigure": {
+      "valueHeadline": "One LEGO minifigure is",
+      "valueDisplay": "4 cm",
+      "comparisons": [
+        {
+          "targetUnitID": "school_bus",
+          "template": "A school bus is about 267 minifigures tall."
+        },
+        {
+          "targetUnitID": "blue_whale",
+          "template": "A blue whale is about 748 minifigures long — a population small enough to fit in a single LEGO set box."
+        },
+        {
+          "targetUnitID": "golden_gate_bridge",
+          "template": "The Golden Gate Bridge spans about 68,425 minifigures — roughly 1.7% of all minifigures ever made."
+        },
+        {
+          "targetUnitID": "human_hair",
+          "template": "About 570 average human-hair widths side by side span one minifigure — tiny plastic, tinier keratin."
+        }
+      ]
+    },
+    "golden_gate_bridge": {
+      "valueHeadline": "The Golden Gate Bridge spans",
+      "valueDisplay": "2,737 m",
+      "comparisons": [
+        {
+          "targetUnitID": "school_bus",
+          "template": "About 256 school buses parked bumper to bumper."
+        },
+        {
+          "targetUnitID": "blue_whale",
+          "template": "Roughly 92 blue whales nose to tail."
+        },
+        {
+          "targetUnitID": "aircraft_carrier",
+          "template": "About 8.2 aircraft carriers — the bridge would dock a small fleet."
+        },
+        {
+          "targetUnitID": "lego_minifigure",
+          "template": "About 68,425 LEGO minifigures, which is fewer than the number of tourists who walk it daily."
+        }
+      ]
     }
   }
 }

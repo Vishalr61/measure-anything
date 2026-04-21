@@ -98,6 +98,20 @@
     "conversionStyle": "multiplicative"
   },
   {
+    "id": "lego_minifigure",
+    "name": "LEGO minifigure",
+    "factor": 0.04,
+    "iconName": "figure.stand",
+    "description": "Standard LEGO minifigure height = 4 cm.",
+    "exampleMeme": "Pocket-sized humanity.",
+    "funFact": "There are over 4 billion LEGO minifigures in existence — making them the world's largest population group. If LEGO minifigures were a country, they'd outnumber every real nation on Earth by a factor of 2.",
+    "interestScore": 10,
+    "category": "length",
+    "baseUnit": "meter",
+    "kind": "absurd",
+    "conversionStyle": "multiplicative"
+  },
+  {
     "id": "credit_card",
     "name": "Credit card",
     "factor": 0.0856,
@@ -406,6 +420,20 @@
     "conversionStyle": "multiplicative"
   },
   {
+    "id": "school_bus",
+    "name": "School bus",
+    "factor": 10.67,
+    "iconName": "bus.fill",
+    "description": "Standard North American school bus ≈ 10.67 m.",
+    "exampleMeme": "The universal unit of 'about this long.'",
+    "funFact": "The yellow colour of school buses is officially called 'National School Bus Glossy Yellow' and was chosen in 1939 because it's the fastest colour for the human eye to notice in peripheral vision — you can spot school bus yellow before any other colour on the road.",
+    "interestScore": 9,
+    "category": "length",
+    "baseUnit": "meter",
+    "kind": "absurd",
+    "conversionStyle": "multiplicative"
+  },
+  {
     "id": "bus",
     "name": "Bus",
     "factor": 12.0,
@@ -638,6 +666,20 @@
     "exampleMeme": "World's tallest ambition.",
     "funFact": "The Burj Khalifa is so tall that you can watch the sunset from the base, take the elevator to the top, and watch it set again.",
     "interestScore": 8,
+    "category": "length",
+    "baseUnit": "meter",
+    "kind": "absurd",
+    "conversionStyle": "multiplicative"
+  },
+  {
+    "id": "golden_gate_bridge",
+    "name": "Golden Gate Bridge",
+    "factor": 2737,
+    "iconName": "bridge",
+    "description": "Golden Gate Bridge total length = 2,737 m.",
+    "exampleMeme": "San Francisco's most measured landmark.",
+    "funFact": "The Golden Gate Bridge's main cables contain 80,000 miles of wire — enough to circle the equator 3 times. Each cable is 92 cm in diameter and contains 27,572 individual wires bundled together. The bridge flexes up to 8 metres sideways in strong winds.",
+    "interestScore": 9,
     "category": "length",
     "baseUnit": "meter",
     "kind": "absurd",

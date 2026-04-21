@@ -791,6 +791,50 @@
           "template": "There are 366.25 sidereal days per year — one more than solar days, because of that missing 3 minutes 56 seconds."
         }
       ]
+    },
+    "microwave_minute": {
+      "valueHeadline": "One microwave minute lasts",
+      "valueDisplay": "60 seconds",
+      "comparisons": [
+        {
+          "targetUnitID": "moment_medieval",
+          "template": "About 67% of a medieval moment — monks would have found microwaves surprisingly patient."
+        },
+        {
+          "targetUnitID": "youtube_ad",
+          "template": "12 unskippable YouTube ads — which somehow feels shorter than standing in front of the microwave."
+        },
+        {
+          "targetUnitID": "heartbeat",
+          "template": "About 70 heartbeats, each one feeling individually countable."
+        },
+        {
+          "targetUnitID": "blink",
+          "template": "About 400 blinks — though most people stare unblinking at the timer."
+        }
+      ]
+    },
+    "traffic_light_cycle": {
+      "valueHeadline": "One traffic light cycle lasts",
+      "valueDisplay": "90 seconds",
+      "comparisons": [
+        {
+          "targetUnitID": "moment_medieval",
+          "template": "Exactly one medieval moment — the monks nailed the duration of human impatience."
+        },
+        {
+          "targetUnitID": "microwave_minute",
+          "template": "1.5 microwave minutes, and equally painful."
+        },
+        {
+          "targetUnitID": "youtube_ad",
+          "template": "18 unskippable YouTube ads — red lights and ads share the same emotional register."
+        },
+        {
+          "targetUnitID": "heartbeat",
+          "template": "About 105 heartbeats — the average driver experiences this roughly 20,000 times per year."
+        }
+      ]
     }
   }
 }
