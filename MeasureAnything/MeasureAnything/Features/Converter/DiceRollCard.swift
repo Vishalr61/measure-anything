@@ -70,8 +70,8 @@ struct DiceRollCard: View {
     }
 
     private var leftColumn: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text("Roll the\ndice")
+        VStack(alignment: .leading, spacing: 6) {
+            Text("Roll the dice")
                 .font(.system(size: 20, weight: .semibold, design: .rounded))
                 .foregroundStyle(Color.white)
                 .fixedSize(horizontal: false, vertical: true)
@@ -82,6 +82,7 @@ struct DiceRollCard: View {
                 .fixedSize(horizontal: false, vertical: true)
 
             subtitleRow
+                .padding(.top, 4)
         }
     }
 
