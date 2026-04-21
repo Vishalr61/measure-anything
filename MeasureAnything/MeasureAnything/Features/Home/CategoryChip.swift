@@ -38,13 +38,13 @@ struct CategoryChip: View {
         Button(action: onTap) {
             HStack(spacing: 4) {
                 Image(systemName: CategoryChipIcon.symbol(for: category, displayName: displayName))
-                    .font(.system(size: 9, weight: .medium))
+                    .font(.system(size: 11, weight: .medium))
                 Text(displayName)
-                    .font(.system(size: 11, weight: isSelected ? .semibold : .regular))
+                    .font(.system(size: 13, weight: isSelected ? .semibold : .regular))
             }
             .foregroundStyle(isSelected ? Color.white : Color.primary)
-            .padding(.horizontal, 10)
-            .padding(.vertical, 6)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
             .background(
                 Capsule(style: .continuous)
                     .fill(isSelected ? accent : Color(hex: "#F0F0F3"))
