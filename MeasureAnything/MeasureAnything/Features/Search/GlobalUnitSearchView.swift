@@ -167,6 +167,11 @@ struct GlobalUnitSearchBody: View {
         }
     }
 
+    private func openFactCard(for result: SearchResult) {
+        factCardSheetItem = FactCardSheetItem(unitID: result.unit.id)
+        Haptics.tap()
+    }
+
     // MARK: - Color helpers
 
     private func lightShade(for category: UnitCategory) -> Color {
@@ -309,16 +314,23 @@ struct GlobalUnitSearchBody: View {
         let bg = lightShade(for: from.category)
         let dark = darkShade(for: from.category)
 
-        return HStack(spacing: 0) {
-            HStack(spacing: 0) {
-                Text("From: \(from.unit.name)")
-                    .font(.system(size: 13, weight: .medium))
-                    .foregroundStyle(dark)
-                Text(" — now pick a 'to' unit")
-                    .font(.system(size: 13))
-                    .foregroundStyle(dark.opacity(0.7))
+        return HStack(alignment: .center, spacing: 10) {
+            VStack(alignment: .leading, spacing: 2) {
+                HStack(spacing: 0) {
+                    Text("From: \(from.unit.name)")
+                        .font(.system(size: 13, weight: .medium))
+                        .foregroundStyle(dark)
+                    Text(" — now pick a 'to' unit")
+                        .font(.system(size: 13))
+                        .foregroundStyle(dark.opacity(0.7))
+                }
+                .lineLimit(1)
+
+                Text("Tap the info button on any result to open its fact card.")
+                    .font(.system(size: 11))
+                    .foregroundStyle(dark.opacity(0.62))
+                    .lineLimit(1)
             }
-            .lineLimit(1)
 
             Spacer(minLength: 8)
 
@@ -334,7 +346,8 @@ struct GlobalUnitSearchBody: View {
             .buttonStyle(.plain)
         }
         .padding(.leading, horizontalInset)
-        .frame(height: 28)
+        .padding(.vertical, 6)
+        .frame(minHeight: 42)
         .background(bg)
     }
 
@@ -764,10 +777,7 @@ struct GlobalUnitSearchBody: View {
             resultCountBadge
             List {
                 ForEach(filteredResults, id: \.id) { result in
-                    Button { handleUnitTap(result) } label: {
-                        searchResultRow(result, query: searchText)
-                    }
-                    .buttonStyle(.plain)
+                    searchResultRow(result, query: searchText)
                     .listRowBackground(
                         fromSelection?.unit.id == result.unit.id
                             ? lightShade(for: result.category).opacity(0.5)
@@ -808,7 +818,7 @@ struct GlobalUnitSearchBody: View {
             Image(systemName: "info.circle")
                 .font(.system(size: 13))
                 .foregroundStyle(.tertiary)
-            Text("Showing name matches only.")
+            Text("Tap a row to choose units. Tap the info button to open a fact card.")
                 .font(.system(size: 11))
                 .foregroundStyle(.secondary)
         }
@@ -821,46 +831,96 @@ struct GlobalUnitSearchBody: View {
 
     private func searchResultRow(_ result: SearchResult, query: String) -> some View {
         let isSelected = fromSelection?.unit.id == result.unit.id
+        let canUseAsTo = fromSelection?.category == result.category && !isSelected
         return HStack(spacing: 10) {
-            RoundedRectangle(cornerRadius: 2, style: .continuous)
-                .fill(result.accent)
-                .frame(width: 3)
-                .frame(maxHeight: .infinity)
+            Button {
+                handleUnitTap(result)
+            } label: {
+                HStack(spacing: 10) {
+                    RoundedRectangle(cornerRadius: 2, style: .continuous)
+                        .fill(result.accent)
+                        .frame(width: 3)
+                        .frame(maxHeight: .infinity)
 
-            VStack(alignment: .leading, spacing: 2) {
-                highlightedText(
-                    result.unit.name,
-                    query: query,
-                    lineWeight: isSelected ? .semibold : .medium
-                )
+                    VStack(alignment: .leading, spacing: 4) {
+                        highlightedText(
+                            result.unit.name,
+                            query: query,
+                            lineWeight: isSelected ? .semibold : .medium
+                        )
 
-                HStack(spacing: 4) {
-                    Text(result.categoryDisplayName)
-                        .font(.system(size: 11, weight: .medium))
-                        .foregroundStyle(result.accent)
-                    Text("\u{00B7}")
-                        .font(.system(size: 10))
-                        .foregroundStyle(.tertiary)
-                    Text(result.factorDisplayString)
-                        .font(.system(size: 11))
-                        .foregroundStyle(.secondary)
+                        HStack(spacing: 4) {
+                            Text(result.categoryDisplayName)
+                                .font(.system(size: 11, weight: .medium))
+                                .foregroundStyle(result.accent)
+                            Text("\u{00B7}")
+                                .font(.system(size: 10))
+                                .foregroundStyle(.tertiary)
+                            Text(result.factorDisplayString)
+                                .font(.system(size: 11))
+                                .foregroundStyle(.secondary)
+                        }
+
+                        if isSelected {
+                            Text("Selected as from")
+                                .font(.system(size: 11, weight: .medium))
+                                .foregroundStyle(result.accent)
+                        } else if canUseAsTo {
+                            Text("Tap to compare as to")
+                                .font(.system(size: 11, weight: .medium))
+                                .foregroundStyle(result.accent)
+                        }
+                    }
+
+                    Spacer()
+
+                    searchResultSelectionAccessory(isSelected: isSelected, canUseAsTo: canUseAsTo, accent: result.accent)
                 }
+                .contentShape(Rectangle())
             }
+            .buttonStyle(.plain)
 
-            Spacer()
-
-            if isSelected {
-                Image(systemName: "checkmark.circle.fill")
-                    .font(.system(size: 14, weight: .medium))
+            Button {
+                openFactCard(for: result)
+            } label: {
+                Image(systemName: "info.circle")
+                    .font(.system(size: 16, weight: .medium))
                     .foregroundStyle(result.accent)
-            } else {
-                Image(systemName: "arrow.right")
-                    .font(.system(size: 11, weight: .medium))
-                    .foregroundStyle(.tertiary)
+                    .frame(width: 34, height: 34)
+                    .background(result.accent.opacity(0.10), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
             }
+            .buttonStyle(.plain)
+            .accessibilityLabel("Open fact card for \(result.unit.name)")
         }
         .padding(.vertical, 7)
         .contentShape(Rectangle())
+    }
+
+    @ViewBuilder
+    private func searchResultSelectionAccessory(isSelected: Bool, canUseAsTo: Bool, accent: Color) -> some View {
+        if isSelected {
+            Image(systemName: "checkmark.circle.fill")
+                .font(.system(size: 14, weight: .medium))
+                .foregroundStyle(accent)
+        } else if canUseAsTo {
+            Text("TO")
+                .font(.system(size: 10, weight: .semibold))
+                .foregroundStyle(accent)
+                .padding(.horizontal, 8)
+                .padding(.vertical, 4)
+                .background(accent.opacity(0.10), in: Capsule())
+        } else if fromSelection == nil {
+            Text("FROM")
+                .font(.system(size: 10, weight: .semibold))
+                .foregroundStyle(.secondary)
+                .padding(.horizontal, 8)
+                .padding(.vertical, 4)
+                .background(Color(hex: "#F0F0F3"), in: Capsule())
+        } else {
+            Image(systemName: "arrow.right")
+                .font(.system(size: 11, weight: .medium))
+                .foregroundStyle(.tertiary)
+        }
     }
 
     // MARK: - No results
