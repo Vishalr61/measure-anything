@@ -4,6 +4,8 @@ import MeasureAnythingCore
 struct DidYouKnowCard: View {
     let unit: UnitDefinition
     var accent: Color = Color(red: 0x2B / 255, green: 0x5C / 255, blue: 0xE6 / 255)
+    /// When set, the card is tappable and shows a trailing arrow affordance.
+    var onOpenFactCard: (() -> Void)?
 
     @State private var showFact: Bool = false
     @State private var flashOpacity: Double = 1
@@ -11,18 +13,28 @@ struct DidYouKnowCard: View {
     var body: some View {
         let resolved = resolvedFact()
 
-        return VStack(alignment: .leading, spacing: 10) {
+        let content = VStack(alignment: .leading, spacing: 10) {
             Text("Did you know")
                 .font(.system(size: 9, weight: .semibold))
                 .foregroundStyle(accent)
                 .textCase(.uppercase)
                 .tracking(0.54) // ≈ 0.06em at 9pt
 
-            Text(resolved)
-                .font(.system(size: 13, weight: .regular))
-                .foregroundStyle(Color(red: 0x2C / 255, green: 0x2C / 255, blue: 0x2A / 255))
-                .lineSpacing(7) // ≈ 13pt * (1.55 - 1)
-                .fixedSize(horizontal: false, vertical: true)
+            HStack(alignment: .top, spacing: 6) {
+                Text(resolved)
+                    .font(.system(size: 13, weight: .regular))
+                    .foregroundStyle(Color(red: 0x2C / 255, green: 0x2C / 255, blue: 0x2A / 255))
+                    .lineSpacing(7) // ≈ 13pt * (1.55 - 1)
+                    .multilineTextAlignment(.leading)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                if onOpenFactCard != nil {
+                    Text("→")
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundStyle(accent)
+                        .accessibilityHidden(true)
+                }
+            }
         }
         .padding(.vertical, 12)
         .padding(.horizontal, 14)
@@ -43,7 +55,21 @@ struct DidYouKnowCard: View {
             showFact = true
             flash()
         }
-        .accessibilityElement(children: .combine)
+
+        Group {
+            if let onOpenFactCard {
+                Button(action: onOpenFactCard) {
+                    content
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("Did you know")
+                .accessibilityValue(resolved)
+                .accessibilityHint("Opens full fact card")
+            } else {
+                content
+                    .accessibilityElement(children: .combine)
+            }
+        }
     }
 
     private func flash() {
@@ -83,4 +109,3 @@ struct DidYouKnowCard: View {
         return out
     }
 }
-

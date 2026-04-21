@@ -463,6 +463,7 @@ struct AppTaxonomyStoreTests {
     }
 
     @Test func applyTaxonomyRouteSetsBundledMeter() {
+        ConversionHistory.shared.clearRecentPairs()
         let tax = AppTaxonomyStore()
         let route = tax.converterRoute(forTaxonomyItemId: "item.measurement.normal.meter")
         #expect(route != nil)
@@ -556,6 +557,7 @@ struct AppTaxonomyStoreTests {
         let reg = try TaxonomyRegistry(jsonData: Data(json.utf8))
         let tax = AppTaxonomyStore(injectedRegistry: reg, loadFailureMessage: nil)
         let route = tax.converterRoute(forTaxonomyItemId: "item.partial")!
+        ConversionHistory.shared.clearRecentPairs()
         let vm = ConverterViewModel(taxonomy: tax)
         vm.applyTaxonomyRoute(route)
         #expect(vm.selectedCategory == .length)

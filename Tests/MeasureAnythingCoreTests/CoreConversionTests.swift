@@ -59,6 +59,10 @@ final class CoreConversionTests: XCTestCase {
         }
     }
 
+    func testAllKindsIncludesEveryUnitKind() {
+        XCTAssertEqual(UnitRegistry.allKinds, Set(UnitKind.allCases))
+    }
+
     func testModeFilteringWorks() throws {
         let store = AbsurdUnitStore()
         let absurd = try store.loadAll()
