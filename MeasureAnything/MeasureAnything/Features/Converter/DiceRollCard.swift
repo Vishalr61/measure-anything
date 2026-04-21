@@ -26,6 +26,8 @@ struct DiceRollCard: View {
     @State private var fromPulseScale: Double = 1
     @State private var toPulseScale: Double = 1
     @State private var restingRandomTilt: Double = 0
+    @State private var restingTiltX: Double = 0
+    @State private var restingTiltY: Double = 0
     @State private var idleBreathOn: Bool = false
 
     private enum RollKind {
@@ -37,8 +39,10 @@ struct DiceRollCard: View {
         HStack(alignment: .center, spacing: 18) {
             leftColumn
                 .frame(maxWidth: .infinity, alignment: .leading)
+                .layoutPriority(1)
 
             dieHero
+                .layoutPriority(0)
         }
         .padding(.vertical, 24)
         .padding(.horizontal, 20)
@@ -111,6 +115,16 @@ struct DiceRollCard: View {
             ring
             dieContainer
                 .rotationEffect(.degrees(vm.diceRotationDegrees + restingRandomTilt + extraDieRotation))
+                .rotation3DEffect(
+                    .degrees(restingTiltX),
+                    axis: (x: 1, y: 0, z: 0),
+                    perspective: 0.3
+                )
+                .rotation3DEffect(
+                    .degrees(restingTiltY),
+                    axis: (x: 0, y: 1, z: 0),
+                    perspective: 0.3
+                )
         }
     }
 
@@ -201,34 +215,25 @@ struct DiceRollCard: View {
     }
 
     private var resultBadge: some View {
-        HStack(spacing: 8) {
-            Text(fromName)
+        HStack(spacing: 0) {
+            Text("\(fromName) \(lastRollKind == .dual ? "⇄" : "→") \(toName)")
                 .font(.system(size: 11, weight: .semibold, design: .rounded))
                 .foregroundStyle(.white)
-                .scaleEffect(fromPulseScale)
-
-            Text(lastRollKind == .dual ? "⇄" : "→")
-                .font(.system(size: 11, weight: .semibold, design: .rounded))
-                .foregroundStyle(Color.white.opacity(0.78))
-
-            Text(toName)
-                .font(.system(size: 11, weight: .semibold, design: .rounded))
-                .foregroundStyle(.white)
+                .lineLimit(2)
+                .multilineTextAlignment(.leading)
+                .fixedSize(horizontal: true, vertical: false)
+                .scaleEffect(lastRollKind == .dual ? fromPulseScale : 1)
+                .offset(x: lastRollKind == .single ? toShakeOffsetX : 0)
                 .padding(.horizontal, 10)
                 .padding(.vertical, 4)
                 .background(Color.white.opacity(0.12), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
-                .scaleEffect(toPulseScale)
-                .offset(x: toShakeOffsetX)
+                .opacity(resultOpacity)
+                .offset(y: resultOffsetY)
+                .animation(.easeInOut(duration: 0.15), value: resultOpacity)
+                .animation(.easeInOut(duration: 0.15), value: resultOffsetY)
+
+            Spacer(minLength: 0)
         }
-        .lineLimit(2)
-        .multilineTextAlignment(.leading)
-        .padding(.horizontal, 10)
-        .padding(.vertical, 4)
-        .background(Color.white.opacity(0.12), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
-        .opacity(resultOpacity)
-        .offset(y: resultOffsetY)
-        .animation(.easeInOut(duration: 0.15), value: resultOpacity)
-        .animation(.easeInOut(duration: 0.15), value: resultOffsetY)
     }
 
     private var fromName: String {
@@ -447,6 +452,8 @@ struct DiceRollCard: View {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.55) {
             withAnimation(.easeOut(duration: 0.22)) {
                 restingRandomTilt = Double.random(in: -8...8)
+                restingTiltX = Double.random(in: -6...6)
+                restingTiltY = Double.random(in: -8...8)
             }
         }
     }
