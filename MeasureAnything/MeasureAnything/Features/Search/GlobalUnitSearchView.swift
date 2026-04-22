@@ -51,7 +51,6 @@ struct GlobalUnitSearchBody: View {
 
     @State private var fromSelection: SearchResult?
     @State private var crossCategoryToast: String?
-    @State private var standardUnitsHelpToast: String?
 
     @State private var factCardSheetItem: FactCardSheetItem?
     @State private var factSheetDetent: PresentationDetent = .large
@@ -264,13 +263,9 @@ struct GlobalUnitSearchBody: View {
                     searchText = ""
                     fromSelection = nil
                     crossCategoryToast = nil
-                    standardUnitsHelpToast = nil
                     factCardSheetItem = nil
                     factSheetDetent = .large
                 }
-            }
-            .onChange(of: vm.standardUnitsOnly) { _, _ in
-                standardUnitsHelpToast = nil
             }
             .onChange(of: activeCategory) { old, new in
                 if old != nil && new == nil {
@@ -289,11 +284,6 @@ struct GlobalUnitSearchBody: View {
                     .transition(.move(edge: .top).combined(with: .opacity))
                     .zIndex(10)
             }
-            if let toast = standardUnitsHelpToast {
-                crossCategoryToastView(toast)
-                    .transition(.move(edge: .top).combined(with: .opacity))
-                    .zIndex(10)
-            }
         }
         .sheet(item: $factCardSheetItem) { item in
             FactCardNavigationShell(
@@ -305,7 +295,6 @@ struct GlobalUnitSearchBody: View {
             .presentationDragIndicator(.visible)
         }
         .animation(.easeInOut(duration: 0.2), value: crossCategoryToast != nil)
-        .animation(.easeInOut(duration: 0.2), value: standardUnitsHelpToast != nil)
     }
 
     // MARK: - Selection hint strip
@@ -507,20 +496,15 @@ struct GlobalUnitSearchBody: View {
                                 fromUnit: item.fromUnit,
                                 toUnit: item.toUnit,
                                 category: item.category,
-                                accent: ConverterCategoryAccent.accent(for: item.category),
-                                isUnavailable: item.isBlockedByStandardOnly
+                                accent: ConverterCategoryAccent.accent(for: item.category)
                             ) {
-                                if item.isBlockedByStandardOnly {
-                                    presentStandardUnitsHelpToast()
-                                } else {
-                                    applyPair(item)
-                                }
+                                applyPair(item)
                             }
                         }
                     }
                 }
             }
-        } else if !vm.standardUnitsOnly {
+        } else {
             tryTheseBrowseSection
         }
     }
@@ -554,7 +538,6 @@ struct GlobalUnitSearchBody: View {
     }
 
     private func tryTheseDisplayRows() -> [TryTheseDisplayRow] {
-        guard !vm.standardUnitsOnly else { return [] }
         return TryTheseSuggestions.rows.compactMap { spec in
             guard
                 let fr = allUnits.first(where: { $0.unit.id == spec.fromID && $0.category == spec.category }),
@@ -564,20 +547,9 @@ struct GlobalUnitSearchBody: View {
                 fromUnit: fr.unit,
                 toUnit: t.unit,
                 category: spec.category,
-                mode: spec.mode,
-                isBlockedByStandardOnly: false
+                mode: spec.mode
             )
             return TryTheseDisplayRow(spec: spec, pair: pair)
-        }
-    }
-
-    private func presentStandardUnitsHelpToast() {
-        standardUnitsHelpToast = "This conversion uses non-standard units (absurd or custom). Turn off 'Standard units only' in Settings to use it."
-        Haptics.tap()
-        DispatchQueue.main.asyncAfter(deadline: .now() + 2.2) {
-            withAnimation(.easeOut(duration: 0.25)) {
-                if standardUnitsHelpToast != nil { standardUnitsHelpToast = nil }
-            }
         }
     }
 
@@ -1000,8 +972,6 @@ struct GlobalUnitSearchBody: View {
         let toUnit: UnitDefinition
         let category: UnitCategory
         let mode: UnitRegistry.Mode
-        /// Recent list only: pair can’t be applied while Standard units only is on.
-        var isBlockedByStandardOnly: Bool = false
     }
 
     private func resolvedPairs() -> [ResolvedPair] {
@@ -1023,13 +993,11 @@ struct GlobalUnitSearchBody: View {
                 toID: pair.toUnitID
             ) else { return nil }
 
-            let blocked = vm.standardUnitsOnly && (fromDef.kind != .normal || toDef.kind != .normal)
             return ResolvedPair(
                 fromUnit: fromDef,
                 toUnit: toDef,
                 category: category,
-                mode: mode,
-                isBlockedByStandardOnly: blocked
+                mode: mode
             )
         }
     }
