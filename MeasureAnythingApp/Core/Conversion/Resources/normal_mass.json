@@ -1,0 +1,47 @@
+[
+  {
+    "id": "gram",
+    "name": "Gram",
+    "category": "mass",
+    "baseUnit": "kilogram",
+    "kind": "normal",
+    "conversionStyle": "multiplicative",
+    "factor": 0.001
+  },
+  {
+    "id": "kilogram",
+    "name": "Kilogram",
+    "category": "mass",
+    "baseUnit": "kilogram",
+    "kind": "normal",
+    "conversionStyle": "multiplicative",
+    "factor": 1
+  },
+  {
+    "id": "milligram",
+    "name": "Milligram",
+    "category": "mass",
+    "baseUnit": "kilogram",
+    "kind": "normal",
+    "conversionStyle": "multiplicative",
+    "factor": 1e-06
+  },
+  {
+    "id": "ounce",
+    "name": "Ounce",
+    "category": "mass",
+    "baseUnit": "kilogram",
+    "kind": "normal",
+    "conversionStyle": "multiplicative",
+    "factor": 0.028349523125
+  },
+  {
+    "id": "pound",
+    "name": "Pound",
+    "category": "mass",
+    "baseUnit": "kilogram",
+    "kind": "normal",
+    "conversionStyle": "multiplicative",
+    "factor": 0.45359237
+  }
+]

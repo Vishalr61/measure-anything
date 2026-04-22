@@ -1,382 +1,28 @@
 {
   "cards": {
-    "blue_whale_mass": {
-      "valueHeadline": "One blue whale weighs",
-      "valueDisplay": "150,000 kg",
+    "aa_battery": {
+      "valueHeadline": "One AA battery weighs",
+      "valueDisplay": "23 g",
       "comparisons": [
         {
-          "targetUnitID": "elephant",
-          "template": "About 25 African elephants, trunks to tails."
-        },
-        {
-          "targetUnitID": "small_car",
-          "template": "125 small cars, if you stacked them into a cube."
-        },
-        {
-          "targetUnitID": "grand_piano",
-          "template": "Over 300 concert grand pianos — enough for every seat in a mid-sized orchestra hall."
-        },
-        {
-          "targetUnitID": "london_double_decker_bus",
-          "template": "12 full London buses, minus the passengers."
-        },
-        {
-          "targetUnitID": "t_rex",
-          "template": "Nearly 19 T-Rex, which still wouldn't tip the scale."
-        },
-        {
-          "targetUnitID": "eiffel_tower_mass",
-          "template": "About 1/48th of the Eiffel Tower's iron frame — the tower is in a league of its own."
-        },
-        {
-          "targetUnitID": "iss",
-          "template": "A little over a third of the International Space Station, which orbits at 7.7 km per second."
-        },
-        {
-          "targetUnitID": "human_brain",
-          "template": "The combined weight of around 107,000 human brains, give or take."
-        }
-      ]
-    },
-    "feather": {
-      "valueHeadline": "One feather weighs",
-      "valueDisplay": "0.01 g",
-      "comparisons": [
-        {
-          "targetUnitID": "grain_of_rice_mass",
-          "template": "A single grain of rice weighs about 2.5 feathers — rice is denser than it looks."
-        },
-        {
-          "targetUnitID": "hummingbird",
-          "template": "A hummingbird weighs as much as 300 feathers, and needs every gram to stay airborne."
+          "targetUnitID": "iphone",
+          "template": "About 13% of an iPhone, despite holding only a fraction of an iPhone's energy."
         },
         {
           "targetUnitID": "paperclip_mass",
-          "template": "A standard paperclip equals 100 feathers, which makes paperclips feel surprisingly substantial."
-        },
-        {
-          "targetUnitID": "aa_battery",
-          "template": "An AA battery weighs 2,300 feathers — batteries really are denser than you'd think."
-        },
-        {
-          "targetUnitID": "iphone",
-          "template": "Your iPhone weighs 17,100 feathers, which is roughly 2.5 bald eagles' worth."
-        },
-        {
-          "targetUnitID": "human_heart",
-          "template": "Your own heart is the weight of 30,000 feathers, pumping 24 hours a day."
-        },
-        {
-          "targetUnitID": "bag_of_sugar",
-          "template": "A kilogram of sugar equals 100,000 feathers — more than 14 full eagles' worth."
-        },
-        {
-          "targetUnitID": "blue_whale_mass",
-          "template": "You'd need 15 billion feathers to match a single blue whale."
-        }
-      ]
-    },
-    "eiffel_tower_mass": {
-      "valueHeadline": "The Eiffel Tower weighs",
-      "valueDisplay": "7,300 tonnes",
-      "comparisons": [
-        {
-          "targetUnitID": "blue_whale_mass",
-          "template": "Roughly 49 blue whales stacked into a tower of their own."
-        },
-        {
-          "targetUnitID": "elephant",
-          "template": "About 1,216 African elephants, which is more than exist in many national parks."
-        },
-        {
-          "targetUnitID": "t_rex",
-          "template": "912 T-Rex, or nearly every T-Rex that ever lived, twice over."
-        },
-        {
-          "targetUnitID": "small_car",
-          "template": "6,083 small cars — enough to fill a large stadium parking lot."
-        },
-        {
-          "targetUnitID": "london_double_decker_bus",
-          "template": "608 full London buses, which is about twice the active fleet of some cities."
-        },
-        {
-          "targetUnitID": "iss",
-          "template": "Nearly 17 International Space Stations, all built from iron instead of aluminium."
-        },
-        {
-          "targetUnitID": "space_shuttle",
-          "template": "About 3.6 Space Shuttles at full launch weight."
-        },
-        {
-          "targetUnitID": "iphone",
-          "template": "The weight of 42.7 million iPhones — roughly one for every person in Argentina."
-        }
-      ]
-    },
-    "iss": {
-      "valueHeadline": "The International Space Station weighs",
-      "valueDisplay": "420,000 kg",
-      "comparisons": [
-        {
-          "targetUnitID": "blue_whale_mass",
-          "template": "About 2.8 blue whales, which is a surprising amount of whale to have in orbit."
-        },
-        {
-          "targetUnitID": "space_shuttle",
-          "template": "Roughly 1/5th of a fully loaded Space Shuttle at launch."
-        },
-        {
-          "targetUnitID": "elephant",
-          "template": "70 African elephants, which would have been impossible to lift into orbit all at once."
-        },
-        {
-          "targetUnitID": "small_car",
-          "template": "350 small cars, assembled piece by piece across dozens of launches."
-        },
-        {
-          "targetUnitID": "t_rex",
-          "template": "About 53 T-Rex — though none were harmed in the making of the station."
-        },
-        {
-          "targetUnitID": "london_double_decker_bus",
-          "template": "35 full London buses, give or take a conductor."
-        },
-        {
-          "targetUnitID": "grand_piano",
-          "template": "875 concert grand pianos, which would make quite an orchestra in zero gravity."
-        },
-        {
-          "targetUnitID": "iphone",
-          "template": "2.45 million iPhones, which is still less than a single day of global sales."
-        }
-      ]
-    },
-    "iphone": {
-      "valueHeadline": "One iPhone weighs",
-      "valueDisplay": "171 g",
-      "comparisons": [
-        {
-          "targetUnitID": "paperclip_mass",
-          "template": "About 171 paperclips, which is roughly one small box."
+          "template": "23 paperclips, or roughly one box of office paperclips."
         },
         {
           "targetUnitID": "feather",
-          "template": "The weight of 17,100 feathers, or around 2.5 bald eagles' worth."
-        },
-        {
-          "targetUnitID": "grain_of_rice_mass",
-          "template": "Nearly 6,840 grains of rice — close to a full rice cup, dry."
-        },
-        {
-          "targetUnitID": "aa_battery",
-          "template": "Around 7.4 AA batteries, though far more useful than a handful of them."
+          "template": "2,300 feathers, which is more feathers than most small birds have in total."
         },
         {
           "targetUnitID": "golf_ball",
-          "template": "Just under 4 golf balls, which is lighter than you might guess for something so dense with electronics."
+          "template": "Half a regulation golf ball, though far less aerodynamic."
         },
         {
           "targetUnitID": "human_heart",
-          "template": "About 57% of your own heart, which is doing similar amounts of work at any given moment."
-        },
-        {
-          "targetUnitID": "human_brain",
-          "template": "Roughly 1/8th of the human brain, pound for pound the most efficient processor ever built."
-        },
-        {
-          "targetUnitID": "bag_of_sugar",
-          "template": "17% of a standard bag of sugar — less than you'd think for a pocket supercomputer."
-        }
-      ]
-    },
-    "human_brain": {
-      "valueHeadline": "One human brain weighs",
-      "valueDisplay": "1.4 kg",
-      "comparisons": [
-        {
-          "targetUnitID": "bag_of_sugar",
-          "template": "Almost exactly 1.4 bags of sugar — a surprisingly casual weight for everything you are."
-        },
-        {
-          "targetUnitID": "iphone",
-          "template": "The weight of about 8 iPhones, yet it consumes 20% of every calorie you eat."
-        },
-        {
-          "targetUnitID": "human_heart",
-          "template": "Around 4.7 human hearts, which puts into perspective how much work the heart does for its size."
-        },
-        {
-          "targetUnitID": "grand_piano",
-          "template": "Roughly 1/343rd of a concert grand piano, yet infinitely more capable of composing music."
-        },
-        {
-          "targetUnitID": "chicken",
-          "template": "About 56% of an average chicken, which says something uncomfortable about evolution."
-        },
-        {
-          "targetUnitID": "blue_whale_mass",
-          "template": "1/107,142nd of a blue whale, whose brain is over 5 times heavier than yours."
-        },
-        {
-          "targetUnitID": "can_of_soup",
-          "template": "Around 3.5 cans of soup, which is genuinely odd to think about."
-        },
-        {
-          "targetUnitID": "aa_battery",
-          "template": "About 61 AA batteries — your brain runs on roughly 20 watts, less than most lightbulbs."
-        }
-      ]
-    },
-    "small_car": {
-      "valueHeadline": "One small car weighs",
-      "valueDisplay": "1,200 kg",
-      "comparisons": [
-        {
-          "targetUnitID": "elephant",
-          "template": "1/5th of an African elephant, which makes cars feel much lighter than they look."
-        },
-        {
-          "targetUnitID": "grand_piano",
-          "template": "Around 2.5 concert grand pianos, piled inelegantly."
-        },
-        {
-          "targetUnitID": "human_brain",
-          "template": "The combined weight of 857 human brains, whatever that tells you about driving."
-        },
-        {
-          "targetUnitID": "iphone",
-          "template": "About 7,018 iPhones — more than most Apple Stores hold in inventory."
-        },
-        {
-          "targetUnitID": "bag_of_sugar",
-          "template": "1,200 bags of sugar, or the grocery hauls of 100 households."
-        },
-        {
-          "targetUnitID": "washing_machine",
-          "template": "About 17 washing machines, which would be a catastrophic laundry day."
-        },
-        {
-          "targetUnitID": "blue_whale_mass",
-          "template": "Just 0.8% of a blue whale — cars are smaller than the largest animals by a wide margin."
-        },
-        {
-          "targetUnitID": "feather",
-          "template": "120 million feathers, which is approximately every feather on 17,000 bald eagles."
-        }
-      ]
-    },
-    "great_pyramid": {
-      "valueHeadline": "The Great Pyramid weighs",
-      "valueDisplay": "5.9 billion kg",
-      "comparisons": [
-        {
-          "targetUnitID": "blue_whale_mass",
-          "template": "Around 39,333 blue whales, or roughly four times every blue whale currently alive."
-        },
-        {
-          "targetUnitID": "eiffel_tower_mass",
-          "template": "About 808 Eiffel Towers, which is a humbling ratio for anything ever built by machines."
-        },
-        {
-          "targetUnitID": "iss",
-          "template": "Approximately 14,048 International Space Stations — the pyramid is on another order of magnitude entirely."
-        },
-        {
-          "targetUnitID": "space_shuttle",
-          "template": "2,950 Space Shuttles at launch weight, and the pyramid is 4,500 years older."
-        },
-        {
-          "targetUnitID": "london_double_decker_bus",
-          "template": "About 491,667 London buses, more than have ever existed in London's history."
-        },
-        {
-          "targetUnitID": "elephant",
-          "template": "Just under a million African elephants — more elephants than have lived in the last century combined."
-        },
-        {
-          "targetUnitID": "t_rex",
-          "template": "737,500 T-Rex, and we're still not sure exactly how the Egyptians moved the stones."
-        },
-        {
-          "targetUnitID": "small_car",
-          "template": "Nearly 5 million small cars, enough to gridlock a continent."
-        }
-      ]
-    },
-    "t_rex": {
-      "valueHeadline": "One T-Rex weighed",
-      "valueDisplay": "8,000 kg",
-      "comparisons": [
-        {
-          "targetUnitID": "small_car",
-          "template": "About 6.7 small cars, which is a lot of apex predator to have near your car."
-        },
-        {
-          "targetUnitID": "elephant",
-          "template": "Around 1.3 African elephants, though an elephant wouldn't have stood a chance."
-        },
-        {
-          "targetUnitID": "grand_piano",
-          "template": "Roughly 17 concert grand pianos — which is approximately what it would sound like falling."
-        },
-        {
-          "targetUnitID": "rhino",
-          "template": "About 3.5 white rhinos, another animal famous for not taking nonsense."
-        },
-        {
-          "targetUnitID": "blue_whale_mass",
-          "template": "Only 5.3% of a blue whale — even the king of dinosaurs was small by ocean standards."
-        },
-        {
-          "targetUnitID": "iss",
-          "template": "Around 1.9% of the International Space Station, which puts the Jurassic Park franchise in perspective."
-        },
-        {
-          "targetUnitID": "human_brain",
-          "template": "The combined weight of 5,714 human brains — T-Rex had a walnut-sized one of its own."
-        },
-        {
-          "targetUnitID": "bag_of_sugar",
-          "template": "8,000 bags of sugar, or about a week of sugar consumption for a medium city."
-        }
-      ]
-    },
-    "space_shuttle": {
-      "valueHeadline": "The Space Shuttle at launch weighed",
-      "valueDisplay": "2,000,000 kg",
-      "comparisons": [
-        {
-          "targetUnitID": "iss",
-          "template": "Around 4.8 International Space Stations, most of which was fuel that burned off in 8 minutes."
-        },
-        {
-          "targetUnitID": "blue_whale_mass",
-          "template": "About 13.3 blue whales, which is a lot of whale to strap to a rocket."
-        },
-        {
-          "targetUnitID": "eiffel_tower_mass",
-          "template": "Roughly 27% of the Eiffel Tower, except this one goes to orbit."
-        },
-        {
-          "targetUnitID": "elephant",
-          "template": "333 African elephants, lifted off the ground by controlled explosion."
-        },
-        {
-          "targetUnitID": "t_rex",
-          "template": "250 T-Rex, none of whom ever saw a rocket in their lifetimes."
-        },
-        {
-          "targetUnitID": "small_car",
-          "template": "Over 1,666 small cars — which is about 50 times the weight of the shuttle itself once you remove the fuel."
-        },
-        {
-          "targetUnitID": "london_double_decker_bus",
-          "template": "About 167 full London buses, though none of them could reach escape velocity."
-        },
-        {
-          "targetUnitID": "great_pyramid",
-          "template": "Just 1/2,950th of the Great Pyramid — the pyramid wins every weight class."
+          "template": "About 7.7% of a human heart — your heart outputs more power per gram than any battery."
         }
       ]
     },
@@ -418,6 +64,422 @@
         }
       ]
     },
+    "blue_whale_mass": {
+      "valueHeadline": "One blue whale weighs",
+      "valueDisplay": "150,000 kg",
+      "comparisons": [
+        {
+          "targetUnitID": "elephant",
+          "template": "About 25 African elephants, trunks to tails."
+        },
+        {
+          "targetUnitID": "small_car",
+          "template": "125 small cars, if you stacked them into a cube."
+        },
+        {
+          "targetUnitID": "grand_piano",
+          "template": "Over 300 concert grand pianos — enough for every seat in a mid-sized orchestra hall."
+        },
+        {
+          "targetUnitID": "london_double_decker_bus",
+          "template": "12 full London buses, minus the passengers."
+        },
+        {
+          "targetUnitID": "t_rex",
+          "template": "Nearly 19 T-Rex, which still wouldn't tip the scale."
+        },
+        {
+          "targetUnitID": "eiffel_tower_mass",
+          "template": "About 1/48th of the Eiffel Tower's iron frame — the tower is in a league of its own."
+        },
+        {
+          "targetUnitID": "iss",
+          "template": "A little over a third of the International Space Station, which orbits at 7.7 km per second."
+        },
+        {
+          "targetUnitID": "human_brain",
+          "template": "The combined weight of around 107,000 human brains, give or take."
+        }
+      ]
+    },
+    "carry_on_luggage": {
+      "valueHeadline": "One carry-on weighs",
+      "valueDisplay": "7 kg",
+      "comparisons": [
+        {
+          "targetUnitID": "human_brain",
+          "template": "5 human brains — you're hauling significant cognitive weight through the airport."
+        },
+        {
+          "targetUnitID": "iphone",
+          "template": "About 41 iPhones, which is roughly the number of devices you see on an average flight."
+        },
+        {
+          "targetUnitID": "bag_of_sugar",
+          "template": "7 bags of sugar — the limit was set for crew safety, not passenger convenience."
+        },
+        {
+          "targetUnitID": "bowling_ball",
+          "template": "About 1.1 bowling balls — similar weight, similar overhead bin anxiety."
+        }
+      ]
+    },
+    "coffee_mug_mass": {
+      "valueHeadline": "One coffee mug weighs",
+      "valueDisplay": "350 g",
+      "comparisons": [
+        {
+          "targetUnitID": "iphone",
+          "template": "About 2 iPhones — your morning ritual is heavier than your pocket."
+        },
+        {
+          "targetUnitID": "human_heart",
+          "template": "Roughly 1.17 human hearts — you're lifting a heart's worth of ceramic to your face every morning."
+        },
+        {
+          "targetUnitID": "aa_battery",
+          "template": "About 15 AA batteries."
+        },
+        {
+          "targetUnitID": "feather",
+          "template": "35,000 feathers — the full plumage of about 5 bald eagles."
+        }
+      ]
+    },
+    "eiffel_tower_mass": {
+      "valueHeadline": "The Eiffel Tower weighs",
+      "valueDisplay": "7,300 tonnes",
+      "comparisons": [
+        {
+          "targetUnitID": "blue_whale_mass",
+          "template": "Roughly 49 blue whales stacked into a tower of their own."
+        },
+        {
+          "targetUnitID": "elephant",
+          "template": "About 1,216 African elephants, which is more than exist in many national parks."
+        },
+        {
+          "targetUnitID": "t_rex",
+          "template": "912 T-Rex, or nearly every T-Rex that ever lived, twice over."
+        },
+        {
+          "targetUnitID": "small_car",
+          "template": "6,083 small cars — enough to fill a large stadium parking lot."
+        },
+        {
+          "targetUnitID": "london_double_decker_bus",
+          "template": "608 full London buses, which is about twice the active fleet of some cities."
+        },
+        {
+          "targetUnitID": "iss",
+          "template": "Nearly 17 International Space Stations, all built from iron instead of aluminium."
+        },
+        {
+          "targetUnitID": "space_shuttle",
+          "template": "About 3.6 Space Shuttles at full launch weight."
+        },
+        {
+          "targetUnitID": "iphone",
+          "template": "The weight of 42.7 million iPhones — roughly one for every person in Argentina."
+        }
+      ]
+    },
+    "elephant": {
+      "valueHeadline": "One African elephant weighs",
+      "valueDisplay": "6,000 kg",
+      "comparisons": [
+        {
+          "targetUnitID": "small_car",
+          "template": "5 small cars, which is roughly the weight elephants can lift with their trunks alone."
+        },
+        {
+          "targetUnitID": "blue_whale_mass",
+          "template": "Just 4% of a blue whale, the only mammal that outweighs an elephant on land or sea."
+        },
+        {
+          "targetUnitID": "human_brain",
+          "template": "The combined weight of 4,286 human brains, though an elephant's own brain is around 5 kg."
+        },
+        {
+          "targetUnitID": "grand_piano",
+          "template": "About 12.5 concert grand pianos."
+        },
+        {
+          "targetUnitID": "iphone",
+          "template": "Around 35,088 iPhones, or roughly the daily output of a single Apple manufacturing line."
+        },
+        {
+          "targetUnitID": "feather",
+          "template": "600 million feathers — more feathers than exist on every eagle in North America."
+        }
+      ]
+    },
+    "feather": {
+      "valueHeadline": "One feather weighs",
+      "valueDisplay": "0.01 g",
+      "comparisons": [
+        {
+          "targetUnitID": "grain_of_rice_mass",
+          "template": "A single grain of rice weighs about 2.5 feathers — rice is denser than it looks."
+        },
+        {
+          "targetUnitID": "hummingbird",
+          "template": "A hummingbird weighs as much as 300 feathers, and needs every gram to stay airborne."
+        },
+        {
+          "targetUnitID": "paperclip_mass",
+          "template": "A standard paperclip equals 100 feathers, which makes paperclips feel surprisingly substantial."
+        },
+        {
+          "targetUnitID": "aa_battery",
+          "template": "An AA battery weighs 2,300 feathers — batteries really are denser than you'd think."
+        },
+        {
+          "targetUnitID": "iphone",
+          "template": "Your iPhone weighs 17,100 feathers, which is roughly 2.5 bald eagles' worth."
+        },
+        {
+          "targetUnitID": "human_heart",
+          "template": "Your own heart is the weight of 30,000 feathers, pumping 24 hours a day."
+        },
+        {
+          "targetUnitID": "bag_of_sugar",
+          "template": "A kilogram of sugar equals 100,000 feathers — more than 14 full eagles' worth."
+        },
+        {
+          "targetUnitID": "blue_whale_mass",
+          "template": "You'd need 15 billion feathers to match a single blue whale."
+        }
+      ]
+    },
+    "golden_retriever": {
+      "valueHeadline": "One golden retriever weighs",
+      "valueDisplay": "32 kg",
+      "comparisons": [
+        {
+          "targetUnitID": "human_brain",
+          "template": "The combined weight of about 23 human brains."
+        },
+        {
+          "targetUnitID": "bag_of_sugar",
+          "template": "32 bags of sugar, which is also roughly a golden retriever's daily preferred snack volume."
+        },
+        {
+          "targetUnitID": "iphone",
+          "template": "Around 187 iPhones, none of which fetch nearly as well."
+        },
+        {
+          "targetUnitID": "newborn_baby_mass",
+          "template": "About 9 newborn babies, which is one reason large dogs and infants don't mix unattended."
+        },
+        {
+          "targetUnitID": "elephant",
+          "template": "Just 0.5% of an African elephant."
+        }
+      ]
+    },
+    "golf_ball": {
+      "valueHeadline": "One golf ball weighs",
+      "valueDisplay": "45.93 g",
+      "comparisons": [
+        {
+          "targetUnitID": "iphone",
+          "template": "About 27% of an iPhone, in a body designed to fly 300 yards on a single hit."
+        },
+        {
+          "targetUnitID": "aa_battery",
+          "template": "Almost exactly 2 AA batteries."
+        },
+        {
+          "targetUnitID": "paperclip_mass",
+          "template": "Around 46 paperclips, packed into a sphere small enough to swallow."
+        },
+        {
+          "targetUnitID": "human_heart",
+          "template": "About 15% of a human heart — coincidentally the heart's stroke volume per beat."
+        }
+      ]
+    },
+    "grain_of_rice_mass": {
+      "valueHeadline": "One grain of rice weighs",
+      "valueDisplay": "25 mg",
+      "comparisons": [
+        {
+          "targetUnitID": "feather",
+          "template": "About 2.5 feathers."
+        },
+        {
+          "targetUnitID": "paperclip_mass",
+          "template": "1/40th of a paperclip, which is heavier than rice by surprising margins."
+        },
+        {
+          "targetUnitID": "bag_of_sugar",
+          "template": "1/40,000th of a kilogram bag of sugar — a single bag holds 40,000 grains."
+        },
+        {
+          "targetUnitID": "hummingbird",
+          "template": "About 0.83% of a hummingbird, which would still be a substantial meal for one."
+        },
+        {
+          "targetUnitID": "iphone",
+          "template": "1/6,840th of an iPhone."
+        }
+      ]
+    },
+    "grand_piano": {
+      "valueHeadline": "One concert grand piano weighs",
+      "valueDisplay": "480 kg",
+      "comparisons": [
+        {
+          "targetUnitID": "human_brain",
+          "template": "About 343 human brains, which is the cognitive output you'd need to compose for one."
+        },
+        {
+          "targetUnitID": "washing_machine",
+          "template": "Roughly 6.9 washing machines."
+        },
+        {
+          "targetUnitID": "iphone",
+          "template": "Around 2,807 iPhones, all of which can play piano music but none of which sound like one."
+        },
+        {
+          "targetUnitID": "small_car",
+          "template": "About 40% of a small car, distributed across 12,000 individual moving parts."
+        },
+        {
+          "targetUnitID": "bag_of_sugar",
+          "template": "480 bags of sugar, or about half a tonne of polished hardwood and steel."
+        }
+      ]
+    },
+    "great_pyramid": {
+      "valueHeadline": "The Great Pyramid weighs",
+      "valueDisplay": "5.9 billion kg",
+      "comparisons": [
+        {
+          "targetUnitID": "blue_whale_mass",
+          "template": "Around 39,333 blue whales, or roughly four times every blue whale currently alive."
+        },
+        {
+          "targetUnitID": "eiffel_tower_mass",
+          "template": "About 808 Eiffel Towers, which is a humbling ratio for anything ever built by machines."
+        },
+        {
+          "targetUnitID": "iss",
+          "template": "Approximately 14,048 International Space Stations — the pyramid is on another order of magnitude entirely."
+        },
+        {
+          "targetUnitID": "space_shuttle",
+          "template": "2,950 Space Shuttles at launch weight, and the pyramid is 4,500 years older."
+        },
+        {
+          "targetUnitID": "london_double_decker_bus",
+          "template": "About 491,667 London buses, more than have ever existed in London's history."
+        },
+        {
+          "targetUnitID": "elephant",
+          "template": "Just under a million African elephants — more elephants than have lived in the last century combined."
+        },
+        {
+          "targetUnitID": "t_rex",
+          "template": "737,500 T-Rex, and we're still not sure exactly how the Egyptians moved the stones."
+        },
+        {
+          "targetUnitID": "small_car",
+          "template": "Nearly 5 million small cars, enough to gridlock a continent."
+        }
+      ]
+    },
+    "great_white_shark": {
+      "valueHeadline": "One great white shark weighs",
+      "valueDisplay": "700 kg",
+      "comparisons": [
+        {
+          "targetUnitID": "small_car",
+          "template": "About 58% of a small car, and faster than most cars in city traffic."
+        },
+        {
+          "targetUnitID": "blue_whale_mass",
+          "template": "Just 0.47% of a blue whale — the ocean's apex predator is small compared to its largest resident."
+        },
+        {
+          "targetUnitID": "orca",
+          "template": "About 14% of an orca, which actually preys on great whites."
+        },
+        {
+          "targetUnitID": "elephant",
+          "template": "Around 12% of an African elephant."
+        },
+        {
+          "targetUnitID": "rhino",
+          "template": "Roughly 30% of a white rhino, with similar levels of don't-mess-with-it energy."
+        },
+        {
+          "targetUnitID": "human_brain",
+          "template": "The combined weight of 500 human brains, though a great white's own brain is just 30 grams."
+        }
+      ]
+    },
+    "hippopotamus": {
+      "valueHeadline": "One hippopotamus weighs",
+      "valueDisplay": "1,500 kg",
+      "comparisons": [
+        {
+          "targetUnitID": "small_car",
+          "template": "About 1.25 small cars — and considerably more dangerous in a collision."
+        },
+        {
+          "targetUnitID": "elephant",
+          "template": "25% of an African elephant, though hippos kill 10 times more people per year."
+        },
+        {
+          "targetUnitID": "rhino",
+          "template": "About 65% of a white rhino, despite looking considerably rounder."
+        },
+        {
+          "targetUnitID": "grand_piano",
+          "template": "About 3.1 concert grand pianos — and hippos can run at 30 km/h carrying all of it."
+        }
+      ]
+    },
+    "human_brain": {
+      "valueHeadline": "One human brain weighs",
+      "valueDisplay": "1.4 kg",
+      "comparisons": [
+        {
+          "targetUnitID": "bag_of_sugar",
+          "template": "Almost exactly 1.4 bags of sugar — a surprisingly casual weight for everything you are."
+        },
+        {
+          "targetUnitID": "iphone",
+          "template": "The weight of about 8 iPhones, yet it consumes 20% of every calorie you eat."
+        },
+        {
+          "targetUnitID": "human_heart",
+          "template": "Around 4.7 human hearts, which puts into perspective how much work the heart does for its size."
+        },
+        {
+          "targetUnitID": "grand_piano",
+          "template": "Roughly 1/343rd of a concert grand piano, yet infinitely more capable of composing music."
+        },
+        {
+          "targetUnitID": "chicken",
+          "template": "About 56% of an average chicken, which says something uncomfortable about evolution."
+        },
+        {
+          "targetUnitID": "blue_whale_mass",
+          "template": "1/107,142nd of a blue whale, whose brain is over 5 times heavier than yours."
+        },
+        {
+          "targetUnitID": "can_of_soup",
+          "template": "Around 3.5 cans of soup, which is genuinely odd to think about."
+        },
+        {
+          "targetUnitID": "aa_battery",
+          "template": "About 61 AA batteries — your brain runs on roughly 20 watts, less than most lightbulbs."
+        }
+      ]
+    },
     "human_heart": {
       "valueHeadline": "One human heart weighs",
       "valueDisplay": "300 g",
@@ -456,133 +518,33 @@
         }
       ]
     },
-    "elephant": {
-      "valueHeadline": "One African elephant weighs",
-      "valueDisplay": "6,000 kg",
-      "comparisons": [
-        {
-          "targetUnitID": "small_car",
-          "template": "5 small cars, which is roughly the weight elephants can lift with their trunks alone."
-        },
-        {
-          "targetUnitID": "blue_whale_mass",
-          "template": "Just 4% of a blue whale, the only mammal that outweighs an elephant on land or sea."
-        },
-        {
-          "targetUnitID": "human_brain",
-          "template": "The combined weight of 4,286 human brains, though an elephant's own brain is around 5 kg."
-        },
-        {
-          "targetUnitID": "grand_piano",
-          "template": "About 12.5 concert grand pianos."
-        },
-        {
-          "targetUnitID": "iphone",
-          "template": "Around 35,088 iPhones, or roughly the daily output of a single Apple manufacturing line."
-        },
-        {
-          "targetUnitID": "feather",
-          "template": "600 million feathers — more feathers than exist on every eagle in North America."
-        }
-      ]
-    },
-    "grand_piano": {
-      "valueHeadline": "One concert grand piano weighs",
-      "valueDisplay": "480 kg",
+    "human_skin": {
+      "valueHeadline": "Your skin weighs",
+      "valueDisplay": "4 kg",
       "comparisons": [
         {
           "targetUnitID": "human_brain",
-          "template": "About 343 human brains, which is the cognitive output you'd need to compose for one."
-        },
-        {
-          "targetUnitID": "washing_machine",
-          "template": "Roughly 6.9 washing machines."
-        },
-        {
-          "targetUnitID": "iphone",
-          "template": "Around 2,807 iPhones, all of which can play piano music but none of which sound like one."
-        },
-        {
-          "targetUnitID": "small_car",
-          "template": "About 40% of a small car, distributed across 12,000 individual moving parts."
-        },
-        {
-          "targetUnitID": "bag_of_sugar",
-          "template": "480 bags of sugar, or about half a tonne of polished hardwood and steel."
-        }
-      ]
-    },
-    "paperclip_mass": {
-      "valueHeadline": "One paperclip weighs",
-      "valueDisplay": "1 g",
-      "comparisons": [
-        {
-          "targetUnitID": "feather",
-          "template": "100 feathers, which is roughly the weight of one wing of a small songbird."
-        },
-        {
-          "targetUnitID": "grain_of_rice_mass",
-          "template": "40 grains of rice — and a single gram is exactly how the gram was originally defined."
-        },
-        {
-          "targetUnitID": "iphone",
-          "template": "About 1/171st of an iPhone."
-        },
-        {
-          "targetUnitID": "aa_battery",
-          "template": "Around 1/23rd of an AA battery, despite both being made mostly of metal."
-        },
-        {
-          "targetUnitID": "bag_of_sugar",
-          "template": "1/1000th of a bag of sugar — a thousand paperclips weigh exactly one kilogram."
-        }
-      ]
-    },
-    "aa_battery": {
-      "valueHeadline": "One AA battery weighs",
-      "valueDisplay": "23 g",
-      "comparisons": [
-        {
-          "targetUnitID": "iphone",
-          "template": "About 13% of an iPhone, despite holding only a fraction of an iPhone's energy."
-        },
-        {
-          "targetUnitID": "paperclip_mass",
-          "template": "23 paperclips, or roughly one box of office paperclips."
-        },
-        {
-          "targetUnitID": "feather",
-          "template": "2,300 feathers, which is more feathers than most small birds have in total."
-        },
-        {
-          "targetUnitID": "golf_ball",
-          "template": "Half a regulation golf ball, though far less aerodynamic."
+          "template": "About 2.9 times the weight of your brain — skin is your heaviest organ."
         },
         {
           "targetUnitID": "human_heart",
-          "template": "About 7.7% of a human heart — your heart outputs more power per gram than any battery."
-        }
-      ]
-    },
-    "golf_ball": {
-      "valueHeadline": "One golf ball weighs",
-      "valueDisplay": "45.93 g",
-      "comparisons": [
+          "template": "Roughly 13.3 human hearts, covering about 2 square metres of surface area."
+        },
+        {
+          "targetUnitID": "human_skeleton",
+          "template": "About 80% of your skeleton, despite being only millimetres thick."
+        },
+        {
+          "targetUnitID": "bag_of_sugar",
+          "template": "4 bags of sugar — and you shed roughly 30,000 cells of it every hour."
+        },
         {
           "targetUnitID": "iphone",
-          "template": "About 27% of an iPhone, in a body designed to fly 300 yards on a single hit."
+          "template": "About 23 iPhones, replaced cell by cell every 2 to 3 weeks."
         },
         {
-          "targetUnitID": "aa_battery",
-          "template": "Almost exactly 2 AA batteries."
-        },
-        {
-          "targetUnitID": "paperclip_mass",
-          "template": "Around 46 paperclips, packed into a sphere small enough to swallow."
-        },
-        {
-          "targetUnitID": "human_heart",
-          "template": "About 15% of a human heart — coincidentally the heart's stroke volume per beat."
+          "targetUnitID": "house_cat",
+          "template": "Roughly 89% of an average house cat."
         }
       ]
     },
@@ -608,107 +570,79 @@
         }
       ]
     },
-    "london_double_decker_bus": {
-      "valueHeadline": "One double-decker bus weighs",
-      "valueDisplay": "12,000 kg",
+    "iphone": {
+      "valueHeadline": "One iPhone weighs",
+      "valueDisplay": "171 g",
       "comparisons": [
         {
+          "targetUnitID": "paperclip_mass",
+          "template": "About 171 paperclips, which is roughly one small box."
+        },
+        {
+          "targetUnitID": "feather",
+          "template": "The weight of 17,100 feathers, or around 2.5 bald eagles' worth."
+        },
+        {
+          "targetUnitID": "grain_of_rice_mass",
+          "template": "Nearly 6,840 grains of rice — close to a full rice cup, dry."
+        },
+        {
+          "targetUnitID": "aa_battery",
+          "template": "Around 7.4 AA batteries, though far more useful than a handful of them."
+        },
+        {
+          "targetUnitID": "golf_ball",
+          "template": "Just under 4 golf balls, which is lighter than you might guess for something so dense with electronics."
+        },
+        {
+          "targetUnitID": "human_heart",
+          "template": "About 57% of your own heart, which is doing similar amounts of work at any given moment."
+        },
+        {
+          "targetUnitID": "human_brain",
+          "template": "Roughly 1/8th of the human brain, pound for pound the most efficient processor ever built."
+        },
+        {
+          "targetUnitID": "bag_of_sugar",
+          "template": "17% of a standard bag of sugar — less than you'd think for a pocket supercomputer."
+        }
+      ]
+    },
+    "iss": {
+      "valueHeadline": "The International Space Station weighs",
+      "valueDisplay": "420,000 kg",
+      "comparisons": [
+        {
+          "targetUnitID": "blue_whale_mass",
+          "template": "About 2.8 blue whales, which is a surprising amount of whale to have in orbit."
+        },
+        {
+          "targetUnitID": "space_shuttle",
+          "template": "Roughly 1/5th of a fully loaded Space Shuttle at launch."
+        },
+        {
           "targetUnitID": "elephant",
-          "template": "Exactly 2 African elephants."
+          "template": "70 African elephants, which would have been impossible to lift into orbit all at once."
         },
         {
           "targetUnitID": "small_car",
-          "template": "10 small cars, which is roughly the seating capacity ratio in reverse."
-        },
-        {
-          "targetUnitID": "blue_whale_mass",
-          "template": "Just 8% of a blue whale, despite carrying up to 87 passengers."
+          "template": "350 small cars, assembled piece by piece across dozens of launches."
         },
         {
           "targetUnitID": "t_rex",
-          "template": "About 1.5 T-Rex, and a similar overall length."
+          "template": "About 53 T-Rex — though none were harmed in the making of the station."
         },
         {
-          "targetUnitID": "iphone",
-          "template": "Around 70,175 iPhones — more than the entire iPhone fleet of a small country."
-        }
-      ]
-    },
-    "golden_retriever": {
-      "valueHeadline": "One golden retriever weighs",
-      "valueDisplay": "32 kg",
-      "comparisons": [
-        {
-          "targetUnitID": "human_brain",
-          "template": "The combined weight of about 23 human brains."
-        },
-        {
-          "targetUnitID": "bag_of_sugar",
-          "template": "32 bags of sugar, which is also roughly a golden retriever's daily preferred snack volume."
-        },
-        {
-          "targetUnitID": "iphone",
-          "template": "Around 187 iPhones, none of which fetch nearly as well."
-        },
-        {
-          "targetUnitID": "newborn_baby_mass",
-          "template": "About 9 newborn babies, which is one reason large dogs and infants don't mix unattended."
-        },
-        {
-          "targetUnitID": "elephant",
-          "template": "Just 0.5% of an African elephant."
-        }
-      ]
-    },
-    "rhino": {
-      "valueHeadline": "One white rhinoceros weighs",
-      "valueDisplay": "2,300 kg",
-      "comparisons": [
-        {
-          "targetUnitID": "small_car",
-          "template": "Just under 2 small cars, with horns made of the same protein as your fingernails."
-        },
-        {
-          "targetUnitID": "elephant",
-          "template": "About 38% of an African elephant — rhinos are heavier than they look."
-        },
-        {
-          "targetUnitID": "human_brain",
-          "template": "Roughly 1,643 human brains, though rhinos themselves have rather small ones for their size."
+          "targetUnitID": "london_double_decker_bus",
+          "template": "35 full London buses, give or take a conductor."
         },
         {
           "targetUnitID": "grand_piano",
-          "template": "Around 4.8 concert grand pianos."
-        },
-        {
-          "targetUnitID": "blue_whale_mass",
-          "template": "1.5% of a blue whale, despite being one of the largest land animals alive."
-        }
-      ]
-    },
-    "grain_of_rice_mass": {
-      "valueHeadline": "One grain of rice weighs",
-      "valueDisplay": "25 mg",
-      "comparisons": [
-        {
-          "targetUnitID": "feather",
-          "template": "About 2.5 feathers."
-        },
-        {
-          "targetUnitID": "paperclip_mass",
-          "template": "1/40th of a paperclip, which is heavier than rice by surprising margins."
-        },
-        {
-          "targetUnitID": "bag_of_sugar",
-          "template": "1/40,000th of a kilogram bag of sugar — a single bag holds 40,000 grains."
-        },
-        {
-          "targetUnitID": "hummingbird",
-          "template": "About 0.83% of a hummingbird, which would still be a substantial meal for one."
+          "template": "875 concert grand pianos, which would make quite an orchestra in zero gravity."
         },
         {
           "targetUnitID": "iphone",
-          "template": "1/6,840th of an iPhone."
+          "template": "2.45 million iPhones, which is still less than a single day of global sales."
         }
       ]
     },
@@ -742,63 +676,29 @@
         }
       ]
     },
-    "human_skin": {
-      "valueHeadline": "Your skin weighs",
-      "valueDisplay": "4 kg",
+    "london_double_decker_bus": {
+      "valueHeadline": "One double-decker bus weighs",
+      "valueDisplay": "12,000 kg",
       "comparisons": [
         {
-          "targetUnitID": "human_brain",
-          "template": "About 2.9 times the weight of your brain — skin is your heaviest organ."
+          "targetUnitID": "elephant",
+          "template": "Exactly 2 African elephants."
         },
-        {
-          "targetUnitID": "human_heart",
-          "template": "Roughly 13.3 human hearts, covering about 2 square metres of surface area."
-        },
-        {
-          "targetUnitID": "human_skeleton",
-          "template": "About 80% of your skeleton, despite being only millimetres thick."
-        },
-        {
-          "targetUnitID": "bag_of_sugar",
-          "template": "4 bags of sugar — and you shed roughly 30,000 cells of it every hour."
-        },
-        {
-          "targetUnitID": "iphone",
-          "template": "About 23 iPhones, replaced cell by cell every 2 to 3 weeks."
-        },
-        {
-          "targetUnitID": "house_cat",
-          "template": "Roughly 89% of an average house cat."
-        }
-      ]
-    },
-    "great_white_shark": {
-      "valueHeadline": "One great white shark weighs",
-      "valueDisplay": "700 kg",
-      "comparisons": [
         {
           "targetUnitID": "small_car",
-          "template": "About 58% of a small car, and faster than most cars in city traffic."
+          "template": "10 small cars, which is roughly the seating capacity ratio in reverse."
         },
         {
           "targetUnitID": "blue_whale_mass",
-          "template": "Just 0.47% of a blue whale — the ocean's apex predator is small compared to its largest resident."
+          "template": "Just 8% of a blue whale, despite carrying up to 87 passengers."
         },
         {
-          "targetUnitID": "orca",
-          "template": "About 14% of an orca, which actually preys on great whites."
+          "targetUnitID": "t_rex",
+          "template": "About 1.5 T-Rex, and a similar overall length."
         },
         {
-          "targetUnitID": "elephant",
-          "template": "Around 12% of an African elephant."
-        },
-        {
-          "targetUnitID": "rhino",
-          "template": "Roughly 30% of a white rhino, with similar levels of don't-mess-with-it energy."
-        },
-        {
-          "targetUnitID": "human_brain",
-          "template": "The combined weight of 500 human brains, though a great white's own brain is just 30 grams."
+          "targetUnitID": "iphone",
+          "template": "Around 70,175 iPhones — more than the entire iPhone fleet of a small country."
         }
       ]
     },
@@ -832,69 +732,169 @@
         }
       ]
     },
-    "coffee_mug_mass": {
-      "valueHeadline": "One coffee mug weighs",
-      "valueDisplay": "350 g",
+    "paperclip_mass": {
+      "valueHeadline": "One paperclip weighs",
+      "valueDisplay": "1 g",
       "comparisons": [
         {
-          "targetUnitID": "iphone",
-          "template": "About 2 iPhones — your morning ritual is heavier than your pocket."
+          "targetUnitID": "feather",
+          "template": "100 feathers, which is roughly the weight of one wing of a small songbird."
         },
         {
-          "targetUnitID": "human_heart",
-          "template": "Roughly 1.17 human hearts — you're lifting a heart's worth of ceramic to your face every morning."
+          "targetUnitID": "grain_of_rice_mass",
+          "template": "40 grains of rice — and a single gram is exactly how the gram was originally defined."
+        },
+        {
+          "targetUnitID": "iphone",
+          "template": "About 1/171st of an iPhone."
         },
         {
           "targetUnitID": "aa_battery",
-          "template": "About 15 AA batteries."
-        },
-        {
-          "targetUnitID": "feather",
-          "template": "35,000 feathers — the full plumage of about 5 bald eagles."
-        }
-      ]
-    },
-    "carry_on_luggage": {
-      "valueHeadline": "One carry-on weighs",
-      "valueDisplay": "7 kg",
-      "comparisons": [
-        {
-          "targetUnitID": "human_brain",
-          "template": "5 human brains — you're hauling significant cognitive weight through the airport."
-        },
-        {
-          "targetUnitID": "iphone",
-          "template": "About 41 iPhones, which is roughly the number of devices you see on an average flight."
+          "template": "Around 1/23rd of an AA battery, despite both being made mostly of metal."
         },
         {
           "targetUnitID": "bag_of_sugar",
-          "template": "7 bags of sugar — the limit was set for crew safety, not passenger convenience."
-        },
-        {
-          "targetUnitID": "bowling_ball",
-          "template": "About 1.1 bowling balls — similar weight, similar overhead bin anxiety."
+          "template": "1/1000th of a bag of sugar — a thousand paperclips weigh exactly one kilogram."
         }
       ]
     },
-    "hippopotamus": {
-      "valueHeadline": "One hippopotamus weighs",
-      "valueDisplay": "1,500 kg",
+    "rhino": {
+      "valueHeadline": "One white rhinoceros weighs",
+      "valueDisplay": "2,300 kg",
       "comparisons": [
         {
           "targetUnitID": "small_car",
-          "template": "About 1.25 small cars — and considerably more dangerous in a collision."
+          "template": "Just under 2 small cars, with horns made of the same protein as your fingernails."
         },
         {
           "targetUnitID": "elephant",
-          "template": "25% of an African elephant, though hippos kill 10 times more people per year."
+          "template": "About 38% of an African elephant — rhinos are heavier than they look."
         },
         {
-          "targetUnitID": "rhino",
-          "template": "About 65% of a white rhino, despite looking considerably rounder."
+          "targetUnitID": "human_brain",
+          "template": "Roughly 1,643 human brains, though rhinos themselves have rather small ones for their size."
         },
         {
           "targetUnitID": "grand_piano",
-          "template": "About 3.1 concert grand pianos — and hippos can run at 30 km/h carrying all of it."
+          "template": "Around 4.8 concert grand pianos."
+        },
+        {
+          "targetUnitID": "blue_whale_mass",
+          "template": "1.5% of a blue whale, despite being one of the largest land animals alive."
+        }
+      ]
+    },
+    "small_car": {
+      "valueHeadline": "One small car weighs",
+      "valueDisplay": "1,200 kg",
+      "comparisons": [
+        {
+          "targetUnitID": "elephant",
+          "template": "1/5th of an African elephant, which makes cars feel much lighter than they look."
+        },
+        {
+          "targetUnitID": "grand_piano",
+          "template": "Around 2.5 concert grand pianos, piled inelegantly."
+        },
+        {
+          "targetUnitID": "human_brain",
+          "template": "The combined weight of 857 human brains, whatever that tells you about driving."
+        },
+        {
+          "targetUnitID": "iphone",
+          "template": "About 7,018 iPhones — more than most Apple Stores hold in inventory."
+        },
+        {
+          "targetUnitID": "bag_of_sugar",
+          "template": "1,200 bags of sugar, or the grocery hauls of 100 households."
+        },
+        {
+          "targetUnitID": "washing_machine",
+          "template": "About 17 washing machines, which would be a catastrophic laundry day."
+        },
+        {
+          "targetUnitID": "blue_whale_mass",
+          "template": "Just 0.8% of a blue whale — cars are smaller than the largest animals by a wide margin."
+        },
+        {
+          "targetUnitID": "feather",
+          "template": "120 million feathers, which is approximately every feather on 17,000 bald eagles."
+        }
+      ]
+    },
+    "space_shuttle": {
+      "valueHeadline": "The Space Shuttle at launch weighed",
+      "valueDisplay": "2,000,000 kg",
+      "comparisons": [
+        {
+          "targetUnitID": "iss",
+          "template": "Around 4.8 International Space Stations, most of which was fuel that burned off in 8 minutes."
+        },
+        {
+          "targetUnitID": "blue_whale_mass",
+          "template": "About 13.3 blue whales, which is a lot of whale to strap to a rocket."
+        },
+        {
+          "targetUnitID": "eiffel_tower_mass",
+          "template": "Roughly 27% of the Eiffel Tower, except this one goes to orbit."
+        },
+        {
+          "targetUnitID": "elephant",
+          "template": "333 African elephants, lifted off the ground by controlled explosion."
+        },
+        {
+          "targetUnitID": "t_rex",
+          "template": "250 T-Rex, none of whom ever saw a rocket in their lifetimes."
+        },
+        {
+          "targetUnitID": "small_car",
+          "template": "Over 1,666 small cars — which is about 50 times the weight of the shuttle itself once you remove the fuel."
+        },
+        {
+          "targetUnitID": "london_double_decker_bus",
+          "template": "About 167 full London buses, though none of them could reach escape velocity."
+        },
+        {
+          "targetUnitID": "great_pyramid",
+          "template": "Just 1/2,950th of the Great Pyramid — the pyramid wins every weight class."
+        }
+      ]
+    },
+    "t_rex": {
+      "valueHeadline": "One T-Rex weighed",
+      "valueDisplay": "8,000 kg",
+      "comparisons": [
+        {
+          "targetUnitID": "small_car",
+          "template": "About 6.7 small cars, which is a lot of apex predator to have near your car."
+        },
+        {
+          "targetUnitID": "elephant",
+          "template": "Around 1.3 African elephants, though an elephant wouldn't have stood a chance."
+        },
+        {
+          "targetUnitID": "grand_piano",
+          "template": "Roughly 17 concert grand pianos — which is approximately what it would sound like falling."
+        },
+        {
+          "targetUnitID": "rhino",
+          "template": "About 3.5 white rhinos, another animal famous for not taking nonsense."
+        },
+        {
+          "targetUnitID": "blue_whale_mass",
+          "template": "Only 5.3% of a blue whale — even the king of dinosaurs was small by ocean standards."
+        },
+        {
+          "targetUnitID": "iss",
+          "template": "Around 1.9% of the International Space Station, which puts the Jurassic Park franchise in perspective."
+        },
+        {
+          "targetUnitID": "human_brain",
+          "template": "The combined weight of 5,714 human brains — T-Rex had a walnut-sized one of its own."
+        },
+        {
+          "targetUnitID": "bag_of_sugar",
+          "template": "8,000 bags of sugar, or about a week of sugar consumption for a medium city."
         }
       ]
     }

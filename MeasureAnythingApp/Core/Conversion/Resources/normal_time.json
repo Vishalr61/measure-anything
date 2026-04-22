@@ -1,0 +1,38 @@
+[
+  {
+    "id": "day",
+    "name": "Day",
+    "category": "time",
+    "baseUnit": "second",
+    "kind": "normal",
+    "conversionStyle": "multiplicative",
+    "factor": 86400
+  },
+  {
+    "id": "hour",
+    "name": "Hour",
+    "category": "time",
+    "baseUnit": "second",
+    "kind": "normal",
+    "conversionStyle": "multiplicative",
+    "factor": 3600
+  },
+  {
+    "id": "minute",
+    "name": "Minute",
+    "category": "time",
+    "baseUnit": "second",
+    "kind": "normal",
+    "conversionStyle": "multiplicative",
+    "factor": 60
+  },
+  {
+    "id": "second",
+    "name": "Second",
+    "category": "time",
+    "baseUnit": "second",
+    "kind": "normal",
+    "conversionStyle": "multiplicative",
+    "factor": 1
+  }
+]

@@ -1,0 +1,26 @@
+[
+  {
+    "id": "celsius",
+    "name": "Celsius",
+    "category": "temperature",
+    "baseUnit": "kelvin",
+    "kind": "normal",
+    "conversionStyle": "temperature"
+  },
+  {
+    "id": "fahrenheit",
+    "name": "Fahrenheit",
+    "category": "temperature",
+    "baseUnit": "kelvin",
+    "kind": "normal",
+    "conversionStyle": "temperature"
+  },
+  {
+    "id": "kelvin",
+    "name": "Kelvin",
+    "category": "temperature",
+    "baseUnit": "kelvin",
+    "kind": "normal",
+    "conversionStyle": "temperature"
+  }
+]

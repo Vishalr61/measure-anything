@@ -8,9 +8,19 @@ xcuserdata/
 DerivedData/
 .derivedData/
 MeasureAnything/.derivedData/
+.derivedData-sim/
 
 # macOS
 .DS_Store
+
+# Python / content pipeline
+.venv/
+__pycache__/
+content-pipeline/.env
+content-pipeline/.venv/
+content-pipeline/__pycache__/
+content-pipeline/.export-tmp/
+content-pipeline/Untitled
 
 # taxonomy (TypeScript)
 taxonomy/node_modules/
