@@ -3,7 +3,7 @@ import Foundation
 /// A unified registry of units available to the conversion engine.
 ///
 /// v1 composition:
-/// - Normal units: built-in (`SeedNormalUnits`)
+/// - Normal units: JSON (`NormalUnitStore`), with fallback to `SeedNormalUnits`
 /// - Absurd units: shipped JSON (`AbsurdUnitStore`)
 /// - Custom units: supplied by the app (SwiftData) as `UnitDefinition`s with `kind == .custom`
 public struct UnitRegistry: Sendable {
@@ -40,9 +40,16 @@ public struct UnitRegistry: Sendable {
 
     public static func v1Default(
         absurdStore: AbsurdUnitStore = AbsurdUnitStore(),
+        normalStore: NormalUnitStore = NormalUnitStore(),
         customUnits: [UnitDefinition] = []
     ) throws -> UnitRegistry {
-        let normals = SeedNormalUnits.all
+        let normals: [UnitDefinition]
+        do {
+            normals = try normalStore.loadAll()
+        } catch {
+            // Fallback so the app still boots even if normal JSON isn't present yet.
+            normals = SeedNormalUnits.all
+        }
         let absurd = try absurdStore.loadAll()
         return try UnitRegistry(units: normals + absurd + customUnits)
     }

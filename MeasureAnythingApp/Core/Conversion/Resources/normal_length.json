@@ -1,0 +1,263 @@
+[
+  {
+    "id": "angstrom",
+    "name": "Angstrom",
+    "category": "length",
+    "baseUnit": "meter",
+    "kind": "normal",
+    "conversionStyle": "multiplicative",
+    "factor": 1e-10
+  },
+  {
+    "id": "astronomical_unit",
+    "name": "Astronomical unit",
+    "category": "length",
+    "baseUnit": "meter",
+    "kind": "normal",
+    "conversionStyle": "multiplicative",
+    "factor": 149597870700
+  },
+  {
+    "id": "centimeter",
+    "name": "Centimeter",
+    "category": "length",
+    "baseUnit": "meter",
+    "kind": "normal",
+    "conversionStyle": "multiplicative",
+    "factor": 0.01
+  },
+  {
+    "id": "chain",
+    "name": "Chain",
+    "category": "length",
+    "baseUnit": "meter",
+    "kind": "normal",
+    "conversionStyle": "multiplicative",
+    "factor": 20.1168
+  },
+  {
+    "id": "cubit",
+    "name": "Cubit",
+    "category": "length",
+    "baseUnit": "meter",
+    "kind": "normal",
+    "conversionStyle": "multiplicative",
+    "factor": 0.4572
+  },
+  {
+    "id": "decimeter",
+    "name": "Decimeter",
+    "category": "length",
+    "baseUnit": "meter",
+    "kind": "normal",
+    "conversionStyle": "multiplicative",
+    "factor": 0.1
+  },
+  {
+    "id": "fathom",
+    "name": "Fathom",
+    "category": "length",
+    "baseUnit": "meter",
+    "kind": "normal",
+    "conversionStyle": "multiplicative",
+    "factor": 1.8288
+  },
+  {
+    "id": "foot",
+    "name": "Foot",
+    "category": "length",
+    "baseUnit": "meter",
+    "kind": "normal",
+    "conversionStyle": "multiplicative",
+    "factor": 0.3048
+  },
+  {
+    "id": "furlong",
+    "name": "Furlong",
+    "category": "length",
+    "baseUnit": "meter",
+    "kind": "normal",
+    "conversionStyle": "multiplicative",
+    "factor": 201.168
+  },
+  {
+    "id": "hand",
+    "name": "Hand",
+    "category": "length",
+    "baseUnit": "meter",
+    "kind": "normal",
+    "conversionStyle": "multiplicative",
+    "factor": 0.1016
+  },
+  {
+    "id": "hectometer",
+    "name": "Hectometer",
+    "category": "length",
+    "baseUnit": "meter",
+    "kind": "normal",
+    "conversionStyle": "multiplicative",
+    "factor": 100
+  },
+  {
+    "id": "inch",
+    "name": "Inch",
+    "category": "length",
+    "baseUnit": "meter",
+    "kind": "normal",
+    "conversionStyle": "multiplicative",
+    "factor": 0.0254
+  },
+  {
+    "id": "kilometer",
+    "name": "Kilometer",
+    "category": "length",
+    "baseUnit": "meter",
+    "kind": "normal",
+    "conversionStyle": "multiplicative",
+    "factor": 1000
+  },
+  {
+    "id": "league",
+    "name": "League",
+    "category": "length",
+    "baseUnit": "meter",
+    "kind": "normal",
+    "conversionStyle": "multiplicative",
+    "factor": 4828.032
+  },
+  {
+    "id": "light_second",
+    "name": "Light-second",
+    "category": "length",
+    "baseUnit": "meter",
+    "kind": "normal",
+    "conversionStyle": "multiplicative",
+    "factor": 299792458
+  },
+  {
+    "id": "light_year",
+    "name": "Light-year",
+    "category": "length",
+    "baseUnit": "meter",
+    "kind": "normal",
+    "conversionStyle": "multiplicative",
+    "factor": 9460730472580800
+  },
+  {
+    "id": "megameter",
+    "name": "Megameter",
+    "category": "length",
+    "baseUnit": "meter",
+    "kind": "normal",
+    "conversionStyle": "multiplicative",
+    "factor": 1000000
+  },
+  {
+    "id": "meter",
+    "name": "Meter",
+    "category": "length",
+    "baseUnit": "meter",
+    "kind": "normal",
+    "conversionStyle": "multiplicative",
+    "factor": 1
+  },
+  {
+    "id": "micrometer",
+    "name": "Micrometer",
+    "category": "length",
+    "baseUnit": "meter",
+    "kind": "normal",
+    "conversionStyle": "multiplicative",
+    "factor": 1e-06
+  },
+  {
+    "id": "mile",
+    "name": "Mile",
+    "category": "length",
+    "baseUnit": "meter",
+    "kind": "normal",
+    "conversionStyle": "multiplicative",
+    "factor": 1609.344
+  },
+  {
+    "id": "millimeter",
+    "name": "Millimeter",
+    "category": "length",
+    "baseUnit": "meter",
+    "kind": "normal",
+    "conversionStyle": "multiplicative",
+    "factor": 0.001
+  },
+  {
+    "id": "nanometer",
+    "name": "Nanometer",
+    "category": "length",
+    "baseUnit": "meter",
+    "kind": "normal",
+    "conversionStyle": "multiplicative",
+    "factor": 1e-09
+  },
+  {
+    "id": "nautical_mile",
+    "name": "Nautical mile",
+    "category": "length",
+    "baseUnit": "meter",
+    "kind": "normal",
+    "conversionStyle": "multiplicative",
+    "factor": 1852
+  },
+  {
+    "id": "pace",
+    "name": "Pace",
+    "category": "length",
+    "baseUnit": "meter",
+    "kind": "normal",
+    "conversionStyle": "multiplicative",
+    "factor": 0.762
+  },
+  {
+    "id": "parsec",
+    "name": "Parsec",
+    "category": "length",
+    "baseUnit": "meter",
+    "kind": "normal",
+    "conversionStyle": "multiplicative",
+    "factor": 30856775810000000
+  },
+  {
+    "id": "picometer",
+    "name": "Picometer",
+    "category": "length",
+    "baseUnit": "meter",
+    "kind": "normal",
+    "conversionStyle": "multiplicative",
+    "factor": 1e-12
+  },
+  {
+    "id": "rod",
+    "name": "Rod",
+    "category": "length",
+    "baseUnit": "meter",
+    "kind": "normal",
+    "conversionStyle": "multiplicative",
+    "factor": 5.0292
+  },
+  {
+    "id": "thou",
+    "name": "Thou",
+    "category": "length",
+    "baseUnit": "meter",
+    "kind": "normal",
+    "conversionStyle": "multiplicative",
+    "factor": 2.54e-05
+  },
+  {
+    "id": "yard",
+    "name": "Yard",
+    "category": "length",
+    "baseUnit": "meter",
+    "kind": "normal",
+    "conversionStyle": "multiplicative",
+    "factor": 0.9144
+  }
+]

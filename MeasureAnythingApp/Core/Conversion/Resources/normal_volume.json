@@ -1,0 +1,65 @@
+[
+  {
+    "id": "cubic_meter",
+    "name": "Cubic meter",
+    "category": "volume",
+    "baseUnit": "liter",
+    "kind": "normal",
+    "conversionStyle": "multiplicative",
+    "factor": 1000
+  },
+  {
+    "id": "liter",
+    "name": "Liter",
+    "category": "volume",
+    "baseUnit": "liter",
+    "kind": "normal",
+    "conversionStyle": "multiplicative",
+    "factor": 1
+  },
+  {
+    "id": "milliliter",
+    "name": "Milliliter",
+    "category": "volume",
+    "baseUnit": "liter",
+    "kind": "normal",
+    "conversionStyle": "multiplicative",
+    "factor": 0.001
+  },
+  {
+    "id": "cup_us",
+    "name": "US cup",
+    "category": "volume",
+    "baseUnit": "liter",
+    "kind": "normal",
+    "conversionStyle": "multiplicative",
+    "factor": 0.2365882365
+  },
+  {
+    "id": "gallon_us",
+    "name": "US gallon",
+    "category": "volume",
+    "baseUnit": "liter",
+    "kind": "normal",
+    "conversionStyle": "multiplicative",
+    "factor": 3.785411784
+  },
+  {
+    "id": "pint_us",
+    "name": "US pint",
+    "category": "volume",
+    "baseUnit": "liter",
+    "kind": "normal",
+    "conversionStyle": "multiplicative",
+    "factor": 0.473176473
+  },
+  {
+    "id": "quart_us",
+    "name": "US quart",
+    "category": "volume",
+    "baseUnit": "liter",
+    "kind": "normal",
+    "conversionStyle": "multiplicative",
+    "factor": 0.946352946
+  }
+]

@@ -1,5 +1,27 @@
 {
   "cards": {
+    "age_of_universe": {
+      "valueHeadline": "The universe has existed for",
+      "valueDisplay": "13.8 billion years",
+      "comparisons": [
+        {
+          "targetUnitID": "human_lifespan",
+          "template": "About 192 million human lifetimes — and humans have only been around for the last 4,000."
+        },
+        {
+          "targetUnitID": "since_dinosaurs",
+          "template": "About 209 dinosaur extinctions ago — the dinosaurs are recent by universe standards."
+        },
+        {
+          "targetUnitID": "since_pyramids",
+          "template": "About 3 million times longer than the pyramids have stood."
+        },
+        {
+          "targetUnitID": "voyager_travel",
+          "template": "Voyager 1 has been travelling for 0.00000034% of this time."
+        }
+      ]
+    },
     "blink": {
       "valueHeadline": "One blink lasts",
       "valueDisplay": "150 ms",
@@ -19,28 +41,6 @@
         {
           "targetUnitID": "light_travel_earth_moon",
           "template": "Light reaches the Moon in about 8.5 blinks."
-        }
-      ]
-    },
-    "heartbeat": {
-      "valueHeadline": "One heartbeat lasts",
-      "valueDisplay": "0.857 seconds",
-      "comparisons": [
-        {
-          "targetUnitID": "blink",
-          "template": "About 5.7 blinks — your heart beats roughly 6 times for every blink."
-        },
-        {
-          "targetUnitID": "youtube_ad",
-          "template": "An unskippable YouTube ad lasts about 5.8 heartbeats."
-        },
-        {
-          "targetUnitID": "human_lifespan",
-          "template": "An average lifetime contains roughly 2.65 billion heartbeats."
-        },
-        {
-          "targetUnitID": "camera_shutter",
-          "template": "A fast camera shutter fires 857 times in one heartbeat."
         }
       ]
     },
@@ -66,94 +66,6 @@
         }
       ]
     },
-    "youtube_ad": {
-      "valueHeadline": "One unskippable YouTube ad lasts",
-      "valueDisplay": "5 seconds",
-      "comparisons": [
-        {
-          "targetUnitID": "heartbeat",
-          "template": "About 5.8 heartbeats — your heart barely notices what your brain considers an eternity."
-        },
-        {
-          "targetUnitID": "blink",
-          "template": "About 33 blinks, though most people forget to blink while waiting."
-        },
-        {
-          "targetUnitID": "pregnancy",
-          "template": "A full pregnancy contains about 4.8 million unskippable ads — roughly 280 days of uninterrupted suffering."
-        },
-        {
-          "targetUnitID": "human_lifespan",
-          "template": "An average lifetime spans about 454 million unskippable ads, though it would feel considerably longer."
-        }
-      ]
-    },
-    "light_travel_earth_moon": {
-      "valueHeadline": "Light reaches the Moon in",
-      "valueDisplay": "1.28 seconds",
-      "comparisons": [
-        {
-          "targetUnitID": "heartbeat",
-          "template": "About 1.5 heartbeats — your heart beats once and light has already arrived."
-        },
-        {
-          "targetUnitID": "blink",
-          "template": "About 8.5 blinks, which is why Apollo astronauts heard a noticeable delay on radio."
-        },
-        {
-          "targetUnitID": "youtube_ad",
-          "template": "An unskippable YouTube ad lasts about 3.9 Moon-light trips."
-        },
-        {
-          "targetUnitID": "camera_shutter",
-          "template": "1,280 camera shutter clicks — light covers 384,400 km in that time."
-        }
-      ]
-    },
-    "song": {
-      "valueHeadline": "One pop song lasts",
-      "valueDisplay": "3.5 minutes",
-      "comparisons": [
-        {
-          "targetUnitID": "youtube_ad",
-          "template": "About 42 unskippable YouTube ads, which is what listening to music on the free tier feels like."
-        },
-        {
-          "targetUnitID": "heartbeat",
-          "template": "Roughly 245 heartbeats from first note to last."
-        },
-        {
-          "targetUnitID": "blink",
-          "template": "About 1,400 blinks — though you'd miss most of them at a live concert."
-        },
-        {
-          "targetUnitID": "toilet_scroll",
-          "template": "About 44% of a toilet scroll session, which is where most streaming happens anyway."
-        }
-      ]
-    },
-    "toilet_scroll": {
-      "valueHeadline": "One toilet scroll session lasts",
-      "valueDisplay": "8 minutes",
-      "comparisons": [
-        {
-          "targetUnitID": "song",
-          "template": "About 2.3 pop songs — enough for a mini playlist every visit."
-        },
-        {
-          "targetUnitID": "youtube_ad",
-          "template": "96 unskippable YouTube ads, which is roughly what the algorithm subjects you to anyway."
-        },
-        {
-          "targetUnitID": "olympic_100m",
-          "template": "Usain Bolt could run 50 world-record 100m sprints in the time you spend scrolling."
-        },
-        {
-          "targetUnitID": "coffee_break",
-          "template": "About 53% of a coffee break, and often taken simultaneously."
-        }
-      ]
-    },
     "coffee_break": {
       "valueHeadline": "One coffee break lasts",
       "valueDisplay": "15 minutes",
@@ -173,50 +85,6 @@
         {
           "targetUnitID": "youtube_ad",
           "template": "180 unskippable YouTube ads — which is what 15 minutes of free-tier YouTube actually contains."
-        }
-      ]
-    },
-    "olympic_100m": {
-      "valueHeadline": "The world record 100m sprint takes",
-      "valueDisplay": "9.58 seconds",
-      "comparisons": [
-        {
-          "targetUnitID": "heartbeat",
-          "template": "About 11 heartbeats — Bolt's entire sprint fits between a dozen pulses."
-        },
-        {
-          "targetUnitID": "youtube_ad",
-          "template": "About 1.9 unskippable YouTube ads — Bolt would finish before the skip button appears."
-        },
-        {
-          "targetUnitID": "blink",
-          "template": "About 64 blinks, though Bolt himself probably didn't blink once."
-        },
-        {
-          "targetUnitID": "light_travel_earth_moon",
-          "template": "Light would reach the Moon 7.5 times before Bolt crosses the finish line."
-        }
-      ]
-    },
-    "nap": {
-      "valueHeadline": "One power nap lasts",
-      "valueDisplay": "20 minutes",
-      "comparisons": [
-        {
-          "targetUnitID": "song",
-          "template": "About 5.7 pop songs — set a playlist as your alarm."
-        },
-        {
-          "targetUnitID": "coffee_break",
-          "template": "1.3 coffee breaks, and NASA says it improves alertness by 100%."
-        },
-        {
-          "targetUnitID": "olympic_100m",
-          "template": "Usain Bolt could run 125 world-record sprints while you nap."
-        },
-        {
-          "targetUnitID": "toilet_scroll",
-          "template": "2.5 toilet scroll sessions — roughly the same recovery benefit."
         }
       ]
     },
@@ -242,47 +110,25 @@
         }
       ]
     },
-    "pregnancy": {
-      "valueHeadline": "One pregnancy lasts",
-      "valueDisplay": "280 days",
-      "comparisons": [
-        {
-          "targetUnitID": "youtube_ad",
-          "template": "About 4.8 million unskippable YouTube ads."
-        },
-        {
-          "targetUnitID": "heartbeat",
-          "template": "Roughly 28.2 million heartbeats from conception to birth."
-        },
-        {
-          "targetUnitID": "tv_episode",
-          "template": "About 8,960 TV episodes — you could watch every episode of The Simpsons 12 times over."
-        },
-        {
-          "targetUnitID": "work_day",
-          "template": "About 840 work days' worth of seconds, though it rarely feels like work."
-        }
-      ]
-    },
-    "human_lifespan": {
-      "valueHeadline": "One average human lifespan is",
-      "valueDisplay": "72 years",
+    "decade": {
+      "valueHeadline": "One decade lasts",
+      "valueDisplay": "10 years",
       "comparisons": [
         {
           "targetUnitID": "heartbeat",
-          "template": "About 2.65 billion heartbeats — you'll hit 1 billion at around age 27."
+          "template": "About 368 million heartbeats — and your entire skeleton replaces itself once in that time."
         },
         {
-          "targetUnitID": "blink",
-          "template": "Roughly 620 million blinks — your eyes spend about 7 years of your life closed just from blinking."
+          "targetUnitID": "human_lifespan",
+          "template": "About 13.9% of an average lifetime — shorter than it feels when you're in one."
         },
         {
-          "targetUnitID": "youtube_ad",
-          "template": "About 454 million unskippable YouTube ads, though it would feel considerably longer."
+          "targetUnitID": "pregnancy",
+          "template": "About 13 pregnancies end to end."
         },
         {
-          "targetUnitID": "since_pyramids",
-          "template": "The Great Pyramid has stood for about 62 human lifetimes — and was already ancient when Rome was founded."
+          "targetUnitID": "dog_year",
+          "template": "About 1.4 dog years — a decade barely registers in dog time."
         }
       ]
     },
@@ -308,377 +154,25 @@
         }
       ]
     },
-    "since_pyramids": {
-      "valueHeadline": "Time since the pyramids were built",
-      "valueDisplay": "4,500 years",
-      "comparisons": [
-        {
-          "targetUnitID": "human_lifespan",
-          "template": "About 62 human lifetimes end to end."
-        },
-        {
-          "targetUnitID": "roman_empire",
-          "template": "About 3.7 times the duration of the Western Roman Empire."
-        },
-        {
-          "targetUnitID": "pregnancy",
-          "template": "Roughly 5,868 consecutive pregnancies — about 160 generations of humans."
-        },
-        {
-          "targetUnitID": "voyager_travel",
-          "template": "Voyager 1 has been travelling for about 1% of this time, and it's already left the solar system."
-        }
-      ]
-    },
-    "since_dinosaurs": {
-      "valueHeadline": "Time since the dinosaurs went extinct",
-      "valueDisplay": "66 million years",
-      "comparisons": [
-        {
-          "targetUnitID": "human_lifespan",
-          "template": "About 917,000 human lifetimes — and modern humans have only existed for the last 4,000 of those."
-        },
-        {
-          "targetUnitID": "since_pyramids",
-          "template": "About 14,667 times longer than the pyramids have existed."
-        },
-        {
-          "targetUnitID": "roman_empire",
-          "template": "About 53,700 Roman Empires placed end to end."
-        },
-        {
-          "targetUnitID": "age_of_universe",
-          "template": "About 0.48% of the universe's total age — dinosaurs are a recent memory in cosmic terms."
-        }
-      ]
-    },
-    "age_of_universe": {
-      "valueHeadline": "The universe has existed for",
-      "valueDisplay": "13.8 billion years",
-      "comparisons": [
-        {
-          "targetUnitID": "human_lifespan",
-          "template": "About 192 million human lifetimes — and humans have only been around for the last 4,000."
-        },
-        {
-          "targetUnitID": "since_dinosaurs",
-          "template": "About 209 dinosaur extinctions ago — the dinosaurs are recent by universe standards."
-        },
-        {
-          "targetUnitID": "since_pyramids",
-          "template": "About 3 million times longer than the pyramids have stood."
-        },
-        {
-          "targetUnitID": "voyager_travel",
-          "template": "Voyager 1 has been travelling for 0.00000034% of this time."
-        }
-      ]
-    },
-    "roman_empire": {
-      "valueHeadline": "The Western Roman Empire lasted",
-      "valueDisplay": "1,229 years",
-      "comparisons": [
-        {
-          "targetUnitID": "human_lifespan",
-          "template": "About 17 human lifetimes — and the Eastern half continued for another 977 years after that."
-        },
-        {
-          "targetUnitID": "pregnancy",
-          "template": "About 1,603 consecutive pregnancies — roughly 45 generations lived and died under Roman rule."
-        },
-        {
-          "targetUnitID": "since_pyramids",
-          "template": "The pyramids were already 1,700 years old when Rome was founded."
-        },
-        {
-          "targetUnitID": "dog_year",
-          "template": "About 176 dog years — even in dog time, Rome lasted a long while."
-        }
-      ]
-    },
-    "tv_episode": {
-      "valueHeadline": "One TV episode lasts",
-      "valueDisplay": "45 minutes",
-      "comparisons": [
-        {
-          "targetUnitID": "song",
-          "template": "About 12.9 pop songs — roughly a full album with room for an encore."
-        },
-        {
-          "targetUnitID": "youtube_ad",
-          "template": "540 unskippable YouTube ads, which is what 45 minutes of free-tier streaming actually contains."
-        },
-        {
-          "targetUnitID": "toilet_scroll",
-          "template": "About 5.6 toilet scroll sessions, which is one way to watch a show."
-        },
-        {
-          "targetUnitID": "olympic_100m",
-          "template": "Usain Bolt could run 282 world-record sprints before the credits roll."
-        }
-      ]
-    },
-    "work_day": {
-      "valueHeadline": "One work day lasts",
-      "valueDisplay": "8 hours",
+    "feature_film": {
+      "valueHeadline": "One feature film lasts",
+      "valueDisplay": "120 minutes",
       "comparisons": [
         {
           "targetUnitID": "tv_episode",
-          "template": "About 10.7 TV episodes — a full season binge, if your boss isn't looking."
-        },
-        {
-          "targetUnitID": "coffee_break",
-          "template": "32 coffee breaks, though most workplaces only tolerate 2."
-        },
-        {
-          "targetUnitID": "song",
-          "template": "About 137 pop songs — a workday playlist that never repeats."
-        },
-        {
-          "targetUnitID": "youtube_ad",
-          "template": "5,760 unskippable YouTube ads, which is roughly what an 8-hour shift feels like on a bad day."
-        }
-      ]
-    },
-    "week": {
-      "valueHeadline": "One week lasts",
-      "valueDisplay": "604,800 seconds",
-      "comparisons": [
-        {
-          "targetUnitID": "work_day",
-          "template": "5 work days and 2 days that vanish immediately."
-        },
-        {
-          "targetUnitID": "heartbeat",
-          "template": "About 705,950 heartbeats — your heart doesn't take weekends off."
-        },
-        {
-          "targetUnitID": "tv_episode",
-          "template": "About 224 TV episodes — roughly the entire run of Breaking Bad, twice."
-        },
-        {
-          "targetUnitID": "toilet_scroll",
-          "template": "About 1,260 toilet scroll sessions, though hopefully not consecutively."
-        }
-      ]
-    },
-    "year": {
-      "valueHeadline": "One year lasts",
-      "valueDisplay": "365.25 days",
-      "comparisons": [
-        {
-          "targetUnitID": "heartbeat",
-          "template": "About 36.8 million heartbeats — your heart's annual output."
-        },
-        {
-          "targetUnitID": "work_day",
-          "template": "About 261 work days, once you remove weekends and pretend holidays don't exist."
-        },
-        {
-          "targetUnitID": "pregnancy",
-          "template": "About 1.3 pregnancies — which is why back-to-back pregnancies feel relentless."
-        },
-        {
-          "targetUnitID": "youtube_ad",
-          "template": "About 6.3 million unskippable YouTube ads."
-        }
-      ]
-    },
-    "decade": {
-      "valueHeadline": "One decade lasts",
-      "valueDisplay": "10 years",
-      "comparisons": [
-        {
-          "targetUnitID": "heartbeat",
-          "template": "About 368 million heartbeats — and your entire skeleton replaces itself once in that time."
-        },
-        {
-          "targetUnitID": "human_lifespan",
-          "template": "About 13.9% of an average lifetime — shorter than it feels when you're in one."
-        },
-        {
-          "targetUnitID": "pregnancy",
-          "template": "About 13 pregnancies end to end."
-        },
-        {
-          "targetUnitID": "dog_year",
-          "template": "About 1.4 dog years — a decade barely registers in dog time."
-        }
-      ]
-    },
-    "mars_day": {
-      "valueHeadline": "One Martian sol lasts",
-      "valueDisplay": "24h 37m",
-      "comparisons": [
-        {
-          "targetUnitID": "work_day",
-          "template": "About 3.1 Earth work days — Mars shifts would be brutal."
-        },
-        {
-          "targetUnitID": "tv_episode",
-          "template": "About 32.7 TV episodes — a full season and a half per sol."
-        },
-        {
-          "targetUnitID": "coffee_break",
-          "template": "About 98.6 coffee breaks — you'd need every one of them to stay awake."
-        },
-        {
-          "targetUnitID": "olympic_100m",
-          "template": "Usain Bolt could run 9,267 world-record sprints in a single Martian day."
-        }
-      ]
-    },
-    "voyager_travel": {
-      "valueHeadline": "Voyager 1 has been travelling for",
-      "valueDisplay": "47 years",
-      "comparisons": [
-        {
-          "targetUnitID": "human_lifespan",
-          "template": "About 65% of an average human lifetime — launched when most of its engineers were younger than you."
-        },
-        {
-          "targetUnitID": "since_pyramids",
-          "template": "About 1% of the time the pyramids have stood — and Voyager is already outside the solar system."
-        },
-        {
-          "targetUnitID": "heartbeat",
-          "template": "About 1.73 billion heartbeats since launch, running on less power than a light bulb."
-        },
-        {
-          "targetUnitID": "age_of_universe",
-          "template": "Voyager has existed for 0.00000034% of the universe's age — a cosmic blink, already at the edge of interstellar space."
-        }
-      ]
-    },
-    "milky_way_light": {
-      "valueHeadline": "Light takes to cross the Milky Way",
-      "valueDisplay": "100,000 years",
-      "comparisons": [
-        {
-          "targetUnitID": "human_lifespan",
-          "template": "About 1,389 human lifetimes — no human has ever seen light complete this journey."
-        },
-        {
-          "targetUnitID": "since_dinosaurs",
-          "template": "About 0.15% of the time since the dinosaurs — our galaxy is wider than deep time."
-        },
-        {
-          "targetUnitID": "since_pyramids",
-          "template": "About 22 times longer than the pyramids have existed."
-        },
-        {
-          "targetUnitID": "voyager_travel",
-          "template": "Voyager 1 would take about 1.7 billion years to cross the Milky Way at its current speed."
-        }
-      ]
-    },
-    "jiffy_physics": {
-      "valueHeadline": "One jiffy lasts",
-      "valueDisplay": "33.3 picoseconds",
-      "comparisons": [
-        {
-          "targetUnitID": "planck_time",
-          "template": "About 617 nonillion Planck times — a jiffy is enormous by quantum standards."
-        },
-        {
-          "targetUnitID": "shake",
-          "template": "One shake contains about 300 jiffies — nuclear reactions are glacial compared to light."
-        },
-        {
-          "targetUnitID": "blink",
-          "template": "A single blink lasts about 4.5 billion jiffies."
-        },
-        {
-          "targetUnitID": "camera_shutter",
-          "template": "A fast camera shutter spans about 30 million jiffies."
-        }
-      ]
-    },
-    "planck_time": {
-      "valueHeadline": "One Planck time lasts",
-      "valueDisplay": "5.39 × 10⁻⁴⁴ s",
-      "comparisons": [
-        {
-          "targetUnitID": "jiffy_physics",
-          "template": "One jiffy contains about 617 nonillion Planck times — and a jiffy is already unimaginably short."
-        },
-        {
-          "targetUnitID": "shake",
-          "template": "One shake contains about 10³⁵ Planck times."
-        },
-        {
-          "targetUnitID": "heartbeat",
-          "template": "One heartbeat spans about 1.6 × 10⁴³ Planck times — a number with 43 digits."
-        },
-        {
-          "targetUnitID": "age_of_universe",
-          "template": "The entire age of the universe is about 8.1 × 10⁶⁰ Planck times — and there are more Planck times in one second than seconds since the Big Bang."
-        }
-      ]
-    },
-    "moment_medieval": {
-      "valueHeadline": "One medieval moment lasts",
-      "valueDisplay": "90 seconds",
-      "comparisons": [
-        {
-          "targetUnitID": "youtube_ad",
-          "template": "18 unskippable YouTube ads — medieval monks would not have been impressed."
-        },
-        {
-          "targetUnitID": "heartbeat",
-          "template": "About 105 heartbeats — monks scheduled their entire day in blocks this size."
-        },
-        {
-          "targetUnitID": "blink",
-          "template": "About 600 blinks."
-        },
-        {
-          "targetUnitID": "song",
-          "template": "About 43% of a modern pop song — medieval chants were considerably longer."
-        }
-      ]
-    },
-    "shake": {
-      "valueHeadline": "One shake lasts",
-      "valueDisplay": "10 nanoseconds",
-      "comparisons": [
-        {
-          "targetUnitID": "jiffy_physics",
-          "template": "About 300 jiffies — nuclear physics operates between these two tiny scales."
-        },
-        {
-          "targetUnitID": "blink",
-          "template": "A single blink lasts about 15 million shakes."
-        },
-        {
-          "targetUnitID": "light_travel_earth_moon",
-          "template": "Light travels about 3 metres in one shake — roughly the height of a ceiling."
-        },
-        {
-          "targetUnitID": "camera_shutter",
-          "template": "A fast camera shutter spans 100,000 shakes — an eternity in nuclear time."
-        }
-      ]
-    },
-    "microcentury": {
-      "valueHeadline": "One microcentury lasts",
-      "valueDisplay": "52 min 36 s",
-      "comparisons": [
-        {
-          "targetUnitID": "tv_episode",
-          "template": "About 1.17 TV episodes — suspiciously close to a university lecture slot."
-        },
-        {
-          "targetUnitID": "coffee_break",
-          "template": "About 3.5 coffee breaks — the professor who coined it knew exactly what he was doing."
+          "template": "About 2.7 TV episodes — which is why films feel like a commitment and TV doesn't."
         },
         {
           "targetUnitID": "pomodoro",
-          "template": "About 2.1 pomodoros, which is a more modern way to measure the same thing."
+          "template": "4.8 pomodoros — a film is basically a focused work session with better visuals."
         },
         {
-          "targetUnitID": "song",
-          "template": "About 15 pop songs — a full lecture's worth of music."
+          "targetUnitID": "youtube_ad",
+          "template": "1,440 unskippable YouTube ads — the cumulative ad load of a year of free-tier streaming."
+        },
+        {
+          "targetUnitID": "microwave_minute",
+          "template": "120 microwave minutes, each of which feels longer than the entire film."
         }
       ]
     },
@@ -726,69 +220,157 @@
         }
       ]
     },
-    "watch_naval": {
-      "valueHeadline": "One naval watch lasts",
-      "valueDisplay": "4 hours",
+    "heartbeat": {
+      "valueHeadline": "One heartbeat lasts",
+      "valueDisplay": "0.857 seconds",
       "comparisons": [
         {
-          "targetUnitID": "work_day",
-          "template": "Half a work day — sailors serve 6 watches per day with no weekends."
-        },
-        {
-          "targetUnitID": "tv_episode",
-          "template": "About 5.3 TV episodes — enough to get through most of a season on the night watch."
-        },
-        {
-          "targetUnitID": "coffee_break",
-          "template": "16 coffee breaks, which is roughly how many you'd need to stay awake on the middle watch."
-        },
-        {
-          "targetUnitID": "pomodoro",
-          "template": "9.6 pomodoros — the Navy had productivity intervals before Silicon Valley."
-        }
-      ]
-    },
-    "pomodoro": {
-      "valueHeadline": "One pomodoro lasts",
-      "valueDisplay": "25 minutes",
-      "comparisons": [
-        {
-          "targetUnitID": "commute",
-          "template": "Almost exactly one average commute — some people do a pomodoro on the train."
-        },
-        {
-          "targetUnitID": "song",
-          "template": "About 7.1 pop songs — a focused playlist for one work sprint."
+          "targetUnitID": "blink",
+          "template": "About 5.7 blinks — your heart beats roughly 6 times for every blink."
         },
         {
           "targetUnitID": "youtube_ad",
-          "template": "300 unskippable YouTube ads — which is what 25 minutes of free-tier YouTube feels like."
+          "template": "An unskippable YouTube ad lasts about 5.8 heartbeats."
         },
         {
-          "targetUnitID": "coffee_break",
-          "template": "1.67 coffee breaks — the technique recommends a 5-minute break after each pomodoro."
+          "targetUnitID": "human_lifespan",
+          "template": "An average lifetime contains roughly 2.65 billion heartbeats."
+        },
+        {
+          "targetUnitID": "camera_shutter",
+          "template": "A fast camera shutter fires 857 times in one heartbeat."
         }
       ]
     },
-    "sidereal_day": {
-      "valueHeadline": "One sidereal day lasts",
-      "valueDisplay": "23h 56m 4s",
+    "human_generation": {
+      "valueHeadline": "One human generation spans",
+      "valueDisplay": "~27 years",
       "comparisons": [
         {
-          "targetUnitID": "mars_day",
-          "template": "About 97% of a Martian sol — Earth and Mars have surprisingly similar day lengths."
+          "targetUnitID": "human_lifespan",
+          "template": "About 37.5% of an average lifetime — most people see 2-3 generations after their own."
         },
         {
+          "targetUnitID": "decade",
+          "template": "About 2.7 decades."
+        },
+        {
+          "targetUnitID": "since_pyramids",
+          "template": "The pyramids were built about 167 generations ago — a chain of parents and children stretching back 4,500 years."
+        },
+        {
+          "targetUnitID": "roman_empire",
+          "template": "The Western Roman Empire lasted about 46 generations."
+        }
+      ]
+    },
+    "human_lifespan": {
+      "valueHeadline": "One average human lifespan is",
+      "valueDisplay": "72 years",
+      "comparisons": [
+        {
+          "targetUnitID": "heartbeat",
+          "template": "About 2.65 billion heartbeats — you'll hit 1 billion at around age 27."
+        },
+        {
+          "targetUnitID": "blink",
+          "template": "Roughly 620 million blinks — your eyes spend about 7 years of your life closed just from blinking."
+        },
+        {
+          "targetUnitID": "youtube_ad",
+          "template": "About 454 million unskippable YouTube ads, though it would feel considerably longer."
+        },
+        {
+          "targetUnitID": "since_pyramids",
+          "template": "The Great Pyramid has stood for about 62 human lifetimes — and was already ancient when Rome was founded."
+        }
+      ]
+    },
+    "jiffy_physics": {
+      "valueHeadline": "One jiffy lasts",
+      "valueDisplay": "33.3 picoseconds",
+      "comparisons": [
+        {
+          "targetUnitID": "planck_time",
+          "template": "About 617 nonillion Planck times — a jiffy is enormous by quantum standards."
+        },
+        {
+          "targetUnitID": "shake",
+          "template": "One shake contains about 300 jiffies — nuclear reactions are glacial compared to light."
+        },
+        {
+          "targetUnitID": "blink",
+          "template": "A single blink lasts about 4.5 billion jiffies."
+        },
+        {
+          "targetUnitID": "camera_shutter",
+          "template": "A fast camera shutter spans about 30 million jiffies."
+        }
+      ]
+    },
+    "light_travel_earth_moon": {
+      "valueHeadline": "Light reaches the Moon in",
+      "valueDisplay": "1.28 seconds",
+      "comparisons": [
+        {
+          "targetUnitID": "heartbeat",
+          "template": "About 1.5 heartbeats — your heart beats once and light has already arrived."
+        },
+        {
+          "targetUnitID": "blink",
+          "template": "About 8.5 blinks, which is why Apollo astronauts heard a noticeable delay on radio."
+        },
+        {
+          "targetUnitID": "youtube_ad",
+          "template": "An unskippable YouTube ad lasts about 3.9 Moon-light trips."
+        },
+        {
+          "targetUnitID": "camera_shutter",
+          "template": "1,280 camera shutter clicks — light covers 384,400 km in that time."
+        }
+      ]
+    },
+    "mars_day": {
+      "valueHeadline": "One Martian sol lasts",
+      "valueDisplay": "24h 37m",
+      "comparisons": [
+        {
           "targetUnitID": "work_day",
-          "template": "About 3 work days — though the missing 3 minutes and 56 seconds add up to a full extra day per year."
+          "template": "About 3.1 Earth work days — Mars shifts would be brutal."
         },
         {
           "targetUnitID": "tv_episode",
-          "template": "About 31.9 TV episodes — almost exactly the same as a solar day, but not quite."
+          "template": "About 32.7 TV episodes — a full season and a half per sol."
         },
         {
-          "targetUnitID": "year",
-          "template": "There are 366.25 sidereal days per year — one more than solar days, because of that missing 3 minutes 56 seconds."
+          "targetUnitID": "coffee_break",
+          "template": "About 98.6 coffee breaks — you'd need every one of them to stay awake."
+        },
+        {
+          "targetUnitID": "olympic_100m",
+          "template": "Usain Bolt could run 9,267 world-record sprints in a single Martian day."
+        }
+      ]
+    },
+    "microcentury": {
+      "valueHeadline": "One microcentury lasts",
+      "valueDisplay": "52 min 36 s",
+      "comparisons": [
+        {
+          "targetUnitID": "tv_episode",
+          "template": "About 1.17 TV episodes — suspiciously close to a university lecture slot."
+        },
+        {
+          "targetUnitID": "coffee_break",
+          "template": "About 3.5 coffee breaks — the professor who coined it knew exactly what he was doing."
+        },
+        {
+          "targetUnitID": "pomodoro",
+          "template": "About 2.1 pomodoros, which is a more modern way to measure the same thing."
+        },
+        {
+          "targetUnitID": "song",
+          "template": "About 15 pop songs — a full lecture's worth of music."
         }
       ]
     },
@@ -814,6 +396,314 @@
         }
       ]
     },
+    "milky_way_light": {
+      "valueHeadline": "Light takes to cross the Milky Way",
+      "valueDisplay": "100,000 years",
+      "comparisons": [
+        {
+          "targetUnitID": "human_lifespan",
+          "template": "About 1,389 human lifetimes — no human has ever seen light complete this journey."
+        },
+        {
+          "targetUnitID": "since_dinosaurs",
+          "template": "About 0.15% of the time since the dinosaurs — our galaxy is wider than deep time."
+        },
+        {
+          "targetUnitID": "since_pyramids",
+          "template": "About 22 times longer than the pyramids have existed."
+        },
+        {
+          "targetUnitID": "voyager_travel",
+          "template": "Voyager 1 would take about 1.7 billion years to cross the Milky Way at its current speed."
+        }
+      ]
+    },
+    "moment_medieval": {
+      "valueHeadline": "One medieval moment lasts",
+      "valueDisplay": "90 seconds",
+      "comparisons": [
+        {
+          "targetUnitID": "youtube_ad",
+          "template": "18 unskippable YouTube ads — medieval monks would not have been impressed."
+        },
+        {
+          "targetUnitID": "heartbeat",
+          "template": "About 105 heartbeats — monks scheduled their entire day in blocks this size."
+        },
+        {
+          "targetUnitID": "blink",
+          "template": "About 600 blinks."
+        },
+        {
+          "targetUnitID": "song",
+          "template": "About 43% of a modern pop song — medieval chants were considerably longer."
+        }
+      ]
+    },
+    "nap": {
+      "valueHeadline": "One power nap lasts",
+      "valueDisplay": "20 minutes",
+      "comparisons": [
+        {
+          "targetUnitID": "song",
+          "template": "About 5.7 pop songs — set a playlist as your alarm."
+        },
+        {
+          "targetUnitID": "coffee_break",
+          "template": "1.3 coffee breaks, and NASA says it improves alertness by 100%."
+        },
+        {
+          "targetUnitID": "olympic_100m",
+          "template": "Usain Bolt could run 125 world-record sprints while you nap."
+        },
+        {
+          "targetUnitID": "toilet_scroll",
+          "template": "2.5 toilet scroll sessions — roughly the same recovery benefit."
+        }
+      ]
+    },
+    "olympic_100m": {
+      "valueHeadline": "The world record 100m sprint takes",
+      "valueDisplay": "9.58 seconds",
+      "comparisons": [
+        {
+          "targetUnitID": "heartbeat",
+          "template": "About 11 heartbeats — Bolt's entire sprint fits between a dozen pulses."
+        },
+        {
+          "targetUnitID": "youtube_ad",
+          "template": "About 1.9 unskippable YouTube ads — Bolt would finish before the skip button appears."
+        },
+        {
+          "targetUnitID": "blink",
+          "template": "About 64 blinks, though Bolt himself probably didn't blink once."
+        },
+        {
+          "targetUnitID": "light_travel_earth_moon",
+          "template": "Light would reach the Moon 7.5 times before Bolt crosses the finish line."
+        }
+      ]
+    },
+    "planck_time": {
+      "valueHeadline": "One Planck time lasts",
+      "valueDisplay": "5.39 × 10⁻⁴⁴ s",
+      "comparisons": [
+        {
+          "targetUnitID": "jiffy_physics",
+          "template": "One jiffy contains about 617 nonillion Planck times — and a jiffy is already unimaginably short."
+        },
+        {
+          "targetUnitID": "shake",
+          "template": "One shake contains about 10³⁵ Planck times."
+        },
+        {
+          "targetUnitID": "heartbeat",
+          "template": "One heartbeat spans about 1.6 × 10⁴³ Planck times — a number with 43 digits."
+        },
+        {
+          "targetUnitID": "age_of_universe",
+          "template": "The entire age of the universe is about 8.1 × 10⁶⁰ Planck times — and there are more Planck times in one second than seconds since the Big Bang."
+        }
+      ]
+    },
+    "pomodoro": {
+      "valueHeadline": "One pomodoro lasts",
+      "valueDisplay": "25 minutes",
+      "comparisons": [
+        {
+          "targetUnitID": "commute",
+          "template": "Almost exactly one average commute — some people do a pomodoro on the train."
+        },
+        {
+          "targetUnitID": "song",
+          "template": "About 7.1 pop songs — a focused playlist for one work sprint."
+        },
+        {
+          "targetUnitID": "youtube_ad",
+          "template": "300 unskippable YouTube ads — which is what 25 minutes of free-tier YouTube feels like."
+        },
+        {
+          "targetUnitID": "coffee_break",
+          "template": "1.67 coffee breaks — the technique recommends a 5-minute break after each pomodoro."
+        }
+      ]
+    },
+    "pregnancy": {
+      "valueHeadline": "One pregnancy lasts",
+      "valueDisplay": "280 days",
+      "comparisons": [
+        {
+          "targetUnitID": "youtube_ad",
+          "template": "About 4.8 million unskippable YouTube ads."
+        },
+        {
+          "targetUnitID": "heartbeat",
+          "template": "Roughly 28.2 million heartbeats from conception to birth."
+        },
+        {
+          "targetUnitID": "tv_episode",
+          "template": "About 8,960 TV episodes — you could watch every episode of The Simpsons 12 times over."
+        },
+        {
+          "targetUnitID": "work_day",
+          "template": "About 840 work days' worth of seconds, though it rarely feels like work."
+        }
+      ]
+    },
+    "roman_empire": {
+      "valueHeadline": "The Western Roman Empire lasted",
+      "valueDisplay": "1,229 years",
+      "comparisons": [
+        {
+          "targetUnitID": "human_lifespan",
+          "template": "About 17 human lifetimes — and the Eastern half continued for another 977 years after that."
+        },
+        {
+          "targetUnitID": "pregnancy",
+          "template": "About 1,603 consecutive pregnancies — roughly 45 generations lived and died under Roman rule."
+        },
+        {
+          "targetUnitID": "since_pyramids",
+          "template": "The pyramids were already 1,700 years old when Rome was founded."
+        },
+        {
+          "targetUnitID": "dog_year",
+          "template": "About 176 dog years — even in dog time, Rome lasted a long while."
+        }
+      ]
+    },
+    "shake": {
+      "valueHeadline": "One shake lasts",
+      "valueDisplay": "10 nanoseconds",
+      "comparisons": [
+        {
+          "targetUnitID": "jiffy_physics",
+          "template": "About 300 jiffies — nuclear physics operates between these two tiny scales."
+        },
+        {
+          "targetUnitID": "blink",
+          "template": "A single blink lasts about 15 million shakes."
+        },
+        {
+          "targetUnitID": "light_travel_earth_moon",
+          "template": "Light travels about 3 metres in one shake — roughly the height of a ceiling."
+        },
+        {
+          "targetUnitID": "camera_shutter",
+          "template": "A fast camera shutter spans 100,000 shakes — an eternity in nuclear time."
+        }
+      ]
+    },
+    "sidereal_day": {
+      "valueHeadline": "One sidereal day lasts",
+      "valueDisplay": "23h 56m 4s",
+      "comparisons": [
+        {
+          "targetUnitID": "mars_day",
+          "template": "About 97% of a Martian sol — Earth and Mars have surprisingly similar day lengths."
+        },
+        {
+          "targetUnitID": "work_day",
+          "template": "About 3 work days — though the missing 3 minutes and 56 seconds add up to a full extra day per year."
+        },
+        {
+          "targetUnitID": "tv_episode",
+          "template": "About 31.9 TV episodes — almost exactly the same as a solar day, but not quite."
+        },
+        {
+          "targetUnitID": "year",
+          "template": "There are 366.25 sidereal days per year — one more than solar days, because of that missing 3 minutes 56 seconds."
+        }
+      ]
+    },
+    "since_dinosaurs": {
+      "valueHeadline": "Time since the dinosaurs went extinct",
+      "valueDisplay": "66 million years",
+      "comparisons": [
+        {
+          "targetUnitID": "human_lifespan",
+          "template": "About 917,000 human lifetimes — and modern humans have only existed for the last 4,000 of those."
+        },
+        {
+          "targetUnitID": "since_pyramids",
+          "template": "About 14,667 times longer than the pyramids have existed."
+        },
+        {
+          "targetUnitID": "roman_empire",
+          "template": "About 53,700 Roman Empires placed end to end."
+        },
+        {
+          "targetUnitID": "age_of_universe",
+          "template": "About 0.48% of the universe's total age — dinosaurs are a recent memory in cosmic terms."
+        }
+      ]
+    },
+    "since_pyramids": {
+      "valueHeadline": "Time since the pyramids were built",
+      "valueDisplay": "4,500 years",
+      "comparisons": [
+        {
+          "targetUnitID": "human_lifespan",
+          "template": "About 62 human lifetimes end to end."
+        },
+        {
+          "targetUnitID": "roman_empire",
+          "template": "About 3.7 times the duration of the Western Roman Empire."
+        },
+        {
+          "targetUnitID": "pregnancy",
+          "template": "Roughly 5,868 consecutive pregnancies — about 160 generations of humans."
+        },
+        {
+          "targetUnitID": "voyager_travel",
+          "template": "Voyager 1 has been travelling for about 1% of this time, and it's already left the solar system."
+        }
+      ]
+    },
+    "song": {
+      "valueHeadline": "One pop song lasts",
+      "valueDisplay": "3.5 minutes",
+      "comparisons": [
+        {
+          "targetUnitID": "youtube_ad",
+          "template": "About 42 unskippable YouTube ads, which is what listening to music on the free tier feels like."
+        },
+        {
+          "targetUnitID": "heartbeat",
+          "template": "Roughly 245 heartbeats from first note to last."
+        },
+        {
+          "targetUnitID": "blink",
+          "template": "About 1,400 blinks — though you'd miss most of them at a live concert."
+        },
+        {
+          "targetUnitID": "toilet_scroll",
+          "template": "About 44% of a toilet scroll session, which is where most streaming happens anyway."
+        }
+      ]
+    },
+    "toilet_scroll": {
+      "valueHeadline": "One toilet scroll session lasts",
+      "valueDisplay": "8 minutes",
+      "comparisons": [
+        {
+          "targetUnitID": "song",
+          "template": "About 2.3 pop songs — enough for a mini playlist every visit."
+        },
+        {
+          "targetUnitID": "youtube_ad",
+          "template": "96 unskippable YouTube ads, which is roughly what the algorithm subjects you to anyway."
+        },
+        {
+          "targetUnitID": "olympic_100m",
+          "template": "Usain Bolt could run 50 world-record 100m sprints in the time you spend scrolling."
+        },
+        {
+          "targetUnitID": "coffee_break",
+          "template": "About 53% of a coffee break, and often taken simultaneously."
+        }
+      ]
+    },
     "traffic_light_cycle": {
       "valueHeadline": "One traffic light cycle lasts",
       "valueDisplay": "90 seconds",
@@ -836,47 +726,157 @@
         }
       ]
     },
-    "feature_film": {
-      "valueHeadline": "One feature film lasts",
-      "valueDisplay": "120 minutes",
+    "tv_episode": {
+      "valueHeadline": "One TV episode lasts",
+      "valueDisplay": "45 minutes",
       "comparisons": [
         {
-          "targetUnitID": "tv_episode",
-          "template": "About 2.7 TV episodes — which is why films feel like a commitment and TV doesn't."
-        },
-        {
-          "targetUnitID": "pomodoro",
-          "template": "4.8 pomodoros — a film is basically a focused work session with better visuals."
+          "targetUnitID": "song",
+          "template": "About 12.9 pop songs — roughly a full album with room for an encore."
         },
         {
           "targetUnitID": "youtube_ad",
-          "template": "1,440 unskippable YouTube ads — the cumulative ad load of a year of free-tier streaming."
+          "template": "540 unskippable YouTube ads, which is what 45 minutes of free-tier streaming actually contains."
         },
         {
-          "targetUnitID": "microwave_minute",
-          "template": "120 microwave minutes, each of which feels longer than the entire film."
+          "targetUnitID": "toilet_scroll",
+          "template": "About 5.6 toilet scroll sessions, which is one way to watch a show."
+        },
+        {
+          "targetUnitID": "olympic_100m",
+          "template": "Usain Bolt could run 282 world-record sprints before the credits roll."
         }
       ]
     },
-    "human_generation": {
-      "valueHeadline": "One human generation spans",
-      "valueDisplay": "~27 years",
+    "voyager_travel": {
+      "valueHeadline": "Voyager 1 has been travelling for",
+      "valueDisplay": "47 years",
       "comparisons": [
         {
           "targetUnitID": "human_lifespan",
-          "template": "About 37.5% of an average lifetime — most people see 2-3 generations after their own."
-        },
-        {
-          "targetUnitID": "decade",
-          "template": "About 2.7 decades."
+          "template": "About 65% of an average human lifetime — launched when most of its engineers were younger than you."
         },
         {
           "targetUnitID": "since_pyramids",
-          "template": "The pyramids were built about 167 generations ago — a chain of parents and children stretching back 4,500 years."
+          "template": "About 1% of the time the pyramids have stood — and Voyager is already outside the solar system."
         },
         {
-          "targetUnitID": "roman_empire",
-          "template": "The Western Roman Empire lasted about 46 generations."
+          "targetUnitID": "heartbeat",
+          "template": "About 1.73 billion heartbeats since launch, running on less power than a light bulb."
+        },
+        {
+          "targetUnitID": "age_of_universe",
+          "template": "Voyager has existed for 0.00000034% of the universe's age — a cosmic blink, already at the edge of interstellar space."
+        }
+      ]
+    },
+    "watch_naval": {
+      "valueHeadline": "One naval watch lasts",
+      "valueDisplay": "4 hours",
+      "comparisons": [
+        {
+          "targetUnitID": "work_day",
+          "template": "Half a work day — sailors serve 6 watches per day with no weekends."
+        },
+        {
+          "targetUnitID": "tv_episode",
+          "template": "About 5.3 TV episodes — enough to get through most of a season on the night watch."
+        },
+        {
+          "targetUnitID": "coffee_break",
+          "template": "16 coffee breaks, which is roughly how many you'd need to stay awake on the middle watch."
+        },
+        {
+          "targetUnitID": "pomodoro",
+          "template": "9.6 pomodoros — the Navy had productivity intervals before Silicon Valley."
+        }
+      ]
+    },
+    "week": {
+      "valueHeadline": "One week lasts",
+      "valueDisplay": "604,800 seconds",
+      "comparisons": [
+        {
+          "targetUnitID": "work_day",
+          "template": "5 work days and 2 days that vanish immediately."
+        },
+        {
+          "targetUnitID": "heartbeat",
+          "template": "About 705,950 heartbeats — your heart doesn't take weekends off."
+        },
+        {
+          "targetUnitID": "tv_episode",
+          "template": "About 224 TV episodes — roughly the entire run of Breaking Bad, twice."
+        },
+        {
+          "targetUnitID": "toilet_scroll",
+          "template": "About 1,260 toilet scroll sessions, though hopefully not consecutively."
+        }
+      ]
+    },
+    "work_day": {
+      "valueHeadline": "One work day lasts",
+      "valueDisplay": "8 hours",
+      "comparisons": [
+        {
+          "targetUnitID": "tv_episode",
+          "template": "About 10.7 TV episodes — a full season binge, if your boss isn't looking."
+        },
+        {
+          "targetUnitID": "coffee_break",
+          "template": "32 coffee breaks, though most workplaces only tolerate 2."
+        },
+        {
+          "targetUnitID": "song",
+          "template": "About 137 pop songs — a workday playlist that never repeats."
+        },
+        {
+          "targetUnitID": "youtube_ad",
+          "template": "5,760 unskippable YouTube ads, which is roughly what an 8-hour shift feels like on a bad day."
+        }
+      ]
+    },
+    "year": {
+      "valueHeadline": "One year lasts",
+      "valueDisplay": "365.25 days",
+      "comparisons": [
+        {
+          "targetUnitID": "heartbeat",
+          "template": "About 36.8 million heartbeats — your heart's annual output."
+        },
+        {
+          "targetUnitID": "work_day",
+          "template": "About 261 work days, once you remove weekends and pretend holidays don't exist."
+        },
+        {
+          "targetUnitID": "pregnancy",
+          "template": "About 1.3 pregnancies — which is why back-to-back pregnancies feel relentless."
+        },
+        {
+          "targetUnitID": "youtube_ad",
+          "template": "About 6.3 million unskippable YouTube ads."
+        }
+      ]
+    },
+    "youtube_ad": {
+      "valueHeadline": "One unskippable YouTube ad lasts",
+      "valueDisplay": "5 seconds",
+      "comparisons": [
+        {
+          "targetUnitID": "heartbeat",
+          "template": "About 5.8 heartbeats — your heart barely notices what your brain considers an eternity."
+        },
+        {
+          "targetUnitID": "blink",
+          "template": "About 33 blinks, though most people forget to blink while waiting."
+        },
+        {
+          "targetUnitID": "pregnancy",
+          "template": "A full pregnancy contains about 4.8 million unskippable ads — roughly 280 days of uninterrupted suffering."
+        },
+        {
+          "targetUnitID": "human_lifespan",
+          "template": "An average lifetime spans about 454 million unskippable ads, though it would feel considerably longer."
         }
       ]
     }

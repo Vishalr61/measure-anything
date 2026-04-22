@@ -1,32 +1,24 @@
 {
   "cards": {
-    "sun_surface": {
-      "valueHeadline": "The Sun's surface reaches",
-      "valueDisplay": "5,500 °C",
+    "cast_iron_sear": {
+      "valueHeadline": "A cast iron sear reaches",
+      "valueDisplay": "230 °C",
       "comparisons": [
         {
-          "targetUnitID": "boiling_water",
-          "template": "The Sun's surface is far hotter than Boiling water at 100 °C."
+          "targetUnitID": "freshly_baked_bread",
+          "template": "135°C hotter than freshly baked bread — the Maillard reaction needs real heat."
         },
         {
-          "targetUnitID": "lava",
-          "template": "The Sun's surface is several times hotter than Lava."
+          "targetUnitID": "freezer_temp",
+          "template": "248°C hotter than your freezer — the full thermal range of cooking in one jump."
         },
         {
-          "targetUnitID": "pizza_oven",
-          "template": "The Sun's surface is an order of magnitude hotter than a Pizza oven."
+          "targetUnitID": "sun_surface",
+          "template": "5,270°C cooler than the surface of the Sun — your cast iron is impressive but not that impressive."
         },
         {
-          "targetUnitID": "body_temp",
-          "template": "Body temperature is tiny next to the Sun's surface."
-        },
-        {
-          "targetUnitID": "comfortable_room",
-          "template": "A Comfortable room feels cryogenic compared to the Sun's surface."
-        },
-        {
-          "targetUnitID": "deep_space",
-          "template": "Deep space is cold; the Sun's surface is not."
+          "targetUnitID": "absolute_zero",
+          "template": "503°C warmer than absolute zero."
         }
       ]
     },
@@ -74,25 +66,33 @@
         }
       ]
     },
-    "cast_iron_sear": {
-      "valueHeadline": "A cast iron sear reaches",
-      "valueDisplay": "230 °C",
+    "sun_surface": {
+      "valueHeadline": "The Sun's surface reaches",
+      "valueDisplay": "5,500 °C",
       "comparisons": [
         {
-          "targetUnitID": "freshly_baked_bread",
-          "template": "135°C hotter than freshly baked bread — the Maillard reaction needs real heat."
+          "targetUnitID": "boiling_water",
+          "template": "The Sun's surface is far hotter than Boiling water at 100 °C."
         },
         {
-          "targetUnitID": "freezer_temp",
-          "template": "248°C hotter than your freezer — the full thermal range of cooking in one jump."
+          "targetUnitID": "lava",
+          "template": "The Sun's surface is several times hotter than Lava."
         },
         {
-          "targetUnitID": "sun_surface",
-          "template": "5,270°C cooler than the surface of the Sun — your cast iron is impressive but not that impressive."
+          "targetUnitID": "pizza_oven",
+          "template": "The Sun's surface is an order of magnitude hotter than a Pizza oven."
         },
         {
-          "targetUnitID": "absolute_zero",
-          "template": "503°C warmer than absolute zero."
+          "targetUnitID": "body_temp",
+          "template": "Body temperature is tiny next to the Sun's surface."
+        },
+        {
+          "targetUnitID": "comfortable_room",
+          "template": "A Comfortable room feels cryogenic compared to the Sun's surface."
+        },
+        {
+          "targetUnitID": "deep_space",
+          "template": "Deep space is cold; the Sun's surface is not."
         }
       ]
     }
