@@ -3,15 +3,9 @@ import SwiftData
 import SwiftUI
 
 struct SettingsTabView: View {
-    private enum Keys {
-        static let launchAnimationPlayCount = "launchAnimationPlayCount"
-    }
-
     @Environment(\.openURL) private var openURL
     @Environment(\.requestReview) private var requestReview
     @Query(sort: \CustomUnit.name) private var customUnits: [CustomUnit]
-
-    @State private var showClearHistoryAlert = false
 
     var body: some View {
         NavigationStack {
@@ -23,25 +17,6 @@ struct SettingsTabView: View {
                         VStack(alignment: .leading, spacing: 3) {
                             Text("My custom units")
                             Text(customUnitsCountSubtitle)
-                                .font(.footnote)
-                                .foregroundStyle(.secondary)
-                        }
-                    }
-
-                    Button(role: .destructive) {
-                        showClearHistoryAlert = true
-                    } label: {
-                        Text("Clear conversion history")
-                    }
-
-                    Button {
-                        UserDefaults.standard.set(0, forKey: Keys.launchAnimationPlayCount)
-                        LaunchAnimationView.hasPlayedThisSession = false
-                        Haptics.tap()
-                    } label: {
-                        VStack(alignment: .leading, spacing: 3) {
-                            Text("Reset launch animation")
-                            Text("See the intro animation again")
                                 .font(.footnote)
                                 .foregroundStyle(.secondary)
                         }
@@ -71,15 +46,6 @@ struct SettingsTabView: View {
             .navigationTitle("Settings")
             .navigationBarTitleDisplayMode(.inline)
             .listStyle(.insetGrouped)
-            .alert("Clear all conversion history?", isPresented: $showClearHistoryAlert) {
-                Button("Clear", role: .destructive) {
-                    ConversionHistory.shared.clearRecentPairs()
-                    Haptics.tap()
-                }
-                Button("Cancel", role: .cancel) {}
-            } message: {
-                Text("This removes your Recently Used list on the Explore page. This can't be undone.")
-            }
         }
     }
 
