@@ -6,7 +6,11 @@
     "baseUnit": "kilogram",
     "kind": "normal",
     "conversionStyle": "multiplicative",
-    "factor": 0.001
+    "factor": 0.001,
+    "iconName": "scalemass",
+    "description": "One gram = 0.001 kilograms.",
+    "funFact": "The gram was originally defined as the mass of one cubic centimetre of water at 4°C — the temperature at which water reaches its maximum density. It was the base unit of the CGS (centimetre-gram-second) system used by physicists until the 1960s. Today the gram is defined as exactly one-thousandth of the kilogram, which itself is now defined using Planck's constant.",
+    "interestScore": 7
   },
   {
     "id": "kilogram",
@@ -15,7 +19,11 @@
     "baseUnit": "kilogram",
     "kind": "normal",
     "conversionStyle": "multiplicative",
-    "factor": 1
+    "factor": 1,
+    "iconName": "scalemass",
+    "description": "SI base unit of mass.",
+    "funFact": "The kilogram is the only SI base unit still named after a physical object — until 2019 it was defined by a platinum-iridium cylinder called Le Grand K, locked in a vault near Paris. The problem: Le Grand K had been slowly gaining mass relative to its official copies over 130 years for unknown reasons. It was replaced by a definition based on Planck's constant to avoid a unit of mass that was literally changing weight.",
+    "interestScore": 10
   },
   {
     "id": "milligram",
@@ -24,7 +32,11 @@
     "baseUnit": "kilogram",
     "kind": "normal",
     "conversionStyle": "multiplicative",
-    "factor": 1e-06
+    "factor": 1e-06,
+    "iconName": "circle.dotted",
+    "description": "One milligram = 0.001 grams.",
+    "funFact": "A milligram is the precision unit of pharmacology — aspirin is 500 mg; some chemotherapy drugs are effective at 0.001 mg. The diamond carat (200 mg exactly) was globally standardised in 1907 specifically to prevent jewellers in different countries from using different carat weights to inflate gem sizes. Every pill, capsule, and injection dose you've ever taken was measured in milligrams.",
+    "interestScore": 8
   },
   {
     "id": "ounce",
@@ -33,7 +45,11 @@
     "baseUnit": "kilogram",
     "kind": "normal",
     "conversionStyle": "multiplicative",
-    "factor": 0.028349523125
+    "factor": 0.028349523125,
+    "iconName": "scalemass",
+    "description": "One avoirdupois ounce ≈ 28.35 grams.",
+    "funFact": "There are three different ounces in active use: the avoirdupois ounce (28.35 g) for everyday weight, the troy ounce (31.1 g) for gold and pharmaceuticals, and the fluid ounce (29.57 ml) for volume. Gold is still priced globally in troy ounces — a unit 10% heavier than the one on your kitchen scales, meaning a 'one ounce' gold coin contains noticeably more material than you'd expect.",
+    "interestScore": 8
   },
   {
     "id": "pound",
@@ -42,6 +58,10 @@
     "baseUnit": "kilogram",
     "kind": "normal",
     "conversionStyle": "multiplicative",
-    "factor": 0.45359237
+    "factor": 0.45359237,
+    "iconName": "scalemass",
+    "description": "One pound ≈ 453.6 grams.",
+    "funFact": "The pound was a currency unit before it was a weight unit — a pound sterling was literally one pound of silver. The currency and the mass diverged as coinage was debased over centuries. The abbreviation 'lb' comes from 'libra', the Roman unit — not from the word 'pound' at all, which is why the abbreviation and the word share no letters.",
+    "interestScore": 9
   }
 ]

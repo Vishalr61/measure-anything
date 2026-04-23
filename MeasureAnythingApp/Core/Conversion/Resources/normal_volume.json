@@ -6,7 +6,11 @@
     "baseUnit": "liter",
     "kind": "normal",
     "conversionStyle": "multiplicative",
-    "factor": 1000
+    "factor": 1000,
+    "iconName": "cube",
+    "description": "One cubic metre = 1,000 litres.",
+    "funFact": "One cubic metre of water weighs exactly 1,000 kg — a relationship deliberately engineered into the metric system. The French 1795 committee chose water at 4°C (its maximum density point) as the reference, ensuring that litre, kilogram, and cubic metre all relate cleanly. Engineers still use this shortcut: 'one cubic metre of water' is a quick way to say 'one metric tonne.'",
+    "interestScore": 8
   },
   {
     "id": "liter",
@@ -15,7 +19,11 @@
     "baseUnit": "liter",
     "kind": "normal",
     "conversionStyle": "multiplicative",
-    "factor": 1
+    "factor": 1,
+    "iconName": "drop",
+    "description": "One litre = one cubic decimetre of water.",
+    "funFact": "The litre was defined in 1795 as one cubic decimetre of water, making one litre weigh exactly one kilogram at 4°C — by design. The US rejected the metric system in 1866 but adopted the litre specifically for wine and spirits in 1975, meaning the US now officially uses litres for liquor but gallons for milk.",
+    "interestScore": 8
   },
   {
     "id": "milliliter",
@@ -24,7 +32,11 @@
     "baseUnit": "liter",
     "kind": "normal",
     "conversionStyle": "multiplicative",
-    "factor": 0.001
+    "factor": 0.001,
+    "iconName": "drop.fill",
+    "description": "One millilitre = one cubic centimetre.",
+    "funFact": "One millilitre equals exactly one cubic centimetre — a dual identity used constantly in medicine and cooking. Every blood test, vaccine dose, and IV drip is measured in millilitres. The average raindrop is about 0.05 ml; a standard IV bag contains 1,000 ml. The millilitre is where chemistry, cooking, and medicine all converge.",
+    "interestScore": 7
   },
   {
     "id": "cup_us",
@@ -33,7 +45,11 @@
     "baseUnit": "liter",
     "kind": "normal",
     "conversionStyle": "multiplicative",
-    "factor": 0.2365882365
+    "factor": 0.2365882365,
+    "iconName": "cup.and.saucer",
+    "description": "One US cup ≈ 236.6 ml.",
+    "funFact": "The US cup (236.6 ml) differs from the metric cup (250 ml) and the UK imperial cup (284 ml) — a divergence that has caused genuine recipe failures in international cookbooks. The US cup was standardised in 1896 for home economics textbooks, at a time when 'a cup' was expected to mean a specific standardised vessel kept in every American kitchen.",
+    "interestScore": 7
   },
   {
     "id": "gallon_us",
@@ -42,7 +58,11 @@
     "baseUnit": "liter",
     "kind": "normal",
     "conversionStyle": "multiplicative",
-    "factor": 3.785411784
+    "factor": 3.785411784,
+    "iconName": "fuelpump",
+    "description": "One US gallon ≈ 3.785 litres.",
+    "funFact": "The US gallon (3.785 L) is 17% smaller than the UK imperial gallon (4.546 L) — a difference that dates to 1707, when Britain standardised on Queen Anne's wine gallon while the American colonies kept using the older measure after independence. This means US mpg and UK mpg figures are not comparable: the same car looks 20% more fuel-efficient in UK numbers.",
+    "interestScore": 9
   },
   {
     "id": "pint_us",
@@ -51,7 +71,11 @@
     "baseUnit": "liter",
     "kind": "normal",
     "conversionStyle": "multiplicative",
-    "factor": 0.473176473
+    "factor": 0.473176473,
+    "iconName": "mug",
+    "description": "One US pint ≈ 473 ml.",
+    "funFact": "A US pint (473 ml) is 20% smaller than a UK pint (568 ml). This creates real confusion in pub culture: a UK 'pint of Guinness' and a US 'pint of Guinness' are materially different drinks, and ordering a US pint in an Irish pub will earn you a look. The UK pint traces to a 1697 statute; the US retained the pre-1707 wine pint that Britain later revised upward.",
+    "interestScore": 8
   },
   {
     "id": "quart_us",
@@ -60,6 +84,10 @@
     "baseUnit": "liter",
     "kind": "normal",
     "conversionStyle": "multiplicative",
-    "factor": 0.946352946
+    "factor": 0.946352946,
+    "iconName": "cylinder",
+    "description": "One US quart ≈ 946 ml (≈ 1 litre).",
+    "funFact": "The word 'quart' literally means 'quarter gallon.' A US quart (946 ml) is close enough to one litre that many recipes round them interchangeably — usually to no ill effect. Engine oil, ice cream, and large paint containers are still sold in US quarts in North America, making the quart one of the most quietly persistent pre-metric units still in daily use.",
+    "interestScore": 7
   }
 ]

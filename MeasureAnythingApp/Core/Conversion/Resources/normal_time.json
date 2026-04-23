@@ -6,7 +6,11 @@
     "baseUnit": "second",
     "kind": "normal",
     "conversionStyle": "multiplicative",
-    "factor": 86400
+    "factor": 86400,
+    "iconName": "sun.max",
+    "description": "One day = 86,400 seconds.",
+    "funFact": "Earth's day is getting longer by about 1.8 milliseconds per century due to tidal friction from the Moon. 350 million years ago a day was only 22 hours and there were 400 days in a year. The oldest evidence of this comes from fossilised coral growth rings, which record daily cycles and reveal more rings per year the further back you go in geological time.",
+    "interestScore": 9
   },
   {
     "id": "hour",
@@ -15,7 +19,11 @@
     "baseUnit": "second",
     "kind": "normal",
     "conversionStyle": "multiplicative",
-    "factor": 3600
+    "factor": 3600,
+    "iconName": "clock",
+    "description": "One hour = 3,600 seconds.",
+    "funFact": "The 24-hour day was established by ancient Egyptians, who divided daylight into 10 hours plus 2 twilight hours. Mechanical clocks only became accurate enough to track individual minutes in the 1600s — before that, a clock with a minute hand was considered a showpiece rather than a tool. The first clock with a minute hand was built by Jost Bürgi around 1577.",
+    "interestScore": 8
   },
   {
     "id": "minute",
@@ -24,7 +32,11 @@
     "baseUnit": "second",
     "kind": "normal",
     "conversionStyle": "multiplicative",
-    "factor": 60
+    "factor": 60,
+    "iconName": "clock.badge.checkmark",
+    "description": "One minute = 60 seconds.",
+    "funFact": "The 60-minute hour traces back to Babylonian mathematics, which used base-60 because 60 has 12 divisors — making it unusually divisible into thirds, quarters, fifths, and sixths without fractions. Base-10 only has four divisors. We still use base-60 for time and angles, 4,000 years after the Babylonians chose it for purely practical arithmetic reasons.",
+    "interestScore": 9
   },
   {
     "id": "second",
@@ -33,6 +45,10 @@
     "baseUnit": "second",
     "kind": "normal",
     "conversionStyle": "multiplicative",
-    "factor": 1
+    "factor": 1,
+    "iconName": "timer",
+    "description": "SI base unit of time.",
+    "funFact": "The second was originally 1/86,400 of a mean solar day — but Earth's rotation is gradually slowing. Since 1967 it has been defined by atomic clocks as exactly 9,192,631,770 oscillations of a caesium-133 atom. This is so precise that atomic clocks lose less than one second over 300 million years — yet we still add 'leap seconds' periodically to keep clocks aligned with the slowing Earth.",
+    "interestScore": 10
   }
 ]

@@ -51,6 +51,7 @@
     "factor": 5400,
     "iconName": "calendar.badge.clock",
     "description": "Bad meeting ≈ 90 minutes.",
+    "funFact": "Microsoft's human factors research found that brainwave patterns indicating stress peak between 30–80 minutes into a meeting. The average corporate meeting is 49 minutes. The most effective group decision-making sessions, measured by outcomes, run under 18 minutes — which no one has ever managed to convince a company to adopt.",
     "exampleMeme": "This could have been a message.",
     "interestScore": 7
   },
@@ -190,6 +191,7 @@
     "factor": 3600,
     "iconName": "figure.strengthtraining.traditional",
     "description": "Gym session ≈ 60 minutes.",
+    "funFact": "The optimal workout duration for most goals is 45–75 minutes — after that, cortisol levels spike and the hormonal conditions become counterproductive to muscle growth. The most popular gym session worldwide lands at almost exactly one hour, driven more by social convention and parking validation than physiology.",
     "exampleMeme": "One session closer to being mysterious.",
     "interestScore": 7
   },
