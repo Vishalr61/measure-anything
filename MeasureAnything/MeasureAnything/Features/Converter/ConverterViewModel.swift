@@ -839,7 +839,10 @@ final class ConverterViewModel: ObservableObject {
     }
 
     /// Footer line for the share card when the destination unit has no fun fact.
+    /// Returns `nil` for temperature because "1 °C = 33.8 °F" is misleading (it converts the
+    /// number 1, not a physically meaningful zero reference).
     func shareCardFormulaLine() -> String? {
+        guard selectedCategory != .temperature else { return nil }
         guard let fromU = fromUnit, let toU = toUnit,
               let one = try? engine.convert(1, from: selectedFromUnitID, to: selectedToUnitID, includeMemeExplanation: false)
         else { return nil }

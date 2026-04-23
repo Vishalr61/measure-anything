@@ -7,9 +7,11 @@ struct DidYouKnowCard: View {
     /// When set, the card is tappable and shows a trailing arrow affordance.
     var onOpenFactCard: (() -> Void)?
 
-    /// Fixed card height so the layout matches the Roll-the-Dice card above and
-    /// doesn't jump when fun fact length changes.
-    private let cardHeight: CGFloat = 128
+    /// Minimum card height keeps the layout stable; the card can grow up to a maximum
+    /// so that very short facts don't leave a huge gap and very long facts don't blow
+    /// out the layout on compact devices.
+    private let cardMinHeight: CGFloat = 96
+    private let cardMaxHeight: CGFloat = 128
     private let cornerRadius: CGFloat = 16
     private let textMaxLines: Int = 4
 
@@ -49,7 +51,7 @@ struct DidYouKnowCard: View {
         .padding(.vertical, 18)
         .padding(.horizontal, 20)
         .frame(maxWidth: .infinity, alignment: .topLeading)
-        .frame(height: cardHeight)
+        .frame(minHeight: cardMinHeight, maxHeight: cardMaxHeight)
         .background(cardBackground)
         .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
         .overlay(

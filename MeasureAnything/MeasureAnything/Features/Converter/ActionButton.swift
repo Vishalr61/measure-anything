@@ -35,5 +35,7 @@ struct ActionButton: View {
         .buttonStyle(.plain)
         .disabled(disabled)
         .opacity(disabled && fadeWhenDisabled ? 0.4 : 1)
+        .accessibilityLabel(label)
+        .accessibilityAddTraits(.isButton)
     }
 }

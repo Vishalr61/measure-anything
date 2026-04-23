@@ -19,6 +19,9 @@ struct CustomUnitFormView: View {
     @State private var previewLine1: String = ""
     @State private var previewLine2: String = ""
     @State private var previewTask: Task<Void, Never>?
+    @State private var showTemperatureAlert = false
+
+    @FocusState private var valueFieldFocused: Bool
 
     init(initialCategory: UnitCategory = .length) {
         let allowed = UnitCategory.customAllowed
@@ -136,10 +139,19 @@ struct CustomUnitFormView: View {
                 HStack(alignment: .center, spacing: 12) {
                     TextField("0", text: $valueText)
                         .keyboardType(.decimalPad)
+                        .focused($valueFieldFocused)
                         .font(.system(size: 28, weight: .semibold, design: .rounded))
                         .monospacedDigit()
                         .minimumScaleFactor(0.6)
                         .lineLimit(1)
+                        .toolbar {
+                            ToolbarItemGroup(placement: .keyboard) {
+                                Spacer()
+                                Button("Done") { valueFieldFocused = false }
+                                    .fontWeight(.semibold)
+                            }
+                        }
+                        .accessibilityLabel("Value in reference unit")
 
                     referenceUnitPill
                 }
@@ -151,10 +163,9 @@ struct CustomUnitFormView: View {
     }
 
     private var categoryChips: some View {
-        let chips = UnitCategory.customAllowed
-        return ScrollView(.horizontal, showsIndicators: false) {
+        ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 8) {
-                ForEach(chips, id: \.self) { cat in
+                ForEach(UnitCategory.customAllowed, id: \.self) { cat in
                     let selected = selectedCategory == cat
                     let chipAccent = ConverterCategoryAccent.accent(for: cat)
                     Button {
@@ -172,10 +183,44 @@ struct CustomUnitFormView: View {
                             .foregroundStyle(selected ? Color.white : Color.primary)
                     }
                     .buttonStyle(.plain)
+                    .accessibilityLabel(chipTitle(for: cat))
+                    .accessibilityAddTraits(selected ? .isSelected : [])
                 }
+
+                temperatureComingSoonChip
             }
             .padding(.vertical, 4)
         }
+        .alert("Temperature support coming soon", isPresented: $showTemperatureAlert) {
+            Button("Got it", role: .cancel) {}
+        } message: {
+            Text("Temperature uses non-linear conversions (offsets, not just multipliers). Custom temperature units are on the roadmap for a future update.")
+        }
+    }
+
+    private var temperatureComingSoonChip: some View {
+        Button {
+            Haptics.tap()
+            showTemperatureAlert = true
+        } label: {
+            HStack(spacing: 6) {
+                Text("Temperature")
+                    .font(.subheadline.weight(.semibold))
+                Text("SOON")
+                    .font(.system(size: 8, weight: .bold))
+                    .padding(.horizontal, 5)
+                    .padding(.vertical, 2)
+                    .background(Capsule().fill(Color(.systemGray3)))
+                    .foregroundStyle(.white)
+            }
+            .padding(.horizontal, 14)
+            .padding(.vertical, 8)
+            .background(Capsule().fill(Color(.systemGray5).opacity(0.6)))
+            .foregroundStyle(Color(.systemGray3))
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("Temperature, coming soon")
+        .accessibilityHint("Double-tap to learn more")
     }
 
     private var referenceUnitPill: some View {
@@ -433,7 +478,7 @@ struct CustomUnitFormView: View {
         case .mass: return "Mass"
         case .time: return "Time"
         case .volume: return "Volume"
-        default: return category.rawValue.capitalized
+        case .temperature: return "Temperature"
         }
     }
 

@@ -7,6 +7,9 @@
 
 import SwiftData
 import SwiftUI
+#if canImport(FirebaseCore)
+import FirebaseCore
+#endif
 
 @main
 struct MeasureAnythingApp: App {
@@ -17,6 +20,13 @@ struct MeasureAnythingApp: App {
         // Creating it proactively avoids a first-run recovery path that can cause
         // a several-second blank screen before SwiftUI renders.
         Self.ensureApplicationSupportDirectoryExists()
+
+        // Configure Firebase (Crashlytics). Requires GoogleService-Info.plist + Firebase SPM package.
+        // See CrashlyticsManager.swift for full setup instructions.
+        #if canImport(FirebaseCore)
+        FirebaseApp.configure()
+        #endif
+        CrashlyticsManager.configure()
 
         // Play the launch animation on every cold launch (new process).
         // `LaunchAnimationView.hasPlayedThisSession` prevents replays on background/foreground.
@@ -44,7 +54,10 @@ struct MeasureAnythingApp: App {
 private struct RootLaunchShell: View {
     let shouldShowLaunchAnimation: Bool
 
+    @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding: Bool = false
+
     @State private var showLaunchAnimation = true
+    @State private var showOnboarding = false
     @State private var taxonomyStore: AppTaxonomyStore?
     @State private var converterViewModel: ConverterViewModel?
     @State private var didBoot = false
@@ -62,11 +75,33 @@ private struct RootLaunchShell: View {
             if shouldShowLaunchAnimation, showLaunchAnimation {
                 LaunchAnimationView(
                     onFinished: {
-                        showLaunchAnimation = false
+                        withAnimation(.easeOut(duration: 0.25)) {
+                            showLaunchAnimation = false
+                        }
+                        if !hasSeenOnboarding {
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                                withAnimation(.easeOut(duration: 0.3)) {
+                                    showOnboarding = true
+                                }
+                            }
+                        }
                     }
                 )
                 .transition(.opacity)
                 .zIndex(10)
+            }
+
+            if showOnboarding {
+                OnboardingOverlayView(
+                    onFinished: {
+                        hasSeenOnboarding = true
+                        withAnimation(.easeOut(duration: 0.25)) {
+                            showOnboarding = false
+                        }
+                    }
+                )
+                .transition(.opacity)
+                .zIndex(9)
             }
         }
         .task {

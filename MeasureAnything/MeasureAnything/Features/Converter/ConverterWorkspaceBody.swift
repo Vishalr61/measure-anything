@@ -19,6 +19,7 @@ struct ConverterWorkspaceBody: View {
     @EnvironmentObject private var taxonomyStore: AppTaxonomyStore
 
     @ObservedObject var vm: ConverterViewModel
+    @Environment(\.verticalSizeClass) private var verticalSizeClass
     @FocusState private var valueFieldFocused: Bool
     @State private var showShareSheet = false
     @State private var shareActivityItems: [Any] = []
@@ -40,7 +41,7 @@ struct ConverterWorkspaceBody: View {
             categoryModeBlock
 
             Spacer()
-                .frame(height: showsCategoryPicker ? ConverterLayout.majorBlockSpacing : ConverterLayout.rhythm12)
+                .frame(height: showsCategoryPicker ? adaptiveMajorSpacing : ConverterLayout.rhythm12)
 
             conversionInputBlock
         }
@@ -132,6 +133,12 @@ struct ConverterWorkspaceBody: View {
 
     private var categoryAccent: Color {
         ConverterCategoryAccent.accent(for: vm.selectedCategory)
+    }
+
+    /// Reduces vertical gap between category chips and converter cards in compact height
+    /// (e.g. iPhone SE landscape) so the key controls stay visible without scrolling.
+    private var adaptiveMajorSpacing: CGFloat {
+        verticalSizeClass == .compact ? ConverterLayout.rhythm12 : ConverterLayout.majorBlockSpacing
     }
 
     /// Live “1 m = … km” style line under the TO amount (hidden when invalid / no result).
