@@ -1,6 +1,17 @@
 {
   "items": [
     {
+      "id": "item.measurement.absurd.smoot",
+      "domainId": "measurement",
+      "subgenreId": "measurement.absurd",
+      "name": "Smoot",
+      "description": "Smoot = 1.7018 m (MIT prank unit, 1958).",
+      "synonyms": ["smoots", "Harvard Bridge unit", "MIT smoot", "364.4 smoots"],
+      "tags": ["length", "distance", "humor", "measurement", "history", "engineering"],
+      "unitCategoryRaw": "length",
+      "converterUnitId": "smoot"
+    },
+    {
       "id": "item.measurement.normal.meter",
       "domainId": "measurement",
       "subgenreId": "measurement.normal",

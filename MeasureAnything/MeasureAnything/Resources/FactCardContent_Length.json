@@ -382,6 +382,28 @@
         }
       ]
     },
+    "smoot": {
+      "valueHeadline": "One smoot is",
+      "valueDisplay": "1.7018 m",
+      "comparisons": [
+        {
+          "targetUnitID": "human_height",
+          "template": "Almost exactly one average human — the smoot is basically “one person tall.”"
+        },
+        {
+          "targetUnitID": "door",
+          "template": "About 84% of a standard door height."
+        },
+        {
+          "targetUnitID": "yoga_mat",
+          "template": "About 93% of a yoga mat — just shy of full savasana length."
+        },
+        {
+          "targetUnitID": "city_block",
+          "template": "A Manhattan short block is about 47.3 smoots long."
+        }
+      ]
+    },
     "spider_silk": {
       "valueHeadline": "One spider silk thread is",
       "valueDisplay": "3 µm wide",
