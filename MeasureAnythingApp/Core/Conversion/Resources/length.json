@@ -9,7 +9,7 @@
     "factor": 332.8,
     "iconName": "ferry",
     "description": "Nimitz-class carrier length ≈ 332.8 m.",
-    "funFact": "The Nimitz-class aircraft carrier is about 332.8 m long and can carry over 5,000 sailors and aircraft.",
+    "funFact": "A Nimitz-class carrier has only 333 m to land a jet approaching at 240 km/h — pilots have about 5 seconds of runway. The arresting wire stops the aircraft in roughly 100 m, from 240 km/h to zero in 2 seconds — approximately the same g-force as a car crash. Pilots describe landing on a carrier at night as 'a controlled collision with a postage stamp.'",
     "exampleMeme": "Deck-length energy.",
     "interestScore": 5
   },
@@ -135,7 +135,7 @@
     "factor": 70.66,
     "iconName": "airplane",
     "description": "Boeing 747-400 length ≈ 70.66 m.",
-    "funFact": "A Boeing 747 is about 70.6 m long and can carry over 400 passengers.",
+    "funFact": "The 747 was designed in only 18 months — Boeing engineers called it 'The Incredibles.' The distinctive upper-deck hump was originally designed for nose-loading cargo; the passenger lounge upstairs was a last-minute addition. At peak production in the 1970s, one 747 was completed every three days.",
     "exampleMeme": "Jumbo distance.",
     "interestScore": 7
   },
@@ -177,7 +177,7 @@
     "factor": 12,
     "iconName": "bus",
     "description": "Typical city bus length ≈ 12 m.",
-    "funFact": "A standard double-decker bus is about 12 m long and weighs about 12 tonnes.",
+    "funFact": "The 12-metre standard for city buses wasn't set by engineering — it was determined by the turning radius required to navigate most city intersections. City road geometry and bus length evolved together: a 12-metre bus can make the same turn as a 12-metre road curve radius. Change one and you'd have to change both.",
     "exampleMeme": "Long enough to miss your stop twice.",
     "interestScore": 6
   },
@@ -345,7 +345,7 @@
     "factor": 91.44,
     "iconName": "sportscourt",
     "description": "American football field length ≈ 100 yards (91.44 m).",
-    "funFact": "An NFL football field is exactly 91.44 m long (100 yards).",
+    "funFact": "American football fields were standardised at 100 yards in 1912, but end zones weren't added until 1920 — which is why the total field is 120 yards. The 'red zone' (inside the 20-yard line) is a TV invention from the 1970s and doesn't appear in the official rulebook. Every inch of the field dimensions traces back to the furlong-based imperial chain.",
     "exampleMeme": "A field's worth of distance.",
     "interestScore": 8
   },
@@ -359,7 +359,7 @@
     "factor": 0.3048,
     "iconName": "fork.knife",
     "description": "Exactly 1 foot (0.3048 m).",
-    "funFact": "A footlong is — by design — exactly one foot (30.48 cm).",
+    "funFact": "In 2013, a photo went viral of a Subway 'Footlong' measuring only 11 inches. The resulting class action lawsuit settled for $525,000, with Subway agreeing to actually measure sandwiches to 12 inches. The scandal revealed that 'Footlong' had quietly become a brand name rather than a length guarantee.",
     "exampleMeme": "Sandwich-standard unit.",
     "interestScore": 5
   },
@@ -471,7 +471,7 @@
     "factor": 7e-05,
     "iconName": "circle.dotted",
     "description": "Average human hair width ≈ 70 µm.",
-    "funFact": "Human hair is typically around 70 µm wide — roughly 1/14,000th of a metre.",
+    "funFact": "Hair width varies by individual: Asian hair averages ~80 µm, European ~60 µm, African varies widely. The world record for longest hair is 5.6 metres, held by Xie Qiuping of China, who hadn't cut it since 1973. Human hair grows about 15 cm per year and is one of the few tissues that grows continuously without any biological limit.",
     "exampleMeme": "Microscope vibes.",
     "interestScore": 8
   },
@@ -541,7 +541,7 @@
     "factor": 80.4672,
     "iconName": "building.2",
     "description": "Manhattan short block ≈ 264 ft (80.4672 m).",
-    "funFact": "A Manhattan city block is about 80 m east to west.",
+    "funFact": "Manhattan blocks are asymmetric by design: east-west 'short blocks' are ~80 m, north-south 'long blocks' are ~264 m. The 1811 Commissioner's Plan chose this ratio to maximise property frontage on avenues. A New Yorker saying 'two blocks' can mean a 2-minute walk or a 15-minute walk depending entirely on which direction.",
     "exampleMeme": "One block away… plus feelings.",
     "interestScore": 5
   },
@@ -555,7 +555,7 @@
     "factor": 42195,
     "iconName": "figure.run",
     "description": "Marathon distance = 42,195 m.",
-    "funFact": "The marathon distance was standardised at 42.195 km in 1921.",
+    "funFact": "The odd 42.195 km was set at the 1908 London Olympics so the race could start at Windsor Castle and finish in front of the Royal Family's box at the stadium. That specific palace-to-royal-box distance became the world standard — one of history's best examples of royal convenience accidentally defining global sport.",
     "exampleMeme": "A commitment in meters.",
     "interestScore": 7
   },
@@ -597,7 +597,7 @@
     "factor": 0.5,
     "iconName": "figure.and.child.holdinghands",
     "description": "Average newborn length ≈ 50 cm (order-of-magnitude).",
-    "funFact": "The average newborn is about 50 cm at birth.",
+    "funFact": "A human newborn is remarkably undeveloped compared to other primates. A foal can walk within hours of birth; a chimp newborn is neurologically equivalent to a 9-month-old human. If humans were born as developmentally mature as a chimp, gestation would need to be 21 months — our large brains force us out early.",
     "exampleMeme": "Baby-sized.",
     "interestScore": 6
   },
@@ -877,7 +877,7 @@
     "factor": 1.83,
     "iconName": "figure.yoga",
     "description": "Standard yoga mat length ≈ 1.83 m (6 ft).",
-    "funFact": "A standard yoga mat is about 1.83 m long — just tall enough for most people to lie flat.",
+    "funFact": "The yoga mat was invented in 1984 — yoga itself is 3,000 years old and was historically practiced on grass, stone, and animal skins. Angela Farmer created the first sticky mat from carpet underlay she found in her luggage while teaching in Germany. Before mass production, the standard yoga mat was a folded wool blanket.",
     "exampleMeme": "Stretch-sized.",
     "interestScore": 6
   }

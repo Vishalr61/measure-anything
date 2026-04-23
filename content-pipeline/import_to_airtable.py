@@ -48,6 +48,13 @@ COMPARISONS_TABLE = "Comparisons"
 RATE_LIMIT_DELAY = 0.22
 
 ABSURD_UNIT_FILES = ["length.json", "mass.json", "time.json", "temperature.json", "volume.json"]
+NORMAL_UNIT_FILES = [
+    "normal_length.json",
+    "normal_mass.json",
+    "normal_time.json",
+    "normal_temperature.json",
+    "normal_volume.json",
+]
 FACT_CARD_FILES = [
     "FactCardContent_Length.json",
     "FactCardContent_Mass.json",
@@ -259,6 +266,29 @@ def load_absurd_units(absurd_dir: Path) -> List[Dict[str, Any]]:
             raise ValueError(f"{filepath} expected a JSON array")
         all_units.extend(units)
         print(f"  Loaded {len(units)} absurd units from {filename}")
+    return all_units
+
+
+def load_normal_units(normal_dir: Path) -> List[Dict[str, Any]]:
+    """
+    Load normal units from normal_*.json files.
+
+    This supersedes the older `parse_seed_normal_units` Swift-parsing approach.
+    The normal_*.json files are the canonical enriched source (with funFact,
+    description, iconName, interestScore) and are generated/maintained alongside
+    the absurd unit JSON files.
+    """
+    all_units: List[Dict[str, Any]] = []
+    for filename in NORMAL_UNIT_FILES:
+        filepath = normal_dir / filename
+        if not filepath.exists():
+            print(f"  Warning: {filepath} not found, skipping")
+            continue
+        units = load_json(filepath)
+        if not isinstance(units, list):
+            raise ValueError(f"{filepath} expected a JSON array")
+        all_units.extend(units)
+        print(f"  Loaded {len(units)} normal units from {filename}")
     return all_units
 
 
@@ -508,7 +538,12 @@ def main() -> None:
     paths = RepoPaths(repo_root=args.repo_root)
 
     absurd_units = load_absurd_units(paths.absurd_units_dir)
-    normal_units = parse_seed_normal_units(paths.seed_normal_units_swift)
+    # Load normal units from normal_*.json (canonical enriched source).
+    # Falls back to SeedNormalUnits.swift only if the JSON files are absent.
+    normal_units = load_normal_units(paths.absurd_units_dir)
+    if not normal_units:
+        print("  normal_*.json files not found — falling back to SeedNormalUnits.swift")
+        normal_units = parse_seed_normal_units(paths.seed_normal_units_swift)
     fact_cards = load_fact_cards(paths.fact_cards_dir)
 
     # Merge units (prefer normal definitions if collision happens; collisions should be rare but possible).

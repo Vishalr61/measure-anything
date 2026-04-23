@@ -23,6 +23,7 @@
     "factor": 10,
     "iconName": "shippingbox",
     "description": "Common bucket volume ≈ 10 L.",
+    "funFact": "The 10-litre bucket is close to the maximum comfortable single-hand carry load for most adults over a short distance. The Romans called a similar vessel an amphora and used it as a standard volume measure (the Roman amphora was about 26 litres). The modern plastic builder's bucket hasn't changed conceptually in 2,000 years.",
     "exampleMeme": "Bucket-based engineering.",
     "interestScore": 6
   },
@@ -288,6 +289,7 @@
     "factor": 0.355,
     "iconName": "takeoutbag.and.cup.and.straw",
     "description": "Standard can volume ≈ 355 mL.",
+    "funFact": "The 355 ml aluminium can was introduced in 1958. Aluminium is 100% recyclable without quality loss and can be back on a shelf within 60 days of recycling — yet the US recycles only about 50% of its cans annually, discarding roughly $1 billion in material per year. A recycled can uses 95% less energy to produce than one made from raw ore.",
     "exampleMeme": "Hydration, but with consequences.",
     "interestScore": 7
   },
@@ -357,6 +359,7 @@
     "factor": 0.15,
     "iconName": "wineglass",
     "description": "Typical pour ≈ 150 mL.",
+    "funFact": "Wine glass sizes have quietly doubled over 30 years — UK standard pours went from 125 ml to 250 ml without official notice. Research from Cambridge found that simply serving wine in a larger glass increases consumption by up to 22%, even when the stated measure is identical. The wine glass is now the least standardised vessel in common use.",
     "exampleMeme": "A responsible amount (until it isn't).",
     "interestScore": 7
   }

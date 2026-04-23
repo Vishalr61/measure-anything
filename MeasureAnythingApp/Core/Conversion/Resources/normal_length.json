@@ -6,7 +6,11 @@
     "baseUnit": "meter",
     "kind": "normal",
     "conversionStyle": "multiplicative",
-    "factor": 1e-10
+    "factor": 1e-10,
+    "iconName": "atom",
+    "description": "One angstrom = 10⁻¹⁰ metres (0.1 nm).",
+    "funFact": "Named after Swedish physicist Anders Jonas Ångström, who used it to map the solar spectrum in 1868. A hydrogen atom is about 1 Å wide. The angstrom is no longer an official SI unit — replaced by the nanometre and picometre — but it survives in chemistry and materials science because atomic bond lengths fall conveniently between 1–3 Å.",
+    "interestScore": 7
   },
   {
     "id": "astronomical_unit",
@@ -15,7 +19,11 @@
     "baseUnit": "meter",
     "kind": "normal",
     "conversionStyle": "multiplicative",
-    "factor": 149597870700
+    "factor": 149597870700,
+    "iconName": "sun.max",
+    "description": "One AU = mean Earth–Sun distance ≈ 149.6 million km.",
+    "funFact": "The AU was formally set as exactly 149,597,870,700 m in 2012. Before GPS, astronomers measured it by timing Venus transits across the Sun — an event so rare that entire naval expeditions were mounted in 1769, with Captain Cook sailing to Tahiti specifically to record the transit. The difference in angle from two observation points allowed triangulation of the Earth-Sun distance.",
+    "interestScore": 9
   },
   {
     "id": "centimeter",
@@ -24,7 +32,11 @@
     "baseUnit": "meter",
     "kind": "normal",
     "conversionStyle": "multiplicative",
-    "factor": 0.01
+    "factor": 0.01,
+    "iconName": "ruler",
+    "description": "One centimetre = 0.01 metres.",
+    "funFact": "The centimetre became the universal unit of rainfall measurement — a single centimetre of rain on one square kilometre delivers 10 million litres of water. Clothing sizes, blood pressure (mmHg uses its sibling the millimetre), and screen dimensions all live at centimetre precision. It's also the scale at which most everyday human measurement comfortably lives.",
+    "interestScore": 7
   },
   {
     "id": "chain",
@@ -33,7 +45,11 @@
     "baseUnit": "meter",
     "kind": "normal",
     "conversionStyle": "multiplicative",
-    "factor": 20.1168
+    "factor": 20.1168,
+    "iconName": "link",
+    "description": "One chain ≈ 20.12 m (66 feet).",
+    "funFact": "The chain was defined by Edmund Gunter in 1620 and is exactly 1/80th of a mile and 1/10th of a furlong — by design, so that an acre equals exactly 10 square chains. Gunter's chain was literally a metal chain of 100 links. Most British Empire land was surveyed using chains, which is why plot boundaries in old title deeds still reference them.",
+    "interestScore": 7
   },
   {
     "id": "cubit",
@@ -42,7 +58,11 @@
     "baseUnit": "meter",
     "kind": "normal",
     "conversionStyle": "multiplicative",
-    "factor": 0.4572
+    "factor": 0.4572,
+    "iconName": "figure.stand",
+    "description": "One cubit ≈ 45.7 cm (elbow to fingertip).",
+    "funFact": "The cubit is the oldest documented unit of measurement — recorded in Egypt over 4,000 years ago. The royal Egyptian cubit was 52.4 cm; several original cedar measuring rods survive in museums. Every major ancient culture independently invented a cubit-sized unit based on the same anatomy: forearm from elbow to fingertip. The Bible, the Pyramids, and Stonehenge are all dimensioned in cubits.",
+    "interestScore": 9
   },
   {
     "id": "decimeter",
@@ -51,7 +71,11 @@
     "baseUnit": "meter",
     "kind": "normal",
     "conversionStyle": "multiplicative",
-    "factor": 0.1
+    "factor": 0.1,
+    "iconName": "ruler",
+    "description": "One decimetre = 0.1 metres.",
+    "funFact": "The decimetre is rarely spoken aloud in daily life but quietly underpins cooking and science: one cubic decimetre is exactly one litre, making volume and length interchangeable for water. The metric system was specifically designed so these units nest cleanly. A standard 750 ml wine bottle is 0.75 cubic decimetres; a 1-litre milk carton is exactly one.",
+    "interestScore": 6
   },
   {
     "id": "fathom",
@@ -60,7 +84,11 @@
     "baseUnit": "meter",
     "kind": "normal",
     "conversionStyle": "multiplicative",
-    "factor": 1.8288
+    "factor": 1.8288,
+    "iconName": "water.waves",
+    "description": "One fathom = 6 feet ≈ 1.83 m.",
+    "funFact": "A fathom was the span of outstretched arms — 6 feet exactly. Sailors lowered weighted lines one arm-span at a time to measure water depth, counting fathoms as they went. The US Navy officially retired the fathom in 1954 but it persists in fishing and diving. The word comes from Old English 'fæðm' — embrace — because you measure it with open arms.",
+    "interestScore": 8
   },
   {
     "id": "foot",
@@ -69,7 +97,11 @@
     "baseUnit": "meter",
     "kind": "normal",
     "conversionStyle": "multiplicative",
-    "factor": 0.3048
+    "factor": 0.3048,
+    "iconName": "figure.walk",
+    "description": "One foot = 12 inches = 0.3048 m exactly.",
+    "funFact": "The foot was standardised at exactly 0.3048 m in 1959 by an international agreement between six English-speaking nations. Before that, the UK foot and US survey foot differed by 2 parts per million — trivial for carpentry, but significant enough to cause genuine land boundary disputes in US states that adopted early cadastral surveys. The US survey foot of 0.3048006 m wasn't officially retired until 2023.",
+    "interestScore": 8
   },
   {
     "id": "furlong",
@@ -78,7 +110,11 @@
     "baseUnit": "meter",
     "kind": "normal",
     "conversionStyle": "multiplicative",
-    "factor": 201.168
+    "factor": 201.168,
+    "iconName": "figure.run",
+    "description": "One furlong = 220 yards ≈ 201.2 m.",
+    "funFact": "A furlong (201 m) is the only pre-metric unit still officially used in thoroughbred horse racing worldwide. The word comes from 'furrow long' — the length one ox team would plough before resting. A standard race track is 8 furlongs = exactly one mile. Oddly, the furlong survives better in sport than in agriculture, despite being originally a farming unit.",
+    "interestScore": 8
   },
   {
     "id": "hand",
@@ -87,7 +123,11 @@
     "baseUnit": "meter",
     "kind": "normal",
     "conversionStyle": "multiplicative",
-    "factor": 0.1016
+    "factor": 0.1016,
+    "iconName": "hand.raised",
+    "description": "One hand = 4 inches = 10.16 cm.",
+    "funFact": "The hand is still the official unit for measuring horse height in the UK, US, Australia, and Ireland — standardised at exactly 4 inches by Henry VIII in 1541. A horse described as 16.2 hands is 16 hands and 2 inches: the digit after the decimal is not a fraction of a hand but whole extra inches, a convention that confuses everyone outside the equestrian world.",
+    "interestScore": 8
   },
   {
     "id": "hectometer",
@@ -96,7 +136,11 @@
     "baseUnit": "meter",
     "kind": "normal",
     "conversionStyle": "multiplicative",
-    "factor": 100
+    "factor": 100,
+    "iconName": "ruler",
+    "description": "One hectometre = 100 metres.",
+    "funFact": "A hectometre is the exact length of an Olympic sprint straight. It's rarely used in speech, but every time you watch a 100 m sprint you are watching a single hectometre race. One hectare — the standard unit of farmland — is exactly one square hectometre (100 m × 100 m).",
+    "interestScore": 6
   },
   {
     "id": "inch",
@@ -105,7 +149,11 @@
     "baseUnit": "meter",
     "kind": "normal",
     "conversionStyle": "multiplicative",
-    "factor": 0.0254
+    "factor": 0.0254,
+    "iconName": "ruler",
+    "description": "One inch = 25.4 mm exactly.",
+    "funFact": "The inch was defined in a 1324 statute by Edward II as three barleycorns placed end to end. Shoe sizes still use the barleycorn: each half-size is exactly one barleycorn (⅓ inch), which is why UK shoe sizes increase in 8.47 mm increments to this day. The world's most precise manufacturing — semiconductor wafers, aircraft tolerances, medical implants — is still commonly specified in thousandths of an inch.",
+    "interestScore": 9
   },
   {
     "id": "kilometer",
@@ -114,7 +162,11 @@
     "baseUnit": "meter",
     "kind": "normal",
     "conversionStyle": "multiplicative",
-    "factor": 1000
+    "factor": 1000,
+    "iconName": "road.lanes",
+    "description": "One kilometre = 1,000 metres.",
+    "funFact": "The kilometre was introduced in 1795 as part of the French metric system, where one metre was defined as one ten-millionth of the distance from the equator to the North Pole through Paris. The French survey was slightly off (the Earth isn't a perfect sphere), which is why the metre is now defined using the speed of light. The original error was about 0.02% — good, but not good enough for atomic precision.",
+    "interestScore": 8
   },
   {
     "id": "league",
@@ -123,7 +175,11 @@
     "baseUnit": "meter",
     "kind": "normal",
     "conversionStyle": "multiplicative",
-    "factor": 4828.032
+    "factor": 4828.032,
+    "iconName": "figure.walk",
+    "description": "One league ≈ 4.83 km (≈ 3 miles).",
+    "funFact": "The league was the approximate distance a person could walk in one hour. Jules Verne's '20,000 Leagues Under the Sea' is commonly misunderstood as depth — 20,000 leagues is the horizontal distance the Nautilus travelled (~80,000 km). The deepest point in the ocean is less than 11 km. The title would be physically impossible if it referred to depth.",
+    "interestScore": 9
   },
   {
     "id": "light_second",
@@ -132,7 +188,11 @@
     "baseUnit": "meter",
     "kind": "normal",
     "conversionStyle": "multiplicative",
-    "factor": 299792458
+    "factor": 299792458,
+    "iconName": "bolt",
+    "description": "One light-second ≈ 299,792 km.",
+    "funFact": "A light-second is roughly the Earth-to-Moon distance in 1.28 seconds. When you see the Moon, you're seeing it as it was 1.28 seconds ago. For GPS to be accurate to under a metre, its satellite clocks must correct for both special and general relativistic time dilation — Einstein's equations are literally embedded in every phone navigation system on Earth.",
+    "interestScore": 9
   },
   {
     "id": "light_year",
@@ -141,7 +201,11 @@
     "baseUnit": "meter",
     "kind": "normal",
     "conversionStyle": "multiplicative",
-    "factor": 9460730472580800
+    "factor": 9460730472580800,
+    "iconName": "star",
+    "description": "One light-year ≈ 9.46 trillion km.",
+    "funFact": "A light-year is a distance, not a time — roughly 9.46 trillion kilometres. The nearest star to Earth other than the Sun, Proxima Centauri, is 4.24 light-years away. At the speed of Voyager 1 (17 km/s), it would take 73,000 years to reach it. When you look at a galaxy 2 million light-years away, you are seeing light that left before Homo sapiens existed.",
+    "interestScore": 10
   },
   {
     "id": "megameter",
@@ -150,7 +214,11 @@
     "baseUnit": "meter",
     "kind": "normal",
     "conversionStyle": "multiplicative",
-    "factor": 1000000
+    "factor": 1000000,
+    "iconName": "globe",
+    "description": "One megametre = 1,000 km.",
+    "funFact": "A megametre is the natural scale for thinking about continental distances. The diameter of the Moon is 3.47 Mm. The distance from London to Rome is about 1.9 Mm. The longest single-country road (the Trans-Siberian Highway) runs about 11 Mm. It makes intercontinental distances feel comprehensibly sized rather than just 'large numbers of kilometres.'",
+    "interestScore": 7
   },
   {
     "id": "meter",
@@ -159,7 +227,11 @@
     "baseUnit": "meter",
     "kind": "normal",
     "conversionStyle": "multiplicative",
-    "factor": 1
+    "factor": 1,
+    "iconName": "ruler",
+    "description": "SI base unit of length.",
+    "funFact": "The metre was originally 'one ten-millionth of the distance from the equator to the North Pole.' Since 1983 it has been defined as the distance light travels in exactly 1/299,792,458 of a second — fixing the speed of light as an exact number and deriving the metre from it. The practical result: every ruler on Earth is calibrated to the speed of light.",
+    "interestScore": 9
   },
   {
     "id": "micrometer",
@@ -168,7 +240,11 @@
     "baseUnit": "meter",
     "kind": "normal",
     "conversionStyle": "multiplicative",
-    "factor": 1e-06
+    "factor": 1e-06,
+    "iconName": "circle.dotted",
+    "description": "One micrometre = 10⁻⁶ metres (1 µm).",
+    "funFact": "A micrometre is the scale of living cells: most human cells are 10–100 µm across, and a human hair is about 70 µm wide. Modern smartphone processor transistors are 3–5 nm apart — but just 20 years ago a state-of-the-art transistor was a micrometre wide. The entire history of computing miniaturisation is the story of shrinking from micrometres down to nanometres.",
+    "interestScore": 8
   },
   {
     "id": "mile",
@@ -177,7 +253,11 @@
     "baseUnit": "meter",
     "kind": "normal",
     "conversionStyle": "multiplicative",
-    "factor": 1609.344
+    "factor": 1609.344,
+    "iconName": "road.lanes",
+    "description": "One mile = 1,760 yards ≈ 1,609.3 m.",
+    "funFact": "The mile comes from the Latin 'mille passuum' — a thousand paces — where a Roman pace was two steps (~1.48 m). The odd modern value (1,760 yards) exists because Henry VIII redefined the mile in 1593 to equal exactly 8 furlongs, which didn't match the Roman calculation. The 'mile' is now defined by a furlong, which is itself defined by an acre, which traces back to how much land one ox could plough in a day.",
+    "interestScore": 9
   },
   {
     "id": "millimeter",
@@ -186,7 +266,11 @@
     "baseUnit": "meter",
     "kind": "normal",
     "conversionStyle": "multiplicative",
-    "factor": 0.001
+    "factor": 0.001,
+    "iconName": "ruler",
+    "description": "One millimetre = 0.001 metres.",
+    "funFact": "A millimetre is the resolution of everyday precision: ruler graduations, machining tolerances, and CT scanner slice thickness are all typically millimetre-accurate. The ISO standard credit card is exactly 0.76 mm thick — a global tolerance maintained so every ATM and card reader works everywhere on Earth. A human fingernail grows about 3 mm per month.",
+    "interestScore": 7
   },
   {
     "id": "nanometer",
@@ -195,7 +279,11 @@
     "baseUnit": "meter",
     "kind": "normal",
     "conversionStyle": "multiplicative",
-    "factor": 1e-09
+    "factor": 1e-09,
+    "iconName": "atom",
+    "description": "One nanometre = 10⁻⁹ metres (1 nm).",
+    "funFact": "A nanometre is smaller than the wavelength of visible light (400–700 nm), which means no optical lens can image anything at this scale. Modern chip transistors are 3–5 nm apart — they can only be 'seen' using electron beams or atomic force microscopes. The DNA double helix is about 2 nm wide, and a human fingernail grows about 1 nm per second.",
+    "interestScore": 9
   },
   {
     "id": "nautical_mile",
@@ -204,7 +292,11 @@
     "baseUnit": "meter",
     "kind": "normal",
     "conversionStyle": "multiplicative",
-    "factor": 1852
+    "factor": 1852,
+    "iconName": "compass",
+    "description": "One nautical mile = 1,852 m.",
+    "funFact": "A nautical mile was defined as one minute of arc along a meridian of Earth — so one degree of latitude equals exactly 60 nautical miles. This makes geographic coordinates directly convertible to distances without a calculator, which is why aviation and maritime navigation still use it worldwide. One knot is one nautical mile per hour.",
+    "interestScore": 9
   },
   {
     "id": "pace",
@@ -213,7 +305,11 @@
     "baseUnit": "meter",
     "kind": "normal",
     "conversionStyle": "multiplicative",
-    "factor": 0.762
+    "factor": 0.762,
+    "iconName": "figure.walk",
+    "description": "One pace ≈ 76.2 cm (double step).",
+    "funFact": "Roman legions kept count of double-steps (each ~1.48 m) while marching, which is how we know distances between Roman cities so precisely 2,000 years later. Milestones were placed every 1,000 paces — 'mille passuum' — giving us the word 'mile.' Roman surveying was so accurate that their road distances match modern GPS measurements to within a few percent.",
+    "interestScore": 8
   },
   {
     "id": "parsec",
@@ -222,7 +318,11 @@
     "baseUnit": "meter",
     "kind": "normal",
     "conversionStyle": "multiplicative",
-    "factor": 30856775810000000
+    "factor": 30856775810000000,
+    "iconName": "sparkles",
+    "description": "One parsec ≈ 3.26 light-years ≈ 30.9 trillion km.",
+    "funFact": "A parsec is the distance at which a star shows an apparent shift of one arcsecond as Earth orbits the Sun. Despite Han Solo claiming the Kessel Run in 'less than 12 parsecs', parsecs are a unit of distance, not time — one of cinema's most famous measurement errors. Astronomers use parsecs because stellar distances in light-years produce unwieldy large numbers.",
+    "interestScore": 10
   },
   {
     "id": "picometer",
@@ -231,7 +331,11 @@
     "baseUnit": "meter",
     "kind": "normal",
     "conversionStyle": "multiplicative",
-    "factor": 1e-12
+    "factor": 1e-12,
+    "iconName": "atom",
+    "description": "One picometre = 10⁻¹² metres (1 pm).",
+    "funFact": "A picometre is the scale of chemistry: covalent bond lengths are 100–300 pm, and the hydrogen atom is about 53 pm in radius. X-rays have wavelengths of 10–0.01 nm, making them perfectly sized to diffract off atomic lattices — which is how Rosalind Franklin's X-ray photographs revealed the double helix structure of DNA in 1952.",
+    "interestScore": 8
   },
   {
     "id": "rod",
@@ -240,7 +344,11 @@
     "baseUnit": "meter",
     "kind": "normal",
     "conversionStyle": "multiplicative",
-    "factor": 5.0292
+    "factor": 5.0292,
+    "iconName": "ruler",
+    "description": "One rod = 16.5 feet ≈ 5.03 m.",
+    "funFact": "The rod was also called the 'perch' or 'pole.' Medieval England defined it as the combined heel-to-toe length of 16 men's left feet as they left church on Sunday — explicitly chosen from whoever happened to be leaving mass. It somehow stabilised to 5.0292 m and is still the legal unit for measuring golf course fairway widths in the UK.",
+    "interestScore": 9
   },
   {
     "id": "thou",
@@ -249,7 +357,11 @@
     "baseUnit": "meter",
     "kind": "normal",
     "conversionStyle": "multiplicative",
-    "factor": 2.54e-05
+    "factor": 2.54e-05,
+    "iconName": "ruler",
+    "description": "One thou = 1/1000 inch = 0.0254 mm.",
+    "funFact": "A thou — one-thousandth of an inch — is the standard precision unit of imperial engineering workshops. Machinists say 'to the thou' to mean tight tolerances. In electronics, PCB trace widths and drill hole sizes are still routinely specified in thou (also written 'mil'). The typical human hair is about 2.8 thou wide.",
+    "interestScore": 7
   },
   {
     "id": "yard",
@@ -258,6 +370,10 @@
     "baseUnit": "meter",
     "kind": "normal",
     "conversionStyle": "multiplicative",
-    "factor": 0.9144
+    "factor": 0.9144,
+    "iconName": "ruler",
+    "description": "One yard = 3 feet = 0.9144 m exactly.",
+    "funFact": "The yard was defined by Henry I of England in the 12th century as the distance from his nose to his outstretched thumb. American football, cricket pitches, fabric sales, and golf courses are still all measured in yards — making it the most widely used pre-metric unit in professional sport, despite every country that uses it also officially having adopted the metric system.",
+    "interestScore": 8
   }
 ]

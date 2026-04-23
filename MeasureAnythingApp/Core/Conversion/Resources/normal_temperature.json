@@ -5,7 +5,11 @@
     "category": "temperature",
     "baseUnit": "kelvin",
     "kind": "normal",
-    "conversionStyle": "temperature"
+    "conversionStyle": "temperature",
+    "iconName": "thermometer.medium",
+    "description": "Water freezes at 0°C, boils at 100°C.",
+    "funFact": "Anders Celsius originally defined his scale with 0 as boiling and 100 as freezing — the reverse of what we use today. A colleague, Carl Linnaeus, reversed it after Celsius's death in 1744. The scale is now formally defined not by water's properties (which vary with pressure and purity) but by fixed points on the International Temperature Scale of 1990.",
+    "interestScore": 9
   },
   {
     "id": "fahrenheit",
@@ -13,7 +17,11 @@
     "category": "temperature",
     "baseUnit": "kelvin",
     "kind": "normal",
-    "conversionStyle": "temperature"
+    "conversionStyle": "temperature",
+    "iconName": "thermometer.medium",
+    "description": "Water freezes at 32°F, boils at 212°F.",
+    "funFact": "Daniel Fahrenheit chose 0°F as the temperature of a saltwater brine and 96°F as human body temperature. Human body temperature turned out to be slightly variable, which shifted the water freezing point to the odd value of 32°F rather than a round number. The Fahrenheit scale is now officially defined in terms of Celsius — making it a derived unit of a derived unit.",
+    "interestScore": 8
   },
   {
     "id": "kelvin",
@@ -21,6 +29,10 @@
     "category": "temperature",
     "baseUnit": "kelvin",
     "kind": "normal",
-    "conversionStyle": "temperature"
+    "conversionStyle": "temperature",
+    "iconName": "thermometer.snowflake",
+    "description": "Absolute zero = 0 K = −273.15°C.",
+    "funFact": "The kelvin is the only temperature scale with no negative values: 0 K is absolute zero, the point at which all molecular motion ceases. Unlike Celsius and Fahrenheit, kelvin is rooted in thermodynamics rather than convenient reference points. Scientists have cooled atomic clouds to 500 picokelvin — 500 trillionths of a degree above absolute zero — making them the coldest objects ever created.",
+    "interestScore": 10
   }
 ]
