@@ -11,9 +11,6 @@ import SwiftUI
 @main
 struct MeasureAnythingApp: App {
     private let shouldShowLaunchAnimation: Bool
-    private enum Keys {
-        static let launchAnimationPlayCount = "launchAnimationPlayCount"
-    }
 
     init() {
         // SwiftData/CoreData expects Application Support to exist on first launch.
@@ -21,10 +18,9 @@ struct MeasureAnythingApp: App {
         // a several-second blank screen before SwiftUI renders.
         Self.ensureApplicationSupportDirectoryExists()
 
-        // Play the launch animation only on first launch (or after a Settings reset).
+        // Play the launch animation on every cold launch (new process).
         // `LaunchAnimationView.hasPlayedThisSession` prevents replays on background/foreground.
-        let playCount = UserDefaults.standard.integer(forKey: Keys.launchAnimationPlayCount)
-        shouldShowLaunchAnimation = playCount == 0
+        shouldShowLaunchAnimation = true
     }
 
     var body: some Scene {
@@ -47,9 +43,6 @@ struct MeasureAnythingApp: App {
 
 private struct RootLaunchShell: View {
     let shouldShowLaunchAnimation: Bool
-    private enum Keys {
-        static let launchAnimationPlayCount = "launchAnimationPlayCount"
-    }
 
     @State private var showLaunchAnimation = true
     @State private var taxonomyStore: AppTaxonomyStore?
@@ -69,7 +62,6 @@ private struct RootLaunchShell: View {
             if shouldShowLaunchAnimation, showLaunchAnimation {
                 LaunchAnimationView(
                     onFinished: {
-                        UserDefaults.standard.set(1, forKey: Keys.launchAnimationPlayCount)
                         showLaunchAnimation = false
                     }
                 )
