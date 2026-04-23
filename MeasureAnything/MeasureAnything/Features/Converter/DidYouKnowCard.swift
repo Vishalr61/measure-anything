@@ -7,45 +7,56 @@ struct DidYouKnowCard: View {
     /// When set, the card is tappable and shows a trailing arrow affordance.
     var onOpenFactCard: (() -> Void)?
 
+    /// Fixed card height so the layout matches the Roll-the-Dice card above and
+    /// doesn't jump when fun fact length changes.
+    private let cardHeight: CGFloat = 128
+    private let cornerRadius: CGFloat = 16
+    private let textMaxLines: Int = 4
+
     @State private var showFact: Bool = false
     @State private var flashOpacity: Double = 1
 
     var body: some View {
         let resolved = resolvedFact()
 
-        let content = VStack(alignment: .leading, spacing: 10) {
-            Text("Did you know")
-                .font(.system(size: 9, weight: .semibold))
-                .foregroundStyle(accent)
-                .textCase(.uppercase)
-                .tracking(0.54) // ≈ 0.06em at 9pt
+        let content = HStack(alignment: .top, spacing: 12) {
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Did you know")
+                    .font(.system(size: 9, weight: .semibold))
+                    .foregroundStyle(accent)
+                    .textCase(.uppercase)
+                    .tracking(0.54) // ≈ 0.06em at 9pt
 
-            HStack(alignment: .top, spacing: 6) {
                 Text(resolved)
                     .font(.system(size: 13, weight: .regular))
                     .foregroundStyle(Color(red: 0x2C / 255, green: 0x2C / 255, blue: 0x2A / 255))
-                    .lineSpacing(7) // ≈ 13pt * (1.55 - 1)
+                    .lineSpacing(5)
                     .multilineTextAlignment(.leading)
-                    .fixedSize(horizontal: false, vertical: true)
+                    .lineLimit(textMaxLines)
+                    .truncationMode(.tail)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
+            .frame(maxWidth: .infinity, alignment: .topLeading)
 
-                if onOpenFactCard != nil {
-                    Text("→")
-                        .font(.system(size: 13, weight: .semibold))
-                        .foregroundStyle(accent)
-                        .accessibilityHidden(true)
-                }
+            if onOpenFactCard != nil {
+                Text("→")
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundStyle(accent)
+                    .padding(.top, 1)
+                    .accessibilityHidden(true)
             }
         }
-        .padding(.vertical, 12)
-        .padding(.horizontal, 14)
-        .background(
-            RoundedRectangle(cornerRadius: 14, style: .continuous)
-                .fill(Color.white)
-        )
+        .padding(.vertical, 18)
+        .padding(.horizontal, 20)
+        .frame(maxWidth: .infinity, alignment: .topLeading)
+        .frame(height: cardHeight)
+        .background(cardBackground)
+        .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
         .overlay(
-            RoundedRectangle(cornerRadius: 14, style: .continuous)
-                .strokeBorder(Color.primary.opacity(0.06), lineWidth: 1)
+            RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                .strokeBorder(accent.opacity(0.14), lineWidth: 1)
         )
+        .shadow(color: accent.opacity(0.08), radius: 8, x: 0, y: 3)
         .opacity(showFact ? flashOpacity : 0)
         .animation(.easeIn(duration: 0.3), value: unit.id)
         .onAppear {
@@ -69,6 +80,39 @@ struct DidYouKnowCard: View {
                 content
                     .accessibilityElement(children: .combine)
             }
+        }
+    }
+
+    /// Soft paper-like surface with a subtle, category-specific pattern tinted
+    /// by the accent color so the card feels part of the app theme instead of
+    /// a plain white rectangle.
+    private var cardBackground: some View {
+        ZStack {
+            LinearGradient(
+                colors: [
+                    Color.white,
+                    accent.opacity(0.06)
+                ],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+
+            CategoryTilePattern(
+                category: unit.category,
+                color: accent,
+                patternOpacity: 0.09
+            )
+            .blendMode(.multiply)
+
+            LinearGradient(
+                colors: [
+                    Color.white.opacity(0.55),
+                    Color.white.opacity(0.0)
+                ],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+            .allowsHitTesting(false)
         }
     }
 
