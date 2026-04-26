@@ -24,8 +24,16 @@ struct ToCard: View {
     @Binding var selectedToUnitID: UnitDefinition.ID
     let availableUnits: [UnitDefinition]
 
+    @AppStorage("hasSeenLongPressCopy") private var hasSeenLongPressCopy: Bool = false
+
     @State private var saveStarScale: CGFloat = 1.0
     @State private var showToPicker = false
+    @State private var showCopiedConfirmation: Bool = false
+
+    /// When the user hasn’t long-pressed yet, nudge discoverability (hidden forever after first long-press copy).
+    private var showHoldToCopyHint: Bool {
+        !hasSeenLongPressCopy && copyEnabled && !usesPlaceholderResult
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -36,33 +44,62 @@ struct ToCard: View {
                 .textCase(.uppercase)
                 .padding(.bottom, 6)
 
-            HStack(alignment: .lastTextBaseline) {
-                Text(resultAttributed)
-                    .font(.system(size: 36, weight: .bold))
-                    .foregroundStyle(usesPlaceholderResult ? Color.secondary.opacity(0.55) : accent)
-                    .monospacedDigit()
-                    .minimumScaleFactor(0.5)
-                    .lineLimit(1)
-                    .textSelection(.enabled)
-                    .accessibilityLabel("Converted amount, \(resultText)")
+            VStack(alignment: .leading, spacing: 3) {
+                HStack(alignment: .lastTextBaseline) {
+                    ZStack(alignment: .topTrailing) {
+                        Text(resultAttributed)
+                            .font(.system(size: 36, weight: .bold))
+                            .foregroundStyle(usesPlaceholderResult ? Color.secondary.opacity(0.55) : accent)
+                            .monospacedDigit()
+                            .minimumScaleFactor(0.5)
+                            .lineLimit(1)
+                            .accessibilityLabel("Converted amount, \(resultText)")
+                            .accessibilityHint(copyEnabled ? "Long press to copy the converted value" : "")
+                            .onLongPressGesture(minimumDuration: 0.55) {
+                                longPressCopyResult()
+                            }
 
-                Spacer()
-
-                UnitPickerPillButton(
-                    name: toUnitName,
-                    accent: accent,
-                    style: .inline
-                ) {
-                    showToPicker = true
-                }
-                .sheet(isPresented: $showToPicker) {
-                    UnitPickerSheet(
-                        units: availableUnits,
-                        selectedID: selectedToUnitID,
-                        accent: accent
-                    ) { newID in
-                        selectedToUnitID = newID
+                        if showCopiedConfirmation {
+                            Text("Copied")
+                                .font(.system(size: 11, weight: .semibold))
+                                .foregroundStyle(.white)
+                                .padding(.horizontal, 10)
+                                .padding(.vertical, 5)
+                                .background(
+                                    Capsule(style: .continuous)
+                                        .fill(Color(.systemGray2))
+                                )
+                                .transition(.opacity.combined(with: .scale(scale: 0.92)))
+                                .offset(x: 4, y: -6)
+                                .accessibilityHidden(true)
+                        }
                     }
+
+                    Spacer()
+
+                    UnitPickerPillButton(
+                        name: toUnitName,
+                        accent: accent,
+                        style: .inline
+                    ) {
+                        showToPicker = true
+                    }
+                    .sheet(isPresented: $showToPicker) {
+                        UnitPickerSheet(
+                            units: availableUnits,
+                            selectedID: selectedToUnitID,
+                            accent: accent
+                        ) { newID in
+                            selectedToUnitID = newID
+                        }
+                    }
+                }
+
+                if showHoldToCopyHint {
+                    Text("hold to copy")
+                        .font(.system(size: 9, weight: .medium))
+                        .foregroundStyle(Color(hex: "#B4B2A9"))
+                        .accessibilityHidden(true)
                 }
             }
             .padding(.bottom, 8)
@@ -150,6 +187,21 @@ struct ToCard: View {
                         saveStarScale = 1.0
                     }
                 }
+            }
+        }
+    }
+
+    /// Same pasteboard + success haptic as the Copy action (`ConverterViewModel.copyResult`).
+    private func longPressCopyResult() {
+        guard copyEnabled else { return }
+        onCopy()
+        hasSeenLongPressCopy = true
+        withAnimation(.easeInOut(duration: 0.15)) {
+            showCopiedConfirmation = true
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
+            withAnimation(.easeInOut(duration: 0.2)) {
+                showCopiedConfirmation = false
             }
         }
     }
