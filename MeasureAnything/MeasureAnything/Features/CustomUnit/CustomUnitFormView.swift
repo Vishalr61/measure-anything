@@ -3,6 +3,13 @@ import SwiftUI
 import UIKit
 import MeasureAnythingCore
 
+/// Holds the pre-edit snapshot of the decimal value field outside SwiftUI's `@State` so
+/// capturing it on focus does NOT trigger a view rebuild during keyboard presentation
+/// (which can otherwise drop the keyboard `Cancel`/`Done` toolbar on the first tap).
+private final class ValueEditSession {
+    var snapshot: String?
+}
+
 /// Create a custom multiplicative unit (local-only, v1). Create-only — no edit mode.
 struct CustomUnitFormView: View {
     @Environment(\.dismiss) private var dismiss
@@ -21,6 +28,9 @@ struct CustomUnitFormView: View {
     @State private var previewLine2: String = ""
     @State private var previewTask: Task<Void, Never>?
     @State private var showTemperatureAlert = false
+    /// Snapshot holder for the decimal field; mutated outside `@State` so capturing it on
+    /// focus does not rebuild the form during keyboard presentation (see `ValueEditSession`).
+    @State private var valueEditSession = ValueEditSession()
 
     @FocusState private var valueFieldFocused: Bool
 
@@ -95,30 +105,42 @@ struct CustomUnitFormView: View {
             }
             .toolbar {
                 ToolbarItemGroup(placement: .keyboard) {
-                    Spacer()
-                    Button {
-                        valueFieldFocused = false
-                        UIApplication.shared.sendAction(
-                            #selector(UIResponder.resignFirstResponder),
-                            to: nil,
-                            from: nil,
-                            for: nil
-                        )
-                    } label: {
-                        Image(systemName: "keyboard.chevron.compact.down")
-                            .font(.system(size: 20))
-                            .foregroundStyle(accent)
+                    Button("Cancel") {
+                        cancelValueFieldEdit()
                     }
-                    .padding(.trailing, 4)
+                    .foregroundStyle(accent.opacity(0.6))
+
+                    Spacer()
+
+                    Button("Done") {
+                        dismissValueFieldKeyboard()
+                    }
+                    .fontWeight(.bold)
+                    .foregroundStyle(accent)
                 }
             }
         }
         .onAppear {
             schedulePreviewRefresh()
+            // Pre-warm the snapshot so the keyboard toolbar's logic has stable state
+            // before the user's first tap on the decimal field. Combined with the
+            // class-based holder, this prevents focus changes from triggering any
+            // @State mutation during the first keyboard presentation, which otherwise
+            // can drop the Cancel/Done bar.
+            if valueEditSession.snapshot == nil {
+                valueEditSession.snapshot = valueText
+            }
         }
         .onChange(of: name) { _, _ in schedulePreviewRefresh() }
         .onChange(of: valueText) { _, _ in schedulePreviewRefresh() }
         .onChange(of: referenceUnitID) { _, _ in schedulePreviewRefresh() }
+        .onChange(of: valueFieldFocused) { _, isFocused in
+            if isFocused {
+                valueEditSession.snapshot = valueText
+            }
+            // Intentionally do not clear on blur: keeps the holder stable across keyboard
+            // transitions so no view rebuild is triggered during animation.
+        }
         .onChange(of: selectedCategory) { _, new in
             referenceUnitID = Self.canonicalReferenceUnitID(for: new)
             schedulePreviewRefresh()
@@ -324,6 +346,26 @@ struct CustomUnitFormView: View {
                 sectionHeader("PREVIEW")
             }
         }
+    }
+
+    // MARK: - Keyboard
+
+    private func dismissValueFieldKeyboard() {
+        valueFieldFocused = false
+        UIApplication.shared.sendAction(
+            #selector(UIResponder.resignFirstResponder),
+            to: nil,
+            from: nil,
+            for: nil
+        )
+    }
+
+    /// Cancel: revert the decimal field to its pre-edit value (if captured) and dismiss the keyboard.
+    private func cancelValueFieldEdit() {
+        if let snapshot = valueEditSession.snapshot {
+            valueText = snapshot
+        }
+        dismissValueFieldKeyboard()
     }
 
     // MARK: - Save
