@@ -23,6 +23,8 @@ struct ToCard: View {
     let onSave: () -> Void
     @Binding var selectedToUnitID: UnitDefinition.ID
     let availableUnits: [UnitDefinition]
+    /// Scale applied to the "To" unit pill during swap (driven by parent; default `1`).
+    var unitPillScale: CGFloat = 1
 
     @AppStorage("hasSeenLongPressCopy") private var hasSeenLongPressCopy: Bool = false
 
@@ -84,6 +86,7 @@ struct ToCard: View {
                     ) {
                         showToPicker = true
                     }
+                    .scaleEffect(unitPillScale, anchor: .center)
                     .sheet(isPresented: $showToPicker) {
                         UnitPickerSheet(
                             units: availableUnits,

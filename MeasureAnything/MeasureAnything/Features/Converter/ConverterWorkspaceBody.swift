@@ -24,6 +24,8 @@ struct ConverterWorkspaceBody: View {
     @State private var showShareSheet = false
     @State private var shareActivityItems: [Any] = []
     @State private var swapRotation: Double = 0
+    @State private var swapPillScale: CGFloat = 1
+    @State private var isSwapPillAnimating: Bool = false
     @State private var showFromPicker = false
     @State private var customUnitSheetDetent: PresentationDetent = .medium
 
@@ -257,7 +259,8 @@ struct ConverterWorkspaceBody: View {
             onShare: { presentShareResult() },
             onSave: { saveCurrentPairAsFavorite() },
             selectedToUnitID: $vm.selectedToUnitID,
-            availableUnits: vm.availableUnits
+            availableUnits: vm.availableUnits,
+            unitPillScale: swapPillScale
         )
     }
 
@@ -291,6 +294,7 @@ struct ConverterWorkspaceBody: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
 
                 unitMenuPill(selection: $vm.selectedFromUnitID)
+                    .scaleEffect(swapPillScale, anchor: .center)
             }
 
             if ConversionHistory.shared.totalRecordedConversions >= 2 {
@@ -359,11 +363,31 @@ struct ConverterWorkspaceBody: View {
 
     private var referenceSwapButton: some View {
         Button {
+            guard !isSwapPillAnimating else { return }
+            isSwapPillAnimating = true
             let gen = UIImpactFeedbackGenerator(style: .medium)
             gen.impactOccurred()
-            withAnimation(.spring(response: 0.34, dampingFraction: 0.82)) {
+            // Both pills scale to 0.85 then back to 1.0 (total feel ~0.25s). Swap at ~0.12s
+            // when nearly at minimum; numbers update without implicit animation.
+            let springDown = Animation.spring(response: 0.12, dampingFraction: 0.75)
+            let springUp = Animation.spring(response: 0.13, dampingFraction: 0.75)
+            withAnimation(springDown) {
+                swapPillScale = 0.85
                 swapRotation += 180
-                vm.swapUnits()
+            }
+            let swapMidpoint: TimeInterval = 0.12
+            DispatchQueue.main.asyncAfter(deadline: .now() + swapMidpoint) {
+                var t = Transaction()
+                t.disablesAnimations = true
+                withTransaction(t) {
+                    vm.swapUnits()
+                }
+                withAnimation(springUp) {
+                    swapPillScale = 1.0
+                }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+                    isSwapPillAnimating = false
+                }
             }
         } label: {
             Image(systemName: "arrow.left.arrow.right")
@@ -376,6 +400,7 @@ struct ConverterWorkspaceBody: View {
                 .rotationEffect(.degrees(swapRotation))
         }
         .buttonStyle(ConverterPressingButtonStyle())
+        .allowsHitTesting(!isSwapPillAnimating)
         .accessibilityLabel("Swap from and to units")
     }
 
