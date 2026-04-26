@@ -21,6 +21,7 @@ struct ConverterWorkspaceBody: View {
     @ObservedObject var vm: ConverterViewModel
     @Environment(\.verticalSizeClass) private var verticalSizeClass
     @FocusState private var valueFieldFocused: Bool
+    @StateObject private var keyboard = KeyboardObserver()
     @State private var showShareSheet = false
     @State private var shareActivityItems: [Any] = []
     @State private var swapRotation: Double = 0
@@ -72,12 +73,18 @@ struct ConverterWorkspaceBody: View {
         .toolbar {
             ToolbarItemGroup(placement: .keyboard) {
                 Spacer()
-                Button("Done") {
+                Button {
                     dismissAmountFieldKeyboard()
+                } label: {
+                    Image(systemName: "keyboard.chevron.compact.down")
+                        .font(.system(size: 20))
+                        .foregroundStyle(categoryAccent)
                 }
-                .fontWeight(.semibold)
+                .padding(.trailing, 4)
             }
         }
+        // Hide the custom bottom nav while the keyboard is up so it can't float mid-screen.
+        .toolbar(keyboard.isVisible ? .hidden : .automatic, for: .tabBar)
     }
 
     private func dismissAmountFieldKeyboard() {

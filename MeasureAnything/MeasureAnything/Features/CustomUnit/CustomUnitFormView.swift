@@ -96,7 +96,7 @@ struct CustomUnitFormView: View {
             .toolbar {
                 ToolbarItemGroup(placement: .keyboard) {
                     Spacer()
-                    Button("Done") {
+                    Button {
                         valueFieldFocused = false
                         UIApplication.shared.sendAction(
                             #selector(UIResponder.resignFirstResponder),
@@ -104,11 +104,14 @@ struct CustomUnitFormView: View {
                             from: nil,
                             for: nil
                         )
+                    } label: {
+                        Image(systemName: "keyboard.chevron.compact.down")
+                            .font(.system(size: 20))
+                            .foregroundStyle(accent)
                     }
-                    .fontWeight(.semibold)
+                    .padding(.trailing, 4)
                 }
             }
-            .ignoresSafeArea(.keyboard, edges: .bottom)
         }
         .onAppear {
             schedulePreviewRefresh()

@@ -18,6 +18,7 @@ struct HomeView: View {
     @State private var scrollToConverterToken = 0
     @State private var homeTab: BottomNav.Tab = .convert
     @State private var exploreResetToken = 0
+    @StateObject private var keyboard = KeyboardObserver()
     @State private var factCardSheetItem: FactCardSheetItem?
     @State private var factCardSheetDetent: PresentationDetent = .large
 
@@ -79,8 +80,24 @@ struct HomeView: View {
                     exploreResetToken &+= 1
                 }
             }
+            // Keep the nav in the hierarchy (avoids toolbar/keyboard transition glitches),
+            // but hide it while the keyboard is up so it can't float mid-screen.
+            .opacity(keyboard.isVisible ? 0 : 1)
+            .allowsHitTesting(!keyboard.isVisible)
         }
         .background(Color(hex: "#F0F0F3"))
+        .onChange(of: homeTab) { old, new in
+            // Ensure keyboard state is fully reset before tab transitions.
+            if old == .explore && new != .explore {
+                exploreResetToken &+= 1
+                UIApplication.shared.sendAction(
+                    #selector(UIResponder.resignFirstResponder),
+                    to: nil,
+                    from: nil,
+                    for: nil
+                )
+            }
+        }
         .sheet(isPresented: $showFavorites) {
             FavoritesListView(registry: vm.currentRegistry) { fav in
                 vm.applyFavoriteRestore(
@@ -125,7 +142,6 @@ struct HomeView: View {
                     }
                     .padding(.bottom, ConverterLayout.rhythm24)
                 }
-                .ignoresSafeArea(.keyboard, edges: .bottom)
                 .scrollDismissesKeyboard(.never)
                 .onChange(of: scrollToConverterToken) { _, _ in
                     withAnimation(.easeInOut(duration: 0.35)) {
@@ -136,6 +152,7 @@ struct HomeView: View {
             .background(Color(hex: "#F0F0F3"))
             .navigationTitle("Measure Anything")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbar(keyboard.isVisible ? .hidden : .automatic, for: .tabBar)
             .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
