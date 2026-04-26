@@ -1,5 +1,6 @@
 import SwiftData
 import SwiftUI
+import UIKit
 import MeasureAnythingCore
 
 /// Create a custom multiplicative unit (local-only, v1). Create-only — no edit mode.
@@ -92,6 +93,22 @@ struct CustomUnitFormView: View {
                         .disabled(!canSave)
                 }
             }
+            .toolbar {
+                ToolbarItemGroup(placement: .keyboard) {
+                    Spacer()
+                    Button("Done") {
+                        valueFieldFocused = false
+                        UIApplication.shared.sendAction(
+                            #selector(UIResponder.resignFirstResponder),
+                            to: nil,
+                            from: nil,
+                            for: nil
+                        )
+                    }
+                    .fontWeight(.semibold)
+                }
+            }
+            .ignoresSafeArea(.keyboard, edges: .bottom)
         }
         .onAppear {
             schedulePreviewRefresh()
@@ -144,13 +161,6 @@ struct CustomUnitFormView: View {
                         .monospacedDigit()
                         .minimumScaleFactor(0.6)
                         .lineLimit(1)
-                        .toolbar {
-                            ToolbarItemGroup(placement: .keyboard) {
-                                Spacer()
-                                Button("Done") { valueFieldFocused = false }
-                                    .fontWeight(.semibold)
-                            }
-                        }
                         .accessibilityLabel("Value in reference unit")
 
                     referenceUnitPill
@@ -225,8 +235,17 @@ struct CustomUnitFormView: View {
 
     private var referenceUnitPill: some View {
         Button {
-            showUnitPicker = true
             Haptics.tap()
+            valueFieldFocused = false
+            UIApplication.shared.sendAction(
+                #selector(UIResponder.resignFirstResponder),
+                to: nil,
+                from: nil,
+                for: nil
+            )
+            DispatchQueue.main.async {
+                showUnitPicker = true
+            }
         } label: {
             HStack(spacing: 6) {
                 Text(referenceUnit?.name ?? "—")

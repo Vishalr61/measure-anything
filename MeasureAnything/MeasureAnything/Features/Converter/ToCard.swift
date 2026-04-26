@@ -25,6 +25,8 @@ struct ToCard: View {
     let availableUnits: [UnitDefinition]
     /// Scale applied to the "To" unit pill during swap (driven by parent; default `1`).
     var unitPillScale: CGFloat = 1
+    /// Called on the main thread before the unit picker is presented; use to dismiss the amount keyboard so the sheet does not appear under it.
+    var onPrepareUnitPicker: (() -> Void)? = nil
 
     @AppStorage("hasSeenLongPressCopy") private var hasSeenLongPressCopy: Bool = false
 
@@ -84,7 +86,10 @@ struct ToCard: View {
                         accent: accent,
                         style: .inline
                     ) {
-                        showToPicker = true
+                        onPrepareUnitPicker?()
+                        DispatchQueue.main.async {
+                            showToPicker = true
+                        }
                     }
                     .scaleEffect(unitPillScale, anchor: .center)
                     .sheet(isPresented: $showToPicker) {

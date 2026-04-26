@@ -125,6 +125,8 @@ struct HomeView: View {
                     }
                     .padding(.bottom, ConverterLayout.rhythm24)
                 }
+                .ignoresSafeArea(.keyboard, edges: .bottom)
+                .scrollDismissesKeyboard(.never)
                 .onChange(of: scrollToConverterToken) { _, _ in
                     withAnimation(.easeInOut(duration: 0.35)) {
                         proxy.scrollTo(HomeScrollTarget.converter, anchor: .top)
@@ -134,7 +136,6 @@ struct HomeView: View {
             .background(Color(hex: "#F0F0F3"))
             .navigationTitle("Measure Anything")
             .navigationBarTitleDisplayMode(.inline)
-            .scrollDismissesKeyboard(.interactively)
             .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {

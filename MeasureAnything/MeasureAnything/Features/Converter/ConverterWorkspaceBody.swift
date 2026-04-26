@@ -69,6 +69,30 @@ struct ConverterWorkspaceBody: View {
         .onShake {
             vm.requestSingleRollFromShake()
         }
+        .toolbar {
+            ToolbarItemGroup(placement: .keyboard) {
+                Spacer()
+                Button("Done") {
+                    dismissAmountFieldKeyboard()
+                }
+                .fontWeight(.semibold)
+            }
+        }
+    }
+
+    private func dismissAmountFieldKeyboard() {
+        valueFieldFocused = false
+        UIApplication.shared.sendAction(
+            #selector(UIResponder.resignFirstResponder),
+            to: nil,
+            from: nil,
+            for: nil
+        )
+    }
+
+    /// Dismiss the decimal keyboard before a unit sheet so the accessory bar and nav bar do not fight the transition.
+    private func prepareUnitPickerPresentation() {
+        dismissAmountFieldKeyboard()
     }
 
     private var canShareResult: Bool {
@@ -263,7 +287,8 @@ struct ConverterWorkspaceBody: View {
             onSave: { saveCurrentPairAsFavorite() },
             selectedToUnitID: $vm.selectedToUnitID,
             availableUnits: vm.availableUnits,
-            unitPillScale: swapPillScale
+            unitPillScale: swapPillScale,
+            onPrepareUnitPicker: { prepareUnitPickerPresentation() }
         )
     }
 
@@ -284,15 +309,6 @@ struct ConverterWorkspaceBody: View {
                     .monospacedDigit()
                     .lineLimit(1)
                     .minimumScaleFactor(0.55)
-                    .toolbar {
-                        ToolbarItemGroup(placement: .keyboard) {
-                            Spacer()
-                            Button("Done") {
-                                valueFieldFocused = false
-                            }
-                            .fontWeight(.semibold)
-                        }
-                    }
                     .accessibilityLabel("Amount to convert")
                     .frame(maxWidth: .infinity, alignment: .leading)
 
@@ -351,7 +367,10 @@ struct ConverterWorkspaceBody: View {
             name: name,
             accent: categoryAccent
         ) {
-            showFromPicker = true
+            prepareUnitPickerPresentation()
+            DispatchQueue.main.async {
+                showFromPicker = true
+            }
         }
         .sheet(isPresented: $showFromPicker) {
             UnitPickerSheet(
