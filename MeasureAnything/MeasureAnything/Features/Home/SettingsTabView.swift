@@ -5,6 +5,7 @@ import SwiftUI
 struct SettingsTabView: View {
     @Environment(\.openURL) private var openURL
     @Environment(\.requestReview) private var requestReview
+    @EnvironmentObject private var vm: ConverterViewModel
     @Query(sort: \CustomUnit.name) private var customUnits: [CustomUnit]
 
     var body: some View {
@@ -23,6 +24,14 @@ struct SettingsTabView: View {
                     }
                 } header: {
                     sectionHeader("General")
+                }
+
+                Section {
+                    Toggle("Precision mode", isOn: $vm.precisionModeEnabled)
+                } header: {
+                    sectionHeader("Display")
+                } footer: {
+                    Text("When on, the converted value shows full decimal detail instead of smart grouping and scientific shorthand.")
                 }
 
                 Section {

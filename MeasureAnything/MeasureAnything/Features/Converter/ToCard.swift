@@ -96,7 +96,7 @@ struct ToCard: View {
                 }
 
                 if showHoldToCopyHint {
-                    Text("hold to copy")
+                    Text("Hold to copy")
                         .font(.system(size: 9, weight: .medium))
                         .foregroundStyle(Color(hex: "#B4B2A9"))
                         .accessibilityHidden(true)
