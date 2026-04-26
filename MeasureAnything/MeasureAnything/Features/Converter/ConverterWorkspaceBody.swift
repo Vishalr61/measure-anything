@@ -359,7 +359,8 @@ struct ConverterWorkspaceBody: View {
 
     private var referenceSwapButton: some View {
         Button {
-            Haptics.tap()
+            let gen = UIImpactFeedbackGenerator(style: .medium)
+            gen.impactOccurred()
             withAnimation(.spring(response: 0.34, dampingFraction: 0.82)) {
                 swapRotation += 180
                 vm.swapUnits()

@@ -92,7 +92,11 @@ struct ToCard: View {
                     background: Color(hex: "#F0F0F3"),
                     foreground: Color(hex: "#5F5E5A"),
                     disabled: !copyEnabled,
-                    action: onCopy
+                    action: {
+                        let gen = UIImpactFeedbackGenerator(style: .light)
+                        gen.impactOccurred()
+                        onCopy()
+                    }
                 )
                 ActionButton(
                     icon: "square.and.arrow.up",
