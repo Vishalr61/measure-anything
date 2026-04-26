@@ -66,6 +66,9 @@ struct ConverterWorkspaceBody: View {
         .task(id: customUnitsSyncToken) {
             vm.sync(customUnits: customUnits)
         }
+        .onShake {
+            vm.requestSingleRollFromShake()
+        }
     }
 
     private var canShareResult: Bool {

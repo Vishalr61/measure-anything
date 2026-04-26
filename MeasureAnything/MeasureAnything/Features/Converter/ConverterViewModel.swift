@@ -92,6 +92,8 @@ final class ConverterViewModel: ObservableObject {
     /// When `true`, `diceLandedUnitName` is the full subtitle (dual roll). When `false`, prefix `"landed on "` is shown before the name.
     @Published var diceSubtitleIsDualFormat: Bool = false
     // Long-press discoverability hint is driven by `DiceRollCard` + UserDefaults.
+    /// Incremented when the user shakes the device so `DiceRollCard` can run the same path as a single tap (animations + `rollDice()`).
+    @Published private(set) var shakeSingleRollRequest: UInt = 0
 
     private var diceFlashTimer: Timer?
     private var diceLongPressHintDismissWorkItem: DispatchWorkItem?
@@ -287,6 +289,11 @@ final class ConverterViewModel: ObservableObject {
         let tmp = selectedFromUnitID
         selectedFromUnitID = selectedToUnitID
         selectedToUnitID = tmp
+    }
+
+    /// Called when the user shakes the device on the converter; `DiceRollCard` mirrors a single tap (including die UI).
+    func requestSingleRollFromShake() {
+        shakeSingleRollRequest &+= 1
     }
 
     func rollDice() {
