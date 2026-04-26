@@ -7,6 +7,7 @@ import MeasureAnythingCore
 
 @MainActor
 final class ConverterViewModel: ObservableObject {
+    private var inputEditSnapshot: String?
     /// Skips category/mode defaulting and per-field `recompute` while applying a saved favorite.
     private var isApplyingFavoriteRestore = false
     /// Skips reactive defaults / `recompute` while restoring `UserDefaults` session in `init`.
@@ -166,6 +167,16 @@ final class ConverterViewModel: ObservableObject {
         taxonomy.attachUnitCatalog(pair.registry.allUnits)
         reconcileSelectionsAfterModeChange()
         recompute()
+    }
+
+    func captureInputEditSnapshot() {
+        inputEditSnapshot = inputText
+    }
+
+    func restoreInputEditSnapshot() {
+        if let snapshot = inputEditSnapshot {
+            inputText = snapshot
+        }
     }
 
     private static func makeRegistry(customUnits: [CustomUnit]) -> (registry: UnitRegistry, engine: ConverterEngine) {

@@ -62,59 +62,67 @@ struct HomeView: View {
     }
 
     var body: some View {
-        VStack(spacing: 0) {
-            Group {
-                switch homeTab {
-                case .convert:
-                    convertTab
-                case .explore:
-                    exploreTab
-                case .settings:
-                    settingsTab
+        GeometryReader { proxy in
+            VStack(spacing: 0) {
+                Group {
+                    switch homeTab {
+                    case .convert:
+                        convertTab
+                    case .explore:
+                        exploreTab
+                    case .settings:
+                        settingsTab
+                    }
                 }
-            }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
 
-            BottomNav(selected: $homeTab, selectionTint: categoryAccent) { tab in
-                if tab == .explore {
-                    exploreResetToken &+= 1
+                BottomNav(selected: $homeTab, selectionTint: categoryAccent) { tab in
+                    if tab == .explore {
+                        exploreResetToken &+= 1
+                    }
+                }
+                // Keep the nav in the hierarchy (avoids toolbar/keyboard transition glitches),
+                // but hide it while the keyboard is up so it can't float mid-screen.
+                .opacity(keyboard.isVisible ? 0 : 1)
+                .allowsHitTesting(!keyboard.isVisible)
+            }
+            .background(Color(hex: "#F0F0F3"))
+            .overlay(alignment: .bottom) {
+                if homeTab == .convert && keyboard.isVisible {
+                    KeyboardAccessoryBar(
+                        accent: categoryAccent,
+                        onCancel: cancelConverterKeyboard,
+                        onDone: dismissKeyboard
+                    )
+                    .padding(.bottom, max(0, keyboard.height - proxy.safeAreaInsets.bottom))
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
                 }
             }
-            // Keep the nav in the hierarchy (avoids toolbar/keyboard transition glitches),
-            // but hide it while the keyboard is up so it can't float mid-screen.
-            .opacity(keyboard.isVisible ? 0 : 1)
-            .allowsHitTesting(!keyboard.isVisible)
-        }
-        .background(Color(hex: "#F0F0F3"))
-        .onChange(of: homeTab) { old, new in
-            // Ensure keyboard state is fully reset before tab transitions.
-            if old == .explore && new != .explore {
-                exploreResetToken &+= 1
-                UIApplication.shared.sendAction(
-                    #selector(UIResponder.resignFirstResponder),
-                    to: nil,
-                    from: nil,
-                    for: nil
-                )
+            .onChange(of: homeTab) { old, new in
+                // Ensure keyboard state is fully reset before tab transitions.
+                if old == .explore && new != .explore {
+                    exploreResetToken &+= 1
+                    dismissKeyboard()
+                }
             }
-        }
-        .sheet(isPresented: $showFavorites) {
-            FavoritesListView(registry: vm.currentRegistry) { fav in
-                vm.applyFavoriteRestore(
-                    categoryRaw: fav.categoryRaw,
-                    fromID: fav.fromUnitID,
-                    toID: fav.toUnitID
-                )
+            .sheet(isPresented: $showFavorites) {
+                FavoritesListView(registry: vm.currentRegistry) { fav in
+                    vm.applyFavoriteRestore(
+                        categoryRaw: fav.categoryRaw,
+                        fromID: fav.fromUnitID,
+                        toID: fav.toUnitID
+                    )
+                }
             }
-        }
-        .sheet(item: $factCardSheetItem) { item in
-            FactCardNavigationShell(
-                initialUnitID: item.unitID,
-                viewModel: vm,
-                dismissEntireFactCardFlow: { factCardSheetItem = nil }
-            )
-            .presentationDetents([.medium, .large], selection: $factCardSheetDetent)
-            .presentationDragIndicator(.visible)
+            .sheet(item: $factCardSheetItem) { item in
+                FactCardNavigationShell(
+                    initialUnitID: item.unitID,
+                    viewModel: vm,
+                    dismissEntireFactCardFlow: { factCardSheetItem = nil }
+                )
+                .presentationDetents([.medium, .large], selection: $factCardSheetDetent)
+                .presentationDragIndicator(.visible)
+            }
         }
     }
 
@@ -203,6 +211,20 @@ struct HomeView: View {
 
     private var settingsTab: some View {
         SettingsTabView()
+    }
+
+    private func dismissKeyboard() {
+        UIApplication.shared.sendAction(
+            #selector(UIResponder.resignFirstResponder),
+            to: nil,
+            from: nil,
+            for: nil
+        )
+    }
+
+    private func cancelConverterKeyboard() {
+        vm.restoreInputEditSnapshot()
+        dismissKeyboard()
     }
 
     private var categoryPillBar: some View {

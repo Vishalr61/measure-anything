@@ -32,47 +32,55 @@ struct ConverterView: View {
     }
 
     var body: some View {
-        VStack(spacing: 0) {
-            Group {
-                switch mainTab {
-                case .convert:
-                    convertTab
-                case .explore:
-                    ExploreView(vm: vm, selectedTab: $mainTab, resetToken: exploreResetToken)
-                case .settings:
-                    SettingsTabView()
+        GeometryReader { proxy in
+            VStack(spacing: 0) {
+                Group {
+                    switch mainTab {
+                    case .convert:
+                        convertTab
+                    case .explore:
+                        ExploreView(vm: vm, selectedTab: $mainTab, resetToken: exploreResetToken)
+                    case .settings:
+                        SettingsTabView()
+                    }
                 }
-            }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
 
-            BottomNav(selected: $mainTab, selectionTint: categoryAccent) { tab in
-                if tab == .explore {
-                    exploreResetToken &+= 1
+                BottomNav(selected: $mainTab, selectionTint: categoryAccent) { tab in
+                    if tab == .explore {
+                        exploreResetToken &+= 1
+                    }
+                }
+                .opacity(keyboard.isVisible ? 0 : 1)
+                .allowsHitTesting(!keyboard.isVisible)
+            }
+            .environmentObject(vm)
+            .background(Color(hex: "#F0F0F3"))
+            .overlay(alignment: .bottom) {
+                if mainTab == .convert && keyboard.isVisible {
+                    KeyboardAccessoryBar(
+                        accent: categoryAccent,
+                        onCancel: cancelConverterKeyboard,
+                        onDone: dismissKeyboard
+                    )
+                    .padding(.bottom, max(0, keyboard.height - proxy.safeAreaInsets.bottom))
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
                 }
             }
-            .opacity(keyboard.isVisible ? 0 : 1)
-            .allowsHitTesting(!keyboard.isVisible)
-        }
-        .environmentObject(vm)
-        .background(Color(hex: "#F0F0F3"))
-        .onChange(of: mainTab) { old, new in
-            if old == .explore && new != .explore {
-                exploreResetToken &+= 1
-                UIApplication.shared.sendAction(
-                    #selector(UIResponder.resignFirstResponder),
-                    to: nil,
-                    from: nil,
-                    for: nil
-                )
+            .onChange(of: mainTab) { old, new in
+                if old == .explore && new != .explore {
+                    exploreResetToken &+= 1
+                    dismissKeyboard()
+                }
             }
-        }
-        .sheet(isPresented: $showFavorites) {
-            FavoritesListView(registry: vm.currentRegistry) { fav in
-                vm.applyFavoriteRestore(
-                    categoryRaw: fav.categoryRaw,
-                    fromID: fav.fromUnitID,
-                    toID: fav.toUnitID
-                )
+            .sheet(isPresented: $showFavorites) {
+                FavoritesListView(registry: vm.currentRegistry) { fav in
+                    vm.applyFavoriteRestore(
+                        categoryRaw: fav.categoryRaw,
+                        fromID: fav.fromUnitID,
+                        toID: fav.toUnitID
+                    )
+                }
             }
         }
     }
@@ -145,6 +153,20 @@ struct ConverterView: View {
         modelContext.insert(fav)
         try? modelContext.save()
         Haptics.favorite()
+    }
+
+    private func dismissKeyboard() {
+        UIApplication.shared.sendAction(
+            #selector(UIResponder.resignFirstResponder),
+            to: nil,
+            from: nil,
+            for: nil
+        )
+    }
+
+    private func cancelConverterKeyboard() {
+        vm.restoreInputEditSnapshot()
+        dismissKeyboard()
     }
 }
 
