@@ -28,6 +28,7 @@ enum UnitScaleGroups {
         "footlong_sub": "Human scale", "wine_bottle": "Human scale",
         "arm_span": "Human scale", "door": "Human scale",
         "human_height": "Human scale", "yoga_mat": "Human scale",
+        "smoot": "Human scale",
         "guitar": "Human scale", "fridge": "Human scale",
         "suitcase": "Human scale", "park_bench": "Human scale",
         "basketball_hoop": "Room & street",

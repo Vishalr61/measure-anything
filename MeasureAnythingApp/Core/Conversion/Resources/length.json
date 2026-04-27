@@ -373,7 +373,7 @@
     "factor": 1.7,
     "iconName": "refrigerator",
     "description": "Typical fridge height ≈ 1.7 m.",
-    "funFact": "The average household fridge runs continuously for around 10–15 years and is one of the few appliances left on 24/7.",
+    "funFact": "Most people believe the top shelf is the coldest—but in many fridges, it’s the back or the bottom near the airflow. That’s why eggs freeze and lettuce wilts if stored in the wrong spot.",
     "exampleMeme": "Roughly fridge-sized, emotionally and physically.",
     "interestScore": 6
   },
@@ -726,6 +726,20 @@
     "funFact": "The average person checks their phone around 96 times a day — roughly once every 10 minutes of waking life.",
     "exampleMeme": "One phone tall.",
     "interestScore": 6
+  },
+  {
+    "id": "smoot",
+    "name": "Smoot",
+    "category": "length",
+    "baseUnit": "meter",
+    "kind": "absurd",
+    "conversionStyle": "multiplicative",
+    "factor": 1.7018,
+    "iconName": "ruler",
+    "description": "Smoot = 1.7018 m (MIT prank unit, 1958).",
+    "funFact": "The smoot was invented in 1958 when MIT students measured the Harvard Bridge using Oliver R. Smoot as a human ruler. The bridge was declared to be 364.4 smoots ± 1 ear, and the markings are still repainted and used as an unofficial calibration reference for road crews and even the police.",
+    "exampleMeme": "Measured in nerd tradition.",
+    "interestScore": 10
   },
   {
     "id": "spider_silk",

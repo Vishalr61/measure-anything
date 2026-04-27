@@ -27,6 +27,8 @@ final class ConverterViewModel: ObservableObject {
         static let hasUsedLongPressRoll = "hasUsedLongPressRoll"
     }
 
+    private static let precisionModeKey = "precisionModeEnabled"
+
     @Published var selectedCategory: UnitCategory = .length {
         didSet {
             guard oldValue != selectedCategory else { return }
@@ -69,6 +71,14 @@ final class ConverterViewModel: ObservableObject {
         didSet { recompute() }
     }
 
+    /// When `true`, `formatNumberForDisplay` uses full decimal output (no smart shorthand / scientific).
+    /// Default `false` is stored; missing key in UserDefaults is treated as off.
+    @Published var precisionModeEnabled: Bool = false {
+        didSet {
+            UserDefaults.standard.set(precisionModeEnabled, forKey: Self.precisionModeKey)
+        }
+    }
+
     @Published private(set) var conversionResult: ConversionResult?
     @Published private(set) var validationError: String?
 
@@ -82,6 +92,8 @@ final class ConverterViewModel: ObservableObject {
     /// When `true`, `diceLandedUnitName` is the full subtitle (dual roll). When `false`, prefix `"landed on "` is shown before the name.
     @Published var diceSubtitleIsDualFormat: Bool = false
     // Long-press discoverability hint is driven by `DiceRollCard` + UserDefaults.
+    /// Incremented when the user shakes the device so `DiceRollCard` can run the same path as a single tap (animations + `rollDice()`).
+    @Published private(set) var shakeSingleRollRequest: UInt = 0
 
     private var diceFlashTimer: Timer?
     private var diceLongPressHintDismissWorkItem: DispatchWorkItem?
@@ -139,6 +151,7 @@ final class ConverterViewModel: ObservableObject {
 
         syncDiceTiltToCategory(animated: false)
         sessionPersistenceEnabled = true
+        precisionModeEnabled = UserDefaults.standard.bool(forKey: Self.precisionModeKey)
         saveSession()
     }
 
@@ -276,6 +289,11 @@ final class ConverterViewModel: ObservableObject {
         let tmp = selectedFromUnitID
         selectedFromUnitID = selectedToUnitID
         selectedToUnitID = tmp
+    }
+
+    /// Called when the user shakes the device on the converter; `DiceRollCard` mirrors a single tap (including die UI).
+    func requestSingleRollFromShake() {
+        shakeSingleRollRequest &+= 1
     }
 
     func rollDice() {
@@ -764,31 +782,58 @@ final class ConverterViewModel: ObservableObject {
         guard value.isFinite else { return "—" }
         guard value != 0 else { return "0" }
 
-        let absValue = abs(value)
-
-        if absValue < 0.0001 || absValue > 9_999_999 {
-            let formatter = NumberFormatter()
-            formatter.numberStyle = .scientific
-            formatter.maximumSignificantDigits = 4
-            formatter.minimumSignificantDigits = 1
-            formatter.locale = Locale(identifier: "en_US")
-            if let raw = formatter.string(from: NSNumber(value: value)) {
-                return raw
-                    .replacingOccurrences(of: "E", with: "×10^")
-                    .replacingOccurrences(of: "e", with: "×10^")
-            }
-            return String(format: "%g", locale: Self.displayFallbackLocale, value)
+        if precisionModeEnabled {
+            return formatFullDecimalMagnitude(value)
         }
 
+        let absValue = abs(value)
+        // Smart: ordinary decimals in [0.001, 1_000_000) with up to 2 fraction digits + grouping;
+        // otherwise scientific with ×10^ for attributed superscript styling.
+        if absValue >= 0.001 && absValue < 1_000_000 {
+            return formatDecimalCompact(value, maxFractionDigits: 2)
+        }
+        return formatScientificForDisplay(value)
+    }
+
+    /// Full decimal, grouped, up to 20 fraction digits, never scientific.
+    private func formatFullDecimalMagnitude(_ value: Double) -> String {
         let formatter = NumberFormatter()
         formatter.numberStyle = .decimal
-        formatter.maximumFractionDigits = 6
-        formatter.minimumFractionDigits = 0
-        formatter.locale = Locale(identifier: "en_US")
+        formatter.locale = Self.displayFallbackLocale
         formatter.usesGroupingSeparator = true
         formatter.roundingMode = .halfUp
+        formatter.maximumFractionDigits = 20
+        formatter.minimumFractionDigits = 0
+        return formatter.string(from: NSNumber(value: value))
+            ?? String(format: "%f", locale: Self.displayFallbackLocale, value)
+    }
+
+    /// Grouped decimal with a capped fraction width; `maximumFractionDigits` 2 for smart mode.
+    private func formatDecimalCompact(_ value: Double, maxFractionDigits: Int) -> String {
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .decimal
+        formatter.locale = Self.displayFallbackLocale
+        formatter.usesGroupingSeparator = true
+        formatter.roundingMode = .halfUp
+        formatter.maximumFractionDigits = maxFractionDigits
+        formatter.minimumFractionDigits = 0
         return formatter.string(from: NSNumber(value: value))
             ?? String(format: "%g", locale: Self.displayFallbackLocale, value)
+    }
+
+    /// Scientific string using `×10^` so `attributedAdaptiveNumber` can style the exponent.
+    private func formatScientificForDisplay(_ value: Double) -> String {
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .scientific
+        formatter.maximumSignificantDigits = 4
+        formatter.minimumSignificantDigits = 1
+        formatter.locale = Self.displayFallbackLocale
+        if let raw = formatter.string(from: NSNumber(value: value)) {
+            return raw
+                .replacingOccurrences(of: "E", with: "×10^")
+                .replacingOccurrences(of: "e", with: "×10^")
+        }
+        return String(format: "%g", locale: Self.displayFallbackLocale, value)
     }
 
     /// Main result line with optional superscript exponent when scientific notation is used.
@@ -839,7 +884,10 @@ final class ConverterViewModel: ObservableObject {
     }
 
     /// Footer line for the share card when the destination unit has no fun fact.
+    /// Returns `nil` for temperature because "1 °C = 33.8 °F" is misleading (it converts the
+    /// number 1, not a physically meaningful zero reference).
     func shareCardFormulaLine() -> String? {
+        guard selectedCategory != .temperature else { return nil }
         guard let fromU = fromUnit, let toU = toUnit,
               let one = try? engine.convert(1, from: selectedFromUnitID, to: selectedToUnitID, includeMemeExplanation: false)
         else { return nil }

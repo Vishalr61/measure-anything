@@ -13,6 +13,7 @@ struct ConverterView: View {
     @State private var showFavorites = false
     @State private var mainTab: BottomNav.Tab = .convert
     @State private var exploreResetToken = 0
+    @StateObject private var keyboard = KeyboardObserver()
 
     private var categoryAccent: Color {
         ConverterCategoryAccent.accent(for: vm.selectedCategory)
@@ -49,9 +50,22 @@ struct ConverterView: View {
                     exploreResetToken &+= 1
                 }
             }
+            .opacity(keyboard.isVisible ? 0 : 1)
+            .allowsHitTesting(!keyboard.isVisible)
         }
         .environmentObject(vm)
         .background(Color(hex: "#F0F0F3"))
+        .onChange(of: mainTab) { old, new in
+            if old == .explore && new != .explore {
+                exploreResetToken &+= 1
+                UIApplication.shared.sendAction(
+                    #selector(UIResponder.resignFirstResponder),
+                    to: nil,
+                    from: nil,
+                    for: nil
+                )
+            }
+        }
         .sheet(isPresented: $showFavorites) {
             FavoritesListView(registry: vm.currentRegistry) { fav in
                 vm.applyFavoriteRestore(
@@ -72,10 +86,11 @@ struct ConverterView: View {
                     vm: vm
                 )
             }
-            .scrollDismissesKeyboard(.interactively)
+            .scrollDismissesKeyboard(.never)
             .background(Color(hex: "#F0F0F3"))
             .navigationTitle("Measure Anything")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbar(keyboard.isVisible ? .hidden : .automatic, for: .tabBar)
             .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {

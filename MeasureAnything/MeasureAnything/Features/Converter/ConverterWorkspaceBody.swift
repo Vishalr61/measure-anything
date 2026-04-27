@@ -3,6 +3,15 @@ import SwiftData
 import UIKit
 import MeasureAnythingCore
 
+/// Holds the pre-edit snapshot of the amount field outside SwiftUI's `@State` so that
+/// capturing it on focus does NOT trigger a view rebuild during keyboard presentation.
+/// A `@State` mutation on first focus was racing against the system attaching the
+/// `ToolbarItemGroup(placement: .keyboard)`, causing the Cancel/Done bar to be missing
+/// on the very first tap of the FROM input field after launch.
+private final class AmountEditSession {
+    var snapshot: String?
+}
+
 /// Live conversion blocks (amount, units, result) shared by `HomeView` and standalone `ConverterView`.
 struct ConverterWorkspaceBody: View {
     /// When `false`, category is controlled by the host (e.g. home pill bar).
@@ -19,10 +28,16 @@ struct ConverterWorkspaceBody: View {
     @EnvironmentObject private var taxonomyStore: AppTaxonomyStore
 
     @ObservedObject var vm: ConverterViewModel
+    @Environment(\.verticalSizeClass) private var verticalSizeClass
     @FocusState private var valueFieldFocused: Bool
+    /// Snapshot holder for the amount field; mutated outside `@State` so capturing it on
+    /// focus does not rebuild the view during keyboard presentation (see `AmountEditSession`).
+    @State private var amountEditSession = AmountEditSession()
     @State private var showShareSheet = false
     @State private var shareActivityItems: [Any] = []
     @State private var swapRotation: Double = 0
+    @State private var swapPillScale: CGFloat = 1
+    @State private var isSwapPillAnimating: Bool = false
     @State private var showFromPicker = false
     @State private var customUnitSheetDetent: PresentationDetent = .medium
 
@@ -40,7 +55,7 @@ struct ConverterWorkspaceBody: View {
             categoryModeBlock
 
             Spacer()
-                .frame(height: showsCategoryPicker ? ConverterLayout.majorBlockSpacing : ConverterLayout.rhythm12)
+                .frame(height: showsCategoryPicker ? adaptiveMajorSpacing : ConverterLayout.rhythm12)
 
             conversionInputBlock
         }
@@ -63,6 +78,64 @@ struct ConverterWorkspaceBody: View {
         .task(id: customUnitsSyncToken) {
             vm.sync(customUnits: customUnits)
         }
+        .onShake {
+            vm.requestSingleRollFromShake()
+        }
+        .onAppear {
+            // Pre-warm the snapshot so the keyboard toolbar's logic has stable state
+            // before the user's first tap. Together with the class-based holder this
+            // ensures focus changes don't trigger any @State mutation during the very
+            // first keyboard presentation, which otherwise drops the accessory bar.
+            if amountEditSession.snapshot == nil {
+                amountEditSession.snapshot = vm.inputText
+            }
+        }
+        .onChange(of: valueFieldFocused) { _, isFocused in
+            if isFocused {
+                amountEditSession.snapshot = vm.inputText
+            }
+            // Intentionally do not clear on blur: keeps the holder stable across keyboard
+            // transitions so no view rebuild is triggered while the keyboard is animating.
+        }
+        .toolbar {
+            ToolbarItemGroup(placement: .keyboard) {
+                Button("Cancel") {
+                    cancelAmountFieldEdit()
+                }
+                .foregroundStyle(categoryAccent.opacity(0.6))
+
+                Spacer()
+
+                Button("Done") {
+                    dismissAmountFieldKeyboard()
+                }
+                .fontWeight(.bold)
+                .foregroundStyle(categoryAccent)
+            }
+        }
+    }
+
+    private func dismissAmountFieldKeyboard() {
+        valueFieldFocused = false
+        UIApplication.shared.sendAction(
+            #selector(UIResponder.resignFirstResponder),
+            to: nil,
+            from: nil,
+            for: nil
+        )
+    }
+
+    /// Cancel: revert the amount field to its pre-edit value (if captured) and dismiss the keyboard.
+    private func cancelAmountFieldEdit() {
+        if let snapshot = amountEditSession.snapshot {
+            vm.inputText = snapshot
+        }
+        dismissAmountFieldKeyboard()
+    }
+
+    /// Dismiss the decimal keyboard before a unit sheet so the accessory bar and nav bar do not fight the transition.
+    private func prepareUnitPickerPresentation() {
+        dismissAmountFieldKeyboard()
     }
 
     private var canShareResult: Bool {
@@ -132,6 +205,12 @@ struct ConverterWorkspaceBody: View {
 
     private var categoryAccent: Color {
         ConverterCategoryAccent.accent(for: vm.selectedCategory)
+    }
+
+    /// Reduces vertical gap between category chips and converter cards in compact height
+    /// (e.g. iPhone SE landscape) so the key controls stay visible without scrolling.
+    private var adaptiveMajorSpacing: CGFloat {
+        verticalSizeClass == .compact ? ConverterLayout.rhythm12 : ConverterLayout.majorBlockSpacing
     }
 
     /// Live “1 m = … km” style line under the TO amount (hidden when invalid / no result).
@@ -250,7 +329,9 @@ struct ConverterWorkspaceBody: View {
             onShare: { presentShareResult() },
             onSave: { saveCurrentPairAsFavorite() },
             selectedToUnitID: $vm.selectedToUnitID,
-            availableUnits: vm.availableUnits
+            availableUnits: vm.availableUnits,
+            unitPillScale: swapPillScale,
+            onPrepareUnitPicker: { prepareUnitPickerPresentation() }
         )
     }
 
@@ -271,19 +352,11 @@ struct ConverterWorkspaceBody: View {
                     .monospacedDigit()
                     .lineLimit(1)
                     .minimumScaleFactor(0.55)
-                    .toolbar {
-                        ToolbarItemGroup(placement: .keyboard) {
-                            Spacer()
-                            Button("Done") {
-                                valueFieldFocused = false
-                            }
-                            .fontWeight(.semibold)
-                        }
-                    }
                     .accessibilityLabel("Amount to convert")
                     .frame(maxWidth: .infinity, alignment: .leading)
 
                 unitMenuPill(selection: $vm.selectedFromUnitID)
+                    .scaleEffect(swapPillScale, anchor: .center)
             }
 
             if ConversionHistory.shared.totalRecordedConversions >= 2 {
@@ -337,7 +410,10 @@ struct ConverterWorkspaceBody: View {
             name: name,
             accent: categoryAccent
         ) {
-            showFromPicker = true
+            prepareUnitPickerPresentation()
+            DispatchQueue.main.async {
+                showFromPicker = true
+            }
         }
         .sheet(isPresented: $showFromPicker) {
             UnitPickerSheet(
@@ -352,10 +428,31 @@ struct ConverterWorkspaceBody: View {
 
     private var referenceSwapButton: some View {
         Button {
-            Haptics.tap()
-            withAnimation(.spring(response: 0.34, dampingFraction: 0.82)) {
+            guard !isSwapPillAnimating else { return }
+            isSwapPillAnimating = true
+            let gen = UIImpactFeedbackGenerator(style: .medium)
+            gen.impactOccurred()
+            // Both pills scale to 0.85 then back to 1.0 (total feel ~0.25s). Swap at ~0.12s
+            // when nearly at minimum; numbers update without implicit animation.
+            let springDown = Animation.spring(response: 0.12, dampingFraction: 0.75)
+            let springUp = Animation.spring(response: 0.13, dampingFraction: 0.75)
+            withAnimation(springDown) {
+                swapPillScale = 0.85
                 swapRotation += 180
-                vm.swapUnits()
+            }
+            let swapMidpoint: TimeInterval = 0.12
+            DispatchQueue.main.asyncAfter(deadline: .now() + swapMidpoint) {
+                var t = Transaction()
+                t.disablesAnimations = true
+                withTransaction(t) {
+                    vm.swapUnits()
+                }
+                withAnimation(springUp) {
+                    swapPillScale = 1.0
+                }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+                    isSwapPillAnimating = false
+                }
             }
         } label: {
             Image(systemName: "arrow.left.arrow.right")
@@ -368,6 +465,7 @@ struct ConverterWorkspaceBody: View {
                 .rotationEffect(.degrees(swapRotation))
         }
         .buttonStyle(ConverterPressingButtonStyle())
+        .allowsHitTesting(!isSwapPillAnimating)
         .accessibilityLabel("Swap from and to units")
     }
 

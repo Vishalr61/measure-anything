@@ -1,3 +1,4 @@
+import Combine
 import SwiftUI
 import MeasureAnythingCore
 
@@ -10,6 +11,7 @@ struct DiceRollCard: View {
     @State private var didCompleteLongPress: Bool = false
     @State private var longPressWorkItem: DispatchWorkItem?
     @State private var showHoldHint: Bool = false
+    @State private var rollHintIndex: Int = 0
 
     @State private var decorativeFace: Int = Int.random(in: 1...6)
     @State private var pipOpacity: Double = 1
@@ -67,14 +69,29 @@ struct DiceRollCard: View {
                 pulseBothUnits()
             }
         }
+        .onChange(of: vm.shakeSingleRollRequest) { _, new in
+            guard new > 0 else { return }
+            triggerSingleRoll()
+        }
+        .onReceive(
+            Timer.publish(every: 4, on: .main, in: .common).autoconnect()
+        ) { _ in
+            rollHintIndex = (rollHintIndex + 1) % Self.rollHintMessages.count
+        }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel("Roll the dice")
-        .accessibilityHint("Tap to randomise the target unit. Long press briefly to randomise both units.")
+        .accessibilityHint("Tap to randomise the target unit, shake the device, or long press briefly to randomise both units.")
         .accessibilityAddTraits(.isButton)
         .accessibilityAction(named: Text("Randomise both units")) {
             triggerDualRoll()
         }
     }
+
+    private static let rollHintMessages: [String] = [
+        "Shake to roll",
+        "Tap for a weird conversion",
+        "Long press for full random"
+    ]
 
     private var leftColumn: some View {
         VStack(alignment: .leading, spacing: 6) {
@@ -83,14 +100,25 @@ struct DiceRollCard: View {
                 .foregroundStyle(Color.white)
                 .fixedSize(horizontal: false, vertical: true)
 
-            Text("Get a random weird conversion")
-                .font(.system(size: 12, weight: .regular, design: .rounded))
-                .foregroundStyle(Color.white.opacity(0.78))
-                .fixedSize(horizontal: false, vertical: true)
+            rollHintLine
 
             subtitleRow
                 .padding(.top, 4)
         }
+    }
+
+    private var rollHintLine: some View {
+        ZStack(alignment: .leading) {
+            ForEach(Array(Self.rollHintMessages.enumerated()), id: \.offset) { index, line in
+                Text(line)
+                    .font(.system(size: 12, weight: .regular, design: .rounded))
+                    .foregroundStyle(Color.white.opacity(0.78))
+                    .fixedSize(horizontal: false, vertical: true)
+                    .opacity(rollHintIndex == index ? 1 : 0)
+            }
+        }
+        .frame(maxWidth: .infinity, minHeight: 16, alignment: .leading)
+        .animation(.easeInOut(duration: 0.5), value: rollHintIndex)
     }
 
     private var subtitleRow: some View {
