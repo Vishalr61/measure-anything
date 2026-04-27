@@ -31,7 +31,6 @@ struct CustomUnitFormView: View {
     /// Snapshot holder for the decimal field; mutated outside `@State` so capturing it on
     /// focus does not rebuild the form during keyboard presentation (see `ValueEditSession`).
     @State private var valueEditSession = ValueEditSession()
-    @StateObject private var keyboard = KeyboardObserver()
 
     @FocusState private var valueFieldFocused: Bool
 
@@ -104,19 +103,21 @@ struct CustomUnitFormView: View {
                         .disabled(!canSave)
                 }
             }
-        }
-        .overlay(alignment: .bottom) {
-            if keyboard.isVisible {
-                GeometryReader { proxy in
-                    KeyboardAccessoryBar(
-                        accent: accent,
-                        onCancel: cancelValueFieldEdit,
-                        onDone: dismissValueFieldKeyboard
-                    )
-                    .padding(.bottom, max(0, keyboard.height - proxy.safeAreaInsets.bottom))
-                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
+            .toolbar {
+                ToolbarItemGroup(placement: .keyboard) {
+                    Button("Cancel") {
+                        cancelValueFieldEdit()
+                    }
+                    .foregroundStyle(accent.opacity(0.6))
+
+                    Spacer()
+
+                    Button("Done") {
+                        dismissValueFieldKeyboard()
+                    }
+                    .fontWeight(.bold)
+                    .foregroundStyle(accent)
                 }
-                .ignoresSafeArea()
             }
         }
         .onAppear {
