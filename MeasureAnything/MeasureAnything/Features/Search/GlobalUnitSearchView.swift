@@ -46,7 +46,6 @@ struct GlobalUnitSearchBody: View {
     @State private var activeCategory: UnitCategory?
     @State private var showAllUnits = false
     @FocusState private var searchFocused: Bool
-    @StateObject private var keyboard = KeyboardObserver()
 
     // MARK: Two-step selection state (ephemeral, in-memory only)
 
@@ -196,7 +195,6 @@ struct GlobalUnitSearchBody: View {
                 mainContent
             }
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar((keyboard.isVisible || searchFocused) ? .hidden : .automatic, for: .tabBar)
             .toolbar {
                 if isExpanded {
                     ToolbarItem(placement: .topBarLeading) {
@@ -268,13 +266,6 @@ struct GlobalUnitSearchBody: View {
                     factCardSheetItem = nil
                     factSheetDetent = .large
                 }
-                searchFocused = false
-                UIApplication.shared.sendAction(
-                    #selector(UIResponder.resignFirstResponder),
-                    to: nil,
-                    from: nil,
-                    for: nil
-                )
             }
             .onChange(of: activeCategory) { old, new in
                 if old != nil && new == nil {
@@ -304,16 +295,6 @@ struct GlobalUnitSearchBody: View {
             .presentationDragIndicator(.visible)
         }
         .animation(.easeInOut(duration: 0.2), value: crossCategoryToast != nil)
-        .onDisappear {
-            // When leaving Explore, ensure keyboard + focus are fully reset so the bottom nav doesn't desync.
-            searchFocused = false
-            UIApplication.shared.sendAction(
-                #selector(UIResponder.resignFirstResponder),
-                to: nil,
-                from: nil,
-                for: nil
-            )
-        }
     }
 
     // MARK: - Selection hint strip
