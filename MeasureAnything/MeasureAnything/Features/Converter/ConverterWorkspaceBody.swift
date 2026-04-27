@@ -3,15 +3,6 @@ import SwiftData
 import UIKit
 import MeasureAnythingCore
 
-/// Holds the pre-edit snapshot of the amount field outside SwiftUI's `@State` so that
-/// capturing it on focus does NOT trigger a view rebuild during keyboard presentation.
-/// A `@State` mutation on first focus was racing against the system attaching the
-/// `ToolbarItemGroup(placement: .keyboard)`, causing the Cancel/Done bar to be missing
-/// on the very first tap of the FROM input field after launch.
-private final class AmountEditSession {
-    var snapshot: String?
-}
-
 /// Live conversion blocks (amount, units, result) shared by `HomeView` and standalone `ConverterView`.
 struct ConverterWorkspaceBody: View {
     /// When `false`, category is controlled by the host (e.g. home pill bar).
@@ -30,9 +21,7 @@ struct ConverterWorkspaceBody: View {
     @ObservedObject var vm: ConverterViewModel
     @Environment(\.verticalSizeClass) private var verticalSizeClass
     @FocusState private var valueFieldFocused: Bool
-    /// Snapshot holder for the amount field; mutated outside `@State` so capturing it on
-    /// focus does not rebuild the view during keyboard presentation (see `AmountEditSession`).
-    @State private var amountEditSession = AmountEditSession()
+    @State private var amountSnapshotBeforeEditing: String?
     @State private var showShareSheet = false
     @State private var shareActivityItems: [Any] = []
     @State private var swapRotation: Double = 0
@@ -82,35 +71,16 @@ struct ConverterWorkspaceBody: View {
             vm.requestSingleRollFromShake()
         }
         .onAppear {
-            // Pre-warm the snapshot so the keyboard toolbar's logic has stable state
-            // before the user's first tap. Together with the class-based holder this
-            // ensures focus changes don't trigger any @State mutation during the very
-            // first keyboard presentation, which otherwise drops the accessory bar.
-            if amountEditSession.snapshot == nil {
-                amountEditSession.snapshot = vm.inputText
+            // Ensure Cancel can revert even on the first focus after launch.
+            if amountSnapshotBeforeEditing == nil {
+                amountSnapshotBeforeEditing = vm.inputText
             }
         }
         .onChange(of: valueFieldFocused) { _, isFocused in
             if isFocused {
-                amountEditSession.snapshot = vm.inputText
-            }
-            // Intentionally do not clear on blur: keeps the holder stable across keyboard
-            // transitions so no view rebuild is triggered while the keyboard is animating.
-        }
-        .toolbar {
-            ToolbarItemGroup(placement: .keyboard) {
-                Button("Cancel") {
-                    cancelAmountFieldEdit()
-                }
-                .foregroundStyle(categoryAccent.opacity(0.6))
-
-                Spacer()
-
-                Button("Done") {
-                    dismissAmountFieldKeyboard()
-                }
-                .fontWeight(.bold)
-                .foregroundStyle(categoryAccent)
+                amountSnapshotBeforeEditing = vm.inputText
+            } else {
+                amountSnapshotBeforeEditing = nil
             }
         }
     }
@@ -127,7 +97,7 @@ struct ConverterWorkspaceBody: View {
 
     /// Cancel: revert the amount field to its pre-edit value (if captured) and dismiss the keyboard.
     private func cancelAmountFieldEdit() {
-        if let snapshot = amountEditSession.snapshot {
+        if let snapshot = amountSnapshotBeforeEditing {
             vm.inputText = snapshot
         }
         dismissAmountFieldKeyboard()
@@ -354,6 +324,14 @@ struct ConverterWorkspaceBody: View {
                     .minimumScaleFactor(0.55)
                     .accessibilityLabel("Amount to convert")
                     .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(
+                        KeyboardInputAccessoryConfigurator(
+                            isActive: valueFieldFocused,
+                            accent: UIColor(categoryAccent),
+                            onCancel: { cancelAmountFieldEdit() },
+                            onDone: { dismissAmountFieldKeyboard() }
+                        )
+                    )
 
                 unitMenuPill(selection: $vm.selectedFromUnitID)
                     .scaleEffect(swapPillScale, anchor: .center)
