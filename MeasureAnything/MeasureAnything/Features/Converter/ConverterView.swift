@@ -83,6 +83,7 @@ struct ConverterView: View {
                 ConverterWorkspaceBody(
                     showsCategoryPicker: true,
                     showCustomUnitForm: $showCustomUnitForm,
+                    isKeyboardActive: .constant(false),
                     vm: vm
                 )
             }

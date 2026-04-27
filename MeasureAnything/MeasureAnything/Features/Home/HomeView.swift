@@ -15,6 +15,7 @@ struct HomeView: View {
 
     @State private var showFavorites = false
     @State private var showCustomUnitForm = false
+    @State private var isConverterKeyboardActive: Bool = false
     @State private var scrollToConverterToken = 0
     @State private var homeTab: BottomNav.Tab = .convert
     @State private var exploreResetToken = 0
@@ -136,6 +137,7 @@ struct HomeView: View {
                                 factCardSheetItem = FactCardSheetItem(unitID: unitID)
                             },
                             showCustomUnitForm: $showCustomUnitForm,
+                            isKeyboardActive: $isConverterKeyboardActive,
                             vm: vm
                         )
                         .id(HomeScrollTarget.converter)
@@ -169,30 +171,63 @@ struct HomeView: View {
                     .accessibilityLabel("View favorites")
                 }
                 ToolbarItemGroup(placement: .topBarTrailing) {
-                    Button {
-                        saveCurrentPairAsFavorite()
-                    } label: {
-                        Image(systemName: isCurrentPairAlreadyFavorite ? "star.fill" : "star")
-                            .font(.body.weight(.regular))
-                            .imageScale(.medium)
-                            .foregroundStyle(isCurrentPairAlreadyFavorite ? categoryAccent.opacity(0.95) : Color.secondary)
-                    }
-                    .disabled(!canSaveFavoriteTap)
-                    .buttonStyle(ConverterPressingButtonStyle())
-                    .accessibilityLabel(isCurrentPairAlreadyFavorite ? "Already a favorite" : "Save as favorite")
+                    if isConverterKeyboardActive {
+                        // Cancel — revert and dismiss
+                        Button {
+                            vm.restoreInputEditSnapshot()
+                            UIApplication.shared.sendAction(
+                                #selector(UIResponder.resignFirstResponder),
+                                to: nil, from: nil, for: nil
+                            )
+                            isConverterKeyboardActive = false
+                        } label: {
+                            Image(systemName: "xmark")
+                                .font(.body.weight(.medium))
+                                .foregroundStyle(.secondary)
+                        }
+                        .buttonStyle(ConverterPressingButtonStyle())
 
-                    Button {
-                        Haptics.tap()
-                        showCustomUnitForm = true
-                    } label: {
-                        Image(systemName: "plus")
-                            .font(.body.weight(.regular))
-                            .imageScale(.medium)
+                        // Done — confirm and dismiss
+                        Button {
+                            UIApplication.shared.sendAction(
+                                #selector(UIResponder.resignFirstResponder),
+                                to: nil, from: nil, for: nil
+                            )
+                            isConverterKeyboardActive = false
+                        } label: {
+                            Image(systemName: "checkmark")
+                                .font(.body.weight(.semibold))
+                                .foregroundStyle(categoryAccent)
+                        }
+                        .buttonStyle(ConverterPressingButtonStyle())
+                    } else {
+                        // Original star and + buttons here (unchanged)
+                        Button {
+                            saveCurrentPairAsFavorite()
+                        } label: {
+                            Image(systemName: isCurrentPairAlreadyFavorite ? "star.fill" : "star")
+                                .font(.body.weight(.regular))
+                                .imageScale(.medium)
+                                .foregroundStyle(isCurrentPairAlreadyFavorite ? categoryAccent.opacity(0.95) : Color.secondary)
+                        }
+                        .disabled(!canSaveFavoriteTap)
+                        .buttonStyle(ConverterPressingButtonStyle())
+                        .accessibilityLabel(isCurrentPairAlreadyFavorite ? "Already a favorite" : "Save as favorite")
+
+                        Button {
+                            Haptics.tap()
+                            showCustomUnitForm = true
+                        } label: {
+                            Image(systemName: "plus")
+                                .font(.body.weight(.regular))
+                                .imageScale(.medium)
+                        }
+                        .buttonStyle(ConverterPressingButtonStyle())
+                        .accessibilityLabel("Add custom unit")
                     }
-                    .buttonStyle(ConverterPressingButtonStyle())
-                    .accessibilityLabel("Add custom unit")
                 }
             }
+            .animation(.easeInOut(duration: 0.2), value: isConverterKeyboardActive)
         }
         .background(Color.white)
     }

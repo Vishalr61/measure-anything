@@ -12,6 +12,7 @@ struct ConverterWorkspaceBody: View {
     var onOpenFactCard: ((String) -> Void)? = nil
 
     @Binding var showCustomUnitForm: Bool
+    @Binding var isKeyboardActive: Bool
 
     @Query(sort: \CustomUnit.name) private var customUnits: [CustomUnit]
     @Query(sort: \FavoriteConversion.createdAt, order: .reverse) private var favorites: [FavoriteConversion]
@@ -77,9 +78,12 @@ struct ConverterWorkspaceBody: View {
             }
         }
         .onChange(of: valueFieldFocused) { _, isFocused in
+            isKeyboardActive = isFocused
             if isFocused {
+                vm.captureInputEditSnapshot()
                 amountSnapshotBeforeEditing = vm.inputText
             } else {
+                vm.clearInputEditSnapshot()
                 amountSnapshotBeforeEditing = nil
             }
         }
@@ -314,24 +318,20 @@ struct ConverterWorkspaceBody: View {
                 .tracking(0.55)
 
             HStack(alignment: .center, spacing: ConverterLayout.rhythm12) {
-                TextField("", text: $vm.inputText, prompt: Text("0").foregroundStyle(.tertiary))
-                    .keyboardType(.decimalPad)
-                    .focused($valueFieldFocused)
-                    .font(.system(size: 40, weight: .bold, design: .rounded))
-                    .foregroundStyle(.primary)
-                    .monospacedDigit()
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.55)
-                    .accessibilityLabel("Amount to convert")
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(
-                        KeyboardInputAccessoryConfigurator(
-                            isActive: valueFieldFocused,
-                            accent: UIColor(categoryAccent),
-                            onCancel: { cancelAmountFieldEdit() },
-                            onDone: { dismissAmountFieldKeyboard() }
-                        )
-                    )
+                TextField(
+                    "",
+                    text: $vm.inputText,
+                    prompt: Text("0").foregroundStyle(.tertiary)
+                )
+                .keyboardType(.decimalPad)
+                .focused($valueFieldFocused)
+                .font(.system(size: 40, weight: .bold, design: .rounded))
+                .foregroundStyle(.primary)
+                .monospacedDigit()
+                .lineLimit(1)
+                .minimumScaleFactor(0.55)
+                .accessibilityLabel("Amount to convert")
+                .frame(maxWidth: .infinity, alignment: .leading)
 
                 unitMenuPill(selection: $vm.selectedFromUnitID)
                     .scaleEffect(swapPillScale, anchor: .center)
@@ -483,7 +483,13 @@ struct ConverterWorkspaceBody: View {
 
 #Preview {
     let taxonomy = AppTaxonomyStore()
-    ConverterWorkspaceBody(showsCategoryPicker: true, onOpenFactCard: nil, showCustomUnitForm: .constant(false), vm: ConverterViewModel(taxonomy: taxonomy))
+    ConverterWorkspaceBody(
+        showsCategoryPicker: true,
+        onOpenFactCard: nil,
+        showCustomUnitForm: .constant(false),
+        isKeyboardActive: .constant(false),
+        vm: ConverterViewModel(taxonomy: taxonomy)
+    )
         .environmentObject(taxonomy)
         .modelContainer(for: [CustomUnit.self, FavoriteConversion.self], inMemory: true)
 }
