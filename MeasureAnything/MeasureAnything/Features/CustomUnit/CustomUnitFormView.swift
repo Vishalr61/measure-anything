@@ -103,22 +103,6 @@ struct CustomUnitFormView: View {
                         .disabled(!canSave)
                 }
             }
-            .toolbar {
-                ToolbarItemGroup(placement: .keyboard) {
-                    Button("Cancel") {
-                        cancelValueFieldEdit()
-                    }
-                    .foregroundStyle(accent.opacity(0.6))
-
-                    Spacer()
-
-                    Button("Done") {
-                        dismissValueFieldKeyboard()
-                    }
-                    .fontWeight(.bold)
-                    .foregroundStyle(accent)
-                }
-            }
         }
         .onAppear {
             schedulePreviewRefresh()

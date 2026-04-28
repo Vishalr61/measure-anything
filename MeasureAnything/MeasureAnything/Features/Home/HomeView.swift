@@ -155,6 +155,7 @@ struct HomeView: View {
             .navigationTitle("Measure Anything")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar(keyboard.isVisible ? .hidden : .automatic, for: .tabBar)
+            .toolbar(isConverterKeyboardActive ? .hidden : .automatic, for: .navigationBar)
             .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {

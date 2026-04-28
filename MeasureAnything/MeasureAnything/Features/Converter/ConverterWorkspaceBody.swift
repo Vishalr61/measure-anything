@@ -1,6 +1,5 @@
 import SwiftUI
 import SwiftData
-import UIKit
 import MeasureAnythingCore
 
 /// Live conversion blocks (amount, units, result) shared by `HomeView` and standalone `ConverterView`.
@@ -318,19 +317,14 @@ struct ConverterWorkspaceBody: View {
                 .tracking(0.55)
 
             HStack(alignment: .center, spacing: ConverterLayout.rhythm12) {
-                TextField(
-                    "",
+                NoAccessoryTextField(
                     text: $vm.inputText,
-                    prompt: Text("0").foregroundStyle(.tertiary)
+                    placeholder: "0",
+                    accessibilityLabel: "Amount to convert",
+                    onFocusChange: { focused in
+                        valueFieldFocused = focused
+                    }
                 )
-                .keyboardType(.decimalPad)
-                .focused($valueFieldFocused)
-                .font(.system(size: 40, weight: .bold, design: .rounded))
-                .foregroundStyle(.primary)
-                .monospacedDigit()
-                .lineLimit(1)
-                .minimumScaleFactor(0.55)
-                .accessibilityLabel("Amount to convert")
                 .frame(maxWidth: .infinity, alignment: .leading)
 
                 unitMenuPill(selection: $vm.selectedFromUnitID)
