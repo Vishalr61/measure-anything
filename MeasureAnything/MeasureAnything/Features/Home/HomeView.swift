@@ -155,7 +155,6 @@ struct HomeView: View {
             .navigationTitle("Measure Anything")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar(keyboard.isVisible ? .hidden : .automatic, for: .tabBar)
-            .toolbar(isConverterKeyboardActive ? .hidden : .automatic, for: .navigationBar)
             .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
@@ -171,7 +170,7 @@ struct HomeView: View {
                     .buttonStyle(FavoritesToolbarButtonStyle())
                     .accessibilityLabel("View favorites")
                 }
-                ToolbarItemGroup(placement: .topBarTrailing) {
+                ToolbarItemGroup(placement: .navigationBarTrailing) {
                     if isConverterKeyboardActive {
                         // Cancel — revert and dismiss
                         Button {
@@ -180,7 +179,6 @@ struct HomeView: View {
                                 #selector(UIResponder.resignFirstResponder),
                                 to: nil, from: nil, for: nil
                             )
-                            isConverterKeyboardActive = false
                         } label: {
                             Image(systemName: "xmark")
                                 .font(.body.weight(.medium))
@@ -194,7 +192,6 @@ struct HomeView: View {
                                 #selector(UIResponder.resignFirstResponder),
                                 to: nil, from: nil, for: nil
                             )
-                            isConverterKeyboardActive = false
                         } label: {
                             Image(systemName: "checkmark")
                                 .font(.body.weight(.semibold))
@@ -228,7 +225,7 @@ struct HomeView: View {
                     }
                 }
             }
-            .animation(.easeInOut(duration: 0.2), value: isConverterKeyboardActive)
+            .animation(.easeInOut(duration: 0.15), value: isConverterKeyboardActive)
         }
         .background(Color.white)
     }
