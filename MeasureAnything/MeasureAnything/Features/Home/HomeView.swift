@@ -100,7 +100,7 @@ struct HomeView: View {
             }
         }
         .sheet(isPresented: $showFavorites) {
-            FavoritesListView(registry: vm.currentRegistry) { fav in
+            FavoritesListView(registry: vm.currentRegistry, accent: categoryAccent) { fav in
                 vm.applyFavoriteRestore(
                     categoryRaw: fav.categoryRaw,
                     fromID: fav.fromUnitID,

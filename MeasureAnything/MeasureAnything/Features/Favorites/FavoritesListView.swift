@@ -9,13 +9,14 @@ struct FavoritesListView: View {
     @Environment(\.dismiss) private var dismiss
 
     let registry: UnitRegistry
+    let accent: Color
     let onSelect: (FavoriteConversion) -> Void
     /// When `false`, embedded in the main tab bar (no Done toolbar, no dismiss on select).
     var presentedAsSheet: Bool = true
 
     var body: some View {
         let itemCount = favorites.count
-        let detent: PresentationDetent = itemCount <= 3 ? .medium : .large
+        let detent: PresentationDetent = itemCount <= 3 ? .fraction(0.6) : .large
 
         NavigationStack {
             VStack(spacing: 0) {
@@ -23,26 +24,25 @@ struct FavoritesListView: View {
                     VStack(spacing: 0) {
                         HStack {
                             Button("Done") { dismiss() }
-                                .font(.body)
-                                .foregroundStyle(Color.secondary)
+                                .font(.system(size: 18, weight: .semibold))
+                                .foregroundStyle(accent)
                                 .buttonStyle(.plain)
+                                .offset(x: 4)
 
                             Spacer()
 
                             Text("Favourites")
-                                .font(.headline)
+                                .font(.system(size: 18, weight: .semibold))
 
                             Spacer()
 
                             Text("Done")
-                                .font(.body)
+                                .font(.system(size: 18, weight: .semibold))
                                 .opacity(0)
                         }
                         .padding(.horizontal, 16)
                         .padding(.top, 20)
                         .padding(.bottom, 14)
-
-                        Divider()
                     }
                 }
 
@@ -68,7 +68,7 @@ struct FavoritesListView: View {
                         }
                         .listStyle(.plain)
                         .scrollContentBackground(.hidden)
-                        .listRowSpacing(6)
+                        .listRowSpacing(10)
                         .padding(.top, 12)
                         .padding(.bottom, 12)
                     }
@@ -77,7 +77,7 @@ struct FavoritesListView: View {
             }
             .background(Color(.systemGroupedBackground))
         }
-        .presentationDetents([.medium, .large], selection: .constant(detent))
+        .presentationDetents([.fraction(0.6), .large], selection: .constant(detent))
         .presentationDragIndicator(.visible)
     }
 }
@@ -99,42 +99,42 @@ private extension FavoritesListView {
             }
         } label: {
             HStack(spacing: 10) {
-                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                RoundedRectangle(cornerRadius: 12, style: .continuous)
                     .fill(accent.opacity(0.12))
-                    .frame(width: 34, height: 34)
+                    .frame(width: 42, height: 42)
                     .overlay(
                         Image(systemName: categorySymbolName(category))
-                            .font(.system(size: 14))
+                            .font(.system(size: 18))
                             .foregroundStyle(accent)
                     )
 
                 VStack(alignment: .leading, spacing: 2) {
                     Text(fromName)
-                        .font(.system(size: 12, weight: .semibold))
+                        .font(.system(size: 15, weight: .semibold))
                         .foregroundStyle(Color(.label))
                     + Text(" → ")
-                        .font(.system(size: 12, weight: .regular))
+                        .font(.system(size: 14, weight: .regular))
                         .foregroundStyle(Color(.tertiaryLabel))
                     + Text(toName)
-                        .font(.system(size: 12, weight: .semibold))
+                        .font(.system(size: 15, weight: .semibold))
                         .foregroundStyle(Color(.label))
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
 
                 Text(categoryDisplayName(category))
-                    .font(.system(size: 9, weight: .semibold))
+                    .font(.system(size: 11, weight: .semibold))
                     .foregroundStyle(accent)
-                    .padding(.vertical, 3)
-                    .padding(.horizontal, 8)
+                    .padding(.vertical, 5)
+                    .padding(.horizontal, 12)
                     .background(accent.opacity(0.12))
                     .overlay(
-                        Capsule()
+                        RoundedRectangle(cornerRadius: 20, style: .continuous)
                             .strokeBorder(accent.opacity(0.3), lineWidth: 0.5)
                     )
-                    .clipShape(Capsule())
+                    .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
             }
-            .padding(.vertical, 9)
-            .padding(.horizontal, 12)
+            .padding(.vertical, 14)
+            .padding(.horizontal, 14)
             .background(Color(.systemBackground))
             .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
             .overlay(
