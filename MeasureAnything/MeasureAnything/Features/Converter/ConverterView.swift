@@ -133,7 +133,7 @@ struct ConverterView: View {
                 }
             }
         }
-        .background(Color.white)
+        .background(Color(hex: "#F0F0F3"))
     }
 
     private func saveCurrentPairAsFavorite() {

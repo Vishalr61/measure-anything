@@ -227,7 +227,7 @@ struct HomeView: View {
             }
             .animation(.easeInOut(duration: 0.15), value: isConverterKeyboardActive)
         }
-        .background(Color.white)
+        .background(Color(hex: "#F0F0F3"))
     }
 
     private var exploreTab: some View {

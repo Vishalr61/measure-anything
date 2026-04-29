@@ -20,7 +20,7 @@ struct ConverterWorkspaceBody: View {
 
     @ObservedObject var vm: ConverterViewModel
     @Environment(\.verticalSizeClass) private var verticalSizeClass
-    @FocusState private var valueFieldFocused: Bool
+    @State private var valueFieldFocused: Bool = false
     @State private var amountSnapshotBeforeEditing: String?
     @State private var showShareSheet = false
     @State private var shareActivityItems: [Any] = []
@@ -90,12 +90,6 @@ struct ConverterWorkspaceBody: View {
 
     private func dismissAmountFieldKeyboard() {
         valueFieldFocused = false
-        UIApplication.shared.sendAction(
-            #selector(UIResponder.resignFirstResponder),
-            to: nil,
-            from: nil,
-            for: nil
-        )
     }
 
     /// Cancel: revert the amount field to its pre-edit value (if captured) and dismiss the keyboard.
@@ -317,20 +311,23 @@ struct ConverterWorkspaceBody: View {
                 .tracking(0.55)
 
             HStack(alignment: .center, spacing: ConverterLayout.rhythm12) {
-                TextField(
-                    "",
+                MinimalPadTextField(
                     text: $vm.inputText,
-                    prompt: Text("0").foregroundStyle(.tertiary)
+                    placeholder: "0",
+                    isFocused: $valueFieldFocused,
+                    onFocusChange: { focused in valueFieldFocused = focused }
                 )
-                .keyboardType(.decimalPad)
-                .focused($valueFieldFocused)
                 .font(.system(size: 40, weight: .bold, design: .rounded))
                 .foregroundStyle(.primary)
                 .monospacedDigit()
                 .lineLimit(1)
                 .minimumScaleFactor(0.55)
                 .accessibilityLabel("Amount to convert")
-                .frame(maxWidth: .infinity, alignment: .leading)
+                .frame(maxWidth: .infinity, minHeight: 48, alignment: .leading)
+                .contentShape(Rectangle())
+                .onTapGesture {
+                    valueFieldFocused = true
+                }
 
                 unitMenuPill(selection: $vm.selectedFromUnitID)
                     .scaleEffect(swapPillScale, anchor: .center)
@@ -379,6 +376,10 @@ struct ConverterWorkspaceBody: View {
             x: 0,
             y: ConverterLayout.referenceCardShadowY
         )
+        .contentShape(Rectangle())
+        .onTapGesture {
+            valueFieldFocused = true
+        }
     }
 
     private func unitMenuPill(selection: Binding<UnitDefinition.ID>) -> some View {
