@@ -186,8 +186,10 @@ struct GlobalUnitSearchBody: View {
 
                 // Two-tap tip (browse/category views only, not search results)
                 if isSearchEmpty && !twoTapTipDismissed && fromSelection == nil {
-                    twoTapTipBanner
-                        .transition(.opacity.combined(with: .move(edge: .top)))
+                    twoTapTipBanner(
+                        accent: activeCategory.map { ConverterCategoryAccent.accent(for: $0) }
+                    )
+                    .transition(.opacity.combined(with: .move(edge: .top)))
                 }
 
                 mainContent
@@ -301,21 +303,28 @@ struct GlobalUnitSearchBody: View {
 
     // MARK: – Two-tap tip banner
 
-    private var twoTapTipBanner: some View {
-        HStack(alignment: .top, spacing: 10) {
+    /// accent = nil → neutral home-screen colours; accent = category colour → tinted category colours.
+    private func twoTapTipBanner(accent: Color?) -> some View {
+        let bg        = accent.map { $0.opacity(0.1) } ?? Color(hex: "#F0F0F0")
+        let iconColor = accent ?? Color(hex: "#1A1A1A")
+        let titleColor = accent ?? Color(hex: "#1A1A1A")
+        let bodyColor  = accent.map { $0.opacity(0.75) } ?? Color(hex: "#6E6E6E")
+        let xColor     = accent.map { $0.opacity(0.4) } ?? Color(hex: "#B0B0B0")
+
+        return HStack(alignment: .top, spacing: 10) {
             // Animated hand-tap icon
             Image(systemName: "hand.tap.fill")
                 .font(.system(size: 15))
-                .foregroundStyle(Color(hex: "#3C3489"))
+                .foregroundStyle(iconColor)
                 .symbolEffect(.bounce, options: .repeating)
 
             VStack(alignment: .leading, spacing: 3) {
                 Text("Tap two units to convert")
                     .font(.system(size: 13, weight: .semibold))
-                    .foregroundStyle(Color(hex: "#26215C"))
+                    .foregroundStyle(titleColor)
                 Text("Tap any unit as FROM, then tap another as TO — they'll open directly in the converter.")
                     .font(.system(size: 12))
-                    .foregroundStyle(Color(hex: "#26215C").opacity(0.7))
+                    .foregroundStyle(bodyColor)
                     .lineSpacing(2)
             }
 
@@ -326,7 +335,7 @@ struct GlobalUnitSearchBody: View {
             } label: {
                 Image(systemName: "xmark")
                     .font(.system(size: 10, weight: .semibold))
-                    .foregroundStyle(Color(hex: "#26215C").opacity(0.4))
+                    .foregroundStyle(xColor)
                     .frame(width: 28, height: 28)
                     .contentShape(Rectangle())
             }
@@ -334,34 +343,34 @@ struct GlobalUnitSearchBody: View {
         }
         .padding(.horizontal, horizontalInset)
         .padding(.vertical, 10)
-        .background(Color(hex: "#EEEDFE"))
+        .background(bg)
     }
 
     // MARK: – Fact card inline tip (shown inside category/all-units row lists)
 
     private func factCardTipBanner(accent: Color) -> some View {
-        HStack(spacing: 8) {
+        HStack(spacing: 10) {
             Image(systemName: "info.circle.fill")
-                .font(.system(size: 13))
+                .font(.system(size: 15))
                 .foregroundStyle(accent)
             Text("Tap the info button on any unit to see its fact card.")
                 .font(.system(size: 12))
-                .foregroundStyle(accent.opacity(0.85))
-            Spacer()
+                .foregroundStyle(accent.opacity(0.75))
+            Spacer(minLength: 4)
             Button {
                 withAnimation(.easeOut(duration: 0.2)) { factCardTipDismissed = true }
             } label: {
                 Image(systemName: "xmark")
-                    .font(.system(size: 9, weight: .semibold))
+                    .font(.system(size: 10, weight: .semibold))
                     .foregroundStyle(accent.opacity(0.4))
-                    .frame(width: 24, height: 24)
+                    .frame(width: 28, height: 28)
                     .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
         }
         .padding(.horizontal, horizontalInset)
-        .padding(.vertical, 8)
-        .background(accent.opacity(0.08))
+        .padding(.vertical, 10)
+        .background(accent.opacity(0.1))
     }
 
     // MARK: - Selection hint strip

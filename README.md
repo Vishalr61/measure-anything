@@ -1,118 +1,110 @@
 # Measure Anything
 
-**Measure Anything** is an iOS app for playful and practical unit conversion. Switch between everyday scales and deliberately absurd comparators—blue whales, Olympic pools, light-years — across length, mass, time, temperature, and volume. The app pairs a fast conversion workspace with **Explore** search, curated **fact cards**, favorites, and custom units.
+A unit conversion app for iOS that mixes real-world measurements with novelty units — Blue Whales, Bowling Balls, T-Rexes and more. Built with SwiftUI.
 
 ---
 
 ## Features
 
+### Converter
+Convert across five categories: **Length, Mass, Time, Temperature, Volume**. Switch between three modes — **Normal** (standard + imperial), **Absurd** (novelty units), and **Custom** (your own). The FROM and TO cards update in real time. Tap the swap button to reverse the direction instantly.
 
-| Area             | Description                                                                                                                                                      |
-| ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Convert**      | Category-scoped picker, live conversion, optional meme lines, and share-friendly output.                                                                         |
-| **Explore**      | Global unit search, category browse, recent pairs, and tiered **fact cards** (headline, fun fact, value band, comparisons with optional rabbit-hole navigation). |
-| **Favorites**    | SwiftData–backed saved from/to pairs per category.                                                                                                               |
-| **Custom units** | User-defined absurd units with optional SF Symbol and validation against the engine.                                                                             |
-| **Design**       | Per-category color ramps and repeating header patterns aligned with Explore tiles.                                                                               |
+### Novelty Units
+100+ absurd units per category, each with a conversion factor, icon, fun fact, and contextual phrase. Examples: Refrigerators, Aircraft Carriers, Bananas, Eiffel Towers, Blue Whales, School Buses, T-Rexes.
 
+### Custom Units
+Define your own units by name, size, and reference unit. *My commute in kilometres*, *My dog in kilograms*, *My shower in minutes* — whatever makes sense to you. Custom units are saved locally and appear immediately in the converter and explore screens.
 
----
+### Explore & Search
+Browse all units by category or search by name. Tap any unit as **FROM**, then tap another as **TO** — they open directly in the converter. Tap the **ⓘ** button on any unit to open a fact card with interesting context and comparisons.
 
-## Architecture
+### Fact Cards
+Each unit has a fact card with a headline value, example comparisons, and trivia. Accessible from the explore screen and from the converter result.
 
-```text
-measure-anything/
-├── Package.swift                    # SPM: MeasureAnythingCore + MeasureAnythingTaxonomy
-├── MeasureAnythingApp/
-│   └── Core/
-│       ├── Conversion/            # UnitDefinition, registry, JSON catalog (per category)
-│       └── Taxonomy/              # Category metadata bundled as MeasureAnythingTaxonomy
-├── MeasureAnything/               # Xcode iOS application target
-│   └── MeasureAnything/
-│       ├── Features/              # SwiftUI: Home, Converter, Explore, Search, Fact cards
-│       ├── Resources/             # FactCardContent_<Category>.json (merged at runtime)
-│       ├── Services/              # FactCardStore, taxonomy bridge
-│       └── Persistence/           # SwiftData models (CustomUnit, FavoriteConversion)
-└── MeasureAnythingTests/          # Unit tests (SPM targets)
-```
+### Dice Roll & Shake
+Tap the dice card to roll a random unit in the current category. Long-press for a dual roll that picks both FROM and TO. Shake the device to roll at any time.
 
-- `**MeasureAnythingCore**` — Pure Swift conversion logic, `UnitDefinition`, absurd unit loading from JSON resources (`mass.json`, `length.json`, etc.), and temperature special cases.
-- `**MeasureAnythingTaxonomy**` — Depends on Core; ships additional taxonomy resources.
-- **Application target** — SwiftUI + SwiftData host; links local SPM products; hosts Explore UI and `FactCardStore` (merges per-category fact JSON into one lookup).
+### Favourites
+Star any conversion pair to save it. Tap the list icon to see all saved pairs and restore any one instantly.
 
-Fact card copy lives in `**MeasureAnything/MeasureAnything/Resources/FactCardContent_*.json`**; unit definitions live under `**MeasureAnythingApp/Core/Conversion/Resources/**`.
+### Share
+Tap the share button on any result to generate a card image — FROM value, TO value, category colour, and meme text — ready to send to anyone.
+
+### Settings
+- **Precision mode** — show full decimal detail instead of smart rounding
+- **My custom units** — view and delete saved units
+- **What's in the app?** — a reference guide to every feature
+- Rate on App Store / Send feedback
 
 ---
 
 ## Requirements
 
-- **Xcode** with an iOS SDK matching the project’s deployment target (see `IPHONEOS_DEPLOYMENT_TARGET` in `MeasureAnything.xcodeproj`).
-- **Swift** 5.10+ (see `Package.swift` `swift-tools-version`).
-- **Apple Silicon or Intel** Mac for building; device or simulator for running.
-
-The Swift package declares **iOS 17** / **macOS 14** as minimum platforms for the libraries; the app target may pin a newer SDK—always take the **stricter** of the two when planning CI or devices.
+- iOS 17+
+- Xcode 15+
 
 ---
 
-## Building the iOS app
+## Project Structure
 
-1. Open `**MeasureAnything/MeasureAnything.xcodeproj`** in Xcode.
+```
+measure-anything/
+├── MeasureAnything/          # App target (SwiftUI)
+│   ├── Features/
+│   │   ├── Converter/        # Converter UI, dice roll, share
+│   │   ├── Home/             # Root shell, bottom nav, settings
+│   │   ├── Search/           # Explore tab, browse, search, fact cards
+│   │   ├── CustomUnit/       # Custom unit creation form
+│   │   ├── Favorites/        # Saved conversion pairs
+│   │   ├── Onboarding/       # Four-slide interactive tour
+│   │   └── Design/           # Colours, spacing, haptics, shared styles
+│   ├── Persistence/          # SwiftData models (CustomUnit, FavoriteConversion)
+│   └── Services/             # Taxonomy store, fact card store, Crashlytics
+├── MeasureAnythingCore/      # SPM library — conversion engine, unit definitions
+└── MeasureAnythingTaxonomy/  # SPM library — search index, taxonomy registry
+```
+
+**Key dependencies:** SwiftData · StoreKit · Firebase Crashlytics (optional)
+
+---
+
+## Architecture
+
+- **SwiftUI** throughout, iOS 17 APIs
+- **SwiftData** for local persistence (custom units, favourites)
+- **ConverterViewModel** — central ObservableObject managing category, mode, unit selections, input, results, session state, and dice roll
+- **AppTaxonomyStore** — loads and serves the unit registry and search index
+- Unit data (normal + absurd) and fact card content loaded from bundled JSON at startup
+- `NoAccessoryTextField` — UIViewRepresentable that suppresses the iOS keyboard input accessory bar
+- `PointerTargetKey` — SwiftUI PreferenceKey used in onboarding to anchor animated pointers to live UI elements
+- Light colour scheme enforced app-wide; category accent colours drive all tinting
+
+---
+
+## Building
+
+1. Open `MeasureAnything/MeasureAnything.xcodeproj` in Xcode.
 2. Select the **MeasureAnything** scheme and a simulator or connected device.
 3. **Product → Build** (`⌘B`), then **Run** (`⌘R`).
 
-The app entry point is `MeasureAnythingApp` (`HomeView` as root). Core packages are resolved as local Swift package dependencies.
-
 ---
 
-## Running tests
-
-From the repository root:
+## Running Tests
 
 ```bash
 swift test
 ```
 
-This runs `**MeasureAnythingCoreTests**` and `**MeasureAnythingTaxonomyTests**` defined in `Package.swift`.
-
-Additional **MeasureAnythingTests** (app target) and **MeasureAnythingUITests** run from the Xcode project’s test actions for the **MeasureAnything** scheme.
-
-To run just the iOS app unit tests from the terminal with an explicitly booted simulator:
-
-```bash
-./scripts/run-app-unit-tests.sh
-```
-
-This helper boots a known simulator first, waits for it to become ready, and then runs only `MeasureAnythingTests`.
-
-Optional overrides:
-
-```bash
-SIMULATOR_NAME="iPhone 16" SIMULATOR_OS="18.6" ./scripts/run-app-unit-tests.sh
-SIMULATOR_ID="<simulator-udid>" ./scripts/run-app-unit-tests.sh
-```
-
----
-
-## Content and assets
-
-- **Unit catalogs** — JSON per `UnitCategory` under `MeasureAnythingApp/Core/Conversion/Resources/` (e.g. `mass.json`). Each unit may include `funFact`, `iconName` (SF Symbol), and conversion metadata.
-- **Fact cards** — `FactCardContent_<Mass|Length|Volume|Time|Temperature>.json` in the app bundle; `FactCardStore` loads and merges them. Malformed files are skipped with a console log so the rest of the app still launches.
-
----
-
-## Development notes
-
-- **Icons** — Prefer `iconName` on `UnitDefinition` (SF Symbol). Explore/fact UI falls back to a single category glyph when absent.
-- **Light mode** — The root scene currently prefers light appearance (`preferredColorScheme(.light)`); adjust in `MeasureAnythingApp.swift` if you add dark mode.
+Runs `MeasureAnythingCoreTests` and `MeasureAnythingTaxonomyTests`. App-level and UI tests run via the Xcode test action for the MeasureAnything scheme.
 
 ---
 
 ## Author
 
-**Vishal Ramanathan** — personal / shipping project (`com.vishal.MeasureAnything`).
+**Vishal Ramanathan** — `com.vishal.MeasureAnything`
 
 ---
 
 ## License
 
-Proprietary; all rights reserved unless otherwise noted in this repository.
+Proprietary — all rights reserved.

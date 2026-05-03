@@ -286,7 +286,7 @@ struct OnboardingSlide {
             accentColor: Color(hex: "#8B3A2A"),
             pointerAnchor: PointerAnchor(label: "tap two units"),
             pointerXOffset: 5,
-            pointerYOffset: 0,
+            pointerYOffset: -30,
             mockup: { appear in
                 AnyView(ExploreMockup(appear: appear))
             }
