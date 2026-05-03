@@ -441,6 +441,7 @@ private struct CustomModeMockup: View {
                         .font(.system(size: 9, weight: .semibold))
                         .foregroundStyle(Color(hex: "#B0B0A8"))
                         .tracking(0.6)
+                        .pointerTarget()
 
                     // Simulated text field with placeholder
                     HStack {
@@ -490,7 +491,6 @@ private struct CustomModeMockup: View {
                     RoundedRectangle(cornerRadius: 10, style: .continuous)
                         .fill(Color(hex: "#ECEAF8"))
                 )
-                .pointerTarget()
                 .transition(.opacity.combined(with: .move(edge: .bottom)))
                 .animation(.easeOut(duration: 0.35).delay(0.35), value: appear)
             }
