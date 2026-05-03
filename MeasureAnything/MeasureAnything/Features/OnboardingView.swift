@@ -22,6 +22,8 @@ struct OnboardingView: View {
 
     private let slides: [OnboardingSlide] = OnboardingSlide.all
 
+    private var currentAccent: Color { slides[currentPage].accentColor }
+
     var body: some View {
         ZStack(alignment: .bottom) {
             Color.white.ignoresSafeArea()
@@ -130,9 +132,10 @@ struct OnboardingView: View {
             HStack(spacing: 7) {
                 ForEach(slides.indices, id: \.self) { idx in
                     Capsule()
-                        .fill(idx == currentPage ? Color.black : Color(hex: "#D8D8D5"))
+                        .fill(idx == currentPage ? currentAccent : Color(hex: "#D8D8D5"))
                         .frame(width: idx == currentPage ? 20 : 7, height: 7)
                         .animation(.spring(response: 0.35, dampingFraction: 0.8), value: currentPage)
+                        .animation(.easeInOut(duration: 0.3), value: currentPage)
                 }
             }
 
@@ -151,7 +154,8 @@ struct OnboardingView: View {
                     .frame(height: 52)
                     .background(
                         RoundedRectangle(cornerRadius: 16, style: .continuous)
-                            .fill(Color.black)
+                            .fill(currentAccent)
+                            .animation(.easeInOut(duration: 0.3), value: currentPage)
                     )
             }
             .buttonStyle(.plain)
