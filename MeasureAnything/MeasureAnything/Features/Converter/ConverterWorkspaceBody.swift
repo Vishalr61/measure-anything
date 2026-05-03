@@ -12,14 +12,15 @@ import MeasureAnythingCore
 // attaches a UITextInputAssistantItem bar (or the system keyboard toolbar)
 // to any first responder.
 //
-// Fix: override `inputAccessoryView` with a zero-height UIView so iOS has
-// nothing to display.  This is the documented approach — setting the property
-// to `UIView(frame: .zero)` is sufficient; setting it to `nil` restores the
-// default behaviour.
+// Fix: use ONE stable zero-sized accessory view (not a new UIView each time the
+// getter runs). Returning a fresh view from `inputAccessoryView` confuses layout and
+// often leaves a tall grey “input accessory” gap above the keyboard.
+// Also clear `UITextInputAssistantItem` bar-button groups and call `reloadInputViews()`.
 // ─────────────────────────────────────────────────────────────────────────────
 
 struct NoAccessoryTextField: UIViewRepresentable {
     @Binding var text: String
+    @Binding var isFocused: Bool
     var placeholder: String = "0"
     var font: UIFont = .systemFont(ofSize: 40, weight: .bold)
     var onFocusChange: ((Bool) -> Void)? = nil
@@ -33,8 +34,17 @@ struct NoAccessoryTextField: UIViewRepresentable {
         tf.backgroundColor = .clear
         tf.adjustsFontSizeToFitWidth = true
         tf.minimumFontSize = font.pointSize * 0.55
+        tf.autocorrectionType = .no
+        tf.spellCheckingType = .no
         tf.delegate = context.coordinator
         tf.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+
+        tf.inputAssistantItem.leadingBarButtonGroups = []
+        tf.inputAssistantItem.trailingBarButtonGroups = []
+
+        tf.addTarget(context.coordinator, action: #selector(Coordinator.editingChanged(_:)), for: .editingChanged)
+
+        tf.reloadInputViews()
         return tf
     }
 
@@ -43,19 +53,53 @@ struct NoAccessoryTextField: UIViewRepresentable {
         if uiView.text != text {
             uiView.text = text
         }
+
+        if uiView.placeholder != placeholder {
+            uiView.placeholder = placeholder
+        }
+
+        let fontMismatch =
+            uiView.font?.pointSize != font.pointSize
+            || uiView.font?.fontName != font.fontName
+        if fontMismatch {
+            uiView.font = font
+            uiView.minimumFontSize = font.pointSize * 0.55
+        }
+
+        // Drive first responder from SwiftUI state (UIKit field inside representable).
+        if isFocused && !uiView.isFirstResponder {
+            DispatchQueue.main.async {
+                uiView.becomeFirstResponder()
+                uiView.reloadInputViews()
+            }
+        } else if !isFocused && uiView.isFirstResponder {
+            uiView.resignFirstResponder()
+        }
     }
 
     func makeCoordinator() -> Coordinator {
-        Coordinator(text: $text, onFocusChange: onFocusChange)
+        Coordinator(text: $text, isFocused: $isFocused, onFocusChange: onFocusChange)
     }
 
     // MARK: – TextField subclass that kills the accessory bar
 
     final class _NoAccessoryUITextField: UITextField {
-        /// Return a zero-height view — iOS uses this instead of the default grey toolbar.
+        /// Stable zero-height accessory — must not allocate a new view per `get`.
+        private let zeroAccessory = UIView(frame: CGRect(x: 0, y: 0, width: 0, height: 0))
+
+        override init(frame: CGRect) {
+            super.init(frame: frame)
+            zeroAccessory.backgroundColor = .clear
+            zeroAccessory.isUserInteractionEnabled = false
+        }
+
+        required init?(coder: NSCoder) {
+            fatalError("init(coder:) has not been implemented")
+        }
+
         override var inputAccessoryView: UIView? {
-            get { UIView(frame: .zero) }
-            set { }   // ignore any attempt to set it externally
+            get { zeroAccessory }
+            set { }
         }
     }
 
@@ -63,24 +107,35 @@ struct NoAccessoryTextField: UIViewRepresentable {
 
     final class Coordinator: NSObject, UITextFieldDelegate {
         @Binding var text: String
+        @Binding var isFocused: Bool
         var onFocusChange: ((Bool) -> Void)?
 
-        init(text: Binding<String>, onFocusChange: ((Bool) -> Void)?) {
+        init(text: Binding<String>, isFocused: Binding<Bool>, onFocusChange: ((Bool) -> Void)?) {
             _text = text
+            _isFocused = isFocused
             self.onFocusChange = onFocusChange
         }
 
-        func textFieldDidChangeSelection(_ textField: UITextField) {
-            let newValue = textField.text ?? ""
+        @objc func editingChanged(_ sender: UITextField) {
+            let newValue = sender.text ?? ""
             if text != newValue { text = newValue }
         }
 
         func textFieldDidBeginEditing(_ textField: UITextField) {
+            if !isFocused { isFocused = true }
             onFocusChange?(true)
         }
 
         func textFieldDidEndEditing(_ textField: UITextField) {
+            if isFocused { isFocused = false }
             onFocusChange?(false)
+        }
+
+        func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
+            if string == "." && (textField.text?.contains(".") ?? false) {
+                return false
+            }
+            return true
         }
     }
 }
@@ -126,15 +181,19 @@ struct ConverterWorkspaceBody: View {
                     .padding(.bottom, ConverterLayout.rhythm12)
             }
 
-            categoryModeBlock
+            if !(isKeyboardActive && showsCategoryPicker) {
+                categoryModeBlock
+            }
 
             Spacer()
-                .frame(height: showsCategoryPicker ? adaptiveMajorSpacing : ConverterLayout.rhythm12)
+                .frame(height: categoryToConverterSpacing)
 
             conversionInputBlock
         }
         .padding(.horizontal, ConverterLayout.horizontalInset)
-        .padding(.vertical, ConverterLayout.rhythm20)
+        .padding(.vertical, verticalPagePadding)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(isKeyboardActive ? Color.white : Color.clear)
         .sheet(isPresented: $showCustomUnitForm) {
             CustomUnitFormView(initialCategory: vm.selectedCategory)
                 .environmentObject(vm)
@@ -247,6 +306,18 @@ struct ConverterWorkspaceBody: View {
         verticalSizeClass == .compact ? ConverterLayout.rhythm12 : ConverterLayout.majorBlockSpacing
     }
 
+    /// Tighter gaps while editing so ScrollView content sits near the keyboard (avoids a grey “dead band”).
+    private var categoryToConverterSpacing: CGFloat {
+        if isKeyboardActive {
+            return showsCategoryPicker ? ConverterLayout.rhythm8 : 4
+        }
+        return showsCategoryPicker ? adaptiveMajorSpacing : ConverterLayout.rhythm12
+    }
+
+    private var verticalPagePadding: CGFloat {
+        isKeyboardActive ? 8 : ConverterLayout.rhythm20
+    }
+
     private var toRowFootnoteText: String? {
         guard vm.validationError == nil,
               let r     = vm.conversionResult,
@@ -293,7 +364,7 @@ struct ConverterWorkspaceBody: View {
     // MARK: – Conversion input block
 
     private var conversionInputBlock: some View {
-        VStack(alignment: .leading, spacing: ConverterLayout.rhythm16) {
+        VStack(alignment: .leading, spacing: isKeyboardActive ? ConverterLayout.rhythm8 : ConverterLayout.rhythm16) {
             referenceConversionColumn
         }
     }
@@ -306,7 +377,7 @@ struct ConverterWorkspaceBody: View {
                 ZStack {
                     referenceSwapButton
                 }
-                .padding(.vertical, 12)
+                .padding(.vertical, isKeyboardActive ? 6 : 12)
                 .zIndex(1)
 
                 expandedToCard
@@ -314,23 +385,25 @@ struct ConverterWorkspaceBody: View {
 
             if let err = vm.validationError {
                 validationErrorView(message: err)
-                    .padding(.top, ConverterLayout.rhythm12)
+                    .padding(.top, isKeyboardActive ? ConverterLayout.rhythm8 : ConverterLayout.rhythm12)
             }
 
-            DiceRollCard(vm: vm, accent: categoryAccent)
-                .transition(.move(edge: .bottom).combined(with: .opacity))
-                .padding(.top, 10)
+            if !isKeyboardActive {
+                DiceRollCard(vm: vm, accent: categoryAccent)
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+                    .padding(.top, 10)
 
-            if let toUnit = vm.toUnit, toUnit.funFact != nil {
-                DidYouKnowCard(
-                    unit: toUnit,
-                    accent: categoryAccent,
-                    onOpenFactCard: onOpenFactCard.map { cb in { cb(toUnit.id) } }
-                )
-                .id(toUnit.id)
-                .transition(.opacity)
-                .animation(.easeIn(duration: 0.25), value: toUnit.id)
-                .padding(.top, 10)
+                if let toUnit = vm.toUnit, toUnit.funFact != nil {
+                    DidYouKnowCard(
+                        unit: toUnit,
+                        accent: categoryAccent,
+                        onOpenFactCard: onOpenFactCard.map { cb in { cb(toUnit.id) } }
+                    )
+                    .id(toUnit.id)
+                    .transition(.opacity)
+                    .animation(.easeIn(duration: 0.25), value: toUnit.id)
+                    .padding(.top, 10)
+                }
             }
         }
     }
@@ -383,6 +456,7 @@ struct ConverterWorkspaceBody: View {
                 // ↓ Key change: NoAccessoryTextField instead of MinimalPadTextField
                 NoAccessoryTextField(
                     text: $vm.inputText,
+                    isFocused: $valueFieldFocused,
                     placeholder: "0",
                     font: UIFont.systemFont(ofSize: 40, weight: .bold),
                     onFocusChange: { focused in
@@ -391,8 +465,6 @@ struct ConverterWorkspaceBody: View {
                 )
                 .frame(maxWidth: .infinity, minHeight: 48, alignment: .leading)
                 .accessibilityLabel("Amount to convert")
-                // Tap anywhere in the card area also focuses the field.
-                .onTapGesture { }   // consumed by the card's tap below
 
                 unitMenuPill(selection: $vm.selectedFromUnitID)
                     .scaleEffect(swapPillScale, anchor: .center)
