@@ -1,6 +1,34 @@
 import SwiftUI
 import MeasureAnythingCore
 
+// MARK: – Info button (matches the search results row info button exactly)
+
+struct UnitInfoButton: View {
+    let accent: Color
+    let unitName: String
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            VStack(spacing: 2) {
+                Image(systemName: "info.circle")
+                    .font(.system(size: 16, weight: .medium))
+                    .foregroundStyle(accent)
+            }
+            .frame(width: 34, height: 34)
+            .background(
+                accent.opacity(0.10),
+                in: RoundedRectangle(cornerRadius: 10, style: .continuous)
+            )
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("Open fact card for \(unitName)")
+        .accessibilityHint("Opens a detail card with interesting facts about this unit")
+    }
+}
+
+// MARK: –
+
 struct UnitBrowseRow: View {
     let unit: UnitDefinition
     let accent: Color
@@ -30,35 +58,21 @@ struct UnitBrowseRow: View {
                 Text(unit.name)
                     .font(.system(size: 15, weight: .medium))
                     .foregroundStyle(Color.primary)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .contentShape(Rectangle())
-                    .highPriorityGesture(TapGesture().onEnded { _ in onTap() })
 
                 if let fact = unit.funFact {
-                    if let openFact = onOpenFactCard {
-                        FactCardRowAffordance(text: fact, accent: accent)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .contentShape(Rectangle())
-                            .highPriorityGesture(TapGesture().onEnded { _ in openFact() })
-                    } else {
-                        Text(fact)
-                            .font(.system(size: 12))
-                            .foregroundStyle(Color.secondary)
-                            .lineLimit(1)
-                    }
+                    Text(fact)
+                        .font(.system(size: 12))
+                        .foregroundStyle(accent.opacity(0.8))
+                        .lineLimit(1)
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .contentShape(Rectangle())
-            .onTapGesture {
-                onTap()
-            }
+            .onTapGesture { onTap() }
 
-            Image(systemName: "chevron.right")
-                .font(.system(size: 12, weight: .medium))
-                .foregroundStyle(Color(.tertiaryLabel))
-                .contentShape(Rectangle())
-                .highPriorityGesture(TapGesture().onEnded { _ in onTap() })
+            if let openFact = onOpenFactCard {
+                UnitInfoButton(accent: accent, unitName: unit.name, action: openFact)
+            }
         }
         .padding(.vertical, 12)
         .padding(.horizontal, horizontalInset)
