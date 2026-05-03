@@ -53,6 +53,25 @@ final class ConverterViewModel: ObservableObject {
         }
     }
 
+    private var inputEditSnapshot: String?
+
+    func captureInputEditSnapshot() {
+        if inputEditSnapshot == nil {
+            inputEditSnapshot = inputText
+        }
+    }
+
+    func restoreInputEditSnapshot() {
+        if let snapshot = inputEditSnapshot {
+            inputText = snapshot
+        }
+        inputEditSnapshot = nil
+    }
+
+    func clearInputEditSnapshot() {
+        inputEditSnapshot = nil
+    }
+
     @Published var selectedFromUnitID: UnitDefinition.ID = "meter" {
         didSet {
             guard !isApplyingFavoriteRestore, !isRestoringSession, !isSanitisingSelections else { return }

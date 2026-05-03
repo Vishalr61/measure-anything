@@ -15,6 +15,7 @@ struct HomeView: View {
 
     @State private var showFavorites = false
     @State private var showCustomUnitForm = false
+    @State private var isConverterKeyboardActive: Bool = false
     @State private var scrollToConverterToken = 0
     @State private var homeTab: BottomNav.Tab = .convert
     @State private var exploreResetToken = 0
@@ -85,7 +86,7 @@ struct HomeView: View {
             .opacity(keyboard.isVisible ? 0 : 1)
             .allowsHitTesting(!keyboard.isVisible)
         }
-        .background(Color(hex: "#F0F0F3"))
+        .background(homeRootBackground)
         .onChange(of: homeTab) { old, new in
             // Ensure keyboard state is fully reset before tab transitions.
             if old == .explore && new != .explore {
@@ -99,7 +100,7 @@ struct HomeView: View {
             }
         }
         .sheet(isPresented: $showFavorites) {
-            FavoritesListView(registry: vm.currentRegistry) { fav in
+            FavoritesListView(registry: vm.currentRegistry, accent: categoryAccent) { fav in
                 vm.applyFavoriteRestore(
                     categoryRaw: fav.categoryRaw,
                     fromID: fav.fromUnitID,
@@ -128,7 +129,9 @@ struct HomeView: View {
             ScrollViewReader { proxy in
                 ScrollView {
                     VStack(alignment: .leading, spacing: ConverterLayout.rhythm12) {
-                        categoryPillBar
+                        if !isConverterKeyboardActive {
+                            categoryPillBar
+                        }
 
                         ConverterWorkspaceBody(
                             showsCategoryPicker: false,
@@ -136,12 +139,14 @@ struct HomeView: View {
                                 factCardSheetItem = FactCardSheetItem(unitID: unitID)
                             },
                             showCustomUnitForm: $showCustomUnitForm,
+                            isKeyboardActive: $isConverterKeyboardActive,
                             vm: vm
                         )
                         .id(HomeScrollTarget.converter)
                     }
-                    .padding(.bottom, ConverterLayout.rhythm24)
+                    .padding(.bottom, isConverterKeyboardActive ? 12 : ConverterLayout.rhythm24)
                 }
+                .background(convertTabChromeBackground)
                 .scrollDismissesKeyboard(.never)
                 .onChange(of: scrollToConverterToken) { _, _ in
                     withAnimation(.easeInOut(duration: 0.35)) {
@@ -149,7 +154,7 @@ struct HomeView: View {
                     }
                 }
             }
-            .background(Color(hex: "#F0F0F3"))
+            .background(convertTabChromeBackground)
             .navigationTitle("Measure Anything")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar(keyboard.isVisible ? .hidden : .automatic, for: .tabBar)
@@ -168,33 +173,73 @@ struct HomeView: View {
                     .buttonStyle(FavoritesToolbarButtonStyle())
                     .accessibilityLabel("View favorites")
                 }
-                ToolbarItemGroup(placement: .topBarTrailing) {
-                    Button {
-                        saveCurrentPairAsFavorite()
-                    } label: {
-                        Image(systemName: isCurrentPairAlreadyFavorite ? "star.fill" : "star")
-                            .font(.body.weight(.regular))
-                            .imageScale(.medium)
-                            .foregroundStyle(isCurrentPairAlreadyFavorite ? categoryAccent.opacity(0.95) : Color.secondary)
-                    }
-                    .disabled(!canSaveFavoriteTap)
-                    .buttonStyle(ConverterPressingButtonStyle())
-                    .accessibilityLabel(isCurrentPairAlreadyFavorite ? "Already a favorite" : "Save as favorite")
+                ToolbarItemGroup(placement: .navigationBarTrailing) {
+                    if isConverterKeyboardActive {
+                        // Cancel — revert and dismiss
+                        Button {
+                            vm.restoreInputEditSnapshot()
+                            UIApplication.shared.sendAction(
+                                #selector(UIResponder.resignFirstResponder),
+                                to: nil, from: nil, for: nil
+                            )
+                        } label: {
+                            Image(systemName: "xmark")
+                                .font(.body.weight(.medium))
+                                .foregroundStyle(.secondary)
+                        }
+                        .buttonStyle(ConverterPressingButtonStyle())
 
-                    Button {
-                        Haptics.tap()
-                        showCustomUnitForm = true
-                    } label: {
-                        Image(systemName: "plus")
-                            .font(.body.weight(.regular))
-                            .imageScale(.medium)
+                        // Done — confirm and dismiss
+                        Button {
+                            UIApplication.shared.sendAction(
+                                #selector(UIResponder.resignFirstResponder),
+                                to: nil, from: nil, for: nil
+                            )
+                        } label: {
+                            Image(systemName: "checkmark")
+                                .font(.body.weight(.semibold))
+                                .foregroundStyle(categoryAccent)
+                        }
+                        .buttonStyle(ConverterPressingButtonStyle())
+                    } else {
+                        // Original star and + buttons here (unchanged)
+                        Button {
+                            saveCurrentPairAsFavorite()
+                        } label: {
+                            Image(systemName: isCurrentPairAlreadyFavorite ? "star.fill" : "star")
+                                .font(.body.weight(.regular))
+                                .imageScale(.medium)
+                                .foregroundStyle(isCurrentPairAlreadyFavorite ? categoryAccent.opacity(0.95) : Color.secondary)
+                        }
+                        .disabled(!canSaveFavoriteTap)
+                        .buttonStyle(ConverterPressingButtonStyle())
+                        .accessibilityLabel(isCurrentPairAlreadyFavorite ? "Already a favorite" : "Save as favorite")
+
+                        Button {
+                            Haptics.tap()
+                            showCustomUnitForm = true
+                        } label: {
+                            Image(systemName: "plus")
+                                .font(.body.weight(.regular))
+                                .imageScale(.medium)
+                        }
+                        .buttonStyle(ConverterPressingButtonStyle())
+                        .accessibilityLabel("Add custom unit")
                     }
-                    .buttonStyle(ConverterPressingButtonStyle())
-                    .accessibilityLabel("Add custom unit")
                 }
             }
+            .animation(.easeInOut(duration: 0.15), value: isConverterKeyboardActive)
         }
-        .background(Color.white)
+        .background(convertTabChromeBackground)
+    }
+
+    /// Root chrome: while editing on Convert, match scroll/TO card white so `#F0F0F3` never shows above the keypad.
+    private var homeRootBackground: Color {
+        homeTab == .convert && isConverterKeyboardActive ? .white : Color(hex: "#F0F0F3")
+    }
+
+    private var convertTabChromeBackground: Color {
+        isConverterKeyboardActive ? .white : Color(hex: "#F0F0F3")
     }
 
     private var exploreTab: some View {

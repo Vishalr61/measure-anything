@@ -4,8 +4,7 @@ import UIKit
 import MeasureAnythingCore
 
 /// Holds the pre-edit snapshot of the decimal value field outside SwiftUI's `@State` so
-/// capturing it on focus does NOT trigger a view rebuild during keyboard presentation
-/// (which can otherwise drop the keyboard `Cancel`/`Done` toolbar on the first tap).
+/// capturing it on focus does NOT trigger a view rebuild during keyboard presentation.
 private final class ValueEditSession {
     var snapshot: String?
 }
@@ -28,34 +27,21 @@ struct CustomUnitFormView: View {
     @State private var previewLine2: String = ""
     @State private var previewTask: Task<Void, Never>?
     @State private var showTemperatureAlert = false
-    /// Snapshot holder for the decimal field; mutated outside `@State` so capturing it on
-    /// focus does not rebuild the form during keyboard presentation (see `ValueEditSession`).
     @State private var valueEditSession = ValueEditSession()
 
     @FocusState private var valueFieldFocused: Bool
 
     init(initialCategory: UnitCategory = .length) {
-        let allowed = UnitCategory.customAllowed
+        let allowed  = UnitCategory.customAllowed
         let resolved = allowed.contains(initialCategory) ? initialCategory : (allowed.first ?? .length)
         _selectedCategory = State(initialValue: resolved)
-        _referenceUnitID = State(initialValue: Self.canonicalReferenceUnitID(for: resolved))
+        _referenceUnitID  = State(initialValue: Self.canonicalReferenceUnitID(for: resolved))
     }
 
-    private var accent: Color {
-        ConverterCategoryAccent.accent(for: selectedCategory)
-    }
-
-    private var palette: CategoryPalette {
-        ConverterCategoryPalette.palette(for: selectedCategory)
-    }
-
-    private var trimmedName: String {
-        name.trimmingCharacters(in: .whitespacesAndNewlines)
-    }
-
-    private var dynamicValueLabel: String {
-        trimmedName.isEmpty ? "Your unit is" : "\(trimmedName) is"
-    }
+    private var accent: Color { ConverterCategoryAccent.accent(for: selectedCategory) }
+    private var palette: CategoryPalette { ConverterCategoryPalette.palette(for: selectedCategory) }
+    private var trimmedName: String { name.trimmingCharacters(in: .whitespacesAndNewlines) }
+    private var dynamicValueLabel: String { trimmedName.isEmpty ? "Your unit is" : "\(trimmedName) is" }
 
     private var canSave: Bool {
         guard !trimmedName.isEmpty else { return false }
@@ -67,13 +53,11 @@ struct CustomUnitFormView: View {
         return true
     }
 
-    private var showPreviewCard: Bool {
-        !trimmedName.isEmpty && parsePositiveValue() != nil
-    }
-
     private var referenceUnit: UnitDefinition? {
         try? vm.currentRegistry.unit(id: referenceUnitID)
     }
+
+    // MARK: – Body
 
     var body: some View {
         NavigationStack {
@@ -81,6 +65,7 @@ struct CustomUnitFormView: View {
                 whatSection
                 howBigSection
                 optionalSection
+
                 if let err = saveError {
                     Section {
                         Text(err)
@@ -88,6 +73,9 @@ struct CustomUnitFormView: View {
                             .font(.footnote)
                     }
                 }
+
+                // Live preview — shown only when there's something to show.
+                // The temp card that appeared unconditionally has been removed.
                 previewSection
             }
             .navigationTitle("Create a unit")
@@ -99,47 +87,22 @@ struct CustomUnitFormView: View {
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Save") { save() }
                         .fontWeight(.semibold)
-                        .foregroundStyle(accent)
+                        .foregroundStyle(canSave ? accent : Color.secondary)
                         .disabled(!canSave)
-                }
-            }
-            .toolbar {
-                ToolbarItemGroup(placement: .keyboard) {
-                    Button("Cancel") {
-                        cancelValueFieldEdit()
-                    }
-                    .foregroundStyle(accent.opacity(0.6))
-
-                    Spacer()
-
-                    Button("Done") {
-                        dismissValueFieldKeyboard()
-                    }
-                    .fontWeight(.bold)
-                    .foregroundStyle(accent)
                 }
             }
         }
         .onAppear {
             schedulePreviewRefresh()
-            // Pre-warm the snapshot so the keyboard toolbar's logic has stable state
-            // before the user's first tap on the decimal field. Combined with the
-            // class-based holder, this prevents focus changes from triggering any
-            // @State mutation during the first keyboard presentation, which otherwise
-            // can drop the Cancel/Done bar.
             if valueEditSession.snapshot == nil {
                 valueEditSession.snapshot = valueText
             }
         }
-        .onChange(of: name) { _, _ in schedulePreviewRefresh() }
-        .onChange(of: valueText) { _, _ in schedulePreviewRefresh() }
-        .onChange(of: referenceUnitID) { _, _ in schedulePreviewRefresh() }
+        .onChange(of: name)           { _, _ in schedulePreviewRefresh() }
+        .onChange(of: valueText)      { _, _ in schedulePreviewRefresh() }
+        .onChange(of: referenceUnitID){ _, _ in schedulePreviewRefresh() }
         .onChange(of: valueFieldFocused) { _, isFocused in
-            if isFocused {
-                valueEditSession.snapshot = valueText
-            }
-            // Intentionally do not clear on blur: keeps the holder stable across keyboard
-            // transitions so no view rebuild is triggered during animation.
+            if isFocused { valueEditSession.snapshot = valueText }
         }
         .onChange(of: selectedCategory) { _, new in
             referenceUnitID = Self.canonicalReferenceUnitID(for: new)
@@ -158,14 +121,18 @@ struct CustomUnitFormView: View {
         }
     }
 
-    // MARK: - Sections
+    // MARK: – Sections
 
     private var whatSection: some View {
         Section {
             TextField("e.g. My commute, My dog, My lunch break", text: $name)
                 .textInputAutocapitalization(.words)
         } header: {
-            sectionHeader("WHAT IS IT?")
+            sectionHeader("What is it?")
+        } footer: {
+            Text("Give your unit a name you'll recognise.")
+                .font(.footnote)
+                .foregroundStyle(.secondary)
         }
     }
 
@@ -193,7 +160,11 @@ struct CustomUnitFormView: View {
             }
             .padding(.vertical, 4)
         } header: {
-            sectionHeader("HOW BIG IS IT?")
+            sectionHeader("How big is it?")
+        } footer: {
+            Text("Enter how many of the reference unit your unit equals.")
+                .font(.footnote)
+                .foregroundStyle(.secondary)
         }
     }
 
@@ -201,7 +172,7 @@ struct CustomUnitFormView: View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 8) {
                 ForEach(UnitCategory.customAllowed, id: \.self) { cat in
-                    let selected = selectedCategory == cat
+                    let selected   = selectedCategory == cat
                     let chipAccent = ConverterCategoryAccent.accent(for: cat)
                     Button {
                         Haptics.tap()
@@ -211,10 +182,7 @@ struct CustomUnitFormView: View {
                             .font(.subheadline.weight(.semibold))
                             .padding(.horizontal, 14)
                             .padding(.vertical, 8)
-                            .background(
-                                Capsule()
-                                    .fill(selected ? chipAccent : Color(.systemGray5))
-                            )
+                            .background(Capsule().fill(selected ? chipAccent : Color(.systemGray5)))
                             .foregroundStyle(selected ? Color.white : Color.primary)
                     }
                     .buttonStyle(.plain)
@@ -264,13 +232,9 @@ struct CustomUnitFormView: View {
             valueFieldFocused = false
             UIApplication.shared.sendAction(
                 #selector(UIResponder.resignFirstResponder),
-                to: nil,
-                from: nil,
-                for: nil
+                to: nil, from: nil, for: nil
             )
-            DispatchQueue.main.async {
-                showUnitPicker = true
-            }
+            DispatchQueue.main.async { showUnitPicker = true }
         } label: {
             HStack(spacing: 6) {
                 Text(referenceUnit?.name ?? "—")
@@ -294,13 +258,15 @@ struct CustomUnitFormView: View {
         Section {
             VStack(alignment: .leading, spacing: 6) {
                 TextField("Fun fact (optional)", text: $detail, axis: .vertical)
-                    .lineLimit(3 ... 6)
+                    .lineLimit(3...6)
                 Text("e.g. Takes 45 mins in traffic")
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
+        } header: {
+            sectionHeader("Add a note")
         }
     }
 
@@ -309,20 +275,27 @@ struct CustomUnitFormView: View {
             .font(.caption)
             .fontWeight(.semibold)
             .foregroundStyle(.secondary)
-            .textCase(.uppercase)
-            .tracking(0.6)
+            .textCase(nil)   // keep sentence case — cleaner than all-caps here
     }
+
+    // MARK: – Preview section
+    // Appears only when name + value are both filled in.
+    // The unconditional "temp card" that existed before is gone.
 
     @ViewBuilder
     private var previewSection: some View {
-        let showCard = showPreviewCard && (!previewLine1.isEmpty || !previewLine2.isEmpty)
-        if showCard {
+        // Only render when we have real content to show.
+        if !trimmedName.isEmpty && parsePositiveValue() != nil
+            && (!previewLine1.isEmpty || !previewLine2.isEmpty) {
+
             Section {
                 VStack(alignment: .leading, spacing: 6) {
-                    Text(previewLine1)
-                        .font(.system(size: 14, weight: .medium))
-                        .foregroundStyle(palette.valueProclamation)
-                        .fixedSize(horizontal: false, vertical: true)
+                    if !previewLine1.isEmpty {
+                        Text(previewLine1)
+                            .font(.system(size: 14, weight: .medium))
+                            .foregroundStyle(palette.valueProclamation)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
                     if !previewLine2.isEmpty {
                         Text(previewLine2)
                             .font(.system(size: 11, weight: .regular))
@@ -343,32 +316,12 @@ struct CustomUnitFormView: View {
                     trailing: ConverterLayout.horizontalInset
                 ))
             } header: {
-                sectionHeader("PREVIEW")
+                sectionHeader("Preview")
             }
         }
     }
 
-    // MARK: - Keyboard
-
-    private func dismissValueFieldKeyboard() {
-        valueFieldFocused = false
-        UIApplication.shared.sendAction(
-            #selector(UIResponder.resignFirstResponder),
-            to: nil,
-            from: nil,
-            for: nil
-        )
-    }
-
-    /// Cancel: revert the decimal field to its pre-edit value (if captured) and dismiss the keyboard.
-    private func cancelValueFieldEdit() {
-        if let snapshot = valueEditSession.snapshot {
-            valueText = snapshot
-        }
-        dismissValueFieldKeyboard()
-    }
-
-    // MARK: - Save
+    // MARK: – Save
 
     private func save() {
         saveError = nil
@@ -386,10 +339,7 @@ struct CustomUnitFormView: View {
             return
         }
         let refF = ref.factor ?? 1
-        guard refF > 0 else {
-            saveError = "Invalid reference unit."
-            return
-        }
+        guard refF > 0 else { saveError = "Invalid reference unit."; return }
         let factor = v * refF
 
         let unit = CustomUnit(
@@ -413,7 +363,7 @@ struct CustomUnitFormView: View {
         }
     }
 
-    // MARK: - Preview (debounced)
+    // MARK: – Preview (debounced)
 
     private func schedulePreviewRefresh() {
         previewTask?.cancel()
@@ -427,31 +377,23 @@ struct CustomUnitFormView: View {
     private func refreshPreviewLines() {
         let n = trimmedName
         guard !n.isEmpty, let v = parsePositiveValue() else {
-            previewLine1 = ""
-            previewLine2 = ""
-            return
+            previewLine1 = ""; previewLine2 = ""; return
         }
         guard let ref = try? vm.currentRegistry.unit(id: referenceUnitID),
               ref.category == selectedCategory,
               ref.kind == .normal
         else {
-            previewLine1 = ""
-            previewLine2 = ""
-            return
+            previewLine1 = ""; previewLine2 = ""; return
         }
         let refF = ref.factor ?? 1
-        guard refF > 0 else {
-            previewLine1 = ""
-            previewLine2 = ""
-            return
-        }
+        guard refF > 0 else { previewLine1 = ""; previewLine2 = ""; return }
         let factor = v * refF
 
         let line1 = "1 \(n) = \(vm.formatNumberForDisplay(v)) \(referenceShortLabel(ref))"
 
         let absurdSorted = vm.currentRegistry
             .units(in: selectedCategory, includeKinds: [.absurd])
-            .sorted { $0.id < $1.id } // stable order for hashing
+            .sorted { $0.id < $1.id }
 
         if let absurd = absurdPick(from: absurdSorted, seed: n + referenceUnitID + "\(v)") {
             let af = absurd.factor ?? 1
@@ -463,9 +405,9 @@ struct CustomUnitFormView: View {
             }
         }
 
-        let baseID = Self.canonicalReferenceUnitID(for: selectedCategory)
+        let baseID  = Self.canonicalReferenceUnitID(for: selectedCategory)
         let baseDef = try? vm.currentRegistry.unit(id: baseID)
-        let sym = baseDef?.baseUnitSymbol ?? ""
+        let sym     = baseDef?.baseUnitSymbol ?? ""
         previewLine1 = line1
         previewLine2 = "= \(vm.formatNumberForDisplay(factor)) \(sym)"
     }
@@ -473,35 +415,27 @@ struct CustomUnitFormView: View {
     private func absurdPick(from list: [UnitDefinition], seed: String) -> UnitDefinition? {
         guard !list.isEmpty else { return nil }
         var h = 0
-        for u in seed.unicodeScalars {
-            h = (h &* 31) &+ Int(u.value)
-        }
-        let idx = abs(h) % list.count
-        return list[idx]
+        for u in seed.unicodeScalars { h = (h &* 31) &+ Int(u.value) }
+        return list[abs(h) % list.count]
     }
 
-    /// Second preview line for absurd comparison: rounded display, "≈" unless exactly 1.0, simple pluralization.
     private func absurdComparisonSecondLine(count: Double, unitName: String) -> String {
         let exactOne = abs(count - 1.0) < 1e-9
-
         let displayNum: String
         let quantityForPlural: Double
 
         if exactOne {
-            displayNum = "1"
-            quantityForPlural = 1
+            displayNum = "1"; quantityForPlural = 1
         } else {
             let nearest = round(count)
             if abs(count - nearest) <= 0.05 {
                 let v = Int(nearest)
-                displayNum = String(v)
-                quantityForPlural = Double(v)
+                displayNum = String(v); quantityForPlural = Double(v)
             } else {
                 let r = (count * 10).rounded() / 10
                 if abs(r - Double(Int(r))) < 1e-9 {
                     let intVal = Int(r)
-                    displayNum = String(intVal)
-                    quantityForPlural = Double(intVal)
+                    displayNum = String(intVal); quantityForPlural = Double(intVal)
                 } else {
                     displayNum = String(format: "%.1f", locale: Locale(identifier: "en_US"), arguments: [r])
                     quantityForPlural = r
@@ -510,11 +444,10 @@ struct CustomUnitFormView: View {
         }
 
         let prefix = exactOne ? "=" : "≈"
-        let label = pluralizedAbsurdUnitName(unitName, quantity: quantityForPlural)
+        let label  = pluralizedAbsurdUnitName(unitName, quantity: quantityForPlural)
         return "\(prefix) \(displayNum) \(label)"
     }
 
-    /// v1: append "s" when quantity ≠ 1; skip if the name already ends with "s".
     private func pluralizedAbsurdUnitName(_ name: String, quantity: Double) -> String {
         let isSingular = abs(quantity - 1.0) < 1e-9
         if isSingular { return name }
@@ -524,10 +457,12 @@ struct CustomUnitFormView: View {
         return trimmed + "s"
     }
 
-    // MARK: - Parsing & helpers
+    // MARK: – Parsing & helpers
 
     private func parsePositiveValue() -> Double? {
-        let normalized = valueText.trimmingCharacters(in: .whitespacesAndNewlines).replacingOccurrences(of: ",", with: ".")
+        let normalized = valueText
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+            .replacingOccurrences(of: ",", with: ".")
         guard let v = Double(normalized), v > 0, v.isFinite else { return nil }
         return v
     }
@@ -538,48 +473,47 @@ struct CustomUnitFormView: View {
 
     private func chipTitle(for category: UnitCategory) -> String {
         switch category {
-        case .length: return "Length"
-        case .mass: return "Mass"
-        case .time: return "Time"
-        case .volume: return "Volume"
+        case .length:      return "Length"
+        case .mass:        return "Mass"
+        case .time:        return "Time"
+        case .volume:      return "Volume"
         case .temperature: return "Temperature"
         }
     }
 
-    /// Short label for preview line (e.g. km); falls back to full name.
     private func referenceShortLabel(_ u: UnitDefinition) -> String {
         switch u.id {
-        case "kilometer": return "km"
-        case "meter": return "m"
+        case "kilometer":  return "km"
+        case "meter":      return "m"
         case "centimeter": return "cm"
         case "millimeter": return "mm"
         case "micrometer": return "µm"
-        case "nanometer": return "nm"
-        case "mile": return "mi"
-        case "inch": return "in"
-        case "foot": return "ft"
-        case "yard": return "yd"
-        case "kilogram": return "kg"
-        case "gram": return "g"
-        case "pound": return "lb"
-        case "ounce": return "oz"
-        case "second": return "s"
-        case "minute": return "min"
-        case "hour": return "h"
-        case "day": return "d"
-        case "liter": return "L"
+        case "nanometer":  return "nm"
+        case "mile":       return "mi"
+        case "inch":       return "in"
+        case "foot":       return "ft"
+        case "yard":       return "yd"
+        case "kilogram":   return "kg"
+        case "gram":       return "g"
+        case "pound":      return "lb"
+        case "ounce":      return "oz"
+        case "second":     return "s"
+        case "minute":     return "min"
+        case "hour":       return "h"
+        case "day":        return "d"
+        case "liter":      return "L"
         case "milliliter": return "mL"
-        default: return u.name
+        default:           return u.name
         }
     }
 
     private static func iconName(for category: UnitCategory) -> String {
         switch category {
-        case .length: return "ruler"
-        case .mass: return "scalemass"
-        case .time: return "clock"
-        case .volume: return "drop"
-        default: return "star.circle"
+        case .length:  return "ruler"
+        case .mass:    return "scalemass"
+        case .time:    return "clock"
+        case .volume:  return "drop"
+        default:       return "star.circle"
         }
     }
 }

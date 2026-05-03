@@ -10,6 +10,7 @@ struct ConverterView: View {
 
     @ObservedObject var vm: ConverterViewModel
     @State private var showCustomUnitForm = false
+    @State private var isConverterKeyboardActive = false
     @State private var showFavorites = false
     @State private var mainTab: BottomNav.Tab = .convert
     @State private var exploreResetToken = 0
@@ -54,7 +55,7 @@ struct ConverterView: View {
             .allowsHitTesting(!keyboard.isVisible)
         }
         .environmentObject(vm)
-        .background(Color(hex: "#F0F0F3"))
+        .background(converterRootBackground)
         .onChange(of: mainTab) { old, new in
             if old == .explore && new != .explore {
                 exploreResetToken &+= 1
@@ -67,7 +68,7 @@ struct ConverterView: View {
             }
         }
         .sheet(isPresented: $showFavorites) {
-            FavoritesListView(registry: vm.currentRegistry) { fav in
+            FavoritesListView(registry: vm.currentRegistry, accent: categoryAccent) { fav in
                 vm.applyFavoriteRestore(
                     categoryRaw: fav.categoryRaw,
                     fromID: fav.fromUnitID,
@@ -83,11 +84,13 @@ struct ConverterView: View {
                 ConverterWorkspaceBody(
                     showsCategoryPicker: true,
                     showCustomUnitForm: $showCustomUnitForm,
+                    isKeyboardActive: $isConverterKeyboardActive,
                     vm: vm
                 )
+                .padding(.bottom, isConverterKeyboardActive ? 12 : ConverterLayout.rhythm24)
             }
             .scrollDismissesKeyboard(.never)
-            .background(Color(hex: "#F0F0F3"))
+            .background(converterScrollBackground)
             .navigationTitle("Measure Anything")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar(keyboard.isVisible ? .hidden : .automatic, for: .tabBar)
@@ -132,7 +135,15 @@ struct ConverterView: View {
                 }
             }
         }
-        .background(Color.white)
+        .background(converterScrollBackground)
+    }
+
+    private var converterScrollBackground: Color {
+        isConverterKeyboardActive ? .white : Color(hex: "#F0F0F3")
+    }
+
+    private var converterRootBackground: Color {
+        mainTab == .convert && isConverterKeyboardActive ? .white : Color(hex: "#F0F0F3")
     }
 
     private func saveCurrentPairAsFavorite() {
