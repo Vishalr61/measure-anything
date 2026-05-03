@@ -213,9 +213,9 @@ struct OnboardingSlide {
     static var unitConversionSlide: OnboardingSlide {
         OnboardingSlide(
             headline: "Convert anything,\ninto anything.",
-            body: "Type a value, pick your units. Measure Anything converts standard units — and ridiculous ones too.",
+            body: "Standard units and ridiculous ones — all in one place.",
             accentColor: Color(hex: "#1A5F73"),
-            pointerAnchor: PointerAnchor(x: 80, y: 60, label: "tap to type"),
+            pointerAnchor: PointerAnchor(x: 16, y: 52, label: "tap to type"),
             mockup: { appear in
                 AnyView(
                     UnitConversionMockup(appear: appear)
@@ -229,9 +229,9 @@ struct OnboardingSlide {
     static var categoriesSlide: OnboardingSlide {
         OnboardingSlide(
             headline: "Five categories,\nhundreds of units.",
-            body: "Length, Mass, Time, Temperature, Volume — plus a growing list of absurd ones like Blue Whales and School Buses.",
+            body: "Length, Mass, Time, Temperature, Volume — plus absurd ones like Bowling Balls, T-Rexes and Eiffel Towers.",
             accentColor: Color(hex: "#3D6B4A"),
-            pointerAnchor: PointerAnchor(x: 20, y: 10, label: "switch category"),
+            pointerAnchor: PointerAnchor(x: 60, y: 0, label: "switch category"),
             mockup: { appear in
                 AnyView(CategoriesMockup(appear: appear))
             }
@@ -243,9 +243,9 @@ struct OnboardingSlide {
     static var customModeSlide: OnboardingSlide {
         OnboardingSlide(
             headline: "Make your own\nunits.",
-            body: "\"My commute\", \"My dog\", \"My coffee mug\" — define anything as a unit and use it in conversions.",
-            accentColor: Color(hex: "#854F0B"),
-            pointerAnchor: PointerAnchor(x: 60, y: 220, label: "create unit"),
+            body: "Name anything, give it a size. Then use it to convert — and see the world in a whole new scale.",
+            accentColor: Color(hex: "#3D3580"),
+            pointerAnchor: PointerAnchor(x: 16, y: 198, label: "create unit"),
             mockup: { appear in
                 AnyView(CustomModeMockup(appear: appear))
             }
@@ -258,8 +258,8 @@ struct OnboardingSlide {
         OnboardingSlide(
             headline: "Explore, search,\nand discover.",
             body: "Browse by category or search. Tap any two units to jump straight to that conversion.",
-            accentColor: Color(hex: "#3C3489"),
-            pointerAnchor: PointerAnchor(x: 40, y: 140, label: "tap two units"),
+            accentColor: Color(hex: "#8B3A2A"),
+            pointerAnchor: PointerAnchor(x: 16, y: 128, label: "tap two units"),
             mockup: { appear in
                 AnyView(ExploreMockup(appear: appear))
             }
