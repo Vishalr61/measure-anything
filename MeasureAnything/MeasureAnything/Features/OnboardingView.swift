@@ -1,5 +1,25 @@
 import SwiftUI
 
+// MARK: – Preference key for pointer target anchoring
+
+struct PointerTargetKey: PreferenceKey {
+    static var defaultValue: Anchor<CGRect>? = nil
+    static func reduce(value: inout Anchor<CGRect>?, nextValue: () -> Anchor<CGRect>?) {
+        value = value ?? nextValue()
+    }
+}
+
+extension View {
+    func pointerTarget() -> some View {
+        self.anchorPreference(key: PointerTargetKey.self, value: .bounds) { $0 }
+    }
+
+    @ViewBuilder
+    func `if`<Content: View>(_ condition: Bool, transform: (Self) -> Content) -> some View {
+        if condition { transform(self) } else { self }
+    }
+}
+
 // MARK: ─────────────────────────────────────────────────────────────────────
 // MARK: OnboardingView
 //
@@ -55,23 +75,28 @@ struct OnboardingView: View {
             Spacer(minLength: 24)
 
             // Mockup + pointer zone
-            ZStack(alignment: .topLeading) {
-                slide.mockup(mockupAppear)
-                    .frame(maxWidth: .infinity)
-
-                // Animated pointer arrow pointing at the highlighted element
-                if let anchor = slide.pointerAnchor {
-                    pointerArrow(slide: slide, anchor: anchor)
-                        .offset(y: pointerBounce)
-                        .animation(
-                            .easeInOut(duration: 0.8)
-                            .repeatForever(autoreverses: true),
-                            value: pointerBounce
-                        )
+            slide.mockup(mockupAppear)
+                .frame(maxWidth: .infinity)
+                .frame(height: 320)
+                .padding(.horizontal, 24)
+                .overlayPreferenceValue(PointerTargetKey.self) { anchor in
+                    if let anchor = anchor, let label = slide.pointerAnchor?.label {
+                        GeometryReader { geo in
+                            let rect = geo[anchor]
+                            pointerArrow(slide: slide, label: label)
+                                .fixedSize()
+                                .offset(
+                                    x: rect.midX - 30,
+                                    y: rect.minY - 52
+                                )
+                                .offset(y: pointerBounce)
+                                .animation(
+                                    .easeInOut(duration: 0.8).repeatForever(autoreverses: true),
+                                    value: pointerBounce
+                                )
+                        }
+                    }
                 }
-            }
-            .frame(height: 320)
-            .padding(.horizontal, 24)
 
             Spacer(minLength: 28)
 
@@ -97,31 +122,21 @@ struct OnboardingView: View {
 
     // MARK: – Pointer arrow
 
-    private func pointerArrow(slide: OnboardingSlide, anchor: OnboardingSlide.PointerAnchor) -> some View {
-        // The pointer is a "measurement ruler tick" style indicator —
-        // a short angled line ending in a filled circle, rotated to point at the element.
+    private func pointerArrow(slide: OnboardingSlide, label: String) -> some View {
         VStack(spacing: 2) {
-            // Label callout bubble
-            Text(anchor.label)
+            Text(label)
                 .font(.system(size: 11, weight: .semibold))
                 .foregroundStyle(.white)
                 .padding(.horizontal, 10)
                 .padding(.vertical, 5)
-                .background(
-                    Capsule().fill(slide.accentColor)
-                )
-
-            // Stem
+                .background(Capsule().fill(slide.accentColor))
             Rectangle()
                 .fill(slide.accentColor)
                 .frame(width: 1.5, height: 18)
-
-            // Arrowhead
             Triangle()
                 .fill(slide.accentColor)
                 .frame(width: 8, height: 6)
         }
-        .offset(x: anchor.x, y: anchor.y)
     }
 
     // MARK: – Bottom bar
@@ -192,8 +207,6 @@ struct OnboardingView: View {
 
 struct OnboardingSlide {
     struct PointerAnchor {
-        let x: CGFloat
-        let y: CGFloat
         let label: String
     }
 
@@ -219,7 +232,7 @@ struct OnboardingSlide {
             headline: "Convert anything,\ninto anything.",
             body: "Standard units and ridiculous ones — all in one place.",
             accentColor: Color(hex: "#1A5F73"),
-            pointerAnchor: PointerAnchor(x: 16, y: 52, label: "tap to type"),
+            pointerAnchor: PointerAnchor(label: "tap to type"),
             mockup: { appear in
                 AnyView(
                     UnitConversionMockup(appear: appear)
@@ -235,7 +248,7 @@ struct OnboardingSlide {
             headline: "Five categories,\nhundreds of units.",
             body: "Length, Mass, Time, Temperature, Volume — plus absurd ones like Bowling Balls, T-Rexes and Eiffel Towers.",
             accentColor: Color(hex: "#3D6B4A"),
-            pointerAnchor: PointerAnchor(x: 60, y: 0, label: "switch category"),
+            pointerAnchor: PointerAnchor(label: "switch category"),
             mockup: { appear in
                 AnyView(CategoriesMockup(appear: appear))
             }
@@ -249,7 +262,7 @@ struct OnboardingSlide {
             headline: "Make your own\nunits.",
             body: "Name anything, give it a size. Then use it to convert — and see the world in a whole new scale.",
             accentColor: Color(hex: "#3D3580"),
-            pointerAnchor: PointerAnchor(x: 16, y: 198, label: "create unit"),
+            pointerAnchor: PointerAnchor(label: "create unit"),
             mockup: { appear in
                 AnyView(CustomModeMockup(appear: appear))
             }
@@ -263,7 +276,7 @@ struct OnboardingSlide {
             headline: "Explore, search,\nand discover.",
             body: "Browse by category or search. Tap any two units to jump straight to that conversion.",
             accentColor: Color(hex: "#8B3A2A"),
-            pointerAnchor: PointerAnchor(x: 16, y: 128, label: "tap two units"),
+            pointerAnchor: PointerAnchor(label: "tap two units"),
             mockup: { appear in
                 AnyView(ExploreMockup(appear: appear))
             }
@@ -297,6 +310,7 @@ private struct UnitConversionMockup: View {
                             .opacity(appear ? 1 : 0)
                             .offset(x: appear ? 0 : -12)
                             .animation(.easeOut(duration: 0.35).delay(0.1), value: appear)
+                            .pointerTarget()
                     }
                     Spacer()
                     unitPill("Centimeters", color: Color(hex: "#1A5F73"))
@@ -373,6 +387,7 @@ private struct CategoriesMockup: View {
                         .opacity(appear ? 1 : 0)
                         .offset(y: appear ? 0 : 10)
                         .animation(.easeOut(duration: 0.3).delay(Double(idx) * 0.07), value: appear)
+                        .if(idx == 1) { $0.pointerTarget() }
                     }
                 }
                 .padding(.horizontal, 4)
@@ -475,6 +490,7 @@ private struct CustomModeMockup: View {
                     RoundedRectangle(cornerRadius: 10, style: .continuous)
                         .fill(Color(hex: "#ECEAF8"))
                 )
+                .pointerTarget()
                 .transition(.opacity.combined(with: .move(edge: .bottom)))
                 .animation(.easeOut(duration: 0.35).delay(0.35), value: appear)
             }
@@ -547,6 +563,7 @@ private struct ExploreMockup: View {
                     badge: firstTapped ? (secondTapped ? "TO ✓" : "TO") : "FROM",
                     accentColor: Color(hex: "#8B3A2A"),
                     delay: 0.22,
+                    isTargeted: true,
                     onTap: {
                         if firstTapped {
                             withAnimation(.easeInOut(duration: 0.2)) { secondTapped = true }
@@ -607,6 +624,7 @@ private struct ExploreMockup: View {
         badge: String,
         accentColor: Color,
         delay: Double,
+        isTargeted: Bool = false,
         onTap: @escaping () -> Void
     ) -> some View {
         Button(action: onTap) {
@@ -620,6 +638,7 @@ private struct ExploreMockup: View {
                     Text(name)
                         .font(.system(size: 14, weight: isSelected ? .semibold : .regular))
                         .foregroundStyle(isSelected ? accentColor : .primary)
+                        .if(isTargeted) { $0.pointerTarget() }
                     Text(detail)
                         .font(.system(size: 11))
                         .foregroundStyle(.secondary)
