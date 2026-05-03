@@ -429,7 +429,7 @@ private struct CustomModeMockup: View {
 
                     // Simulated text field with placeholder
                     HStack {
-                        Text("My commute")
+                        Text("My shower")
                             .font(.system(size: 16))
                             .foregroundStyle(.primary)
                             .opacity(appear ? 1 : 0)
@@ -444,19 +444,19 @@ private struct CustomModeMockup: View {
 
             mockupCard {
                 VStack(alignment: .leading, spacing: 10) {
-                    Text("HOW BIG IS IT?")
+                    Text("HOW LONG IS IT?")
                         .font(.system(size: 9, weight: .semibold))
                         .foregroundStyle(Color(hex: "#B0B0A8"))
                         .tracking(0.6)
 
                     HStack(alignment: .center, spacing: 12) {
-                        Text(appear ? "12.4" : "0")
+                        Text(appear ? "8" : "0")
                             .font(.system(size: 28, weight: .bold, design: .rounded))
                             .foregroundStyle(.primary)
                             .contentTransition(.numericText())
                             .animation(.easeOut(duration: 0.45).delay(0.2), value: appear)
                         Spacer()
-                        unitPill("Kilometers", color: Color(hex: "#854F0B"))
+                        unitPill("Minutes", color: Color(hex: "#3D3580"))
                     }
                 }
             }
@@ -464,16 +464,16 @@ private struct CustomModeMockup: View {
             // Preview card
             if appear {
                 HStack(spacing: 10) {
-                    Text("1 My commute = 12.4 km ≈ 13 blue whales")
+                    Text("The Apollo 11 mission lasted ~1,460 showers")
                         .font(.system(size: 12, weight: .medium))
-                        .foregroundStyle(Color(hex: "#854F0B"))
+                        .foregroundStyle(Color(hex: "#3D3580"))
                         .fixedSize(horizontal: false, vertical: true)
                     Spacer()
                 }
                 .padding(12)
                 .background(
                     RoundedRectangle(cornerRadius: 10, style: .continuous)
-                        .fill(Color(hex: "#FAEEDA"))
+                        .fill(Color(hex: "#ECEAF8"))
                 )
                 .transition(.opacity.combined(with: .move(edge: .bottom)))
                 .animation(.easeOut(duration: 0.35).delay(0.35), value: appear)
