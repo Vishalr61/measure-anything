@@ -368,7 +368,7 @@ private struct CategoriesMockup: View {
                             icon: chip.0,
                             name: chip.1,
                             color: chip.2,
-                            isSelected: idx == 0
+                            isSelected: idx == 1
                         )
                         .opacity(appear ? 1 : 0)
                         .offset(y: appear ? 0 : 10)
@@ -380,7 +380,7 @@ private struct CategoriesMockup: View {
 
             // Mini unit grid below
             LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
-                ForEach(["Meter", "Foot", "Mile", "Inch", "Yard", "Blue\nWhale"], id: \.self) { name in
+                ForEach(Array(["Kilogram", "Pound", "Ounce", "Bowling\nBall", "T-Rex", "Eiffel\nTower"].enumerated()), id: \.offset) { idx, name in
                     Text(name)
                         .font(.system(size: 12, weight: .medium))
                         .multilineTextAlignment(.center)
@@ -388,9 +388,9 @@ private struct CategoriesMockup: View {
                         .padding(.vertical, 10)
                         .background(
                             RoundedRectangle(cornerRadius: 10, style: .continuous)
-                                .fill(Color(hex: "#E1F5EE"))
+                                .fill(idx < 3 ? Color(hex: "#E1F5EE") : Color(hex: "#EDF4EF"))
                         )
-                        .foregroundStyle(Color(hex: "#085041"))
+                        .foregroundStyle(idx < 3 ? Color(hex: "#085041") : Color(hex: "#3D6B4A"))
                         .opacity(appear ? 1 : 0)
                         .animation(.easeOut(duration: 0.3).delay(0.4), value: appear)
                 }
