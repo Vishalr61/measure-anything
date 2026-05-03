@@ -86,7 +86,7 @@ struct OnboardingView: View {
                             pointerArrow(slide: slide, label: label)
                                 .fixedSize()
                                 .offset(
-                                    x: rect.midX - 30,
+                                    x: rect.midX - 55 + slide.pointerXOffset,
                                     y: rect.minY - 52
                                 )
                                 .offset(y: pointerBounce)
@@ -214,6 +214,7 @@ struct OnboardingSlide {
     let body: String
     let accentColor: Color
     let pointerAnchor: PointerAnchor?
+    let pointerXOffset: CGFloat
     let mockup: (Bool) -> AnyView   // `appear` drives entrance animation
 
     // MARK: All slides
@@ -233,6 +234,7 @@ struct OnboardingSlide {
             body: "Standard units and ridiculous ones — all in one place.",
             accentColor: Color(hex: "#1A5F73"),
             pointerAnchor: PointerAnchor(label: "tap to type"),
+            pointerXOffset: 0,
             mockup: { appear in
                 AnyView(
                     UnitConversionMockup(appear: appear)
@@ -249,6 +251,7 @@ struct OnboardingSlide {
             body: "Length, Mass, Time, Temperature, Volume — plus absurd ones like Bowling Balls, T-Rexes and Eiffel Towers.",
             accentColor: Color(hex: "#3D6B4A"),
             pointerAnchor: PointerAnchor(label: "switch category"),
+            pointerXOffset: 0,
             mockup: { appear in
                 AnyView(CategoriesMockup(appear: appear))
             }
@@ -263,6 +266,7 @@ struct OnboardingSlide {
             body: "Name anything, give it a size. Then use it to convert — and see the world in a whole new scale.",
             accentColor: Color(hex: "#3D3580"),
             pointerAnchor: PointerAnchor(label: "create unit"),
+            pointerXOffset: 0,
             mockup: { appear in
                 AnyView(CustomModeMockup(appear: appear))
             }
@@ -277,6 +281,7 @@ struct OnboardingSlide {
             body: "Browse by category or search. Tap any two units to jump straight to that conversion.",
             accentColor: Color(hex: "#8B3A2A"),
             pointerAnchor: PointerAnchor(label: "tap two units"),
+            pointerXOffset: 0,
             mockup: { appear in
                 AnyView(ExploreMockup(appear: appear))
             }
