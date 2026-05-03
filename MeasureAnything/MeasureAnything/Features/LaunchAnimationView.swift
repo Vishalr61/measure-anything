@@ -3,6 +3,7 @@ import UIKit
 
 struct LaunchAnimationView: View {
     static var hasPlayedThisSession = false
+
     private enum Phase {
         case animating
         case held
@@ -16,45 +17,60 @@ struct LaunchAnimationView: View {
     }
 
     private let words: [Word] = [
-        Word(id: 0, text: "Elephants", color: Color(hex: "#0F3D4A")),
-        Word(id: 1, text: "Feathers", color: Color(hex: "#27500A")),
+        Word(id: 0, text: "Elephants",   color: Color(hex: "#0F3D4A")),
+        Word(id: 1, text: "Feathers",    color: Color(hex: "#27500A")),
         Word(id: 2, text: "Light years", color: Color(hex: "#854F0B")),
-        Word(id: 3, text: "Heartbeats", color: Color(hex: "#3C3489")),
-        Word(id: 4, text: "Anything.", color: Color(hex: "#000000")),
+        Word(id: 3, text: "Heartbeats",  color: Color(hex: "#3C3489")),
+        Word(id: 4, text: "Anything.",   color: Color(hex: "#000000")),
     ]
 
-    private let subtitleText = "meters, whales, and everything between"
-    private let subtitleGray = Color(hex: "#9A9A94")
+    private let subtitleText  = "meters, whales, and everything between"
+    private let subtitleGray  = Color(hex: "#9A9A94")
     private let tapPromptText = "slide to start"
     private let tapPromptGray = Color(hex: "#C0C0B8")
 
     var onFinished: () -> Void
 
+    // MARK: – Lifecycle flags
     @State private var didStart = false
+
+    // MARK: – Root transform
     @State private var rootOpacity: Double = 1
     @State private var rootOffsetY: CGFloat = 0
     @State private var allowsTouches = true
+
+    // MARK: – Phase (single source of truth for interaction gating)
     @State private var phase: Phase = .animating
+
+    // MARK: – Interactive drag
     @State private var dragTranslationY: CGFloat = 0
 
+    // MARK: – "Measure" word
     @State private var measureOpacity: Double = 0
     @State private var measureY: CGFloat = 8
 
+    // MARK: – Cycling words
     @State private var wordOpacities: [Double] = Array(repeating: 0, count: 5)
-    @State private var wordYs: [CGFloat] = Array(repeating: 16, count: 5)
+    @State private var wordYs: [CGFloat]       = Array(repeating: 16, count: 5)
 
+    // MARK: – Subtitle
     @State private var subtitleOpacity: Double = 0
     @State private var subtitleY: CGFloat = 6
 
+    // MARK: – Tap-prompt
     @State private var tapPromptVisibleOpacity: Double = 0
     @State private var tapPromptPulse: Double = 0.4
 
+    // MARK: – Animation task handle
     @State private var animationTask: Task<Void, Never>?
+
+    // MARK: ─────────────────────────────────────────────────────────────────
+    // MARK: Body
+    // MARK: ─────────────────────────────────────────────────────────────────
 
     var body: some View {
         ZStack {
-            Color.white
-                .ignoresSafeArea()
+            Color.white.ignoresSafeArea()
 
             VStack(alignment: .leading, spacing: 10) {
                 HStack(alignment: .firstTextBaseline, spacing: 8) {
@@ -81,7 +97,6 @@ struct LaunchAnimationView: View {
                         .font(.system(size: 12, weight: .medium))
                         .foregroundStyle(tapPromptGray)
                         .opacity(tapPromptVisibleOpacity * tapPromptPulse)
-
                     Text(tapPromptText)
                         .font(.system(size: 12, weight: .regular))
                         .foregroundStyle(tapPromptGray)
@@ -100,18 +115,23 @@ struct LaunchAnimationView: View {
             handleProceedGesture()
         }
         .gesture(
-            DragGesture(minimumDistance: 12, coordinateSpace: .local)
+            DragGesture(minimumDistance: 8, coordinateSpace: .local)
                 .onChanged { value in
                     guard allowsTouches else { return }
                     let t = value.translation.height
+
                     switch phase {
                     case .held:
+                        // Allow upward rubber-band drag only.
                         dragTranslationY = min(0, t)
+
                     case .animating:
-                        // If user starts swiping up early, treat it like "skip to held".
-                        if t < -50 {
-                            handleProceedGesture()
+                        // Any upward swipe during animation → snap to final state immediately.
+                        // We use a low threshold (–20 pt) so it feels responsive.
+                        if t < -20 {
+                            snapToFinalState()
                         }
+
                     case .dismissing:
                         break
                     }
@@ -119,16 +139,24 @@ struct LaunchAnimationView: View {
                 .onEnded { value in
                     guard allowsTouches else { return }
                     let t = value.translation.height
-                    if phase == .held {
-                        if t < -120 {
+
+                    switch phase {
+                    case .held:
+                        if t < -100 {
                             Task { await finishWithSlide() }
                         } else {
                             withAnimation(.spring(response: 0.35, dampingFraction: 0.86)) {
                                 dragTranslationY = 0
                             }
                         }
-                    } else {
-                        dragTranslationY = 0
+                    case .animating:
+                        // Swipe ended during animation (shouldn't normally reach here after
+                        // snapToFinalState fires, but guard against residual drag offset).
+                        withAnimation(.easeOut(duration: 0.15)) {
+                            dragTranslationY = 0
+                        }
+                    case .dismissing:
+                        break
                     }
                 }
         )
@@ -136,13 +164,11 @@ struct LaunchAnimationView: View {
             guard !didStart else { return }
             didStart = true
 
-            // Skip entirely for VoiceOver users.
             if UIAccessibility.isVoiceOverRunning {
                 finishImmediately()
                 return
             }
 
-            // Never replay within the same process (background/foreground).
             guard !Self.hasPlayedThisSession else {
                 finishImmediately()
                 return
@@ -155,6 +181,10 @@ struct LaunchAnimationView: View {
         .accessibilityHidden(true)
     }
 
+    // MARK: ─────────────────────────────────────────────────────────────────
+    // MARK: Sub-views
+    // MARK: ─────────────────────────────────────────────────────────────────
+
     private var measureText: some View {
         Text("Measure")
             .font(.system(size: 32, weight: .medium))
@@ -165,10 +195,9 @@ struct LaunchAnimationView: View {
 
     private var cyclingWordStack: some View {
         ZStack(alignment: .leading) {
-            // Baseline anchor: ensures container participates in baseline alignment.
             Text("Anything.")
                 .font(.system(size: 32, weight: .medium))
-                .opacity(0)
+                .opacity(0) // baseline anchor
 
             ForEach(words) { word in
                 Text(word.text)
@@ -184,36 +213,35 @@ struct LaunchAnimationView: View {
         }
     }
 
+    // MARK: ─────────────────────────────────────────────────────────────────
+    // MARK: Animation sequence
+    // MARK: ─────────────────────────────────────────────────────────────────
+
     private func runAnimation() async {
         phase = .animating
 
-        // 0.0s: "Measure" appears.
         withAnimation(.easeOut(duration: 0.3)) {
-            measureOpacity = 1
-            measureY = 0
+            measureOpacity = 1; measureY = 0
         }
 
-        // 0.4s: first word slides in.
         await sleep(0.4)
-        await wordIn(0)
-        await sleep(0.4) // hold
+        await wordIn(0);  await sleep(0.4)
 
-        // 0.8s -> ... uniform transitions with 80ms gap.
         await transition(from: 0, to: 1, nextHold: 0.4)
         await transition(from: 1, to: 2, nextHold: 0.4)
         await transition(from: 2, to: 3, nextHold: 0.4)
-
-        // 2.0s: Anything. in, hold longer.
         await transition(from: 3, to: 4, nextHold: 0.6)
 
-        // 2.4s: subtitle fades in.
+        // Check for cancellation before mutating more UI state.
+        guard !Task.isCancelled, phase == .animating else { return }
+
         withAnimation(.easeOut(duration: 0.3)) {
-            subtitleOpacity = 1
-            subtitleY = 0
+            subtitleOpacity = 1; subtitleY = 0
         }
 
-        // Hold indefinitely on the final title screen.
         await sleep(0.5)
+        guard !Task.isCancelled, phase == .animating else { return }
+
         await showTapPrompt()
         phase = .held
     }
@@ -221,38 +249,112 @@ struct LaunchAnimationView: View {
     private func wordIn(_ id: Int) async {
         guard !Task.isCancelled else { return }
         withAnimation(.easeOut(duration: 0.25)) {
-            wordOpacities[id] = 1
-            wordYs[id] = 0
+            wordOpacities[id] = 1; wordYs[id] = 0
         }
     }
 
     private func wordOut(_ id: Int) async {
         guard !Task.isCancelled else { return }
         withAnimation(.easeIn(duration: 0.2)) {
-            wordOpacities[id] = 0
-            wordYs[id] = -14
+            wordOpacities[id] = 0; wordYs[id] = -14
         }
     }
 
     private func transition(from: Int, to: Int, nextHold: TimeInterval) async {
         await wordOut(from)
-        await sleep(0.08) // gap
+        await sleep(0.08)
         await wordIn(to)
         await sleep(nextHold)
     }
 
+    // MARK: ─────────────────────────────────────────────────────────────────
+    // MARK: Gesture handlers
+    // MARK: ─────────────────────────────────────────────────────────────────
+
     private func handleProceedGesture() {
         switch phase {
         case .animating:
-            animationTask?.cancel()
-            animationTask = nil
-            Task { await jumpToHeld() }
+            snapToFinalState()
         case .held:
             Task { await finishWithFade() }
         case .dismissing:
             break
         }
     }
+
+    /// Core fix: called the moment any swipe/tap is detected mid-animation.
+    ///
+    /// Strategy:
+    /// 1. Flip phase to `.dismissing` immediately — this is the only lock we need.
+    ///    No more animation mutations can fire from `runAnimation()` because every
+    ///    `await sleep` is followed by a `guard phase == .animating` check.
+    /// 2. Cancel the task (stops future sleeps from waking).
+    /// 3. In a single, synchronous block: zero out all in-flight offsets and
+    ///    set the final visible state — no animation, so nothing can "freeze" mid-tween.
+    /// 4. Animate in the final typography cleanly from a known-good baseline.
+    /// 5. Transition phase to `.held` so the user can swipe-up to dismiss.
+    private func snapToFinalState() {
+        guard phase == .animating else { return }
+
+        // ① Lock out the animation loop immediately.
+        phase = .dismissing   // temporary gate; we'll move to .held below
+
+        // ② Cancel any pending sleeps.
+        animationTask?.cancel()
+        animationTask = nil
+
+        // ③ Kill drag rubber-band immediately (no animation — avoids conflict).
+        dragTranslationY = 0
+
+        // ④ Zero all word states atomically, without animation.
+        //    This is the key fix: we're not trying to animate over an in-flight animation.
+        var t = Transaction()
+        t.disablesAnimations = true
+        withTransaction(t) {
+            for i in 0..<wordOpacities.count {
+                wordOpacities[i] = 0
+                wordYs[i] = 0      // reset offsets so the final word slides from neutral
+            }
+            // "Measure" should already be visible, but ensure it's locked.
+            measureOpacity = 1
+            measureY = 0
+            // Reset subtitle so we can animate it in cleanly.
+            subtitleOpacity = 0
+            subtitleY = 6
+            // Reset prompt too.
+            tapPromptVisibleOpacity = 0
+            tapPromptPulse = 0.4
+        }
+
+        // ⑤ Animate in the final state from a clean baseline.
+        withAnimation(.easeOut(duration: 0.22)) {
+            wordOpacities[4] = 1
+            wordYs[4] = 0
+        }
+
+        // Stagger the subtitle slightly after the word lands.
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+            withAnimation(.easeOut(duration: 0.2)) {
+                subtitleOpacity = 1
+                subtitleY = 0
+            }
+        }
+
+        // ⑥ Show tap-prompt and hand back to the user.
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.45) {
+            withAnimation(.easeOut(duration: 0.2)) {
+                tapPromptVisibleOpacity = 1
+            }
+            withAnimation(.easeInOut(duration: 0.9).repeatForever(autoreverses: true)) {
+                tapPromptPulse = 0.9
+            }
+            phase = .held   // ← user can now swipe-up to dismiss
+        }
+    }
+
+    // MARK: ─────────────────────────────────────────────────────────────────
+    // MARK: Dismiss transitions
+    // MARK: ─────────────────────────────────────────────────────────────────
 
     private func finishImmediately() {
         allowsTouches = false
@@ -261,71 +363,43 @@ struct LaunchAnimationView: View {
     }
 
     private func finishWithFade() async {
-        guard allowsTouches else { return }
+        guard allowsTouches, phase == .held else { return }
         phase = .dismissing
         allowsTouches = false
-        withAnimation(.easeOut(duration: 0.3)) {
+        withAnimation(.easeOut(duration: 0.28)) {
             rootOpacity = 0
-            rootOffsetY = -80
+            rootOffsetY = -60
         }
-        await sleep(0.32)
+        await sleep(0.30)
         onFinished()
     }
 
     private func finishWithSlide() async {
-        // Dismiss from an interactive drag position.
-        guard allowsTouches else { return }
+        guard allowsTouches, phase == .held else { return }
         phase = .dismissing
         allowsTouches = false
-        let target = -max(220, UIScreen.main.bounds.height * 0.35)
-        withAnimation(.easeOut(duration: 0.3)) {
+        let target = -max(240, UIScreen.main.bounds.height * 0.38)
+        withAnimation(.easeOut(duration: 0.28)) {
             rootOpacity = 0
             rootOffsetY = target
             dragTranslationY = 0
         }
-        await sleep(0.32)
+        await sleep(0.30)
         onFinished()
     }
+
+    // MARK: ─────────────────────────────────────────────────────────────────
+    // MARK: Helpers
+    // MARK: ─────────────────────────────────────────────────────────────────
 
     private func showTapPrompt() async {
         guard !Task.isCancelled else { return }
         withAnimation(.easeOut(duration: 0.25)) {
             tapPromptVisibleOpacity = 1
         }
-        await sleep(0.02)
         withAnimation(.easeInOut(duration: 0.9).repeatForever(autoreverses: true)) {
             tapPromptPulse = 0.9
         }
-    }
-
-    private func jumpToHeld() async {
-        guard phase == .animating else { return }
-
-        // Ensure "Measure" is visible and steady.
-        withAnimation(.easeOut(duration: 0.2)) {
-            measureOpacity = 1
-            measureY = 0
-        }
-
-        // Hide any currently animating words.
-        withAnimation(.easeOut(duration: 0.15)) {
-            for i in 0..<wordOpacities.count {
-                wordOpacities[i] = 0
-                wordYs[i] = 0
-            }
-        }
-
-        // Show landing word + subtitle.
-        withAnimation(.easeOut(duration: 0.2)) {
-            wordOpacities[4] = 1
-            wordYs[4] = 0
-            subtitleOpacity = 1
-            subtitleY = 0
-        }
-
-        await sleep(0.5)
-        await showTapPrompt()
-        phase = .held
     }
 
     private func sleep(_ seconds: TimeInterval) async {
@@ -337,4 +411,3 @@ struct LaunchAnimationView: View {
 #Preview {
     LaunchAnimationView(onFinished: {})
 }
-

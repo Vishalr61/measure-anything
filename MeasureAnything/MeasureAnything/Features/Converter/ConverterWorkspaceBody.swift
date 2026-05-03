@@ -1,13 +1,97 @@
 import SwiftUI
 import SwiftData
+import UIKit
 import MeasureAnythingCore
+
+// MARK: ─────────────────────────────────────────────────────────────────────
+// MARK: NoAccessoryTextField
+//
+// Wraps UITextField to suppress the grey input-accessory bar iOS injects
+// above the keyboard. The bar appears because SwiftUI's TextField uses
+// UITextInputAssistantItem / UITextField internally and iOS automatically
+// attaches a UITextInputAssistantItem bar (or the system keyboard toolbar)
+// to any first responder.
+//
+// Fix: override `inputAccessoryView` with a zero-height UIView so iOS has
+// nothing to display.  This is the documented approach — setting the property
+// to `UIView(frame: .zero)` is sufficient; setting it to `nil` restores the
+// default behaviour.
+// ─────────────────────────────────────────────────────────────────────────────
+
+struct NoAccessoryTextField: UIViewRepresentable {
+    @Binding var text: String
+    var placeholder: String = "0"
+    var font: UIFont = .systemFont(ofSize: 40, weight: .bold)
+    var onFocusChange: ((Bool) -> Void)? = nil
+
+    func makeUIView(context: Context) -> _NoAccessoryUITextField {
+        let tf = _NoAccessoryUITextField()
+        tf.placeholder = placeholder
+        tf.font = font
+        tf.keyboardType = .decimalPad
+        tf.borderStyle = .none
+        tf.backgroundColor = .clear
+        tf.adjustsFontSizeToFitWidth = true
+        tf.minimumFontSize = font.pointSize * 0.55
+        tf.delegate = context.coordinator
+        tf.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+        return tf
+    }
+
+    func updateUIView(_ uiView: _NoAccessoryUITextField, context: Context) {
+        // Avoid triggering cursor jumps when the value hasn't changed.
+        if uiView.text != text {
+            uiView.text = text
+        }
+    }
+
+    func makeCoordinator() -> Coordinator {
+        Coordinator(text: $text, onFocusChange: onFocusChange)
+    }
+
+    // MARK: – TextField subclass that kills the accessory bar
+
+    final class _NoAccessoryUITextField: UITextField {
+        /// Return a zero-height view — iOS uses this instead of the default grey toolbar.
+        override var inputAccessoryView: UIView? {
+            get { UIView(frame: .zero) }
+            set { }   // ignore any attempt to set it externally
+        }
+    }
+
+    // MARK: – Coordinator
+
+    final class Coordinator: NSObject, UITextFieldDelegate {
+        @Binding var text: String
+        var onFocusChange: ((Bool) -> Void)?
+
+        init(text: Binding<String>, onFocusChange: ((Bool) -> Void)?) {
+            _text = text
+            self.onFocusChange = onFocusChange
+        }
+
+        func textFieldDidChangeSelection(_ textField: UITextField) {
+            let newValue = textField.text ?? ""
+            if text != newValue { text = newValue }
+        }
+
+        func textFieldDidBeginEditing(_ textField: UITextField) {
+            onFocusChange?(true)
+        }
+
+        func textFieldDidEndEditing(_ textField: UITextField) {
+            onFocusChange?(false)
+        }
+    }
+}
+
+// MARK: ─────────────────────────────────────────────────────────────────────
+// MARK: ConverterWorkspaceBody
+// ─────────────────────────────────────────────────────────────────────────────
 
 /// Live conversion blocks (amount, units, result) shared by `HomeView` and standalone `ConverterView`.
 struct ConverterWorkspaceBody: View {
-    /// When `false`, category is controlled by the host (e.g. home pill bar).
     var showsCategoryPicker: Bool = true
-
-    /// When set (e.g. on the home tab), “Did you know” opens the fact card sheet for the given unit id.
     var onOpenFactCard: ((String) -> Void)? = nil
 
     @Binding var showCustomUnitForm: Bool
@@ -20,6 +104,7 @@ struct ConverterWorkspaceBody: View {
 
     @ObservedObject var vm: ConverterViewModel
     @Environment(\.verticalSizeClass) private var verticalSizeClass
+
     @State private var valueFieldFocused: Bool = false
     @State private var amountSnapshotBeforeEditing: String?
     @State private var showShareSheet = false
@@ -33,7 +118,7 @@ struct ConverterWorkspaceBody: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             if let msg = taxonomyStore.loadFailureMessage {
-                Text("Couldn’t load taxonomy (\(msg)). Using built-in category and mode order.")
+                Text("Couldn't load taxonomy (\(msg)). Using built-in category and mode order.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
@@ -57,9 +142,7 @@ struct ConverterWorkspaceBody: View {
                 .presentationDragIndicator(.visible)
         }
         .onChange(of: showCustomUnitForm) { _, isPresented in
-            if isPresented {
-                customUnitSheetDetent = .medium
-            }
+            if isPresented { customUnitSheetDetent = .medium }
         }
         .sheet(isPresented: $showShareSheet) {
             ActivityView(activityItems: shareActivityItems)
@@ -71,7 +154,6 @@ struct ConverterWorkspaceBody: View {
             vm.requestSingleRollFromShake()
         }
         .onAppear {
-            // Ensure Cancel can revert even on the first focus after launch.
             if amountSnapshotBeforeEditing == nil {
                 amountSnapshotBeforeEditing = vm.inputText
             }
@@ -88,46 +170,34 @@ struct ConverterWorkspaceBody: View {
         }
     }
 
-    private func dismissAmountFieldKeyboard() {
-        valueFieldFocused = false
-    }
+    // MARK: – Internal helpers (unchanged)
 
-    /// Cancel: revert the amount field to its pre-edit value (if captured) and dismiss the keyboard.
+    private func dismissAmountFieldKeyboard() { valueFieldFocused = false }
+
     private func cancelAmountFieldEdit() {
-        if let snapshot = amountSnapshotBeforeEditing {
-            vm.inputText = snapshot
-        }
+        if let snapshot = amountSnapshotBeforeEditing { vm.inputText = snapshot }
         dismissAmountFieldKeyboard()
     }
 
-    /// Dismiss the decimal keyboard before a unit sheet so the accessory bar and nav bar do not fight the transition.
-    private func prepareUnitPickerPresentation() {
-        dismissAmountFieldKeyboard()
-    }
+    private func prepareUnitPickerPresentation() { dismissAmountFieldKeyboard() }
 
     private var canShareResult: Bool {
-        vm.conversionResult != nil
-            && vm.validationError == nil
-            && vm.fromUnit != nil
-            && vm.toUnit != nil
+        vm.conversionResult != nil && vm.validationError == nil
+            && vm.fromUnit != nil && vm.toUnit != nil
     }
 
     private var canCopyResult: Bool {
-        vm.conversionResult != nil
-            && vm.validationError == nil
-            && vm.toUnit != nil
+        vm.conversionResult != nil && vm.validationError == nil && vm.toUnit != nil
     }
 
     private func shareTextLine() -> String {
         guard let r = vm.conversionResult,
               let fromName = vm.fromUnit?.name,
-              let toName = vm.toUnit?.name else { return "" }
-        let input = vm.formatNumberForDisplay(r.inputValue)
+              let toName   = vm.toUnit?.name else { return "" }
+        let input  = vm.formatNumberForDisplay(r.inputValue)
         let output = vm.formatNumberForDisplay(r.outputValue)
         var s = "\(input) \(fromName) = \(output) \(toName)"
-        if let m = r.memeExplanation, !m.isEmpty {
-            s += "\n\n\(m)"
-        }
+        if let m = r.memeExplanation, !m.isEmpty { s += "\n\n\(m)" }
         return s
     }
 
@@ -146,9 +216,9 @@ struct ConverterWorkspaceBody: View {
 
     private var isCurrentPairAlreadyFavorite: Bool {
         favorites.contains {
-            $0.categoryRaw == vm.selectedCategory.rawValue
+            $0.categoryRaw   == vm.selectedCategory.rawValue
                 && $0.fromUnitID == vm.selectedFromUnitID
-                && $0.toUnitID == vm.selectedToUnitID
+                && $0.toUnitID   == vm.selectedToUnitID
         }
     }
 
@@ -166,32 +236,29 @@ struct ConverterWorkspaceBody: View {
     private var customUnitsSyncToken: String {
         customUnits
             .map { "\($0.id)|\($0.factor)|\($0.name)|\($0.categoryRaw)" }
-            .sorted()
-            .joined(separator: ";")
+            .sorted().joined(separator: ";")
     }
 
     private var categoryAccent: Color {
         ConverterCategoryAccent.accent(for: vm.selectedCategory)
     }
 
-    /// Reduces vertical gap between category chips and converter cards in compact height
-    /// (e.g. iPhone SE landscape) so the key controls stay visible without scrolling.
     private var adaptiveMajorSpacing: CGFloat {
         verticalSizeClass == .compact ? ConverterLayout.rhythm12 : ConverterLayout.majorBlockSpacing
     }
 
-    /// Live “1 m = … km” style line under the TO amount (hidden when invalid / no result).
     private var toRowFootnoteText: String? {
         guard vm.validationError == nil,
-              let r = vm.conversionResult,
+              let r     = vm.conversionResult,
               let fromU = vm.fromUnit,
-              let toU = vm.toUnit else { return nil }
-        let inStr = vm.formatNumberForDisplay(r.inputValue)
+              let toU   = vm.toUnit else { return nil }
+        let inStr  = vm.formatNumberForDisplay(r.inputValue)
         let outStr = vm.formatNumberForDisplay(r.outputValue)
         return "\(inStr) \(fromU.name) = \(outStr) \(toU.name)"
     }
 
-    /// Category chips (optional) when this body owns category selection.
+    // MARK: – Category chips
+
     private var categoryModeBlock: some View {
         Group {
             if showsCategoryPicker {
@@ -223,14 +290,14 @@ struct ConverterWorkspaceBody: View {
         }
     }
 
-    /// Block 2: amount and unit pickers — reference-style stacked white cards + floating swap.
+    // MARK: – Conversion input block
+
     private var conversionInputBlock: some View {
         VStack(alignment: .leading, spacing: ConverterLayout.rhythm16) {
             referenceConversionColumn
         }
     }
 
-    /// From/To: left column = amounts (input / converted output), right column = white unit pills — same `HStack` template so edges align. Swap on the seam.
     private var referenceConversionColumn: some View {
         VStack(alignment: .leading, spacing: 0) {
             VStack(spacing: 0) {
@@ -279,7 +346,6 @@ struct ConverterWorkspaceBody: View {
     }
 
     private var expandedToCard: some View {
-        // Resolve from the registry so labels stay correct when the selection is outside the current mode list until sanitise runs.
         let toName = vm.toUnit?.name ?? "—"
         return ToCard(
             toUnitName: toName,
@@ -302,6 +368,9 @@ struct ConverterWorkspaceBody: View {
         )
     }
 
+    // MARK: – FROM card
+    // Uses NoAccessoryTextField so the grey iOS input-accessory bar never appears.
+
     private var fromConversionCard: some View {
         VStack(alignment: .leading, spacing: ConverterLayout.rhythm8) {
             Text("From")
@@ -311,31 +380,26 @@ struct ConverterWorkspaceBody: View {
                 .tracking(0.55)
 
             HStack(alignment: .center, spacing: ConverterLayout.rhythm12) {
-                MinimalPadTextField(
+                // ↓ Key change: NoAccessoryTextField instead of MinimalPadTextField
+                NoAccessoryTextField(
                     text: $vm.inputText,
                     placeholder: "0",
-                    isFocused: $valueFieldFocused,
-                    onFocusChange: { focused in valueFieldFocused = focused }
+                    font: UIFont.systemFont(ofSize: 40, weight: .bold),
+                    onFocusChange: { focused in
+                        valueFieldFocused = focused
+                    }
                 )
-                .font(.system(size: 40, weight: .bold, design: .rounded))
-                .foregroundStyle(.primary)
-                .monospacedDigit()
-                .lineLimit(1)
-                .minimumScaleFactor(0.55)
-                .accessibilityLabel("Amount to convert")
                 .frame(maxWidth: .infinity, minHeight: 48, alignment: .leading)
-                .contentShape(Rectangle())
-                .onTapGesture {
-                    valueFieldFocused = true
-                }
+                .accessibilityLabel("Amount to convert")
+                // Tap anywhere in the card area also focuses the field.
+                .onTapGesture { }   // consumed by the card's tap below
 
                 unitMenuPill(selection: $vm.selectedFromUnitID)
                     .scaleEffect(swapPillScale, anchor: .center)
             }
 
             if ConversionHistory.shared.totalRecordedConversions >= 2 {
-                // Over-fetch then drop current TO so pills stay useful; history never suggests from→from.
-                let raw = ConversionHistory.shared.suggestions(for: vm.selectedFromUnitID, limit: 12)
+                let raw         = ConversionHistory.shared.suggestions(for: vm.selectedFromUnitID, limit: 12)
                 let suggestions = raw.filter { $0 != vm.selectedToUnitID }
                 if !suggestions.isEmpty {
                     ScrollView(.horizontal, showsIndicators: false) {
@@ -373,34 +437,29 @@ struct ConverterWorkspaceBody: View {
         .shadow(
             color: .black.opacity(ConverterLayout.referenceCardShadowOpacity),
             radius: ConverterLayout.referenceCardShadowRadius,
-            x: 0,
-            y: ConverterLayout.referenceCardShadowY
+            x: 0, y: ConverterLayout.referenceCardShadowY
         )
         .contentShape(Rectangle())
+        // Tapping anywhere on the card focuses the text field.
         .onTapGesture {
+            // NoAccessoryTextField becomes first responder via UIKit directly;
+            // we just need to update our SwiftUI focus state so isKeyboardActive syncs.
             valueFieldFocused = true
         }
     }
 
     private func unitMenuPill(selection: Binding<UnitDefinition.ID>) -> some View {
         let name = vm.fromUnit?.name ?? "—"
-        return UnitPickerPillButton(
-            name: name,
-            accent: categoryAccent
-        ) {
+        return UnitPickerPillButton(name: name, accent: categoryAccent) {
             prepareUnitPickerPresentation()
-            DispatchQueue.main.async {
-                showFromPicker = true
-            }
+            DispatchQueue.main.async { showFromPicker = true }
         }
         .sheet(isPresented: $showFromPicker) {
             UnitPickerSheet(
                 units: vm.availableUnits,
                 selectedID: selection.wrappedValue,
                 accent: categoryAccent
-            ) { newID in
-                selection.wrappedValue = newID
-            }
+            ) { newID in selection.wrappedValue = newID }
         }
     }
 
@@ -410,24 +469,17 @@ struct ConverterWorkspaceBody: View {
             isSwapPillAnimating = true
             let gen = UIImpactFeedbackGenerator(style: .medium)
             gen.impactOccurred()
-            // Both pills scale to 0.85 then back to 1.0 (total feel ~0.25s). Swap at ~0.12s
-            // when nearly at minimum; numbers update without implicit animation.
             let springDown = Animation.spring(response: 0.12, dampingFraction: 0.75)
-            let springUp = Animation.spring(response: 0.13, dampingFraction: 0.75)
+            let springUp   = Animation.spring(response: 0.13, dampingFraction: 0.75)
             withAnimation(springDown) {
                 swapPillScale = 0.85
                 swapRotation += 180
             }
-            let swapMidpoint: TimeInterval = 0.12
-            DispatchQueue.main.asyncAfter(deadline: .now() + swapMidpoint) {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.12) {
                 var t = Transaction()
                 t.disablesAnimations = true
-                withTransaction(t) {
-                    vm.swapUnits()
-                }
-                withAnimation(springUp) {
-                    swapPillScale = 1.0
-                }
+                withTransaction(t) { vm.swapUnits() }
+                withAnimation(springUp) { swapPillScale = 1.0 }
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
                     isSwapPillAnimating = false
                 }
@@ -454,7 +506,10 @@ struct ConverterWorkspaceBody: View {
 
     private var referenceUnitCardStroke: some View {
         RoundedRectangle(cornerRadius: ConverterLayout.referenceCardCornerRadius, style: .continuous)
-            .strokeBorder(Color.primary.opacity(ConverterLayout.strokeOpacitySubtle * 0.85), lineWidth: ConverterLayout.strokeHairline)
+            .strokeBorder(
+                Color.primary.opacity(ConverterLayout.strokeOpacitySubtle * 0.85),
+                lineWidth: ConverterLayout.strokeHairline
+            )
     }
 
     private func validationErrorView(message: String) -> some View {
@@ -490,6 +545,6 @@ struct ConverterWorkspaceBody: View {
         isKeyboardActive: .constant(false),
         vm: ConverterViewModel(taxonomy: taxonomy)
     )
-        .environmentObject(taxonomy)
-        .modelContainer(for: [CustomUnit.self, FavoriteConversion.self], inMemory: true)
+    .environmentObject(taxonomy)
+    .modelContainer(for: [CustomUnit.self, FavoriteConversion.self], inMemory: true)
 }

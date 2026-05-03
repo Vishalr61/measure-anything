@@ -92,7 +92,7 @@ private struct RootLaunchShell: View {
             }
 
             if showOnboarding {
-                OnboardingOverlayView(
+                OnboardingView(
                     onFinished: {
                         hasSeenOnboarding = true
                         withAnimation(.easeOut(duration: 0.25)) {
