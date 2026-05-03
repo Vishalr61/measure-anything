@@ -87,7 +87,7 @@ struct OnboardingView: View {
                                 .fixedSize()
                                 .offset(
                                     x: rect.midX - 55 + slide.pointerXOffset,
-                                    y: rect.minY - 52
+                                    y: rect.minY - 52 + slide.pointerYOffset
                                 )
                                 .offset(y: pointerBounce)
                                 .animation(
@@ -192,7 +192,7 @@ struct OnboardingView: View {
     private func resetMockupAnimation() {
         mockupAppear = false
         pointerBounce = 0
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
             withAnimation(.easeOut(duration: 0.4)) { mockupAppear = true }
             withAnimation(.easeInOut(duration: 0.8).repeatForever(autoreverses: true)) {
                 pointerBounce = -6
@@ -215,6 +215,7 @@ struct OnboardingSlide {
     let accentColor: Color
     let pointerAnchor: PointerAnchor?
     let pointerXOffset: CGFloat
+    let pointerYOffset: CGFloat
     let mockup: (Bool) -> AnyView   // `appear` drives entrance animation
 
     // MARK: All slides
@@ -235,6 +236,7 @@ struct OnboardingSlide {
             accentColor: Color(hex: "#1A5F73"),
             pointerAnchor: PointerAnchor(label: "tap to type"),
             pointerXOffset: 0,
+            pointerYOffset: -10,
             mockup: { appear in
                 AnyView(
                     UnitConversionMockup(appear: appear)
@@ -252,6 +254,7 @@ struct OnboardingSlide {
             accentColor: Color(hex: "#3D6B4A"),
             pointerAnchor: PointerAnchor(label: "switch category"),
             pointerXOffset: 0,
+            pointerYOffset: 0,
             mockup: { appear in
                 AnyView(CategoriesMockup(appear: appear))
             }
@@ -267,6 +270,7 @@ struct OnboardingSlide {
             accentColor: Color(hex: "#3D3580"),
             pointerAnchor: PointerAnchor(label: "create unit"),
             pointerXOffset: 0,
+            pointerYOffset: 0,
             mockup: { appear in
                 AnyView(CustomModeMockup(appear: appear))
             }
@@ -281,7 +285,8 @@ struct OnboardingSlide {
             body: "Browse by category or search. Tap any two units to jump straight to that conversion.",
             accentColor: Color(hex: "#8B3A2A"),
             pointerAnchor: PointerAnchor(label: "tap two units"),
-            pointerXOffset: 0,
+            pointerXOffset: 5,
+            pointerYOffset: 0,
             mockup: { appear in
                 AnyView(ExploreMockup(appear: appear))
             }
@@ -404,7 +409,7 @@ private struct CategoriesMockup: View {
                     Text(name)
                         .font(.system(size: 12, weight: .medium))
                         .multilineTextAlignment(.center)
-                        .frame(maxWidth: .infinity)
+                        .frame(maxWidth: .infinity, minHeight: 36)
                         .padding(.vertical, 10)
                         .background(
                             RoundedRectangle(cornerRadius: 10, style: .continuous)
@@ -556,6 +561,7 @@ private struct ExploreMockup: View {
                     badge: firstTapped ? "FROM ✓" : "FROM",
                     accentColor: Color(hex: "#8B3A2A"),
                     delay: 0.15,
+                    isPointerTarget: true,
                     onTap: {
                         withAnimation(.easeInOut(duration: 0.2)) { firstTapped = true }
                     }
@@ -568,7 +574,6 @@ private struct ExploreMockup: View {
                     badge: firstTapped ? (secondTapped ? "TO ✓" : "TO") : "FROM",
                     accentColor: Color(hex: "#8B3A2A"),
                     delay: 0.22,
-                    isTargeted: true,
                     onTap: {
                         if firstTapped {
                             withAnimation(.easeInOut(duration: 0.2)) { secondTapped = true }
@@ -596,21 +601,10 @@ private struct ExploreMockup: View {
             .animation(.easeOut(duration: 0.3).delay(0.15), value: appear)
         }
         .padding(.horizontal, 4)
-        .onAppear {
-            // Auto-demo the tap flow
-            if appear {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-                    withAnimation { firstTapped = true }
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.7) {
-                        withAnimation { secondTapped = true }
-                    }
-                }
-            }
-        }
         .onChange(of: appear) { _, newVal in
             if newVal {
                 firstTapped = false; secondTapped = false
-                DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.4) {
                     withAnimation { firstTapped = true }
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.7) {
                         withAnimation { secondTapped = true }
@@ -629,7 +623,7 @@ private struct ExploreMockup: View {
         badge: String,
         accentColor: Color,
         delay: Double,
-        isTargeted: Bool = false,
+        isPointerTarget: Bool = false,
         onTap: @escaping () -> Void
     ) -> some View {
         Button(action: onTap) {
@@ -643,7 +637,6 @@ private struct ExploreMockup: View {
                     Text(name)
                         .font(.system(size: 14, weight: isSelected ? .semibold : .regular))
                         .foregroundStyle(isSelected ? accentColor : .primary)
-                        .if(isTargeted) { $0.pointerTarget() }
                     Text(detail)
                         .font(.system(size: 11))
                         .foregroundStyle(.secondary)
@@ -659,6 +652,7 @@ private struct ExploreMockup: View {
                     .background(
                         Capsule().fill(isSelected ? accentColor : accentColor.opacity(0.12))
                     )
+                    .if(isPointerTarget) { $0.pointerTarget() }
             }
             .padding(.horizontal, 12)
             .padding(.vertical, 10)
