@@ -497,7 +497,7 @@ private struct ExploreMockup: View {
                 Image(systemName: "magnifyingglass")
                     .font(.system(size: 14))
                     .foregroundStyle(Color(hex: "#B4B2A9"))
-                Text("kilometer, elephant, year...")
+                Text("celsius, fahrenheit, year...")
                     .font(.system(size: 14))
                     .foregroundStyle(Color(hex: "#B4B2A9"))
                 Spacer()
@@ -513,15 +513,15 @@ private struct ExploreMockup: View {
             HStack(spacing: 6) {
                 Image(systemName: "hand.tap")
                     .font(.system(size: 11))
-                    .foregroundStyle(Color(hex: "#3C3489"))
+                    .foregroundStyle(Color(hex: "#8B3A2A"))
                 Text("Tap FROM, then tap TO to convert instantly")
                     .font(.system(size: 11, weight: .medium))
-                    .foregroundStyle(Color(hex: "#3C3489"))
+                    .foregroundStyle(Color(hex: "#8B3A2A"))
                 Spacer()
             }
             .padding(.horizontal, 10)
             .padding(.vertical, 6)
-            .background(Color(hex: "#EEEDFE"))
+            .background(Color(hex: "#F5EEF0"))
             .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
             .opacity(appear ? 1 : 0)
             .animation(.easeOut(duration: 0.3).delay(0.1), value: appear)
@@ -529,11 +529,11 @@ private struct ExploreMockup: View {
             // Unit rows showing the selection flow
             VStack(spacing: 0) {
                 exploreRow(
-                    name: "Kilometer",
-                    detail: "1,000 m",
+                    name: "Celsius",
+                    detail: "0° freezing, 100° boiling",
                     isSelected: firstTapped,
                     badge: firstTapped ? "FROM ✓" : "FROM",
-                    accentColor: Color(hex: "#3C3489"),
+                    accentColor: Color(hex: "#8B3A2A"),
                     delay: 0.15,
                     onTap: {
                         withAnimation(.easeInOut(duration: 0.2)) { firstTapped = true }
@@ -541,11 +541,11 @@ private struct ExploreMockup: View {
                 )
                 Divider().padding(.leading, 16)
                 exploreRow(
-                    name: "Marathon",
-                    detail: "42.195 km",
+                    name: "Freshly baked bread",
+                    detail: "≈ 93°C out of the oven",
                     isSelected: secondTapped,
                     badge: firstTapped ? (secondTapped ? "TO ✓" : "TO") : "FROM",
-                    accentColor: Color(hex: "#3C3489"),
+                    accentColor: Color(hex: "#8B3A2A"),
                     delay: 0.22,
                     onTap: {
                         if firstTapped {
@@ -555,11 +555,11 @@ private struct ExploreMockup: View {
                 )
                 Divider().padding(.leading, 16)
                 exploreRow(
-                    name: "Blue Whale",
-                    detail: "≈ 25 m",
+                    name: "Surface of Venus",
+                    detail: "≈ 465°C average",
                     isSelected: false,
                     badge: "FROM",
-                    accentColor: Color(hex: "#3C3489"),
+                    accentColor: Color(hex: "#8B3A2A"),
                     delay: 0.29,
                     onTap: {}
                 )
