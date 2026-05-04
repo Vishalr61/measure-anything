@@ -32,7 +32,6 @@ struct ConverterWorkspaceBody: View {
     @State private var swapPillScale: CGFloat = 1
     @State private var isSwapPillAnimating: Bool = false
     @State private var showFromPicker = false
-    @State private var customUnitSheetDetent: PresentationDetent = .medium
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -61,11 +60,6 @@ struct ConverterWorkspaceBody: View {
         .sheet(isPresented: $showCustomUnitForm) {
             CustomUnitFormView(initialCategory: vm.selectedCategory)
                 .environmentObject(vm)
-                .presentationDetents([.medium, .large], selection: $customUnitSheetDetent)
-                .presentationDragIndicator(.visible)
-        }
-        .onChange(of: showCustomUnitForm) { _, isPresented in
-            if isPresented { customUnitSheetDetent = .medium }
         }
         .task(id: customUnitsSyncToken) {
             vm.sync(customUnits: customUnits)
@@ -152,6 +146,27 @@ struct ConverterWorkspaceBody: View {
             toUnitID: vm.selectedToUnitID
         )
         modelContext.insert(fav)
+        try? modelContext.save()
+    }
+
+    /// Adds the current FROM→TO pair to favourites if absent, otherwise removes it.
+    /// Shares the same favourites @Query as the nav-bar star, so both update in sync.
+    private func toggleCurrentPairFavorite() {
+        guard vm.canSaveCurrentPairAsFavorite else { return }
+        if let existing = favorites.first(where: {
+            $0.categoryRaw == vm.selectedCategory.rawValue
+                && $0.fromUnitID == vm.selectedFromUnitID
+                && $0.toUnitID == vm.selectedToUnitID
+        }) {
+            modelContext.delete(existing)
+        } else {
+            let fav = FavoriteConversion(
+                categoryRaw: vm.selectedCategory.rawValue,
+                fromUnitID: vm.selectedFromUnitID,
+                toUnitID: vm.selectedToUnitID
+            )
+            modelContext.insert(fav)
+        }
         try? modelContext.save()
     }
 
@@ -294,7 +309,7 @@ struct ConverterWorkspaceBody: View {
             usesPlaceholderResult: toRowUsesPlaceholder,
             onCopy: { vm.copyResult() },
             onShare: { presentShareResult() },
-            onSave: { saveCurrentPairAsFavorite() },
+            onSave: { toggleCurrentPairFavorite() },
             selectedToUnitID: $vm.selectedToUnitID,
             availableUnits: vm.availableUnits,
             unitPillScale: swapPillScale,

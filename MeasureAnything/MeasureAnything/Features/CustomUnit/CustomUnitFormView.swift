@@ -102,6 +102,26 @@ struct CustomUnitFormView: View {
         }
         .onChange(of: name)           { _, _ in schedulePreviewRefresh() }
         .onChange(of: valueText)      { _, _ in schedulePreviewRefresh() }
+        // Limit the input to 9 numeric digits + one decimal point (10 chars max).
+        .onChange(of: valueText) { _, newValue in
+            var digitCount = 0
+            var hasDecimal = false
+            let trimmed = newValue.filter { char -> Bool in
+                if char == "." {
+                    if hasDecimal { return false }
+                    hasDecimal = true
+                    return true
+                }
+                if char.isNumber {
+                    digitCount += 1
+                    return digitCount <= 9
+                }
+                return false
+            }
+            if trimmed != newValue {
+                valueText = trimmed
+            }
+        }
         .onChange(of: referenceUnitID){ _, _ in schedulePreviewRefresh() }
         .onChange(of: valueFieldFocused) { _, isFocused in
             if isFocused { valueEditSession.snapshot = valueText }

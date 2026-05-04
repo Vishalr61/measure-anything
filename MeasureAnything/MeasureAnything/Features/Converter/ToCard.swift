@@ -154,13 +154,13 @@ struct ToCard: View {
                 ActionButton(
                     icon: isSaved ? "star.fill" : "star",
                     label: isSaved ? "Saved" : "Save",
-                    background: accent.opacity(0.10),
+                    background: isSaved ? accent.opacity(0.12) : accent.opacity(0.10),
                     foreground: accent,
-                    disabled: isSaved || !saveEnabled,
-                    fadeWhenDisabled: !isSaved,
+                    disabled: !saveEnabled,
+                    fadeWhenDisabled: true,
                     iconScale: saveStarScale,
                     action: {
-                        guard saveEnabled, !isSaved else { return }
+                        guard saveEnabled else { return }
                         UIImpactFeedbackGenerator(style: .light).impactOccurred()
                         onSave()
                     }

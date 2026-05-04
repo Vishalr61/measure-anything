@@ -61,6 +61,29 @@ struct HomeView: View {
         Haptics.favorite()
     }
 
+    /// Toggles the current FROM→TO pair: removes it if already favourited,
+    /// otherwise inserts a new favourite. Both star buttons (nav bar + TO card)
+    /// share this so they stay in sync via the live `@Query` favourites array.
+    private func toggleCurrentPairFavorite() {
+        guard vm.canSaveCurrentPairAsFavorite else { return }
+        if let existing = favorites.first(where: {
+            $0.categoryRaw == vm.selectedCategory.rawValue
+                && $0.fromUnitID == vm.selectedFromUnitID
+                && $0.toUnitID == vm.selectedToUnitID
+        }) {
+            modelContext.delete(existing)
+        } else {
+            let fav = FavoriteConversion(
+                categoryRaw: vm.selectedCategory.rawValue,
+                fromUnitID: vm.selectedFromUnitID,
+                toUnitID: vm.selectedToUnitID
+            )
+            modelContext.insert(fav)
+            Haptics.favorite()
+        }
+        try? modelContext.save()
+    }
+
     private func focusConverterFromAbsurdShortcut() {
         scrollToConverterToken &+= 1
     }
@@ -222,18 +245,18 @@ struct HomeView: View {
                         }
                         .buttonStyle(ConverterPressingButtonStyle())
                     } else {
-                        // Original star and + buttons here (unchanged)
+                        // Star toggles favourite state — adds when not favourited, removes when already favourited.
                         Button {
-                            saveCurrentPairAsFavorite()
+                            toggleCurrentPairFavorite()
                         } label: {
                             Image(systemName: isCurrentPairAlreadyFavorite ? "star.fill" : "star")
                                 .font(.body.weight(.regular))
                                 .imageScale(.medium)
-                                .foregroundStyle(isCurrentPairAlreadyFavorite ? categoryAccent.opacity(0.95) : Color.secondary)
+                                .foregroundStyle(isCurrentPairAlreadyFavorite ? categoryAccent : Color.primary)
                         }
-                        .disabled(!canSaveFavoriteTap)
+                        .disabled(!vm.canSaveCurrentPairAsFavorite)
                         .buttonStyle(ConverterPressingButtonStyle())
-                        .accessibilityLabel(isCurrentPairAlreadyFavorite ? "Already a favorite" : "Save as favorite")
+                        .accessibilityLabel(isCurrentPairAlreadyFavorite ? "Remove from favorites" : "Save as favorite")
 
                         Button {
                             Haptics.tap()
