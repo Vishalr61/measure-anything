@@ -149,13 +149,7 @@ private extension FavoritesListView {
     }
 
     func categorySymbolName(_ category: UnitCategory) -> String {
-        switch category {
-        case .length: return "ruler"
-        case .mass: return "scalemass"
-        case .time: return "clock"
-        case .temperature: return "thermometer"
-        case .volume: return "drop.fill"
-        }
+        category.symbolName
     }
 
     struct FavoritesRowPressButtonStyle: ButtonStyle {
@@ -166,13 +160,7 @@ private extension FavoritesListView {
     }
 
     func categoryDisplayName(_ category: UnitCategory) -> String {
-        switch category {
-        case .length: return "Length"
-        case .mass: return "Mass"
-        case .time: return "Time"
-        case .temperature: return "Temperature"
-        case .volume: return "Volume"
-        }
+        category.displayName
     }
 
     var emptyState: some View {

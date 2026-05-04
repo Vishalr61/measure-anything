@@ -23,24 +23,72 @@ struct CustomUnitsListView: View {
             } else {
                 List {
                     ForEach(customUnits) { unit in
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text(unit.name)
-                                .font(.body.weight(.medium))
-                            Text(unit.categoryRaw.capitalized)
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                            Text(valueLine(for: unit))
-                                .font(.subheadline.monospacedDigit())
-                                .foregroundStyle(.secondary)
-                        }
-                        .padding(.vertical, 2)
+                        customUnitRow(unit)
+                            .listRowInsets(EdgeInsets(top: 4, leading: 10, bottom: 4, trailing: 10))
+                            .listRowSeparator(.hidden)
+                            .listRowBackground(Color.clear)
                     }
                     .onDelete(perform: delete)
                 }
+                .listStyle(.plain)
+                .scrollContentBackground(.hidden)
+                .listRowSpacing(10)
+                .padding(.top, 12)
+                .padding(.bottom, 12)
+                .background(Color(.systemGroupedBackground))
             }
         }
         .navigationTitle("My custom units")
         .navigationBarTitleDisplayMode(.inline)
+    }
+
+    @ViewBuilder
+    private func customUnitRow(_ unit: CustomUnit) -> some View {
+        let category = UnitCategory(rawValue: unit.categoryRaw) ?? .length
+        let categoryAccent = ConverterCategoryAccent.accent(for: category)
+
+        HStack(spacing: 14) {
+            // Icon tile — same treatment as Favorites cards
+            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                .fill(categoryAccent.opacity(0.1))
+                .frame(width: 44, height: 44)
+                .overlay(
+                    Image(systemName: category.symbolName)
+                        .font(.system(size: 20, weight: .medium))
+                        .foregroundStyle(categoryAccent)
+                )
+
+            // Text info
+            VStack(alignment: .leading, spacing: 2) {
+                Text(unit.name)
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundStyle(Color.primary)
+                    .lineLimit(1)
+
+                Text(valueLine(for: unit))
+                    .font(.system(size: 13))
+                    .foregroundStyle(Color.secondary)
+                    .lineLimit(1)
+            }
+
+            Spacer()
+
+            // Category pill
+            Text(category.displayName)
+                .font(.system(size: 12, weight: .medium))
+                .foregroundStyle(categoryAccent)
+                .padding(.horizontal, 10)
+                .padding(.vertical, 4)
+                .background(Capsule().fill(categoryAccent.opacity(0.1)))
+        }
+        .padding(.vertical, 14)
+        .padding(.horizontal, 14)
+        .background(Color(.systemBackground))
+        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                .strokeBorder(Color(.separator), lineWidth: 0.5)
+        )
     }
 
     private func valueLine(for unit: CustomUnit) -> String {
