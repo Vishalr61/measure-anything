@@ -83,11 +83,12 @@ struct HomeView: View {
             }
             // Keep the nav in the hierarchy (avoids toolbar/keyboard transition glitches),
             // but collapse its height while the keyboard is up so it doesn't reserve a
-            // chrome strip above the keyboard.
+            // chrome strip above the keyboard. NOTE: no `.clipped()` — that would also
+            // clip the nav's white background's extension into the bottom safe area,
+            // exposing chrome grey on devices with a home indicator.
             .frame(height: keyboard.isVisible ? 0 : nil)
             .opacity(keyboard.isVisible ? 0 : 1)
             .allowsHitTesting(!keyboard.isVisible)
-            .clipped()
         }
         .background(homeRootBackground)
         .onChange(of: homeTab) { old, new in

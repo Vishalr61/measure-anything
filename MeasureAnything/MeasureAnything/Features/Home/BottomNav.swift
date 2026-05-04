@@ -14,7 +14,7 @@ struct BottomNav: View {
     }
 
     var body: some View {
-        HStack(spacing: 0) {
+        HStack(spacing: 56) {
             NavTab(
                 iconBase: "arrow.left.arrow.right",
                 label: "Convert",
@@ -43,15 +43,12 @@ struct BottomNav: View {
                 selected = .settings
             }
         }
-        .padding(.vertical, 8)
+        .frame(maxWidth: .infinity)
+        .padding(.top, 14)
+        .padding(.bottom, 4)
         .background {
             Color.white
                 .ignoresSafeArea(edges: .bottom)
-        }
-        .overlay(alignment: .top) {
-            Rectangle()
-                .fill(Color(hex: "#E8E8E8"))
-                .frame(height: 0.5)
         }
     }
 }
@@ -80,15 +77,14 @@ private struct NavTab: View {
         Button(action: action) {
             VStack(spacing: 3) {
                 Image(systemName: systemImage)
-                    .font(.system(size: 16))
+                    .font(.system(size: 18))
                     .foregroundStyle(isSelected ? selectionTint : Color(hex: "#B4B2A9"))
                 Text(label)
-                    .font(.system(size: 9, weight: .medium))
+                    .font(.system(size: 10, weight: .medium))
                     .foregroundStyle(isSelected ? selectionTint : Color(hex: "#B4B2A9"))
                     .textCase(.uppercase)
                     .tracking(0.5)
             }
-            .frame(maxWidth: .infinity)
         }
         .buttonStyle(.plain)
         .accessibilityLabel(label)
