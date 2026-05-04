@@ -141,22 +141,27 @@ struct ShareCardView: View {
     private var topRow: some View {
         HStack(alignment: .center) {
             // FROM chip
-            HStack(alignment: .lastTextBaseline, spacing: 5) {
+            HStack(alignment: .lastTextBaseline, spacing: 0) {
                 ExponentTextView(
                     value: fromValue,
-                    fontSize: 14,
-                    maxWidth: 100,
-                    foregroundColor: .white
+                    fontSize: 18,
+                    maxWidth: 120,
+                    foregroundColor: .white,
+                    tracking: 0.5
                 )
                 .fixedSize()
 
+                Text("  ·  ")
+                    .font(.system(size: 13))
+                    .foregroundStyle(Color.white.opacity(0.35))
+
                 Text(fromUnit.truncated(to: 20))
-                    .font(.system(size: 12))
-                    .foregroundStyle(Color.white.opacity(0.6))
+                    .font(.system(size: 13))
+                    .foregroundStyle(Color.white.opacity(0.7))
                     .lineLimit(1)
             }
-            .padding(.horizontal, 12)
-            .padding(.vertical, 6)
+            .padding(.horizontal, 14)
+            .padding(.vertical, 8)
             .background(Capsule().fill(Color.white.opacity(0.13)))
             .fixedSize()
 
@@ -269,6 +274,7 @@ struct ExponentTextView: View {
     let fontSize: CGFloat
     var maxWidth: CGFloat = 310
     var foregroundColor: Color = .white
+    var tracking: CGFloat = -2
 
     var body: some View {
         if let sci = parseScientific(value) {
@@ -278,7 +284,7 @@ struct ExponentTextView: View {
                     .foregroundStyle(foregroundColor)
                     .lineLimit(1)
                     .minimumScaleFactor(0.3)
-                    .tracking(-2)
+                    .tracking(tracking)
 
                 VStack(spacing: 0) {
                     Text((sci.isNegativeExp ? "−" : "") + sci.exponent)
@@ -297,7 +303,7 @@ struct ExponentTextView: View {
                 .foregroundStyle(foregroundColor)
                 .lineLimit(1)
                 .minimumScaleFactor(0.3)
-                .tracking(-4)
+                .tracking(tracking)
                 .frame(maxWidth: maxWidth)
         }
     }
