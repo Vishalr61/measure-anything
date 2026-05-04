@@ -25,8 +25,7 @@ struct ConverterWorkspaceBody: View {
 
     @FocusState private var valueFieldFocused: Bool
     @State private var amountSnapshotBeforeEditing: String?
-    @State private var showShareSheet = false
-    @State private var shareActivityItems: [Any] = []
+    @State private var shareSheetItem: ShareSheetItem?
     @State private var swapRotation: Double = 0
     @State private var swapPillScale: CGFloat = 1
     @State private var isSwapPillAnimating: Bool = false
@@ -66,8 +65,8 @@ struct ConverterWorkspaceBody: View {
         .onChange(of: showCustomUnitForm) { _, isPresented in
             if isPresented { customUnitSheetDetent = .medium }
         }
-        .sheet(isPresented: $showShareSheet) {
-            ActivityView(activityItems: shareActivityItems)
+        .sheet(item: $shareSheetItem) { item in
+            ActivityView(activityItems: item.items)
         }
         .task(id: customUnitsSyncToken) {
             vm.sync(customUnits: customUnits)
@@ -126,14 +125,18 @@ struct ConverterWorkspaceBody: View {
     private func presentShareResult() {
         guard canShareResult else { return }
         Haptics.share()
+        let items: [Any]
         if let image = vm.renderShareCardImage() {
-            shareActivityItems = [image]
+            items = [image]
         } else {
             let text = shareTextLine()
             guard !text.isEmpty else { return }
-            shareActivityItems = [text]
+            items = [text]
         }
-        showShareSheet = true
+        // `.sheet(item:)` guarantees the content closure receives the populated
+        // items on first tap (UIActivityViewController can't be re-bound after
+        // creation, so `.sheet(isPresented:)` would race the state commit).
+        shareSheetItem = ShareSheetItem(items: items)
     }
 
     private var isCurrentPairAlreadyFavorite: Bool {
@@ -153,6 +156,14 @@ struct ConverterWorkspaceBody: View {
         )
         modelContext.insert(fav)
         try? modelContext.save()
+    }
+
+    /// Wraps the share-sheet payload so `.sheet(item:)` can deliver fully-populated
+    /// activity items in a single state transition, avoiding the first-tap empty
+    /// share sheet caused by `UIActivityViewController` capturing items at creation.
+    private struct ShareSheetItem: Identifiable {
+        let id = UUID()
+        let items: [Any]
     }
 
     private var customUnitsSyncToken: String {
