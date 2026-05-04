@@ -83,11 +83,13 @@ struct CustomUnitFormView: View {
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") { dismiss() }
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundStyle(accent)
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Save") { save() }
-                        .fontWeight(.semibold)
-                        .foregroundStyle(canSave ? accent : Color.secondary)
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundStyle(canSave ? accent : accent.opacity(0.4))
                         .disabled(!canSave)
                 }
             }
@@ -100,6 +102,26 @@ struct CustomUnitFormView: View {
         }
         .onChange(of: name)           { _, _ in schedulePreviewRefresh() }
         .onChange(of: valueText)      { _, _ in schedulePreviewRefresh() }
+        // Limit the input to 9 numeric digits + one decimal point (10 chars max).
+        .onChange(of: valueText) { _, newValue in
+            var digitCount = 0
+            var hasDecimal = false
+            let trimmed = newValue.filter { char -> Bool in
+                if char == "." {
+                    if hasDecimal { return false }
+                    hasDecimal = true
+                    return true
+                }
+                if char.isNumber {
+                    digitCount += 1
+                    return digitCount <= 9
+                }
+                return false
+            }
+            if trimmed != newValue {
+                valueText = trimmed
+            }
+        }
         .onChange(of: referenceUnitID){ _, _ in schedulePreviewRefresh() }
         .onChange(of: valueFieldFocused) { _, isFocused in
             if isFocused { valueEditSession.snapshot = valueText }
@@ -293,13 +315,13 @@ struct CustomUnitFormView: View {
                     if !previewLine1.isEmpty {
                         Text(previewLine1)
                             .font(.system(size: 14, weight: .medium))
-                            .foregroundStyle(palette.valueProclamation)
+                            .foregroundStyle(accent)
                             .fixedSize(horizontal: false, vertical: true)
                     }
                     if !previewLine2.isEmpty {
                         Text(previewLine2)
                             .font(.system(size: 11, weight: .regular))
-                            .foregroundStyle(.secondary)
+                            .foregroundStyle(accent)
                             .fixedSize(horizontal: false, vertical: true)
                     }
                 }
@@ -307,7 +329,7 @@ struct CustomUnitFormView: View {
                 .padding(14)
                 .background(
                     RoundedRectangle(cornerRadius: 12, style: .continuous)
-                        .fill(palette.light)
+                        .fill(accent.opacity(0.1))
                 )
                 .listRowInsets(EdgeInsets(
                     top: 8,

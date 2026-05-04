@@ -1,5 +1,7 @@
+import Photos
 import SwiftData
 import SwiftUI
+import UIKit
 import MeasureAnythingCore
 
 /// Single-page conversion workspace: discovery chrome, category pills, live converter, and optional shortcuts below.
@@ -22,6 +24,7 @@ struct HomeView: View {
     @StateObject private var keyboard = KeyboardObserver()
     @State private var factCardSheetItem: FactCardSheetItem?
     @State private var factCardSheetDetent: PresentationDetent = .large
+    @State private var isSharePreviewVisible = false
 
     private var categoryAccent: Color {
         ConverterCategoryAccent.accent(for: vm.selectedCategory)
@@ -58,34 +61,69 @@ struct HomeView: View {
         Haptics.favorite()
     }
 
+    /// Toggles the current FROM→TO pair: removes it if already favourited,
+    /// otherwise inserts a new favourite. Both star buttons (nav bar + TO card)
+    /// share this so they stay in sync via the live `@Query` favourites array.
+    private func toggleCurrentPairFavorite() {
+        guard vm.canSaveCurrentPairAsFavorite else { return }
+        if let existing = favorites.first(where: {
+            $0.categoryRaw == vm.selectedCategory.rawValue
+                && $0.fromUnitID == vm.selectedFromUnitID
+                && $0.toUnitID == vm.selectedToUnitID
+        }) {
+            modelContext.delete(existing)
+        } else {
+            let fav = FavoriteConversion(
+                categoryRaw: vm.selectedCategory.rawValue,
+                fromUnitID: vm.selectedFromUnitID,
+                toUnitID: vm.selectedToUnitID
+            )
+            modelContext.insert(fav)
+            Haptics.favorite()
+        }
+        try? modelContext.save()
+    }
+
     private func focusConverterFromAbsurdShortcut() {
         scrollToConverterToken &+= 1
     }
 
     var body: some View {
-        VStack(spacing: 0) {
-            Group {
-                switch homeTab {
-                case .convert:
-                    convertTab
-                case .explore:
-                    exploreTab
-                case .settings:
-                    settingsTab
+        ZStack {
+            VStack(spacing: 0) {
+                Group {
+                    switch homeTab {
+                    case .convert:
+                        convertTab
+                    case .explore:
+                        exploreTab
+                    case .settings:
+                        settingsTab
+                    }
                 }
-            }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
 
-            BottomNav(selected: $homeTab, selectionTint: categoryAccent) { tab in
-                if tab == .explore {
-                    exploreResetToken &+= 1
+                BottomNav(selected: $homeTab, selectionTint: categoryAccent) { tab in
+                    if tab == .explore {
+                        exploreResetToken &+= 1
+                    }
                 }
+                // Keep the nav in the hierarchy (avoids toolbar/keyboard transition glitches),
+                // but collapse its height while the keyboard is up so it doesn't reserve a
+                // chrome strip above the keyboard. NOTE: no `.clipped()` — that would also
+                // clip the nav's white background's extension into the bottom safe area,
+                // exposing chrome grey on devices with a home indicator.
+                .frame(height: keyboard.isVisible ? 0 : nil)
+                .opacity(keyboard.isVisible ? 0 : 1)
+                .allowsHitTesting(!keyboard.isVisible)
             }
-            // Keep the nav in the hierarchy (avoids toolbar/keyboard transition glitches),
-            // but hide it while the keyboard is up so it can't float mid-screen.
-            .opacity(keyboard.isVisible ? 0 : 1)
-            .allowsHitTesting(!keyboard.isVisible)
+
+            if isSharePreviewVisible {
+                sharePreviewOverlay
+                    .zIndex(100)
+            }
         }
+        .animation(.easeInOut(duration: 0.2), value: isSharePreviewVisible)
         .background(homeRootBackground)
         .onChange(of: homeTab) { old, new in
             // Ensure keyboard state is fully reset before tab transitions.
@@ -138,13 +176,18 @@ struct HomeView: View {
                             onOpenFactCard: { unitID in
                                 factCardSheetItem = FactCardSheetItem(unitID: unitID)
                             },
+                            onShareTapped: {
+                                withAnimation(.easeInOut(duration: 0.2)) {
+                                    isSharePreviewVisible = true
+                                }
+                            },
                             showCustomUnitForm: $showCustomUnitForm,
                             isKeyboardActive: $isConverterKeyboardActive,
                             vm: vm
                         )
                         .id(HomeScrollTarget.converter)
                     }
-                    .padding(.bottom, isConverterKeyboardActive ? 12 : ConverterLayout.rhythm24)
+                    .padding(.bottom, isConverterKeyboardActive ? 120 : ConverterLayout.rhythm24)
                 }
                 .background(convertTabChromeBackground)
                 .scrollDismissesKeyboard(.never)
@@ -202,18 +245,18 @@ struct HomeView: View {
                         }
                         .buttonStyle(ConverterPressingButtonStyle())
                     } else {
-                        // Original star and + buttons here (unchanged)
+                        // Star toggles favourite state — adds when not favourited, removes when already favourited.
                         Button {
-                            saveCurrentPairAsFavorite()
+                            toggleCurrentPairFavorite()
                         } label: {
                             Image(systemName: isCurrentPairAlreadyFavorite ? "star.fill" : "star")
                                 .font(.body.weight(.regular))
                                 .imageScale(.medium)
-                                .foregroundStyle(isCurrentPairAlreadyFavorite ? categoryAccent.opacity(0.95) : Color.secondary)
+                                .foregroundStyle(isCurrentPairAlreadyFavorite ? categoryAccent : Color.primary)
                         }
-                        .disabled(!canSaveFavoriteTap)
+                        .disabled(!vm.canSaveCurrentPairAsFavorite)
                         .buttonStyle(ConverterPressingButtonStyle())
-                        .accessibilityLabel(isCurrentPairAlreadyFavorite ? "Already a favorite" : "Save as favorite")
+                        .accessibilityLabel(isCurrentPairAlreadyFavorite ? "Remove from favorites" : "Save as favorite")
 
                         Button {
                             Haptics.tap()
@@ -233,13 +276,131 @@ struct HomeView: View {
         .background(convertTabChromeBackground)
     }
 
-    /// Root chrome: while editing on Convert, match scroll/TO card white so `#F0F0F3` never shows above the keypad.
     private var homeRootBackground: Color {
-        homeTab == .convert && isConverterKeyboardActive ? .white : Color(hex: "#F0F0F3")
+        Color(hex: "#F0F0F3")
     }
 
     private var convertTabChromeBackground: Color {
-        isConverterKeyboardActive ? .white : Color(hex: "#F0F0F3")
+        Color(hex: "#F0F0F3")
+    }
+
+    // MARK: – Share preview overlay + image generation
+
+    @ViewBuilder
+    private var sharePreviewOverlay: some View {
+        if let r = vm.conversionResult,
+           let fromName = vm.fromUnit?.name,
+           let toName = vm.toUnit?.name {
+            let fromVal = vm.formatNumberForDisplay(r.inputValue)
+            let toVal = ShareCardView.formatForCard(vm.formatNumberForDisplay(r.outputValue))
+            SharePreviewOverlay(
+                fromValue: fromVal,
+                fromUnit: fromName,
+                toValue: toVal,
+                toUnit: toName,
+                category: shareCategoryTag(for: vm.selectedCategory),
+                isPrecisionMode: vm.precisionModeEnabled,
+                accentColor: categoryAccent,
+                onDismiss: {
+                    withAnimation(.easeInOut(duration: 0.2)) {
+                        isSharePreviewVisible = false
+                    }
+                },
+                onShare: {
+                    withAnimation(.easeInOut(duration: 0.2)) {
+                        isSharePreviewVisible = false
+                    }
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+                        presentShareSheet()
+                    }
+                },
+                onSave: {
+                    saveCardToPhotos()
+                    withAnimation(.easeInOut(duration: 0.2)) {
+                        isSharePreviewVisible = false
+                    }
+                }
+            )
+        }
+    }
+
+    private func shareCategoryTag(for category: UnitCategory) -> String {
+        switch category {
+        case .length:      return "LENGTH"
+        case .mass:        return "MASS"
+        case .time:        return "TIME"
+        case .temperature: return "TEMP"
+        case .volume:      return "VOLUME"
+        }
+    }
+
+    @MainActor
+    private func renderCardImage() -> UIImage? {
+        guard #available(iOS 16.0, *) else { return nil }
+        guard let r = vm.conversionResult,
+              let fromName = vm.fromUnit?.name,
+              let toName = vm.toUnit?.name else { return nil }
+
+        let fromVal = vm.formatNumberForDisplay(r.inputValue)
+        let toVal = ShareCardView.formatForCard(vm.formatNumberForDisplay(r.outputValue))
+
+        let card = ShareCardView(
+            fromValue: fromVal,
+            fromUnit: fromName,
+            toValue: toVal,
+            toUnit: toName,
+            category: shareCategoryTag(for: vm.selectedCategory),
+            isPrecisionMode: vm.precisionModeEnabled
+        )
+        let renderer = ImageRenderer(content: card)
+        renderer.scale = 3.0
+        renderer.proposedSize = ProposedViewSize(
+            width: ShareCardView.cardWidth,
+            height: ShareCardView.cardHeight
+        )
+        return renderer.uiImage
+    }
+
+    private func presentShareSheet() {
+        guard let image = renderCardImage() else { return }
+        guard let topVC = topMostViewController() else { return }
+
+        let vc = UIActivityViewController(
+            activityItems: [image],
+            applicationActivities: nil
+        )
+        if let popover = vc.popoverPresentationController {
+            popover.sourceView = topVC.view
+            popover.sourceRect = CGRect(
+                x: topVC.view.bounds.midX,
+                y: topVC.view.bounds.midY,
+                width: 0,
+                height: 0
+            )
+            popover.permittedArrowDirections = []
+        }
+        topVC.present(vc, animated: true)
+    }
+
+    private func saveCardToPhotos() {
+        guard let image = renderCardImage() else { return }
+        PHPhotoLibrary.requestAuthorization(for: .addOnly) { status in
+            guard status == .authorized || status == .limited else { return }
+            DispatchQueue.main.async {
+                UIImageWriteToSavedPhotosAlbum(image, nil, nil, nil)
+            }
+        }
+    }
+
+    private func topMostViewController() -> UIViewController? {
+        guard let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+              let root = scene.windows.first(where: \.isKeyWindow)?.rootViewController
+                ?? scene.windows.first?.rootViewController else { return nil }
+        var top = root
+        while let presented = top.presentedViewController {
+            top = presented
+        }
+        return top
     }
 
     private var exploreTab: some View {

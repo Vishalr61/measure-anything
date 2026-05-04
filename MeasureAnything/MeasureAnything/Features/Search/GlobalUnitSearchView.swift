@@ -15,7 +15,8 @@ struct GlobalUnitSearchView: View {
                 .toolbar {
                     ToolbarItem(placement: .topBarTrailing) {
                         Button("Done") { dismiss() }
-                            .fontWeight(.semibold)
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundStyle(Color(hex: "#B0B0A8"))
                     }
                 }
         }
@@ -348,21 +349,27 @@ struct GlobalUnitSearchBody: View {
 
     // MARK: – Fact card inline tip (shown inside category/all-units row lists)
 
-    private func factCardTipBanner(accent: Color) -> some View {
-        HStack(spacing: 10) {
+    /// accent = nil → neutral styling; accent = category colour → tinted styling.
+    private func factCardTipBanner(accent: Color?) -> some View {
+        let bg         = accent.map { $0.opacity(0.1) } ?? Color(hex: "#F0F0F0")
+        let iconColor  = accent ?? Color(hex: "#1A1A1A")
+        let bodyColor  = accent.map { $0.opacity(0.75) } ?? Color(hex: "#6E6E6E")
+        let xColor     = accent.map { $0.opacity(0.4) } ?? Color(hex: "#B0B0B0")
+
+        return HStack(spacing: 10) {
             Image(systemName: "info.circle.fill")
                 .font(.system(size: 15))
-                .foregroundStyle(accent)
+                .foregroundStyle(iconColor)
             Text("Tap the info button on any unit to see its fact card.")
                 .font(.system(size: 12))
-                .foregroundStyle(accent.opacity(0.75))
+                .foregroundStyle(bodyColor)
             Spacer(minLength: 4)
             Button {
                 withAnimation(.easeOut(duration: 0.2)) { factCardTipDismissed = true }
             } label: {
                 Image(systemName: "xmark")
                     .font(.system(size: 10, weight: .semibold))
-                    .foregroundStyle(accent.opacity(0.4))
+                    .foregroundStyle(xColor)
                     .frame(width: 28, height: 28)
                     .contentShape(Rectangle())
             }
@@ -370,7 +377,7 @@ struct GlobalUnitSearchBody: View {
         }
         .padding(.horizontal, horizontalInset)
         .padding(.vertical, 10)
-        .background(accent.opacity(0.1))
+        .background(bg)
     }
 
     // MARK: - Selection hint strip
@@ -750,7 +757,7 @@ struct GlobalUnitSearchBody: View {
             VStack(alignment: .leading, spacing: 0) {
                 // Fact-card tip at top
                 if !factCardTipDismissed {
-                    factCardTipBanner(accent: Color(hex: "#3C3489"))
+                    factCardTipBanner(accent: nil)
                         .padding(.top, 8)
                 }
 
