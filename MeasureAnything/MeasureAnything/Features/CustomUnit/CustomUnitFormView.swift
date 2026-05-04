@@ -61,38 +61,28 @@ struct CustomUnitFormView: View {
 
     var body: some View {
         NavigationStack {
-            Form {
-                whatSection
-                howBigSection
-                optionalSection
+            VStack(spacing: 0) {
+                customHeader
 
-                if let err = saveError {
-                    Section {
-                        Text(err)
-                            .foregroundStyle(.red)
-                            .font(.footnote)
+                Form {
+                    whatSection
+                    howBigSection
+                    optionalSection
+
+                    if let err = saveError {
+                        Section {
+                            Text(err)
+                                .foregroundStyle(.red)
+                                .font(.footnote)
+                        }
                     }
-                }
 
-                // Live preview — shown only when there's something to show.
-                // The temp card that appeared unconditionally has been removed.
-                previewSection
-            }
-            .navigationTitle("Create a unit")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") { dismiss() }
-                        .font(.system(size: 16, weight: .semibold))
-                        .foregroundStyle(accent)
-                }
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("Save") { save() }
-                        .font(.system(size: 16, weight: .semibold))
-                        .foregroundStyle(canSave ? accent : accent.opacity(0.4))
-                        .disabled(!canSave)
+                    // Live preview — shown only when there's something to show.
+                    // The temp card that appeared unconditionally has been removed.
+                    previewSection
                 }
             }
+            .navigationBarHidden(true)
         }
         .onAppear {
             schedulePreviewRefresh()
@@ -141,6 +131,37 @@ struct CustomUnitFormView: View {
                 registry: vm.currentRegistry
             )
         }
+    }
+
+    // MARK: – Custom header (Cancel / Title / Save)
+    //
+    // Built as a plain HStack instead of `.toolbar { ToolbarItem }` so the
+    // Cancel and Save buttons render as flat text — iOS's toolbar API now
+    // wraps trailing/leading items in a pill background by default.
+
+    private var customHeader: some View {
+        HStack {
+            Button("Cancel") { dismiss() }
+                .font(.system(size: 16, weight: .semibold))
+                .foregroundStyle(accent)
+                .buttonStyle(.plain)
+
+            Spacer()
+
+            Text("Create a unit")
+                .font(.system(size: 18, weight: .semibold))
+
+            Spacer()
+
+            Button("Save") { save() }
+                .font(.system(size: 16, weight: .semibold))
+                .foregroundStyle(canSave ? accent : accent.opacity(0.4))
+                .buttonStyle(.plain)
+                .disabled(!canSave)
+        }
+        .padding(.horizontal, 16)
+        .padding(.top, 20)
+        .padding(.bottom, 14)
     }
 
     // MARK: – Sections

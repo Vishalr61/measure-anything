@@ -57,14 +57,6 @@ struct SettingsTabView: View {
 
                 // ── About ────────────────────────────────────────────────────
                 Section {
-                    Toggle("Precision mode", isOn: $vm.precisionModeEnabled)
-                } header: {
-                    sectionHeader("Display")
-                } footer: {
-                    Text("When on, the converted value shows full decimal detail instead of smart grouping and scientific shorthand.")
-                }
-
-                Section {
                     LabeledContent("Version", value: versionString)
 
                     Button { sendFeedback() } label: {

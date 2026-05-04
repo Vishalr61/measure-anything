@@ -24,10 +24,10 @@ struct FavoritesListView: View {
                     VStack(spacing: 0) {
                         HStack {
                             Button("Done") { dismiss() }
-                                .font(.system(size: 16, weight: .semibold))
+                                .font(.system(size: 18, weight: .semibold))
                                 .foregroundStyle(accent)
                                 .buttonStyle(.plain)
-                                .offset(x: 4)
+                                .padding(.leading, 12)
 
                             Spacer()
 
@@ -37,7 +37,8 @@ struct FavoritesListView: View {
                             Spacer()
 
                             Text("Done")
-                                .font(.system(size: 16, weight: .semibold))
+                                .font(.system(size: 18, weight: .semibold))
+                                .padding(.leading, 12)
                                 .opacity(0)
                         }
                         .padding(.horizontal, 16)

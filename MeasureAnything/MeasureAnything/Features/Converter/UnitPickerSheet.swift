@@ -36,25 +36,45 @@ struct UnitPickerSheet: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
+                customHeader
                 searchBar
                 Divider()
                 unitList
             }
-            .navigationTitle("Choose unit")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button("Done") { dismiss() }
-                        .font(.system(size: 16, weight: .semibold))
-                        .foregroundStyle(accent)
-                }
-            }
+            .navigationBarHidden(true)
         }
         .presentationDetents([.medium, .large])
         .presentationDragIndicator(.visible)
     }
 
     // MARK: - Subviews
+
+    /// Custom HStack header — Done as flat text in category accent, no iOS toolbar pill.
+    private var customHeader: some View {
+        HStack {
+            // Balance spacer (mirrors Done width so the title stays centred).
+            Text("Done")
+                .font(.system(size: 18, weight: .semibold))
+                .padding(.trailing, 12)
+                .opacity(0)
+
+            Spacer()
+
+            Text("Choose unit")
+                .font(.system(size: 18, weight: .semibold))
+
+            Spacer()
+
+            Button("Done") { dismiss() }
+                .font(.system(size: 18, weight: .semibold))
+                .foregroundStyle(accent)
+                .buttonStyle(.plain)
+                .padding(.trailing, 12)
+        }
+        .padding(.horizontal, 16)
+        .padding(.top, 20)
+        .padding(.bottom, 14)
+    }
 
     private var searchBar: some View {
         HStack(spacing: 8) {
