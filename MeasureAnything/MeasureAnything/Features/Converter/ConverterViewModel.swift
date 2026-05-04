@@ -913,25 +913,4 @@ final class ConverterViewModel: ObservableObject {
         return "1 \(fromU.name) = \(formatNumberForDisplay(one.outputValue)) \(toU.name)"
     }
 
-    /// Renders the 1080×1080 share card (iOS 16+). Returns `nil` when invalid or unavailable.
-    func renderShareCardImage() -> UIImage? {
-        guard #available(iOS 16.0, *) else { return nil }
-        guard validationError == nil, let r = conversionResult,
-              let fromN = fromUnit?.name, let toN = toUnit?.name else { return nil }
-        let fromVal = formatNumberForDisplay(r.inputValue)
-        let toVal = formatNumberForDisplay(r.outputValue)
-        let fact = toUnit?.funFact
-        let formula = shareCardFormulaLine()
-        let trimmedFact = fact?.trimmingCharacters(in: .whitespacesAndNewlines)
-        let useFact = trimmedFact.map { !$0.isEmpty } ?? false
-        return ShareCardView.renderImage(
-            fromValue: fromVal,
-            fromUnit: fromN,
-            toValue: toVal,
-            toUnit: toN,
-            funFact: useFact ? trimmedFact : nil,
-            formulaLine: useFact ? nil : formula,
-            accent: ConverterCategoryAccent.accent(for: selectedCategory)
-        )
-    }
 }

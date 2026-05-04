@@ -25,7 +25,6 @@ struct ConverterWorkspaceBody: View {
 
     @FocusState private var valueFieldFocused: Bool
     @State private var amountSnapshotBeforeEditing: String?
-    @State private var shareSheetItem: ShareSheetItem?
     @State private var swapRotation: Double = 0
     @State private var swapPillScale: CGFloat = 1
     @State private var isSwapPillAnimating: Bool = false
@@ -65,9 +64,6 @@ struct ConverterWorkspaceBody: View {
         .onChange(of: showCustomUnitForm) { _, isPresented in
             if isPresented { customUnitSheetDetent = .medium }
         }
-        .sheet(item: $shareSheetItem) { item in
-            ActivityView(activityItems: item.items)
-        }
         .task(id: customUnitsSyncToken) {
             vm.sync(customUnits: customUnits)
         }
@@ -87,6 +83,22 @@ struct ConverterWorkspaceBody: View {
             } else {
                 vm.clearInputEditSnapshot()
                 amountSnapshotBeforeEditing = nil
+            }
+        }
+        // Limit the input to 9 numeric digits (one decimal point allowed alongside).
+        .onChange(of: vm.inputText) { _, newValue in
+            let digits = newValue.filter { $0.isNumber }
+            guard digits.count > 9 else { return }
+            var digitCount = 0
+            let trimmed = newValue.filter { char in
+                if char.isNumber {
+                    digitCount += 1
+                    return digitCount <= 9
+                }
+                return char == "."
+            }
+            if trimmed != newValue {
+                vm.inputText = trimmed
             }
         }
     }
@@ -111,32 +123,55 @@ struct ConverterWorkspaceBody: View {
         vm.conversionResult != nil && vm.validationError == nil && vm.toUnit != nil
     }
 
-    private func shareTextLine() -> String {
-        guard let r = vm.conversionResult,
-              let fromName = vm.fromUnit?.name,
-              let toName   = vm.toUnit?.name else { return "" }
-        let input  = vm.formatNumberForDisplay(r.inputValue)
-        let output = vm.formatNumberForDisplay(r.outputValue)
-        var s = "\(input) \(fromName) = \(output) \(toName)"
-        if let m = r.memeExplanation, !m.isEmpty { s += "\n\n\(m)" }
-        return s
-    }
-
     private func presentShareResult() {
         guard canShareResult else { return }
+        guard let r = vm.conversionResult,
+              let fromName = vm.fromUnit?.name,
+              let toName = vm.toUnit?.name else { return }
         Haptics.share()
-        let items: [Any]
-        if let image = vm.renderShareCardImage() {
-            items = [image]
-        } else {
-            let text = shareTextLine()
-            guard !text.isEmpty else { return }
-            items = [text]
+
+        let topVC = topMostViewController()
+        guard let topVC else { return }
+
+        let fromVal = vm.formatNumberForDisplay(r.inputValue)
+        let toVal = vm.formatNumberForDisplay(r.outputValue)
+        let categoryTag = shareCategoryTag(for: vm.selectedCategory)
+        let equation = "\(fromVal) \(fromName) converted into something you can actually picture."
+
+        ShareCardPresenter.present(
+            from: topVC,
+            fromValue: fromVal,
+            fromUnit: fromName,
+            toValue: toVal,
+            toUnit: toName,
+            category: categoryTag,
+            isPrecisionMode: vm.precisionModeEnabled,
+            equationText: equation
+        )
+    }
+
+    /// Maps `UnitCategory` to the all-caps tag used by the share card background switch.
+    private func shareCategoryTag(for category: UnitCategory) -> String {
+        switch category {
+        case .length:      return "LENGTH"
+        case .mass:        return "MASS"
+        case .time:        return "TIME"
+        case .temperature: return "TEMP"
+        case .volume:      return "VOLUME"
         }
-        // `.sheet(item:)` guarantees the content closure receives the populated
-        // items on first tap (UIActivityViewController can't be re-bound after
-        // creation, so `.sheet(isPresented:)` would race the state commit).
-        shareSheetItem = ShareSheetItem(items: items)
+    }
+
+    /// Walks up from the connected scene's root to the top-most presented VC,
+    /// so `UIActivityViewController` can be presented without losing the topmost sheet/popover.
+    private func topMostViewController() -> UIViewController? {
+        guard let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+              let root = scene.windows.first(where: \.isKeyWindow)?.rootViewController
+                ?? scene.windows.first?.rootViewController else { return nil }
+        var top = root
+        while let presented = top.presentedViewController {
+            top = presented
+        }
+        return top
     }
 
     private var isCurrentPairAlreadyFavorite: Bool {
@@ -156,14 +191,6 @@ struct ConverterWorkspaceBody: View {
         )
         modelContext.insert(fav)
         try? modelContext.save()
-    }
-
-    /// Wraps the share-sheet payload so `.sheet(item:)` can deliver fully-populated
-    /// activity items in a single state transition, avoiding the first-tap empty
-    /// share sheet caused by `UIActivityViewController` capturing items at creation.
-    private struct ShareSheetItem: Identifiable {
-        let id = UUID()
-        let items: [Any]
     }
 
     private var customUnitsSyncToken: String {
