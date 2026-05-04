@@ -11,6 +11,9 @@ import MeasureAnythingCore
 struct ConverterWorkspaceBody: View {
     var showsCategoryPicker: Bool = true
     var onOpenFactCard: ((String) -> Void)? = nil
+    /// Fired when the user taps the SHARE action on the TO card. The host
+    /// (HomeView) handles preview overlay + image rendering + activity sheet.
+    var onShareTapped: () -> Void = {}
 
     @Binding var showCustomUnitForm: Bool
     @Binding var isKeyboardActive: Bool
@@ -85,17 +88,21 @@ struct ConverterWorkspaceBody: View {
                 amountSnapshotBeforeEditing = nil
             }
         }
-        // Limit the input to 9 numeric digits (one decimal point allowed alongside).
+        // Limit the input to 9 numeric digits + one decimal point (10 chars max).
         .onChange(of: vm.inputText) { _, newValue in
-            let digits = newValue.filter { $0.isNumber }
-            guard digits.count > 9 else { return }
             var digitCount = 0
-            let trimmed = newValue.filter { char in
+            var hasDecimal = false
+            let trimmed = newValue.filter { char -> Bool in
+                if char == "." {
+                    if hasDecimal { return false }
+                    hasDecimal = true
+                    return true
+                }
                 if char.isNumber {
                     digitCount += 1
                     return digitCount <= 9
                 }
-                return char == "."
+                return false
             }
             if trimmed != newValue {
                 vm.inputText = trimmed
@@ -125,53 +132,8 @@ struct ConverterWorkspaceBody: View {
 
     private func presentShareResult() {
         guard canShareResult else { return }
-        guard let r = vm.conversionResult,
-              let fromName = vm.fromUnit?.name,
-              let toName = vm.toUnit?.name else { return }
         Haptics.share()
-
-        let topVC = topMostViewController()
-        guard let topVC else { return }
-
-        let fromVal = vm.formatNumberForDisplay(r.inputValue)
-        let toVal = vm.formatNumberForDisplay(r.outputValue)
-        let categoryTag = shareCategoryTag(for: vm.selectedCategory)
-        let equation = "\(fromVal) \(fromName) converted into something you can actually picture."
-
-        ShareCardPresenter.present(
-            from: topVC,
-            fromValue: fromVal,
-            fromUnit: fromName,
-            toValue: toVal,
-            toUnit: toName,
-            category: categoryTag,
-            isPrecisionMode: vm.precisionModeEnabled,
-            equationText: equation
-        )
-    }
-
-    /// Maps `UnitCategory` to the all-caps tag used by the share card background switch.
-    private func shareCategoryTag(for category: UnitCategory) -> String {
-        switch category {
-        case .length:      return "LENGTH"
-        case .mass:        return "MASS"
-        case .time:        return "TIME"
-        case .temperature: return "TEMP"
-        case .volume:      return "VOLUME"
-        }
-    }
-
-    /// Walks up from the connected scene's root to the top-most presented VC,
-    /// so `UIActivityViewController` can be presented without losing the topmost sheet/popover.
-    private func topMostViewController() -> UIViewController? {
-        guard let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-              let root = scene.windows.first(where: \.isKeyWindow)?.rootViewController
-                ?? scene.windows.first?.rootViewController else { return nil }
-        var top = root
-        while let presented = top.presentedViewController {
-            top = presented
-        }
-        return top
+        onShareTapped()
     }
 
     private var isCurrentPairAlreadyFavorite: Bool {

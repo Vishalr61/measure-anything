@@ -12,9 +12,10 @@ extension String {
 
 // MARK: - ShareCardView
 //
-// 9:16 portrait card (390 × 693) rendered to an image via ImageRenderer.
-// The fixed dimensions guarantee identical output across all screen sizes
-// including iPad — ImageRenderer always captures at this resolution.
+// 9:16 portrait card (390 × 693). Used both as an in-app preview (scaled)
+// and as the source for ImageRenderer capture at full resolution. All
+// layout values are fixed so the captured image is identical on every
+// device including iPad.
 
 struct ShareCardView: View {
     let fromValue: String
@@ -24,12 +25,11 @@ struct ShareCardView: View {
     /// One of "LENGTH", "MASS", "TIME", "TEMP", "VOLUME".
     let category: String
     let isPrecisionMode: Bool
-    let equationText: String
 
     static let cardWidth: CGFloat = 390
     static let cardHeight: CGFloat = 693
 
-    private var bgColor: Color {
+    var accentColor: Color {
         switch category {
         case "LENGTH": return Color(hex: "#1A6E87")
         case "MASS":   return Color(hex: "#3D7A52")
@@ -40,19 +40,22 @@ struct ShareCardView: View {
         }
     }
 
-    private func resultFontSize(for value: String) -> CGFloat {
-        switch value.count {
-        case 1...4:  return 110
-        case 5...6:  return 82
-        case 7...9:  return 60
-        default:     return 44
+    var equationText: String {
+        "\(fromValue) \(fromUnit) converted into something you can actually picture."
+    }
+
+    var resultFontSize: CGFloat {
+        switch toValue.count {
+        case 0...4: return 110
+        case 5...6: return 82
+        case 7...9: return 60
+        default:    return 44
         }
     }
 
     var body: some View {
         ZStack {
-            // Background
-            bgColor
+            accentColor
 
             // Layer 1 — Ghost number
             Text(toValue)
@@ -60,18 +63,20 @@ struct ShareCardView: View {
                 .foregroundStyle(Color.white.opacity(0.045))
                 .lineLimit(1)
                 .minimumScaleFactor(0.1)
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .frame(width: Self.cardWidth)
 
             // Layer 3 — Centre content
             VStack(spacing: 0) {
                 approxRow
+                    .padding(.bottom, 4)
 
                 Text(toValue)
-                    .font(.system(size: resultFontSize(for: toValue), weight: .black))
+                    .font(.system(size: resultFontSize, weight: .black))
                     .foregroundStyle(.white)
                     .lineLimit(1)
-                    .minimumScaleFactor(0.5)
+                    .minimumScaleFactor(0.4)
                     .tracking(-4)
+                    .frame(maxWidth: 310)
 
                 Text(toUnit.truncated(to: 20))
                     .font(.system(size: 24, weight: .bold))
@@ -94,7 +99,7 @@ struct ShareCardView: View {
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
 
-            // Layer 2 — Top row + Layer 4 — Bottom brand
+            // Layer 2 — Top row + Layer 4 — Brand footer
             VStack {
                 topRow
                     .padding(.horizontal, 40)
@@ -112,15 +117,15 @@ struct ShareCardView: View {
         .frame(width: Self.cardWidth, height: Self.cardHeight)
     }
 
-    // MARK: — Subviews
+    // MARK: – Subviews
 
     @ViewBuilder
     private var approxRow: some View {
         HStack(spacing: 8) {
+            Text(isPrecisionMode ? "=" : "≈")
+                .font(.system(size: 18, weight: .medium))
+                .foregroundStyle(Color.white.opacity(0.4))
             if isPrecisionMode {
-                Text("=")
-                    .font(.system(size: 18, weight: .medium))
-                    .foregroundStyle(Color.white.opacity(0.4))
                 Text("PRECISION")
                     .font(.system(size: 9, weight: .black))
                     .tracking(0.8)
@@ -129,16 +134,12 @@ struct ShareCardView: View {
                     .padding(.vertical, 3)
                     .background(Capsule().fill(Color.white.opacity(0.2)))
                     .overlay(Capsule().strokeBorder(Color.white.opacity(0.35), lineWidth: 0.5))
-            } else {
-                Text("≈")
-                    .font(.system(size: 18, weight: .medium))
-                    .foregroundStyle(Color.white.opacity(0.4))
             }
         }
     }
 
     private var topRow: some View {
-        HStack {
+        HStack(alignment: .center) {
             // FROM chip
             HStack(alignment: .lastTextBaseline, spacing: 5) {
                 Text(fromValue)
@@ -164,6 +165,43 @@ struct ShareCardView: View {
                 .padding(.horizontal, 10)
                 .padding(.vertical, 5)
                 .background(Capsule().fill(Color.white.opacity(0.1)))
+        }
+    }
+}
+
+// MARK: - Number formatting for the share card
+
+extension ShareCardView {
+    /// Formats a numeric string for display on the card:
+    /// - ≥ 1B → "1.2B"
+    /// - ≥ 1M → "3.4M"
+    /// - ≥ 10K → "12,345" (with thousands separator)
+    /// - else → max 4 significant figures, trailing zeros stripped
+    static func formatForCard(_ value: String) -> String {
+        guard let number = Double(value) else { return value }
+        let absNumber = Swift.abs(number)
+        let sign = number < 0 ? "-" : ""
+
+        switch absNumber {
+        case 1_000_000_000...:
+            return sign + String(format: "%.1fB", absNumber / 1_000_000_000)
+        case 1_000_000...:
+            return sign + String(format: "%.1fM", absNumber / 1_000_000)
+        case 10_000...:
+            let formatter = NumberFormatter()
+            formatter.numberStyle = .decimal
+            formatter.maximumFractionDigits = 0
+            return sign + (formatter.string(from: NSNumber(value: absNumber)) ?? value)
+        default:
+            if absNumber == 0 { return "0" }
+            let d = ceil(log10(absNumber == 0 ? 1 : absNumber))
+            let power = 4 - Int(d)
+            let magnitude = pow(10.0, Double(power))
+            let rounded = (absNumber * magnitude).rounded() / magnitude
+            if rounded.truncatingRemainder(dividingBy: 1) == 0 {
+                return sign + String(format: "%.0f", rounded)
+            }
+            return sign + "\(rounded)"
         }
     }
 }
