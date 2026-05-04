@@ -82,9 +82,12 @@ struct HomeView: View {
                 }
             }
             // Keep the nav in the hierarchy (avoids toolbar/keyboard transition glitches),
-            // but hide it while the keyboard is up so it can't float mid-screen.
+            // but collapse its height while the keyboard is up so it doesn't reserve a
+            // chrome strip above the keyboard.
+            .frame(height: keyboard.isVisible ? 0 : nil)
             .opacity(keyboard.isVisible ? 0 : 1)
             .allowsHitTesting(!keyboard.isVisible)
+            .clipped()
         }
         .background(homeRootBackground)
         .onChange(of: homeTab) { old, new in
@@ -144,7 +147,7 @@ struct HomeView: View {
                         )
                         .id(HomeScrollTarget.converter)
                     }
-                    .padding(.bottom, isConverterKeyboardActive ? 12 : ConverterLayout.rhythm24)
+                    .padding(.bottom, isConverterKeyboardActive ? 120 : ConverterLayout.rhythm24)
                 }
                 .background(convertTabChromeBackground)
                 .scrollDismissesKeyboard(.never)
@@ -233,13 +236,12 @@ struct HomeView: View {
         .background(convertTabChromeBackground)
     }
 
-    /// Root chrome: while editing on Convert, match scroll/TO card white so `#F0F0F3` never shows above the keypad.
     private var homeRootBackground: Color {
-        homeTab == .convert && isConverterKeyboardActive ? .white : Color(hex: "#F0F0F3")
+        Color(hex: "#F0F0F3")
     }
 
     private var convertTabChromeBackground: Color {
-        isConverterKeyboardActive ? .white : Color(hex: "#F0F0F3")
+        Color(hex: "#F0F0F3")
     }
 
     private var exploreTab: some View {
