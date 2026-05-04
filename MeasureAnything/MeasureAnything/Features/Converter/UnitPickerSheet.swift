@@ -45,7 +45,7 @@ struct UnitPickerSheet: View {
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Done") { dismiss() }
-                        .fontWeight(.semibold)
+                        .font(.system(size: 16, weight: .semibold))
                         .foregroundStyle(accent)
                 }
             }

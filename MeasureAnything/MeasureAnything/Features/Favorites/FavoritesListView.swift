@@ -24,7 +24,7 @@ struct FavoritesListView: View {
                     VStack(spacing: 0) {
                         HStack {
                             Button("Done") { dismiss() }
-                                .font(.system(size: 18, weight: .semibold))
+                                .font(.system(size: 16, weight: .semibold))
                                 .foregroundStyle(accent)
                                 .buttonStyle(.plain)
                                 .offset(x: 4)
@@ -37,7 +37,7 @@ struct FavoritesListView: View {
                             Spacer()
 
                             Text("Done")
-                                .font(.system(size: 18, weight: .semibold))
+                                .font(.system(size: 16, weight: .semibold))
                                 .opacity(0)
                         }
                         .padding(.horizontal, 16)
@@ -176,27 +176,19 @@ private extension FavoritesListView {
     }
 
     var emptyState: some View {
-        VStack(spacing: 0) {
-            Spacer()
-
+        VStack(spacing: 16) {
             Image(systemName: "star")
-                .font(.system(size: 32))
-                .foregroundStyle(Color(.tertiaryLabel))
-
+                .font(.system(size: 48, weight: .light))
+                .foregroundStyle(Color(hex: "#D0D0C8"))
             Text("No favourites yet")
-                .font(.subheadline.weight(.semibold))
-                .foregroundStyle(.secondary)
-                .padding(.top, 8)
-
-            Text("Tap the star on any conversion to save it")
-                .font(.caption)
-                .foregroundStyle(.tertiary)
+                .font(.system(size: 20, weight: .semibold))
+                .foregroundStyle(Color(hex: "#1A1A1A"))
+            Text("Tap the star on any unit to save it here.")
+                .font(.system(size: 15))
+                .foregroundStyle(Color(hex: "#6E6E6E"))
                 .multilineTextAlignment(.center)
-                .padding(.top, 4)
-
-            Spacer()
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .padding(.horizontal, 24)
+        .padding(.horizontal, 40)
     }
 }

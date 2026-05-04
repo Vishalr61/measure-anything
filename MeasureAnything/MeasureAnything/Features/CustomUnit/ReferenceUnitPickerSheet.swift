@@ -13,6 +13,10 @@ struct ReferenceUnitPickerSheet: View {
         registry.units(in: category, includeKinds: [.normal])
     }
 
+    private var accent: Color {
+        ConverterCategoryAccent.accent(for: category)
+    }
+
     var body: some View {
         NavigationStack {
             List {
@@ -39,6 +43,8 @@ struct ReferenceUnitPickerSheet: View {
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") { dismiss() }
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundStyle(accent)
                 }
             }
         }

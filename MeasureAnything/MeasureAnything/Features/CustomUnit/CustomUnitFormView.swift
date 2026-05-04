@@ -83,11 +83,13 @@ struct CustomUnitFormView: View {
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") { dismiss() }
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundStyle(accent)
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Save") { save() }
-                        .fontWeight(.semibold)
-                        .foregroundStyle(canSave ? accent : Color.secondary)
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundStyle(canSave ? accent : accent.opacity(0.4))
                         .disabled(!canSave)
                 }
             }
@@ -293,13 +295,13 @@ struct CustomUnitFormView: View {
                     if !previewLine1.isEmpty {
                         Text(previewLine1)
                             .font(.system(size: 14, weight: .medium))
-                            .foregroundStyle(palette.valueProclamation)
+                            .foregroundStyle(accent)
                             .fixedSize(horizontal: false, vertical: true)
                     }
                     if !previewLine2.isEmpty {
                         Text(previewLine2)
                             .font(.system(size: 11, weight: .regular))
-                            .foregroundStyle(.secondary)
+                            .foregroundStyle(accent)
                             .fixedSize(horizontal: false, vertical: true)
                     }
                 }
@@ -307,7 +309,7 @@ struct CustomUnitFormView: View {
                 .padding(14)
                 .background(
                     RoundedRectangle(cornerRadius: 12, style: .continuous)
-                        .fill(palette.light)
+                        .fill(accent.opacity(0.1))
                 )
                 .listRowInsets(EdgeInsets(
                     top: 8,
