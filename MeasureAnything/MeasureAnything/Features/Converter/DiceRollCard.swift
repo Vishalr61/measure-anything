@@ -362,58 +362,88 @@ struct DiceRollCard: View {
         pulsePattern(multiplier: 2, settle: 0.4)
         vm.rollDice()
         scheduleHoldHintAfterSingleRollIfNeeded()
+        landingBounce(delay: 0.35)
     }
 
     private func triggerDualRoll() {
         lastRollKind = .dual
         animateResultTransitionOut()
         animateDecorativeRollDual()
-        pulsePattern(multiplier: 3, settle: 0.6)
+        pulsePattern(multiplier: 6, settle: 0.7)
         vm.rollDiceDual()
-        scheduleDualLandingBounce()
+        landingBounce(delay: 0.65)
     }
 
     private func animateDecorativeRollSingle() {
-        withAnimation(.easeOut(duration: 0.15)) {
+        withAnimation(.easeOut(duration: 0.12)) {
             pipOpacity = 0
         }
 
+        // Scramble through 2 intermediate faces during spin
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.08) {
+            decorativeFace = Int.random(in: 1...6)
+            withAnimation(.easeIn(duration: 0.06)) { pipOpacity = 0.5 }
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.16) {
+            decorativeFace = Int.random(in: 1...6)
+            withAnimation(.easeIn(duration: 0.06)) { pipOpacity = 0.5 }
+        }
+
         let nextFace = Int.random(in: 1...6)
-        let offset = Double.random(in: 15...45) * (Bool.random() ? 1 : -1)
-        withAnimation(.interpolatingSpring(mass: 1, stiffness: 120, damping: 14, initialVelocity: 8)) {
+        let offset = Double.random(in: 180...270) * (Bool.random() ? 1 : -1)
+
+        withAnimation(.interpolatingSpring(mass: 1, stiffness: 120,
+                       damping: 14, initialVelocity: 8)) {
             extraDieRotation = offset
         }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.24) {
             decorativeFace = nextFace
-            withAnimation(.easeIn(duration: 0.15)) {
-                pipOpacity = 1
-            }
-            withAnimation(.interpolatingSpring(mass: 1, stiffness: 90, damping: 12, initialVelocity: 6)) {
+            withAnimation(.easeIn(duration: 0.12)) { pipOpacity = 1 }
+            withAnimation(.interpolatingSpring(mass: 1, stiffness: 90,
+                           damping: 12, initialVelocity: 6)) {
                 extraDieRotation = 0
             }
         }
     }
 
     private func animateDecorativeRollDual() {
-        let nextFace = Int.random(in: 1...6)
-        withAnimation(.linear(duration: 0.5)) {
+        withAnimation(.easeOut(duration: 0.1)) { pipOpacity = 0 }
+
+        let finalFace = Int.random(in: 1...6)
+
+        // Flash through 3 faces during the spin
+        let scrambleTimes: [Double] = [0.12, 0.24, 0.36]
+        for t in scrambleTimes {
+            DispatchQueue.main.asyncAfter(deadline: .now() + t) {
+                decorativeFace = Int.random(in: 1...6)
+                withAnimation(.easeInOut(duration: 0.08)) {
+                    pipOpacity = Double.random(in: 0.4...0.8)
+                }
+            }
+        }
+
+        withAnimation(.timingCurve(0.2, 0.0, 0.0, 1.0, duration: 0.55)) {
             extraDieRotation = 720 * (Bool.random() ? 1 : -1)
         }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
-            decorativeFace = nextFace
-        }
+
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-            withAnimation(.interpolatingSpring(mass: 1, stiffness: 90, damping: 14, initialVelocity: 6)) {
-                extraDieRotation = 0
+            decorativeFace = finalFace
+            withAnimation(.easeIn(duration: 0.12)) { pipOpacity = 1 }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                withAnimation(.interpolatingSpring(mass: 1, stiffness: 90,
+                               damping: 14, initialVelocity: 6)) {
+                    extraDieRotation = 0
+                }
             }
         }
     }
 
     private func pulsePattern(multiplier: Double, settle: Double) {
-        withAnimation(.easeIn(duration: 0.15)) {
+        withAnimation(.easeIn(duration: 0.1)) {
             patternPulseMultiplier = multiplier
         }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
             withAnimation(.easeOut(duration: settle)) {
                 patternPulseMultiplier = 1
             }
@@ -463,13 +493,14 @@ struct DiceRollCard: View {
         }
     }
 
-    private func scheduleDualLandingBounce() {
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-            withAnimation(.easeOut(duration: 0.1)) {
-                cardLandingScale = 1.02
+    private func landingBounce(delay: Double = 0.0) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
+            withAnimation(.easeIn(duration: 0.08)) {
+                cardLandingScale = 0.94
             }
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                withAnimation(.easeIn(duration: 0.1)) {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.08) {
+                withAnimation(.interpolatingSpring(mass: 1, stiffness: 200,
+                               damping: 12, initialVelocity: 10)) {
                     cardLandingScale = 1.0
                 }
             }
@@ -479,9 +510,9 @@ struct DiceRollCard: View {
     private func scheduleRestingTiltRandomize() {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.55) {
             withAnimation(.easeOut(duration: 0.22)) {
-                restingRandomTilt = Double.random(in: -8...8)
-                restingTiltX = Double.random(in: -6...6)
-                restingTiltY = Double.random(in: -8...8)
+                restingRandomTilt = Double.random(in: -12...12)
+                restingTiltX = Double.random(in: -18...18)
+                restingTiltY = Double.random(in: -18...18)
             }
         }
     }
