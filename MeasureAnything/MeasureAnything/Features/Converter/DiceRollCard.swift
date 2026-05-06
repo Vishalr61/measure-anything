@@ -10,8 +10,8 @@ struct DiceRollCard: View {
     @State private var ringOpacity: Double = 0
     @State private var didCompleteLongPress: Bool = false
     @State private var longPressWorkItem: DispatchWorkItem?
-    @State private var showHoldHint: Bool = false
-    @State private var rollHintIndex: Int = 0
+    @State private var hasRolledOnce: Bool = false
+    @State private var hasUsedShake: Bool = false
 
     @State private var decorativeFace: Int = Int.random(in: 1...6)
     @State private var pipOpacity: Double = 1
@@ -71,12 +71,9 @@ struct DiceRollCard: View {
         }
         .onChange(of: vm.shakeSingleRollRequest) { _, new in
             guard new > 0 else { return }
+            hasRolledOnce = true
+            hasUsedShake = true
             triggerSingleRoll()
-        }
-        .onReceive(
-            Timer.publish(every: 4, on: .main, in: .common).autoconnect()
-        ) { _ in
-            rollHintIndex = (rollHintIndex + 1) % Self.rollHintMessages.count
         }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel("Roll the dice")
@@ -87,11 +84,20 @@ struct DiceRollCard: View {
         }
     }
 
-    private static let rollHintMessages: [String] = [
-        "Shake to roll",
-        "Tap for a weird conversion",
-        "Long press for full random"
-    ]
+    /// State-driven discoverability hint. One thing at a time, advances as
+    /// the user demonstrates each gesture.
+    private var hintText: String {
+        if !hasRolledOnce {
+            return "Tap to roll"
+        }
+        if vm.shouldShowLongPressDiscoverabilityHint {
+            return "Long press for full random"
+        }
+        if !hasUsedShake {
+            return "Shake to roll"
+        }
+        return "Tap · Long press · Shake"
+    }
 
     private var leftColumn: some View {
         VStack(alignment: .leading, spacing: 6) {
@@ -108,30 +114,17 @@ struct DiceRollCard: View {
     }
 
     private var rollHintLine: some View {
-        ZStack(alignment: .leading) {
-            ForEach(Array(Self.rollHintMessages.enumerated()), id: \.offset) { index, line in
-                Text(line)
-                    .font(.system(size: 12, weight: .regular, design: .rounded))
-                    .foregroundStyle(Color.white.opacity(0.78))
-                    .fixedSize(horizontal: false, vertical: true)
-                    .opacity(rollHintIndex == index ? 1 : 0)
-            }
-        }
-        .frame(maxWidth: .infinity, minHeight: 16, alignment: .leading)
-        .animation(.easeInOut(duration: 0.5), value: rollHintIndex)
+        Text(hintText)
+            .font(.system(size: 12, weight: .regular, design: .rounded))
+            .foregroundStyle(Color.white.opacity(0.78))
+            .fixedSize(horizontal: false, vertical: true)
+            .frame(maxWidth: .infinity, minHeight: 16, alignment: .leading)
+            .animation(.easeInOut(duration: 0.4), value: hintText)
     }
 
     private var subtitleRow: some View {
         VStack(alignment: .leading, spacing: 3) {
             resultBadge
-
-            if vm.showDiceSubtitle, showHoldHint {
-                Text("Hold for full chaos")
-                    .font(.system(size: 11, weight: .regular, design: .rounded))
-                    .foregroundStyle(Color.white.opacity(0.60))
-                    .accessibilityHidden(true)
-                    .transition(.opacity)
-            }
         }
         .opacity(vm.showDiceSubtitle ? 1 : 0)
         .frame(minHeight: 14, alignment: .leading)
@@ -326,6 +319,12 @@ struct DiceRollCard: View {
             secondary.impactOccurred()
         }
 
+        // Release the press-grab the instant the long press completes. The
+        // existing spring on `isPressed` pops the card back to scale 1.0,
+        // giving a "throw" feel instead of leaving the die compressed under
+        // the user's finger while it tries to spin.
+        isPressed = false
+
         withAnimation(.easeInOut(duration: 0.12)) {
             ringOpacity = 1
         }
@@ -336,7 +335,6 @@ struct DiceRollCard: View {
         }
 
         vm.setHasUsedLongPressRoll()
-        showHoldHint = false
 
         triggerDualRoll()
     }
@@ -356,16 +354,17 @@ struct DiceRollCard: View {
     }
 
     private func triggerSingleRoll() {
+        hasRolledOnce = true
         lastRollKind = .single
         animateResultTransitionOut()
         animateDecorativeRollSingle()
         pulsePattern(multiplier: 2, settle: 0.4)
         vm.rollDice()
-        scheduleHoldHintAfterSingleRollIfNeeded()
         landingBounce(delay: 0.35)
     }
 
     private func triggerDualRoll() {
+        hasRolledOnce = true
         lastRollKind = .dual
         animateResultTransitionOut()
         animateDecorativeRollDual()
@@ -423,7 +422,10 @@ struct DiceRollCard: View {
             }
         }
 
-        withAnimation(.timingCurve(0.2, 0.0, 0.0, 1.0, duration: 0.55)) {
+        // Fast-start, smooth-decelerate curve — die snaps into the spin
+        // immediately on release (no perceived "stuck" frame) and slows
+        // gracefully into the landing.
+        withAnimation(.timingCurve(0.0, 0.0, 0.2, 1.0, duration: 0.55)) {
             extraDieRotation = 720 * (Bool.random() ? 1 : -1)
         }
 
@@ -517,20 +519,5 @@ struct DiceRollCard: View {
         }
     }
 
-    private func scheduleHoldHintAfterSingleRollIfNeeded() {
-        guard vm.shouldShowLongPressDiscoverabilityHint else { return }
-        showHoldHint = false
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-            guard vm.shouldShowLongPressDiscoverabilityHint else { return }
-            withAnimation(.easeIn(duration: 0.3)) {
-                showHoldHint = true
-            }
-            DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
-                withAnimation(.easeOut(duration: 0.5)) {
-                    showHoldHint = false
-                }
-            }
-        }
-    }
 }
 
