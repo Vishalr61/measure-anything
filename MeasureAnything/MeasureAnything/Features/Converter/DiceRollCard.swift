@@ -92,6 +92,12 @@ struct DiceRollCard: View {
                 hasUsedShake = true
                 triggerSingleRoll()
             }
+            .onChange(of: vm.shakeDualRollRequest) { _, new in
+                guard new > 0 else { return }
+                hasRolledOnce = true
+                hasUsedShake = true
+                triggerDualRoll()
+            }
             .accessibilityElement(children: .ignore)
             .accessibilityLabel("Roll the dice")
             .accessibilityHint(vm.isChaosMode
@@ -188,16 +194,23 @@ struct DiceRollCard: View {
         }
     }
 
-    /// Live pair badge mirroring the FROM/TO cycle during a chaos roll.
-    /// Reads directly from the VM overrides so it stays in lockstep with
-    /// the real FROM/TO pill cycling above.
+    /// Live pair badge mirroring the FROM/TO cycle during a roll.
+    /// Falls back to the real unit names when the slot-machine override
+    /// is nil so the badge has correct content the moment a roll starts
+    /// (e.g. normal single tap leaves `slotMachineFromName` nil — the
+    /// badge then shows the actual FROM with TO cycling).
+    /// Tint switches to chaos light-purple in chaos mode.
     private var slotMachineRow: some View {
-        HStack(spacing: 0) {
+        let textColor: Color = vm.isChaosMode
+            ? Color(hex: "#C4B5FD").opacity(0.9)
+            : Color.white.opacity(0.9)
+
+        return HStack(spacing: 0) {
             HStack(spacing: 0) {
-                Text(vm.slotMachineFromName ?? "—")
+                Text(vm.slotMachineFromName ?? fromName)
                     .font(.system(size: 11, weight: .semibold,
                                   design: .rounded))
-                    .foregroundStyle(Color(hex: "#C4B5FD").opacity(0.9))
+                    .foregroundStyle(textColor)
                     .lineLimit(1)
                     .padding(.leading, 10)
                     .padding(.vertical, 4)
@@ -210,10 +223,10 @@ struct DiceRollCard: View {
                     .foregroundStyle(Color.white.opacity(0.3))
                     .padding(.vertical, 4)
 
-                Text(vm.slotMachineToName ?? "—")
+                Text(vm.slotMachineToName ?? toName)
                     .font(.system(size: 11, weight: .semibold,
                                   design: .rounded))
-                    .foregroundStyle(Color(hex: "#C4B5FD").opacity(0.9))
+                    .foregroundStyle(textColor)
                     .lineLimit(1)
                     .padding(.trailing, 10)
                     .padding(.vertical, 4)
@@ -505,6 +518,82 @@ struct DiceRollCard: View {
         }
     }
 
+    /// Slot-machine prelude for a normal single tap (TO-only). Pulls
+    /// names from the *current* category's absurd pool; FROM stays
+    /// untouched. Aligns with `rollDice`'s 1.4s landing.
+    private func runSlotMachineNormalSingle() {
+        let pool: [String] = vm.exploreUnitDefinitions(for: vm.selectedCategory)
+            .filter { $0.kind == .absurd }
+            .map { $0.name }
+            .shuffled()
+
+        guard pool.count >= 2 else { return }
+
+        isSlotMachineRunning = true
+
+        // 3 cycles × 0.37s = 1.11s; rollDice lands at 1.4s → ~0.29s gap
+        let cycleDuration: Double = 0.37
+        let totalCycles = 3
+
+        for i in 0..<totalCycles {
+            let cycleStart = Double(i) * cycleDuration
+            let name = pool[i % pool.count]
+            DispatchQueue.main.asyncAfter(deadline: .now() + cycleStart) {
+                withAnimation(.easeInOut(duration: 0.12)) {
+                    vm.slotMachineToName = name
+                }
+            }
+        }
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.11) {
+            isSlotMachineRunning = false
+        }
+    }
+
+    /// Slot-machine prelude for a normal dual roll (long press / shake).
+    /// Both FROM and TO cycle, drawn from the current category's absurd pool.
+    /// Aligns with `rollDiceDual`'s 1.6s landing.
+    private func runSlotMachineNormalDual() {
+        let pool: [String] = vm.exploreUnitDefinitions(for: vm.selectedCategory)
+            .filter { $0.kind == .absurd }
+            .map { $0.name }
+            .shuffled()
+
+        guard pool.count >= 4 else { return }
+
+        isSlotMachineRunning = true
+
+        // FROM 4×0.37s = 1.48s; TO offset 0.18s ends at 1.66s.
+        // rollDiceDual lands at 1.6s — small overlap on TO is fine since
+        // the landing block clears overrides atomically with the unit IDs.
+        let cycleDuration: Double = 0.37
+        let totalCycles = 4
+
+        for i in 0..<totalCycles {
+            let cycleStart = Double(i) * cycleDuration
+            let name = pool[i % pool.count]
+            DispatchQueue.main.asyncAfter(deadline: .now() + cycleStart) {
+                withAnimation(.easeInOut(duration: 0.12)) {
+                    vm.slotMachineFromName = name
+                }
+            }
+        }
+
+        for i in 0..<totalCycles {
+            let cycleStart = 0.18 + Double(i) * cycleDuration
+            let name = pool[(i + totalCycles) % pool.count]
+            DispatchQueue.main.asyncAfter(deadline: .now() + cycleStart) {
+                withAnimation(.easeInOut(duration: 0.12)) {
+                    vm.slotMachineToName = name
+                }
+            }
+        }
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.55) {
+            isSlotMachineRunning = false
+        }
+    }
+
     // MARK: – Chaos page-indicator dots (rendered below the card)
 
     private var chaosDots: some View {
@@ -775,9 +864,14 @@ struct DiceRollCard: View {
             landingBounce(delay: 1.8)
             return
         }
+        // Clear any stale TO override from an in-flight previous roll so
+        // a rapid second tap doesn't briefly flash the old slot-machine name.
+        vm.slotMachineToName = nil
+
         hasRolledOnce = true
         lastRollKind = .single
         animateResultTransitionOut()
+        runSlotMachineNormalSingle()
         animateDecorativeRollSingle()
         pulsePattern(multiplier: 2, settle: 0.4)
         vm.rollDice()
@@ -790,9 +884,14 @@ struct DiceRollCard: View {
             triggerSingleRoll()
             return
         }
+        // Clear stale overrides from an in-flight previous roll.
+        vm.slotMachineFromName = nil
+        vm.slotMachineToName = nil
+
         hasRolledOnce = true
         lastRollKind = .dual
         animateResultTransitionOut()
+        runSlotMachineNormalDual()
         animateDecorativeRollDual()
         pulsePattern(multiplier: 6, settle: 0.7)
         vm.rollDiceDual()

@@ -66,7 +66,8 @@ struct ConverterWorkspaceBody: View {
             vm.sync(customUnits: customUnits)
         }
         .onShake {
-            vm.requestSingleRollFromShake()
+            // Shake now fires the dual-roll path — both FROM and TO change.
+            vm.requestDualRollFromShake()
         }
         .onAppear {
             if amountSnapshotBeforeEditing == nil {

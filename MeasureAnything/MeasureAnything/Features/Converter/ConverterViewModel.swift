@@ -121,6 +121,10 @@ final class ConverterViewModel: ObservableObject {
     // Long-press discoverability hint is driven by `DiceRollCard` + UserDefaults.
     /// Incremented when the user shakes the device so `DiceRollCard` can run the same path as a single tap (animations + `rollDice()`).
     @Published private(set) var shakeSingleRollRequest: UInt = 0
+    /// Increments when shake-detection wants the card to fire its dual-roll
+    /// path (both FROM and TO change). Decoupled from `shakeSingleRollRequest`
+    /// so existing callers/observers of the single-roll variant stay intact.
+    @Published private(set) var shakeDualRollRequest: UInt = 0
 
     private var diceFlashTimer: Timer?
     private var diceLongPressHintDismissWorkItem: DispatchWorkItem?
@@ -323,6 +327,12 @@ final class ConverterViewModel: ObservableObject {
         shakeSingleRollRequest &+= 1
     }
 
+    /// Called when the user shakes the device on the converter and the card
+    /// should fire its dual-roll path (both FROM and TO randomise).
+    func requestDualRollFromShake() {
+        shakeDualRollRequest &+= 1
+    }
+
     func rollDice() {
         // Make dice roll interruptible so the user can spam taps.
         diceRollToken = UUID()
@@ -355,8 +365,10 @@ final class ConverterViewModel: ObservableObject {
         // Keep dice resting tilt stable; the dice face animation is decorative and handled in `DiceRollCard`.
         syncDiceTiltToCategory(animated: true)
 
-        // Land.
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.72) {
+        // Land — extended to 1.4s so the in-card slot-machine prelude
+        // (3 cycles × 0.37s ≈ 1.11s) gets a clean ~0.29s settle before
+        // the real TO unit snaps in.
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.4) {
             MainActor.assumeIsolated {
                 guard self.diceRollToken == token else { return }
                 self.diceDisplayFace = newFace
@@ -384,6 +396,10 @@ final class ConverterViewModel: ObservableObject {
                 } else {
                     self.diceLandedUnitName = ""
                 }
+
+                // Clear TO override so the real TO name snaps in atomically
+                // with the unit ID assignment (no stale slot-machine name).
+                self.slotMachineToName = nil
 
                 withAnimation(.easeIn(duration: 0.25)) {
                     self.showDiceSubtitle = (self.diceLandedUnitName.isEmpty == false)
@@ -428,13 +444,18 @@ final class ConverterViewModel: ObservableObject {
         // Keep dice resting tilt stable; the dice face animation is decorative and handled in `DiceRollCard`.
         syncDiceTiltToCategory(animated: true)
 
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+        // Land — extended to 1.6s so the in-card slot-machine prelude
+        // (FROM 4×0.37s = 1.48s, TO offset 0.18s = 1.66s) lines up with
+        // the real units snapping in.
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.6) {
             MainActor.assumeIsolated {
                 guard self.diceRollToken == token else { return }
                 self.diceDisplayFace = newFace
 
                 let allowedAbsurd = absurdPoolForDual()
                 guard allowedAbsurd.count >= 2 else {
+                    self.slotMachineFromName = nil
+                    self.slotMachineToName = nil
                     self.isDiceRolling = false
                     return
                 }
@@ -470,6 +491,11 @@ final class ConverterViewModel: ObservableObject {
                     self.diceLandedUnitName = ""
                     self.diceSubtitleIsDualFormat = false
                 }
+
+                // Clear FROM/TO overrides so the real names snap in
+                // atomically with the unit ID assignment.
+                self.slotMachineFromName = nil
+                self.slotMachineToName = nil
 
                 withAnimation(.easeIn(duration: 0.25)) {
                     self.showDiceSubtitle = !self.diceLandedUnitName.isEmpty
