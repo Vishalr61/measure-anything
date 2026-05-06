@@ -401,14 +401,13 @@ struct ConverterWorkspaceBody: View {
     private func unitMenuPill(selection: Binding<UnitDefinition.ID>) -> some View {
         // Slot-machine override takes precedence during a chaos roll so the
         // pill cycles through random unit names where the user is already
-        // looking; falls back to the real unit name when nil.
+        // looking; falls back to the real unit name when nil. The vertical
+        // slot-reel transition lives inside UnitPickerPillButton.
         let name = vm.slotMachineFromName ?? vm.fromUnit?.name ?? "—"
         return UnitPickerPillButton(name: name, accent: categoryAccent) {
             prepareUnitPickerPresentation()
             DispatchQueue.main.async { showFromPicker = true }
         }
-        .contentTransition(.opacity)
-        .animation(.easeInOut(duration: 0.08), value: vm.slotMachineFromName)
         .sheet(isPresented: $showFromPicker) {
             UnitPickerSheet(
                 units: vm.availableUnits,

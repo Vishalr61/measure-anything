@@ -111,7 +111,6 @@ final class ConverterViewModel: ObservableObject {
     /// usual locations rather than only in the dice card badge.
     @Published var slotMachineFromName: String? = nil
     @Published var slotMachineToName: String? = nil
-    @Published var slotMachineCategoryName: String? = nil
     @Published var isDiceRolling: Bool = false
     @Published var diceDisplayFace: Int = 5
     @Published var diceRotationDegrees: Double = UnitCategory.length.converterDiceRestDegrees
@@ -524,7 +523,6 @@ final class ConverterViewModel: ObservableObject {
                 guard freshPool.count >= 2 else {
                     self.slotMachineFromName = nil
                     self.slotMachineToName = nil
-                    self.slotMachineCategoryName = nil
                     self.isDiceRolling = false
                     return
                 }
@@ -552,7 +550,6 @@ final class ConverterViewModel: ObservableObject {
                       from.id != to.id else {
                     self.slotMachineFromName = nil
                     self.slotMachineToName = nil
-                    self.slotMachineCategoryName = nil
                     self.isDiceRolling = false
                     return
                 }
@@ -572,7 +569,6 @@ final class ConverterViewModel: ObservableObject {
                 // landed unit names atomically with the category switch.
                 self.slotMachineFromName = nil
                 self.slotMachineToName = nil
-                self.slotMachineCategoryName = nil
 
                 // Edge case 8: if the user exited chaos mid-roll, don't
                 // pollute the normal-mode badge with the chaos-format string.
