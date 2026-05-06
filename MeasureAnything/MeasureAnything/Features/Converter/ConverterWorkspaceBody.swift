@@ -299,7 +299,9 @@ struct ConverterWorkspaceBody: View {
     }
 
     private var expandedToCard: some View {
-        let toName = vm.toUnit?.name ?? "—"
+        // Slot-machine override takes precedence during a chaos roll so the
+        // TO pill cycles random names; falls back to real unit name when nil.
+        let toName = vm.slotMachineToName ?? vm.toUnit?.name ?? "—"
         return ToCard(
             toUnitName: toName,
             resultText: toRowDisplayString,
@@ -397,11 +399,16 @@ struct ConverterWorkspaceBody: View {
     }
 
     private func unitMenuPill(selection: Binding<UnitDefinition.ID>) -> some View {
-        let name = vm.fromUnit?.name ?? "—"
+        // Slot-machine override takes precedence during a chaos roll so the
+        // pill cycles through random unit names where the user is already
+        // looking; falls back to the real unit name when nil.
+        let name = vm.slotMachineFromName ?? vm.fromUnit?.name ?? "—"
         return UnitPickerPillButton(name: name, accent: categoryAccent) {
             prepareUnitPickerPresentation()
             DispatchQueue.main.async { showFromPicker = true }
         }
+        .contentTransition(.opacity)
+        .animation(.easeInOut(duration: 0.08), value: vm.slotMachineFromName)
         .sheet(isPresented: $showFromPicker) {
             UnitPickerSheet(
                 units: vm.availableUnits,

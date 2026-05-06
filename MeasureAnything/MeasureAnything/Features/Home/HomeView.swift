@@ -426,9 +426,18 @@ struct HomeView: View {
     private func categoryPill(_ category: UnitCategory) -> some View {
         let display = taxonomyStore.categoryDisplay(for: category)
         let selected = vm.selectedCategory == category
+        // Slot-machine override: the selected chip cycles through all
+        // category names during a chaos roll. Other chips show their
+        // real labels.
+        let chipName: String = {
+            if selected, let override = vm.slotMachineCategoryName {
+                return override
+            }
+            return display.displayName
+        }()
         return CategoryChip(
             category: category,
-            displayName: display.displayName,
+            displayName: chipName,
             accent: ConverterCategoryAccent.accent(for: category),
             isSelected: selected,
             onTap: {
@@ -436,6 +445,8 @@ struct HomeView: View {
                 vm.selectedCategory = category
             }
         )
+        .contentTransition(.opacity)
+        .animation(.easeInOut(duration: 0.08), value: vm.slotMachineCategoryName)
     }
 
 }

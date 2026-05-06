@@ -92,6 +92,8 @@ struct ToCard: View {
                         }
                     }
                     .scaleEffect(unitPillScale, anchor: .center)
+                    .contentTransition(.opacity)
+                    .animation(.easeInOut(duration: 0.08), value: toUnitName)
                     .sheet(isPresented: $showToPicker) {
                         UnitPickerSheet(
                             units: availableUnits,

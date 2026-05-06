@@ -104,6 +104,14 @@ final class ConverterViewModel: ObservableObject {
     // MARK: - Dice roll (random TO unit; long-press randomises both absurd units)
 
     @Published var isChaosMode: Bool = false
+    /// Slot machine display overrides — set by `DiceRollCard.runSlotMachine()`
+    /// during a chaos roll, cleared by `rollDiceChaos()` when the real result
+    /// lands. UI views (FROM pill, TO pill, category chip) prefer these
+    /// override values when non-nil so the cycling names appear in their
+    /// usual locations rather than only in the dice card badge.
+    @Published var slotMachineFromName: String? = nil
+    @Published var slotMachineToName: String? = nil
+    @Published var slotMachineCategoryName: String? = nil
     @Published var isDiceRolling: Bool = false
     @Published var diceDisplayFace: Int = 5
     @Published var diceRotationDegrees: Double = UnitCategory.length.converterDiceRestDegrees
@@ -508,12 +516,15 @@ final class ConverterViewModel: ObservableObject {
             return Self.weightedRandomUnit(from: rest)
         }()
 
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
             MainActor.assumeIsolated {
                 guard self.diceRollToken == token else { return }
 
                 let freshPool = chaosPool()
                 guard freshPool.count >= 2 else {
+                    self.slotMachineFromName = nil
+                    self.slotMachineToName = nil
+                    self.slotMachineCategoryName = nil
                     self.isDiceRolling = false
                     return
                 }
@@ -539,6 +550,9 @@ final class ConverterViewModel: ObservableObject {
                 guard let from = resolvedFrom,
                       let to = resolvedTo,
                       from.id != to.id else {
+                    self.slotMachineFromName = nil
+                    self.slotMachineToName = nil
+                    self.slotMachineCategoryName = nil
                     self.isDiceRolling = false
                     return
                 }
@@ -553,6 +567,12 @@ final class ConverterViewModel: ObservableObject {
                 self.isApplyingFavoriteRestore = false
                 self.syncDiceTiltToCategory(animated: true)
                 self.recompute()
+
+                // Clear slot-machine overrides so UI snaps to the real
+                // landed unit names atomically with the category switch.
+                self.slotMachineFromName = nil
+                self.slotMachineToName = nil
+                self.slotMachineCategoryName = nil
 
                 // Edge case 8: if the user exited chaos mid-roll, don't
                 // pollute the normal-mode badge with the chaos-format string.

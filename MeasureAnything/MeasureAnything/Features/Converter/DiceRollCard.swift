@@ -183,29 +183,30 @@ struct DiceRollCard: View {
         }
     }
 
-    /// Independent slot-machine pill, rendered above the regular subtitleRow
-    /// during a chaos roll's prelude. Uses dedicated `slotTextOpacity` /
-    /// `slotTextOffsetY` so it never collides with the result-badge state.
-    /// `minHeight` matches subtitleRow so the card height stays stable.
+    /// Compact "rolling…" indicator shown in the badge zone during a chaos
+    /// roll. The actual slot-machine cycling happens in the FROM/TO pills
+    /// and category chip via `vm.slotMachineFromName / ToName / CategoryName`.
     private var slotMachineRow: some View {
-        HStack(spacing: 0) {
-            Text(slotMachineText)
+        HStack(spacing: 6) {
+            Text("rolling")
                 .font(.system(size: 11, weight: .semibold,
                               design: .rounded))
-                .foregroundStyle(Color(hex: "#C4B5FD"))
-                .lineLimit(1)
-                .padding(.horizontal, 10)
-                .padding(.vertical, 4)
-                .background(
-                    Color.white.opacity(0.12),
-                    in: RoundedRectangle(cornerRadius: 8,
-                                         style: .continuous)
-                )
-                .opacity(slotTextOpacity)
-                .offset(y: slotTextOffsetY)
+                .foregroundStyle(Color(hex: "#C4B5FD").opacity(0.7))
 
-            Spacer(minLength: 0)
+            HStack(spacing: 3) {
+                ForEach(0..<3, id: \.self) { _ in
+                    Circle()
+                        .fill(Color(hex: "#C4B5FD").opacity(0.5))
+                        .frame(width: 4, height: 4)
+                }
+            }
         }
+        .padding(.horizontal, 10)
+        .padding(.vertical, 4)
+        .background(
+            Color.white.opacity(0.10),
+            in: RoundedRectangle(cornerRadius: 8, style: .continuous)
+        )
         .frame(minHeight: 26, alignment: .leading)
     }
 
@@ -426,61 +427,76 @@ struct DiceRollCard: View {
 
     // MARK: – Chaos slot machine prelude
 
+    /// Drives the slot-machine prelude during a chaos roll. Names cycle
+    /// in their *real* UI locations (FROM pill, TO pill, category chip)
+    /// via `vm.slotMachineFromName / slotMachineToName / slotMachineCategoryName`
+    /// so the user sees the converter "searching" for a unit pair rather
+    /// than the slot machine being a separate badge widget.
     private func runSlotMachine() {
         guard vm.isChaosMode else { return }
+        isSlotMachineRunning = true
 
-        // Pool: every absurd unit name across all categories, fully shuffled
-        // each call so the cycle never repeats the same order twice.
-        let pool: [String] = UnitCategory.allCases.flatMap { cat in
+        let allNames: [String] = UnitCategory.allCases.flatMap { cat in
             vm.exploreUnitDefinitions(for: cat)
                 .filter { $0.kind == .absurd }
                 .map { $0.name }
         }.shuffled()
 
-        guard pool.count >= 2 else { return }
+        let categoryNames: [String] = UnitCategory.allCases
+            .map { $0.displayName }
+            .shuffled()
 
-        // 8 random names — no foreshadowing of the actual roll result.
-        let names = Array(pool.prefix(8))
+        guard allNames.count >= 2 else {
+            isSlotMachineRunning = false
+            return
+        }
 
-        isSlotMachineRunning = true
-        slotTextOpacity = 0
-        slotTextOffsetY = 4
+        // 4 cycles, 0.41s each = 1.64s. FROM offset 0.0s, category 0.08s,
+        // TO 0.15s — staggered so the three lanes don't tick in lockstep.
+        // All cycles complete by 1.70s; rollDiceChaos lands at 2.00s for
+        // a clean ~0.30s gap before the result snaps in.
+        let cycleDuration = 0.41
+        let fadeTime = 0.08
+        let totalCycles = 4
 
-        // Cycle structure (per name, 0.10s total):
-        //   0.00–0.04s : fade + slide in from +5pt
-        //   0.04–0.07s : hold visible at 0pt
-        //   0.07–0.10s : fade + slide out to −4pt
-        // Total runtime = 8 * 0.10 = 0.80s.
-        // rollDiceChaos lands at 1.20s, leaving a clean ~0.40s gap.
-        for (idx, name) in names.enumerated() {
-            let cycleStart = Double(idx) * 0.10
-
-            // Fade + slide in
+        // FROM unit cycling
+        for i in 0..<totalCycles {
+            let cycleStart = Double(i) * cycleDuration
+            let name = allNames[i % allNames.count]
             DispatchQueue.main.asyncAfter(deadline: .now() + cycleStart) {
-                slotMachineText = name
-                slotTextOpacity = 0
-                slotTextOffsetY = 5
-                withAnimation(.easeOut(duration: 0.04)) {
-                    slotTextOpacity = 1
-                    slotTextOffsetY = 0
-                }
-            }
-
-            // Fade + slide out before the next name appears
-            DispatchQueue.main.asyncAfter(deadline: .now() + cycleStart + 0.07) {
-                withAnimation(.easeIn(duration: 0.03)) {
-                    slotTextOpacity = 0
-                    slotTextOffsetY = -4
+                withAnimation(.easeInOut(duration: fadeTime)) {
+                    vm.slotMachineFromName = name
                 }
             }
         }
 
-        // After all 8 cycles complete, clear the slot machine state so the
-        // result badge can take over cleanly.
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.80) {
+        // TO unit cycling — offset by 0.15s, drawn from a different slice
+        for i in 0..<totalCycles {
+            let cycleStart = 0.15 + Double(i) * cycleDuration
+            let name = allNames[(i + totalCycles) % allNames.count]
+            DispatchQueue.main.asyncAfter(deadline: .now() + cycleStart) {
+                withAnimation(.easeInOut(duration: fadeTime)) {
+                    vm.slotMachineToName = name
+                }
+            }
+        }
+
+        // Category cycling — offset by 0.08s
+        for i in 0..<totalCycles {
+            let cycleStart = 0.08 + Double(i) * cycleDuration
+            let name = categoryNames[i % categoryNames.count]
+            DispatchQueue.main.asyncAfter(deadline: .now() + cycleStart) {
+                withAnimation(.easeInOut(duration: fadeTime)) {
+                    vm.slotMachineCategoryName = name
+                }
+            }
+        }
+
+        // End the slot-machine indicator before the roll lands. We do NOT
+        // clear the override values here — `rollDiceChaos()` clears them
+        // atomically when the real values are committed.
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.70) {
             isSlotMachineRunning = false
-            slotTextOpacity = 0
-            slotMachineText = ""
         }
     }
 
@@ -610,8 +626,12 @@ struct DiceRollCard: View {
                             vm.isChaosMode = false
                         }
                         // Cancel any in-flight slot-machine cycle so we
-                        // don't leave an orphaned name visible after exit.
+                        // don't leave orphaned names visible in the FROM /
+                        // TO pills or category chip after exit.
                         isSlotMachineRunning = false
+                        vm.slotMachineFromName = nil
+                        vm.slotMachineToName = nil
+                        vm.slotMachineCategoryName = nil
                         slotMachineText = ""
                         slotTextOpacity = 0
                         slotTextOffsetY = 0
@@ -729,7 +749,7 @@ struct DiceRollCard: View {
             pulsePattern(multiplier: 4, settle: 0.7)
             runSlotMachine()
             vm.rollDiceChaos()
-            landingBounce(delay: 0.8)
+            landingBounce(delay: 1.8)
             return
         }
         hasRolledOnce = true
