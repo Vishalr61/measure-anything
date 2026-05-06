@@ -103,6 +103,7 @@ final class ConverterViewModel: ObservableObject {
 
     // MARK: - Dice roll (random TO unit; long-press randomises both absurd units)
 
+    @Published var isChaosMode: Bool = false
     @Published var isDiceRolling: Bool = false
     @Published var diceDisplayFace: Int = 5
     @Published var diceRotationDegrees: Double = UnitCategory.length.converterDiceRestDegrees
@@ -467,6 +468,111 @@ final class ConverterViewModel: ObservableObject {
                     self.showDiceSubtitle = !self.diceLandedUnitName.isEmpty
                 }
                 self.isDiceRolling = false
+            }
+        }
+    }
+
+    // MARK: – Chaos roll
+    //
+    // Pulls absurd units from EVERY category, picks a random FROM and TO,
+    // switches the converter's selectedCategory to match, and labels the
+    // result with a "CATEGORY · fromName ⇄ toName" subtitle. Used by the
+    // dice card when isChaosMode is true.
+    func rollDiceChaos() {
+        // Pool: all absurd units across ALL categories
+        func chaosPool() -> [UnitDefinition] {
+            UnitCategory.allCases.flatMap { cat in
+                registry.units(in: cat, includeKinds: [.absurd])
+            }
+        }
+
+        let pool = chaosPool()
+        guard pool.count >= 2 else { return }
+
+        diceRollToken = UUID()
+        let token = diceRollToken
+        diceFlashTimer?.invalidate()
+        diceFlashTimer = nil
+
+        isDiceRolling = true
+        showDiceSubtitle = false
+        diceLandedUnitName = ""
+        diceSubtitleIsDualFormat = false
+        inputText = "1"
+
+        // Pre-select outcome before animation
+        let pickedFrom = Self.weightedRandomUnit(from: pool)
+        let pickedTo: UnitDefinition? = {
+            guard let f = pickedFrom else { return nil }
+            let rest = pool.filter { $0.id != f.id }
+            return Self.weightedRandomUnit(from: rest)
+        }()
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
+            MainActor.assumeIsolated {
+                guard self.diceRollToken == token else { return }
+
+                let freshPool = chaosPool()
+                guard freshPool.count >= 2 else {
+                    self.isDiceRolling = false
+                    return
+                }
+
+                let resolvedFrom: UnitDefinition? = {
+                    if let f = pickedFrom,
+                       freshPool.contains(where: { $0.id == f.id }) {
+                        return f
+                    }
+                    return Self.weightedRandomUnit(from: freshPool)
+                }()
+
+                let resolvedTo: UnitDefinition? = {
+                    guard let from = resolvedFrom else { return nil }
+                    let candidates = freshPool.filter { $0.id != from.id }
+                    if let t = pickedTo,
+                       candidates.contains(where: { $0.id == t.id }) {
+                        return t
+                    }
+                    return Self.weightedRandomUnit(from: candidates)
+                }()
+
+                guard let from = resolvedFrom,
+                      let to = resolvedTo,
+                      from.id != to.id else {
+                    self.isDiceRolling = false
+                    return
+                }
+
+                // Switch category to match the landed FROM unit. Wrap with
+                // isApplyingFavoriteRestore guard so the published-property
+                // didSet observers don't fire reactive recompute mid-update.
+                self.isApplyingFavoriteRestore = true
+                self.selectedCategory = from.category
+                self.selectedFromUnitID = from.id
+                self.selectedToUnitID = to.id
+                self.isApplyingFavoriteRestore = false
+                self.syncDiceTiltToCategory(animated: true)
+                self.recompute()
+
+                // Edge case 8: if the user exited chaos mid-roll, don't
+                // pollute the normal-mode badge with the chaos-format string.
+                guard self.isChaosMode else {
+                    self.isDiceRolling = false
+                    return
+                }
+
+                // Build result label: "TEMP·Surface of Venus⇄Baked bread"
+                let categoryPrefix = from.category.displayName.uppercased()
+                self.diceLandedUnitName = "\(categoryPrefix)·\(from.name)⇄\(to.name)"
+                self.diceSubtitleIsDualFormat = true
+
+                withAnimation(.easeIn(duration: 0.25)) {
+                    self.showDiceSubtitle = true
+                }
+                self.isDiceRolling = false
+
+                let impact = UIImpactFeedbackGenerator(style: .medium)
+                impact.impactOccurred()
             }
         }
     }

@@ -32,61 +32,77 @@ struct DiceRollCard: View {
     @State private var restingTiltY: Double = 0
     @State private var idleBreathOn: Bool = false
 
+    // MARK: – Chaos mode
+    @State private var chaosSwipeOffset: CGFloat = 0
+    @State private var slotMachineText: String = ""
+    @State private var isSlotMachineRunning: Bool = false
+
     private enum RollKind {
         case single
         case dual
     }
 
     var body: some View {
-        HStack(alignment: .center, spacing: 18) {
-            leftColumn
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .layoutPriority(1)
+        VStack(spacing: 0) {
+            HStack(alignment: .center, spacing: 18) {
+                leftColumn
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .layoutPriority(1)
 
-            dieHero
-                .layoutPriority(0)
-        }
-        .padding(.vertical, 24)
-        .padding(.horizontal, 20)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(cardBackground)
-        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-        .clipped()
-        .contentShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-        .overlay(innerBorder)
-        .scaleEffect((isPressed ? 0.92 : 1.0) * cardLandingScale)
-        .animation(.spring(response: 0.3, dampingFraction: 0.6), value: isPressed)
-        .animation(.spring(response: 0.22, dampingFraction: 0.55), value: cardLandingScale)
-        .highPriorityGesture(pressGesture)
-        .onChange(of: vm.diceLandedUnitName) { _, newValue in
-            guard !newValue.isEmpty else { return }
-            animateResultTransitionIn()
-            scheduleRestingTiltRandomize()
-            switch lastRollKind {
-            case .single:
-                shakeToPill()
-            case .dual:
-                pulseBothUnits()
+                dieHero
+                    .layoutPriority(0)
             }
-        }
-        .onChange(of: vm.shakeSingleRollRequest) { _, new in
-            guard new > 0 else { return }
-            hasRolledOnce = true
-            hasUsedShake = true
-            triggerSingleRoll()
-        }
-        .accessibilityElement(children: .ignore)
-        .accessibilityLabel("Roll the dice")
-        .accessibilityHint("Tap to randomise the target unit, shake the device, or long press briefly to randomise both units.")
-        .accessibilityAddTraits(.isButton)
-        .accessibilityAction(named: Text("Randomise both units")) {
-            triggerDualRoll()
+            .padding(.vertical, 24)
+            .padding(.horizontal, 20)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(cardBackground)
+            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+            .clipped()
+            .contentShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+            .overlay(innerBorder)
+            .scaleEffect((isPressed ? 0.92 : 1.0) * cardLandingScale)
+            .offset(x: min(max(chaosSwipeOffset * 0.15, -12), 12))
+            .animation(.spring(response: 0.3, dampingFraction: 0.6), value: isPressed)
+            .animation(.spring(response: 0.22, dampingFraction: 0.55), value: cardLandingScale)
+            .highPriorityGesture(pressGesture)
+            .simultaneousGesture(swipeGesture)
+            .onChange(of: vm.diceLandedUnitName) { _, newValue in
+                guard !newValue.isEmpty else { return }
+                animateResultTransitionIn()
+                scheduleRestingTiltRandomize()
+                switch lastRollKind {
+                case .single:
+                    shakeToPill()
+                case .dual:
+                    pulseBothUnits()
+                }
+            }
+            .onChange(of: vm.shakeSingleRollRequest) { _, new in
+                guard new > 0 else { return }
+                hasRolledOnce = true
+                hasUsedShake = true
+                triggerSingleRoll()
+            }
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel("Roll the dice")
+            .accessibilityHint(vm.isChaosMode
+                ? "Chaos mode active. Tap to roll any unit from any category. Swipe left to exit chaos."
+                : "Tap to randomise the target unit. Long press to randomise both. Swipe right for chaos mode.")
+            .accessibilityAddTraits(.isButton)
+            .accessibilityAction(named: Text("Randomise both units")) {
+                triggerDualRoll()
+            }
+
+            chaosDots
         }
     }
 
     /// State-driven discoverability hint. One thing at a time, advances as
-    /// the user demonstrates each gesture.
+    /// the user demonstrates each gesture. Chaos mode overrides everything.
     private var hintText: String {
+        if vm.isChaosMode {
+            return "The universe decides."
+        }
         if !hasRolledOnce {
             return "Tap to roll"
         }
@@ -99,12 +115,40 @@ struct DiceRollCard: View {
         return "Tap · Long press · Shake"
     }
 
+    /// Pip tint used to recolour the dice face's white pips in chaos mode.
+    private var pipColor: Color {
+        vm.isChaosMode ? Color(hex: "#C4B5FD") : .white
+    }
+
     private var leftColumn: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text("Roll the dice")
-                .font(.system(size: 20, weight: .semibold, design: .rounded))
-                .foregroundStyle(Color.white)
-                .fixedSize(horizontal: false, vertical: true)
+            HStack(spacing: 8) {
+                Text("Roll the dice")
+                    .font(.system(size: 20, weight: .semibold, design: .rounded))
+                    .foregroundStyle(Color.white)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                if vm.isChaosMode {
+                    Text("CHAOS")
+                        .font(.system(size: 10, weight: .bold, design: .rounded))
+                        .foregroundStyle(Color(hex: "#C4B5FD"))
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 2)
+                        .background(
+                            Capsule()
+                                .fill(Color(hex: "#8B5CF6").opacity(0.25))
+                                .overlay(
+                                    Capsule()
+                                        .strokeBorder(
+                                            Color(hex: "#8B5CF6").opacity(0.45),
+                                            lineWidth: 0.5
+                                        )
+                                )
+                        )
+                        .transition(.opacity.combined(with: .scale(scale: 0.8)))
+                }
+            }
+            .animation(.spring(response: 0.3, dampingFraction: 0.7), value: vm.isChaosMode)
 
             rollHintLine
 
@@ -116,7 +160,11 @@ struct DiceRollCard: View {
     private var rollHintLine: some View {
         Text(hintText)
             .font(.system(size: 12, weight: .regular, design: .rounded))
-            .foregroundStyle(Color.white.opacity(0.78))
+            .foregroundStyle(
+                vm.isChaosMode
+                    ? Color(hex: "#C4B5FD").opacity(0.8)
+                    : Color.white.opacity(0.78)
+            )
             .fixedSize(horizontal: false, vertical: true)
             .frame(maxWidth: .infinity, minHeight: 16, alignment: .leading)
             .animation(.easeInOut(duration: 0.4), value: hintText)
@@ -151,15 +199,22 @@ struct DiceRollCard: View {
 
     private var cardBackground: some View {
         ZStack {
-            accent
+            if vm.isChaosMode {
+                Color(hex: "#0D0D1A")
+            } else {
+                accent
+            }
 
             CategoryTilePattern(
                 category: vm.selectedCategory,
                 color: .white,
-                patternOpacity: 0.14 * patternPulseMultiplier
+                patternOpacity: vm.isChaosMode
+                    ? 0.06 * patternPulseMultiplier
+                    : 0.14 * patternPulseMultiplier
             )
             .overlay(patternSpotlightFade)
         }
+        .animation(.easeInOut(duration: 0.4), value: vm.isChaosMode)
     }
 
     private var patternSpotlightFade: some View {
@@ -176,7 +231,12 @@ struct DiceRollCard: View {
 
     private var innerBorder: some View {
         RoundedRectangle(cornerRadius: 16, style: .continuous)
-            .strokeBorder(Color.white.opacity(0.10), lineWidth: 0.5)
+            .strokeBorder(
+                vm.isChaosMode
+                    ? Color(hex: "#8B5CF6").opacity(0.3)
+                    : Color.white.opacity(0.10),
+                lineWidth: 0.5
+            )
             .padding(0.5)
             .allowsHitTesting(false)
     }
@@ -187,12 +247,17 @@ struct DiceRollCard: View {
         let baseFaceOpacity: Double = 0.22
         let faceOpacity: Double = isResting ? (baseFaceOpacity + (idleBreathOn ? 0.03 : 0)) : baseFaceOpacity
 
+        // DiceFaceView paints pips in white. `.colorMultiply(pipColor)` tints
+        // them (and the face) with the chaos light-purple in chaos mode.
         return DiceFaceView(
             face: $decorativeFace,
-            faceColor: Color.white.opacity(faceOpacity),
+            faceColor: vm.isChaosMode
+                ? Color(hex: "#8B5CF6").opacity(0.3)
+                : Color.white.opacity(faceOpacity),
             pipOpacity: pipOpacity,
             size: 56
         )
+        .colorMultiply(pipColor)
         .overlay(bevelOverlay)
         .shadow(color: .black.opacity(0.25), radius: 4, x: 2, y: 3)
         .scaleEffect(isResting ? breathScale : 1.0)
@@ -237,21 +302,76 @@ struct DiceRollCard: View {
 
     private var resultBadge: some View {
         HStack(spacing: 0) {
-            Text("\(fromName) \(lastRollKind == .dual ? "⇄" : "→") \(toName)")
-                .font(.system(size: 11, weight: .semibold, design: .rounded))
-                .foregroundStyle(.white)
-                .lineLimit(2)
-                .multilineTextAlignment(.leading)
-                .fixedSize(horizontal: true, vertical: false)
-                .scaleEffect(lastRollKind == .dual ? fromPulseScale : 1)
-                .offset(x: lastRollKind == .single ? toShakeOffsetX : 0)
-                .padding(.horizontal, 10)
-                .padding(.vertical, 4)
-                .background(Color.white.opacity(0.12), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+            if vm.isChaosMode, isSlotMachineRunning {
+                // Slot-machine prelude: cycling unit name during chaos spin.
+                Text(slotMachineText)
+                    .font(.system(size: 11, weight: .semibold, design: .rounded))
+                    .foregroundStyle(Color(hex: "#C4B5FD"))
+                    .lineLimit(1)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 4)
+                    .background(
+                        Color.white.opacity(0.12),
+                        in: RoundedRectangle(cornerRadius: 8, style: .continuous)
+                    )
+                    .opacity(resultOpacity)
+                    .offset(y: resultOffsetY)
+
+            } else if vm.isChaosMode, vm.showDiceSubtitle {
+                // Parsed chaos format: "CAT·fromName⇄toName"
+                let parts = vm.diceLandedUnitName.components(separatedBy: "·")
+                let categoryPrefix = parts.count >= 2 ? parts[0] : ""
+                let pairPart = parts.count >= 2 ? parts[1] : vm.diceLandedUnitName
+
+                HStack(spacing: 0) {
+                    if !categoryPrefix.isEmpty {
+                        Text(categoryPrefix)
+                            .font(.system(size: 10, weight: .bold, design: .rounded))
+                            .foregroundStyle(Color(hex: "#C4B5FD"))
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 4)
+
+                        Rectangle()
+                            .fill(Color.white.opacity(0.15))
+                            .frame(width: 0.5)
+                            .padding(.vertical, 4)
+                    }
+
+                    Text(pairPart)
+                        .font(.system(size: 11, weight: .semibold, design: .rounded))
+                        .foregroundStyle(.white)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.8)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                }
+                .background(
+                    Color.white.opacity(0.12),
+                    in: RoundedRectangle(cornerRadius: 8, style: .continuous)
+                )
                 .opacity(resultOpacity)
                 .offset(y: resultOffsetY)
                 .animation(.easeInOut(duration: 0.15), value: resultOpacity)
                 .animation(.easeInOut(duration: 0.15), value: resultOffsetY)
+
+            } else {
+                // Normal mode badge — unchanged.
+                Text("\(fromName) \(lastRollKind == .dual ? "⇄" : "→") \(toName)")
+                    .font(.system(size: 11, weight: .semibold, design: .rounded))
+                    .foregroundStyle(.white)
+                    .lineLimit(2)
+                    .multilineTextAlignment(.leading)
+                    .fixedSize(horizontal: true, vertical: false)
+                    .scaleEffect(lastRollKind == .dual ? fromPulseScale : 1)
+                    .offset(x: lastRollKind == .single ? toShakeOffsetX : 0)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 4)
+                    .background(Color.white.opacity(0.12), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+                    .opacity(resultOpacity)
+                    .offset(y: resultOffsetY)
+                    .animation(.easeInOut(duration: 0.15), value: resultOpacity)
+                    .animation(.easeInOut(duration: 0.15), value: resultOffsetY)
+            }
 
             Spacer(minLength: 0)
         }
@@ -263,6 +383,117 @@ struct DiceRollCard: View {
 
     private var toName: String {
         vm.toUnit?.name ?? "—"
+    }
+
+    // MARK: – Chaos toggle: horizontal swipe gesture
+
+    private var swipeGesture: some Gesture {
+        DragGesture(minimumDistance: 20, coordinateSpace: .local)
+            .onChanged { value in
+                let horizontal = abs(value.translation.width)
+                let vertical = abs(value.translation.height)
+                guard horizontal > vertical else { return }
+                chaosSwipeOffset = value.translation.width
+            }
+            .onEnded { value in
+                let horizontal = value.translation.width
+                let vertical = abs(value.translation.height)
+                guard abs(horizontal) > vertical else {
+                    withAnimation(.spring()) { chaosSwipeOffset = 0 }
+                    return
+                }
+
+                if horizontal > 60 && !vm.isChaosMode {
+                    let impact = UIImpactFeedbackGenerator(style: .heavy)
+                    impact.impactOccurred()
+                    withAnimation(.spring(response: 0.35, dampingFraction: 0.7)) {
+                        vm.isChaosMode = true
+                        chaosSwipeOffset = 0
+                    }
+                } else if horizontal < -60 && vm.isChaosMode {
+                    let impact = UIImpactFeedbackGenerator(style: .medium)
+                    impact.impactOccurred()
+                    withAnimation(.spring(response: 0.35, dampingFraction: 0.7)) {
+                        vm.isChaosMode = false
+                        chaosSwipeOffset = 0
+                    }
+                } else {
+                    withAnimation(.spring()) { chaosSwipeOffset = 0 }
+                }
+            }
+    }
+
+    // MARK: – Chaos slot machine prelude
+
+    private func runSlotMachine() {
+        guard vm.isChaosMode else { return }
+        isSlotMachineRunning = true
+
+        let allCategories = UnitCategory.allCases
+        let sampleNames: [String] = allCategories.flatMap { cat in
+            vm.exploreUnitDefinitions(for: cat)
+                .filter { $0.kind == .absurd }
+                .prefix(3)
+                .map { $0.name }
+        }.shuffled().prefix(6).map { $0 }
+
+        guard !sampleNames.isEmpty else {
+            isSlotMachineRunning = false
+            return
+        }
+
+        for (idx, name) in sampleNames.enumerated() {
+            let delay = Double(idx) * 0.14
+            DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
+                withAnimation(.easeInOut(duration: 0.1)) {
+                    resultOpacity = 0.6
+                    resultOffsetY = 2
+                }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.07) {
+                    slotMachineText = name
+                    withAnimation(.easeIn(duration: 0.07)) {
+                        resultOpacity = 1
+                        resultOffsetY = 0
+                    }
+                }
+            }
+        }
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + Double(sampleNames.count) * 0.14) {
+            isSlotMachineRunning = false
+        }
+    }
+
+    // MARK: – Chaos page-indicator dots (rendered below the card)
+
+    private var chaosDots: some View {
+        HStack(spacing: 6) {
+            // Left dot — filled in normal mode
+            Circle()
+                .fill(vm.isChaosMode ? Color.clear : accent)
+                .overlay(
+                    Circle().strokeBorder(
+                        vm.isChaosMode ? Color(UIColor.tertiaryLabel) : Color.clear,
+                        lineWidth: 0.5
+                    )
+                )
+                .frame(width: 6, height: 6)
+                .animation(.easeInOut(duration: 0.3), value: vm.isChaosMode)
+
+            // Right dot — filled in chaos mode
+            Circle()
+                .fill(vm.isChaosMode ? Color(hex: "#8B5CF6") : Color.clear)
+                .overlay(
+                    Circle().strokeBorder(
+                        vm.isChaosMode ? Color.clear : Color(UIColor.tertiaryLabel),
+                        lineWidth: 0.5
+                    )
+                )
+                .frame(width: 6, height: 6)
+                .animation(.easeInOut(duration: 0.3), value: vm.isChaosMode)
+        }
+        .padding(.top, 6)
+        .frame(maxWidth: .infinity, alignment: .center)
     }
 
     private var pressGesture: some Gesture {
@@ -354,6 +585,16 @@ struct DiceRollCard: View {
     }
 
     private func triggerSingleRoll() {
+        if vm.isChaosMode {
+            lastRollKind = .dual
+            animateResultTransitionOut()
+            animateDecorativeRollDual()
+            pulsePattern(multiplier: 4, settle: 0.7)
+            runSlotMachine()
+            vm.rollDiceChaos()
+            landingBounce(delay: 0.8)
+            return
+        }
         hasRolledOnce = true
         lastRollKind = .single
         animateResultTransitionOut()
@@ -364,6 +605,11 @@ struct DiceRollCard: View {
     }
 
     private func triggerDualRoll() {
+        if vm.isChaosMode {
+            // Dual in chaos = same as single in chaos (everything is already random)
+            triggerSingleRoll()
+            return
+        }
         hasRolledOnce = true
         lastRollKind = .dual
         animateResultTransitionOut()
