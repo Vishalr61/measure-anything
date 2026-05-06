@@ -64,7 +64,11 @@ private struct RootLaunchShell: View {
 
     var body: some View {
         ZStack {
-            if let taxonomyStore, let converterViewModel {
+            // Only mount HomeView once onboarding has been completed. Until then,
+            // the user can never see it — even momentarily — because it isn't in
+            // the view tree at all. A solid white backdrop covers everything
+            // behind the launch / onboarding overlays.
+            if hasSeenOnboarding, let taxonomyStore, let converterViewModel {
                 HomeView(vm: converterViewModel)
                     .environmentObject(taxonomyStore)
                     .environmentObject(converterViewModel)
@@ -75,15 +79,21 @@ private struct RootLaunchShell: View {
             if shouldShowLaunchAnimation, showLaunchAnimation {
                 LaunchAnimationView(
                     onFinished: {
+                        // First-run flow: stage Onboarding into the view tree
+                        // BEFORE the launch overlay starts fading, with animations
+                        // explicitly disabled so it appears instantly. While the
+                        // launch overlay is still fully opaque on top, onboarding
+                        // is already mounted underneath. When the launch fades,
+                        // the user sees onboarding directly — never a HomeView flash.
+                        if !hasSeenOnboarding {
+                            var t = Transaction()
+                            t.disablesAnimations = true
+                            withTransaction(t) {
+                                showOnboarding = true
+                            }
+                        }
                         withAnimation(.easeOut(duration: 0.25)) {
                             showLaunchAnimation = false
-                        }
-                        if !hasSeenOnboarding {
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                                withAnimation(.easeOut(duration: 0.3)) {
-                                    showOnboarding = true
-                                }
-                            }
                         }
                     }
                 )
