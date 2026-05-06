@@ -29,6 +29,7 @@ struct ConverterWorkspaceBody: View {
     @FocusState private var valueFieldFocused: Bool
     @State private var amountSnapshotBeforeEditing: String?
     @State private var swapRotation: Double = 0
+    @State private var fromCardScale: CGFloat = 1.0
     @State private var swapPillScale: CGFloat = 1
     @State private var isSwapPillAnimating: Bool = false
     @State private var showFromPicker = false
@@ -80,6 +81,9 @@ struct ConverterWorkspaceBody: View {
             } else {
                 vm.clearInputEditSnapshot()
                 amountSnapshotBeforeEditing = nil
+            }
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                fromCardScale = isFocused ? 1.02 : 1.0
             }
         }
         // Limit the input to 9 numeric digits + one decimal point (10 chars max).
@@ -385,6 +389,7 @@ struct ConverterWorkspaceBody: View {
             x: 0, y: ConverterLayout.referenceCardShadowY
         )
         .contentShape(Rectangle())
+        .scaleEffect(fromCardScale)
         // Tapping anywhere on the card focuses the text field.
         .onTapGesture {
             valueFieldFocused = true

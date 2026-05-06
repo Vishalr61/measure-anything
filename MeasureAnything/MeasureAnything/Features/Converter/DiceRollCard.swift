@@ -34,8 +34,14 @@ struct DiceRollCard: View {
 
     // MARK: – Chaos mode
     @State private var swipeInProgress: Bool = false
+    @State private var swipeDragOffset: CGFloat = 0
+    @State private var chaosBledAmount: Double = 0
+    @State private var hasTickedThisSwipe: Bool = false
+    @State private var resultLandingScale: Double = 1.0
     @State private var slotMachineText: String = ""
     @State private var isSlotMachineRunning: Bool = false
+    @State private var slotTextOpacity: Double = 0
+    @State private var slotTextOffsetY: CGFloat = 0
 
     private enum RollKind {
         case single
@@ -61,9 +67,13 @@ struct DiceRollCard: View {
             .contentShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
             .overlay(innerBorder)
             .scaleEffect((isPressed ? 0.92 : 1.0) * cardLandingScale)
+            .offset(x: swipeDragOffset)
             .animation(.spring(response: 0.3, dampingFraction: 0.6), value: isPressed)
             .animation(.spring(response: 0.22, dampingFraction: 0.55), value: cardLandingScale)
             .gesture(unifiedGesture)
+            .onAppear {
+                chaosBledAmount = vm.isChaosMode ? 1.0 : 0.0
+            }
             .onChange(of: vm.diceLandedUnitName) { _, newValue in
                 guard !newValue.isEmpty else { return }
                 animateResultTransitionIn()
@@ -143,16 +153,60 @@ struct DiceRollCard: View {
                                         )
                                 )
                         )
-                        .transition(.opacity.combined(with: .scale(scale: 0.8)))
+                        .transition(
+                            .opacity
+                                .combined(with: .scale(scale: 0.6, anchor: .leading))
+                                .combined(with: .offset(x: -8))
+                        )
                 }
             }
-            .animation(.spring(response: 0.3, dampingFraction: 0.7), value: vm.isChaosMode)
+            .animation(
+                .interpolatingSpring(mass: 0.6, stiffness: 220,
+                                     damping: 12, initialVelocity: 8),
+                value: vm.isChaosMode
+            )
 
             rollHintLine
 
-            subtitleRow
-                .padding(.top, 4)
+            // Slot machine renders independently of vm.showDiceSubtitle so
+            // its 0.8s prelude is actually visible (subtitleRow's opacity
+            // gate would otherwise hide it). Once the cycle ends, fall
+            // back to the regular subtitleRow which gates on showDiceSubtitle
+            // for the result badge fade-in.
+            if isSlotMachineRunning {
+                slotMachineRow
+                    .padding(.top, 4)
+            } else {
+                subtitleRow
+                    .padding(.top, 4)
+            }
         }
+    }
+
+    /// Independent slot-machine pill, rendered above the regular subtitleRow
+    /// during a chaos roll's prelude. Uses dedicated `slotTextOpacity` /
+    /// `slotTextOffsetY` so it never collides with the result-badge state.
+    /// `minHeight` matches subtitleRow so the card height stays stable.
+    private var slotMachineRow: some View {
+        HStack(spacing: 0) {
+            Text(slotMachineText)
+                .font(.system(size: 11, weight: .semibold,
+                              design: .rounded))
+                .foregroundStyle(Color(hex: "#C4B5FD"))
+                .lineLimit(1)
+                .padding(.horizontal, 10)
+                .padding(.vertical, 4)
+                .background(
+                    Color.white.opacity(0.12),
+                    in: RoundedRectangle(cornerRadius: 8,
+                                         style: .continuous)
+                )
+                .opacity(slotTextOpacity)
+                .offset(y: slotTextOffsetY)
+
+            Spacer(minLength: 0)
+        }
+        .frame(minHeight: 26, alignment: .leading)
     }
 
     private var rollHintLine: some View {
@@ -197,18 +251,18 @@ struct DiceRollCard: View {
 
     private var cardBackground: some View {
         ZStack {
-            if vm.isChaosMode {
-                Color(hex: "#0D0D1A")
-            } else {
-                accent
-            }
+            // Base colour cross-fade: accent <-> chaos dark, driven by
+            // chaosBledAmount (0 = full accent, 1 = full chaos dark).
+            // During a swipe this rides the finger so the colour visibly
+            // bleeds across before the threshold tick.
+            accent.opacity(1.0 - chaosBledAmount)
+            Color(hex: "#0D0D1A").opacity(chaosBledAmount)
 
             CategoryTilePattern(
                 category: vm.selectedCategory,
                 color: .white,
-                patternOpacity: vm.isChaosMode
-                    ? 0.06 * patternPulseMultiplier
-                    : 0.14 * patternPulseMultiplier
+                patternOpacity: (vm.isChaosMode ? 0.06 : 0.14)
+                    * patternPulseMultiplier
             )
             .overlay(patternSpotlightFade)
         }
@@ -300,22 +354,7 @@ struct DiceRollCard: View {
 
     private var resultBadge: some View {
         HStack(spacing: 0) {
-            if vm.isChaosMode, isSlotMachineRunning {
-                // Slot-machine prelude: cycling unit name during chaos spin.
-                Text(slotMachineText)
-                    .font(.system(size: 11, weight: .semibold, design: .rounded))
-                    .foregroundStyle(Color(hex: "#C4B5FD"))
-                    .lineLimit(1)
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 4)
-                    .background(
-                        Color.white.opacity(0.12),
-                        in: RoundedRectangle(cornerRadius: 8, style: .continuous)
-                    )
-                    .opacity(resultOpacity)
-                    .offset(y: resultOffsetY)
-
-            } else if vm.isChaosMode, vm.showDiceSubtitle {
+            if vm.isChaosMode, vm.showDiceSubtitle {
                 // Parsed chaos format: "CAT·fromName⇄toName"
                 let parts = vm.diceLandedUnitName.components(separatedBy: "·")
                 let categoryPrefix = parts.count >= 2 ? parts[0] : ""
@@ -349,6 +388,7 @@ struct DiceRollCard: View {
                 )
                 .opacity(resultOpacity)
                 .offset(y: resultOffsetY)
+                .scaleEffect(resultLandingScale, anchor: .leading)
                 .animation(.easeInOut(duration: 0.15), value: resultOpacity)
                 .animation(.easeInOut(duration: 0.15), value: resultOffsetY)
 
@@ -367,6 +407,7 @@ struct DiceRollCard: View {
                     .background(Color.white.opacity(0.12), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
                     .opacity(resultOpacity)
                     .offset(y: resultOffsetY)
+                    .scaleEffect(resultLandingScale, anchor: .leading)
                     .animation(.easeInOut(duration: 0.15), value: resultOpacity)
                     .animation(.easeInOut(duration: 0.15), value: resultOffsetY)
             }
@@ -387,40 +428,59 @@ struct DiceRollCard: View {
 
     private func runSlotMachine() {
         guard vm.isChaosMode else { return }
-        isSlotMachineRunning = true
 
-        let allCategories = UnitCategory.allCases
-        let sampleNames: [String] = allCategories.flatMap { cat in
+        // Pool: every absurd unit name across all categories, fully shuffled
+        // each call so the cycle never repeats the same order twice.
+        let pool: [String] = UnitCategory.allCases.flatMap { cat in
             vm.exploreUnitDefinitions(for: cat)
                 .filter { $0.kind == .absurd }
-                .prefix(3)
                 .map { $0.name }
-        }.shuffled().prefix(6).map { $0 }
+        }.shuffled()
 
-        guard !sampleNames.isEmpty else {
-            isSlotMachineRunning = false
-            return
-        }
+        guard pool.count >= 2 else { return }
 
-        for (idx, name) in sampleNames.enumerated() {
-            let delay = Double(idx) * 0.14
-            DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
-                withAnimation(.easeInOut(duration: 0.1)) {
-                    resultOpacity = 0.6
-                    resultOffsetY = 2
+        // 8 random names — no foreshadowing of the actual roll result.
+        let names = Array(pool.prefix(8))
+
+        isSlotMachineRunning = true
+        slotTextOpacity = 0
+        slotTextOffsetY = 4
+
+        // Cycle structure (per name, 0.10s total):
+        //   0.00–0.04s : fade + slide in from +5pt
+        //   0.04–0.07s : hold visible at 0pt
+        //   0.07–0.10s : fade + slide out to −4pt
+        // Total runtime = 8 * 0.10 = 0.80s.
+        // rollDiceChaos lands at 1.20s, leaving a clean ~0.40s gap.
+        for (idx, name) in names.enumerated() {
+            let cycleStart = Double(idx) * 0.10
+
+            // Fade + slide in
+            DispatchQueue.main.asyncAfter(deadline: .now() + cycleStart) {
+                slotMachineText = name
+                slotTextOpacity = 0
+                slotTextOffsetY = 5
+                withAnimation(.easeOut(duration: 0.04)) {
+                    slotTextOpacity = 1
+                    slotTextOffsetY = 0
                 }
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.07) {
-                    slotMachineText = name
-                    withAnimation(.easeIn(duration: 0.07)) {
-                        resultOpacity = 1
-                        resultOffsetY = 0
-                    }
+            }
+
+            // Fade + slide out before the next name appears
+            DispatchQueue.main.asyncAfter(deadline: .now() + cycleStart + 0.07) {
+                withAnimation(.easeIn(duration: 0.03)) {
+                    slotTextOpacity = 0
+                    slotTextOffsetY = -4
                 }
             }
         }
 
-        DispatchQueue.main.asyncAfter(deadline: .now() + Double(sampleNames.count) * 0.14) {
+        // After all 8 cycles complete, clear the slot machine state so the
+        // result badge can take over cleanly.
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.80) {
             isSlotMachineRunning = false
+            slotTextOpacity = 0
+            slotMachineText = ""
         }
     }
 
@@ -497,6 +557,23 @@ struct DiceRollCard: View {
                         }
                         idleBreathOn = false
                     }
+
+                    // Card follows the finger at 20% of drag, clamped ±20pt.
+                    swipeDragOffset = min(max(dx * 0.20, -20), 20)
+
+                    // Bleed the chaos colour in proportion to swipe progress.
+                    // 0 = full accent, 1 = full chaos dark.
+                    let progress = min(adx / 44.0, 1.0)
+                    chaosBledAmount = vm.isChaosMode
+                        ? (1.0 - progress)
+                        : progress
+
+                    // Soft tick the moment we cross the 44pt commit threshold.
+                    if adx >= 44 && !hasTickedThisSwipe {
+                        hasTickedThisSwipe = true
+                        let tick = UIImpactFeedbackGenerator(style: .soft)
+                        tick.impactOccurred()
+                    }
                     return
                 }
 
@@ -512,6 +589,7 @@ struct DiceRollCard: View {
                 let ady = abs(dy)
                 let wasSwipe = swipeInProgress
                 swipeInProgress = false
+                hasTickedThisSwipe = false
 
                 if wasSwipe && adx > 44 && adx > ady {
                     // Confirmed horizontal swipe.
@@ -531,13 +609,36 @@ struct DiceRollCard: View {
                                      dampingFraction: 0.7)) {
                             vm.isChaosMode = false
                         }
+                        // Cancel any in-flight slot-machine cycle so we
+                        // don't leave an orphaned name visible after exit.
+                        isSlotMachineRunning = false
+                        slotMachineText = ""
+                        slotTextOpacity = 0
+                        slotTextOffsetY = 0
+                    }
+                    // Snap card back to centre and finalise the bleed to
+                    // match the (now-toggled) isChaosMode.
+                    withAnimation(.spring(response: 0.35, dampingFraction: 0.65)) {
+                        swipeDragOffset = 0
+                    }
+                    withAnimation(.easeInOut(duration: 0.4)) {
+                        chaosBledAmount = vm.isChaosMode ? 1.0 : 0.0
                     }
                     resetRing(animated: true)
                     isPressed = false
                     return
                 }
 
-                // Not a confirmed swipe — fall through to the press flow,
+                if wasSwipe {
+                    // Incomplete swipe — rubber-band card back, restore bleed.
+                    withAnimation(.spring(response: 0.35, dampingFraction: 0.65)) {
+                        swipeDragOffset = 0
+                        chaosBledAmount = vm.isChaosMode ? 1.0 : 0.0
+                    }
+                    return
+                }
+
+                // Not a swipe at all — fall through to the press flow,
                 // which handles single-tap vs long-press completion via
                 // `didCompleteLongPress` inside endPress().
                 endPress()
@@ -744,12 +845,28 @@ struct DiceRollCard: View {
 
     private func animateResultTransitionIn() {
         guard pendingResultTransitionOut else { return }
+        // If the slot machine is still cycling (e.g. an unusually fast
+        // chaos completion), defer briefly so the two animations don't
+        // collide on the same badge.
+        guard !isSlotMachineRunning else {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                animateResultTransitionIn()
+            }
+            return
+        }
         pendingResultTransitionOut = false
         resultOpacity = 0
         resultOffsetY = 4
+        resultLandingScale = 0.85
         withAnimation(.easeIn(duration: 0.15)) {
             resultOpacity = 1
             resultOffsetY = 0
+        }
+        // Springy scale-up landing — runs alongside the fade-in so the
+        // badge "lands" with a tiny bounce instead of a flat crossfade.
+        withAnimation(.interpolatingSpring(mass: 0.8, stiffness: 200,
+                       damping: 13, initialVelocity: 6)) {
+            resultLandingScale = 1.0
         }
     }
 
