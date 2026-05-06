@@ -35,6 +35,7 @@ struct DiceRollCard: View {
     // MARK: – Chaos mode
     @State private var swipeInProgress: Bool = false
     @State private var swipeDragOffset: CGFloat = 0
+    @State private var swipeThresholdReached: Bool = false
     @State private var chaosBledAmount: Double = 0
     @State private var hasTickedThisSwipe: Bool = false
     @State private var resultLandingScale: Double = 1.0
@@ -136,7 +137,7 @@ struct DiceRollCard: View {
                     .foregroundStyle(Color.white)
                     .fixedSize(horizontal: false, vertical: true)
 
-                if vm.isChaosMode {
+                if vm.isChaosMode || swipeThresholdReached {
                     Text("CHAOS")
                         .font(.system(size: 10, weight: .bold, design: .rounded))
                         .foregroundStyle(Color(hex: "#C4B5FD"))
@@ -164,6 +165,10 @@ struct DiceRollCard: View {
                 .interpolatingSpring(mass: 0.6, stiffness: 220,
                                      damping: 12, initialVelocity: 8),
                 value: vm.isChaosMode
+            )
+            .animation(
+                .spring(response: 0.3, dampingFraction: 0.7),
+                value: swipeThresholdReached
             )
 
             rollHintLine
@@ -574,8 +579,9 @@ struct DiceRollCard: View {
                         idleBreathOn = false
                     }
 
-                    // Card follows the finger at 20% of drag, clamped ±20pt.
-                    swipeDragOffset = min(max(dx * 0.20, -20), 20)
+                    // Card follows the finger at 45% of drag, clamped ±40pt
+                    // — a much more visible, physical pull than a subtle nudge.
+                    swipeDragOffset = min(max(dx * 0.45, -40), 40)
 
                     // Bleed the chaos colour in proportion to swipe progress.
                     // 0 = full accent, 1 = full chaos dark.
@@ -589,6 +595,23 @@ struct DiceRollCard: View {
                         hasTickedThisSwipe = true
                         let tick = UIImpactFeedbackGenerator(style: .soft)
                         tick.impactOccurred()
+                    }
+
+                    // Preview the CHAOS badge as soon as the user crosses
+                    // the commit threshold while entering chaos. If they
+                    // pull back under the threshold the preview retracts.
+                    if adx >= 44 && !vm.isChaosMode {
+                        if !swipeThresholdReached {
+                            withAnimation(.spring(response: 0.3,
+                                                  dampingFraction: 0.7)) {
+                                swipeThresholdReached = true
+                            }
+                        }
+                    } else if adx < 44 && swipeThresholdReached {
+                        withAnimation(.spring(response: 0.3,
+                                              dampingFraction: 0.7)) {
+                            swipeThresholdReached = false
+                        }
                     }
                     return
                 }
@@ -606,6 +629,7 @@ struct DiceRollCard: View {
                 let wasSwipe = swipeInProgress
                 swipeInProgress = false
                 hasTickedThisSwipe = false
+                swipeThresholdReached = false
 
                 if wasSwipe && adx > 44 && adx > ady {
                     // Confirmed horizontal swipe.
@@ -635,8 +659,7 @@ struct DiceRollCard: View {
                         slotTextOpacity = 0
                         slotTextOffsetY = 0
                     }
-                    // Snap card back to centre and finalise the bleed to
-                    // match the (now-toggled) isChaosMode.
+                    // Snap card back to centre + finalise bleed.
                     withAnimation(.spring(response: 0.35, dampingFraction: 0.65)) {
                         swipeDragOffset = 0
                     }
@@ -649,7 +672,8 @@ struct DiceRollCard: View {
                 }
 
                 if wasSwipe {
-                    // Incomplete swipe — rubber-band card back, restore bleed.
+                    // Incomplete swipe — rubber-band card back, restore
+                    // bleed to match current chaos state.
                     withAnimation(.spring(response: 0.35, dampingFraction: 0.65)) {
                         swipeDragOffset = 0
                         chaosBledAmount = vm.isChaosMode ? 1.0 : 0.0
