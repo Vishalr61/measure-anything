@@ -8,15 +8,16 @@ extension UnitCategory {
     /// Until then, `@unknown default` picks a stable tilt from the category’s `rawValue` so the UI
     /// still looks intentional rather than identical across categories.
     var converterDiceRestDegrees: Double {
+        let base: Double
         switch self {
-        case .length: return 75
-        case .mass: return 45
-        case .time: return 15
-        case .temperature: return 60
-        case .volume: return 30
-        @unknown default:
-            return deterministicDiceTilt(forRawCategory: rawValue)
+        case .length:      base = 75
+        case .mass:        base = 45
+        case .time:        base = 15
+        case .temperature: base = 60
+        case .volume:      base = 30
+        @unknown default:  base = deterministicDiceTilt(forRawCategory: rawValue)
         }
+        return base + Double.random(in: -5...5)
     }
 }
 
