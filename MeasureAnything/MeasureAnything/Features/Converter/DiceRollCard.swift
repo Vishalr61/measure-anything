@@ -33,7 +33,7 @@ struct DiceRollCard: View {
     @State private var idleBreathOn: Bool = false
 
     // MARK: – Chaos mode
-    @State private var chaosSwipeOffset: CGFloat = 0
+    @State private var swipeInProgress: Bool = false
     @State private var slotMachineText: String = ""
     @State private var isSlotMachineRunning: Bool = false
 
@@ -61,11 +61,9 @@ struct DiceRollCard: View {
             .contentShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
             .overlay(innerBorder)
             .scaleEffect((isPressed ? 0.92 : 1.0) * cardLandingScale)
-            .offset(x: min(max(chaosSwipeOffset * 0.15, -12), 12))
             .animation(.spring(response: 0.3, dampingFraction: 0.6), value: isPressed)
             .animation(.spring(response: 0.22, dampingFraction: 0.55), value: cardLandingScale)
-            .highPriorityGesture(pressGesture)
-            .simultaneousGesture(swipeGesture)
+            .gesture(unifiedGesture)
             .onChange(of: vm.diceLandedUnitName) { _, newValue in
                 guard !newValue.isEmpty else { return }
                 animateResultTransitionIn()
@@ -385,44 +383,6 @@ struct DiceRollCard: View {
         vm.toUnit?.name ?? "—"
     }
 
-    // MARK: – Chaos toggle: horizontal swipe gesture
-
-    private var swipeGesture: some Gesture {
-        DragGesture(minimumDistance: 20, coordinateSpace: .local)
-            .onChanged { value in
-                let horizontal = abs(value.translation.width)
-                let vertical = abs(value.translation.height)
-                guard horizontal > vertical else { return }
-                chaosSwipeOffset = value.translation.width
-            }
-            .onEnded { value in
-                let horizontal = value.translation.width
-                let vertical = abs(value.translation.height)
-                guard abs(horizontal) > vertical else {
-                    withAnimation(.spring()) { chaosSwipeOffset = 0 }
-                    return
-                }
-
-                if horizontal > 60 && !vm.isChaosMode {
-                    let impact = UIImpactFeedbackGenerator(style: .heavy)
-                    impact.impactOccurred()
-                    withAnimation(.spring(response: 0.35, dampingFraction: 0.7)) {
-                        vm.isChaosMode = true
-                        chaosSwipeOffset = 0
-                    }
-                } else if horizontal < -60 && vm.isChaosMode {
-                    let impact = UIImpactFeedbackGenerator(style: .medium)
-                    impact.impactOccurred()
-                    withAnimation(.spring(response: 0.35, dampingFraction: 0.7)) {
-                        vm.isChaosMode = false
-                        chaosSwipeOffset = 0
-                    }
-                } else {
-                    withAnimation(.spring()) { chaosSwipeOffset = 0 }
-                }
-            }
-    }
-
     // MARK: – Chaos slot machine prelude
 
     private func runSlotMachine() {
@@ -504,6 +464,82 @@ struct DiceRollCard: View {
                 }
             }
             .onEnded { _ in
+                endPress()
+            }
+    }
+
+    /// Single DragGesture that resolves to one of: tap, long press, or swipe.
+    /// Eliminates the tap/swipe race we had with separate pressGesture +
+    /// swipeGesture on the same view — the recogniser sees every drag as
+    /// either a press (if mostly stationary) or a swipe (if it crosses the
+    /// horizontal-dominance threshold), never both.
+    private var unifiedGesture: some Gesture {
+        DragGesture(minimumDistance: 0, coordinateSpace: .local)
+            .onChanged { value in
+                let dx = value.translation.width
+                let dy = value.translation.height
+                let adx = abs(dx)
+                let ady = abs(dy)
+
+                // Detect horizontal swipe intent — clear horizontal dominance
+                // plus a minimum movement threshold to ignore micro-jitter.
+                if adx > 12 && adx > ady * 1.5 {
+                    if !swipeInProgress {
+                        swipeInProgress = true
+                        // Cancel long press — swipe takes over.
+                        longPressWorkItem?.cancel()
+                        longPressWorkItem = nil
+                        didCompleteLongPress = false
+                        isPressed = false
+                        withAnimation(.easeOut(duration: 0.18)) {
+                            holdProgress = 0
+                            ringOpacity = 0
+                        }
+                        idleBreathOn = false
+                    }
+                    return
+                }
+
+                // Not a swipe — handle as press.
+                if !swipeInProgress && !isPressed {
+                    beginPress()
+                }
+            }
+            .onEnded { value in
+                let dx = value.translation.width
+                let dy = value.translation.height
+                let adx = abs(dx)
+                let ady = abs(dy)
+                let wasSwipe = swipeInProgress
+                swipeInProgress = false
+
+                if wasSwipe && adx > 44 && adx > ady {
+                    // Confirmed horizontal swipe.
+                    if dx < 0 && !vm.isChaosMode {
+                        // Right-to-left → enter chaos
+                        let impact = UIImpactFeedbackGenerator(style: .heavy)
+                        impact.impactOccurred()
+                        withAnimation(.spring(response: 0.35,
+                                     dampingFraction: 0.7)) {
+                            vm.isChaosMode = true
+                        }
+                    } else if dx > 0 && vm.isChaosMode {
+                        // Left-to-right → exit chaos
+                        let impact = UIImpactFeedbackGenerator(style: .medium)
+                        impact.impactOccurred()
+                        withAnimation(.spring(response: 0.35,
+                                     dampingFraction: 0.7)) {
+                            vm.isChaosMode = false
+                        }
+                    }
+                    resetRing(animated: true)
+                    isPressed = false
+                    return
+                }
+
+                // Not a confirmed swipe — fall through to the press flow,
+                // which handles single-tap vs long-press completion via
+                // `didCompleteLongPress` inside endPress().
                 endPress()
             }
     }
