@@ -33,6 +33,9 @@ struct ConverterWorkspaceBody: View {
     @State private var swapPillScale: CGFloat = 1
     @State private var isSwapPillAnimating: Bool = false
     @State private var showFromPicker = false
+    /// Snapshot of suggestion pill IDs frozen at the start of a roll so
+    /// the pills don't update mid-animation while FROM/TO are mutating.
+    @State private var frozenSuggestions: [String] = []
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -85,6 +88,20 @@ struct ConverterWorkspaceBody: View {
             }
             withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
                 fromCardScale = isFocused ? 1.02 : 1.0
+            }
+        }
+        // Snapshot suggestion pills at the start of every roll so they
+        // don't churn while units cycle. Refresh once the roll lands.
+        .onChange(of: vm.isDiceRollInProgress) { _, isRolling in
+            if isRolling {
+                let raw = ConversionHistory.shared.suggestions(
+                    for: vm.selectedFromUnitID, limit: 12)
+                frozenSuggestions = raw.filter { $0 != vm.selectedToUnitID }
+            } else {
+                // Snap to new suggestions immediately — no delay, no animation.
+                let raw = ConversionHistory.shared.suggestions(
+                    for: vm.selectedFromUnitID, limit: 12)
+                frozenSuggestions = raw.filter { $0 != vm.selectedToUnitID }
             }
         }
         // Limit the input to 9 numeric digits + one decimal point (10 chars max).
@@ -351,15 +368,25 @@ struct ConverterWorkspaceBody: View {
             }
 
             if ConversionHistory.shared.totalRecordedConversions >= 2 {
-                let raw         = ConversionHistory.shared.suggestions(for: vm.selectedFromUnitID, limit: 12)
-                let suggestions = raw.filter { $0 != vm.selectedToUnitID }
-                if !suggestions.isEmpty {
+                // Use frozenSuggestions during a roll to prevent pills
+                // from updating mid-animation; live suggestions resume
+                // once the roll lands and the onChange observer below
+                // refreshes the snapshot.
+                let displaySuggestions: [String] = vm.isDiceRollInProgress
+                    ? frozenSuggestions
+                    : {
+                        let raw = ConversionHistory.shared.suggestions(
+                            for: vm.selectedFromUnitID, limit: 12)
+                        return raw.filter { $0 != vm.selectedToUnitID }
+                    }()
+
+                if !displaySuggestions.isEmpty {
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 6) {
                             Text("→")
                                 .font(.system(size: 10))
                                 .foregroundStyle(Color(hex: "#B4B2A9"))
-                            ForEach(Array(suggestions.prefix(3)), id: \.self) { unitId in
+                            ForEach(Array(displaySuggestions.prefix(3)), id: \.self) { unitId in
                                 if let unit = vm.availableUnits.first(where: { $0.id == unitId }) {
                                     Button {
                                         Haptics.tap()
@@ -379,6 +406,7 @@ struct ConverterWorkspaceBody: View {
                         }
                         .padding(.top, 6)
                     }
+                    .opacity(1.0)
                 }
             }
         }

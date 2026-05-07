@@ -112,6 +112,10 @@ final class ConverterViewModel: ObservableObject {
     @Published var slotMachineFromName: String? = nil
     @Published var slotMachineToName: String? = nil
     @Published var isDiceRolling: Bool = false
+    /// True from roll-trigger to landing (regardless of which roll path).
+    /// Views can observe this to freeze derived UI (suggestion pills,
+    /// fact cards, etc.) so they don't update mid-animation.
+    @Published var isDiceRollInProgress: Bool = false
     @Published var diceDisplayFace: Int = 5
     @Published var diceRotationDegrees: Double = UnitCategory.length.converterDiceRestDegrees
     @Published var showDiceSubtitle: Bool = false
@@ -334,6 +338,10 @@ final class ConverterViewModel: ObservableObject {
     }
 
     func rollDice() {
+        // Mark a roll as in progress so derived UI (suggestion pills,
+        // fact card, etc.) can freeze until the result lands.
+        isDiceRollInProgress = true
+
         // Make dice roll interruptible so the user can spam taps.
         diceRollToken = UUID()
         let token = diceRollToken
@@ -410,12 +418,15 @@ final class ConverterViewModel: ObservableObject {
                     self.showDiceSubtitle = (self.diceLandedUnitName.isEmpty == false)
                 }
                 self.isDiceRolling = false
+                self.isDiceRollInProgress = false
             }
         }
     }
 
     /// Long-press (~0.25s `minimumDuration` on `DiceRollCard`): randomises both FROM and TO to distinct absurd units in the current category.
     func rollDiceDual() {
+        isDiceRollInProgress = true
+
         func absurdPoolForDual() -> [UnitDefinition] {
             registry.units(in: selectedCategory, includeKinds: [.absurd])
                 .filter { $0.category == selectedCategory }
@@ -423,7 +434,10 @@ final class ConverterViewModel: ObservableObject {
 
         let pool = absurdPoolForDual()
         // Silent no-op: must not cancel an in-flight single roll or invalidate timers.
-        guard pool.count >= 2 else { return }
+        guard pool.count >= 2 else {
+            isDiceRollInProgress = false
+            return
+        }
 
         diceRollToken = UUID()
         let token = diceRollToken
@@ -461,6 +475,7 @@ final class ConverterViewModel: ObservableObject {
                     self.slotMachineFromName = nil
                     self.slotMachineToName = nil
                     self.isDiceRolling = false
+                    self.isDiceRollInProgress = false
                     return
                 }
 
@@ -508,6 +523,7 @@ final class ConverterViewModel: ObservableObject {
                     self.showDiceSubtitle = !self.diceLandedUnitName.isEmpty
                 }
                 self.isDiceRolling = false
+                self.isDiceRollInProgress = false
             }
         }
     }
@@ -519,6 +535,8 @@ final class ConverterViewModel: ObservableObject {
     // result with a "CATEGORY · fromName ⇄ toName" subtitle. Used by the
     // dice card when isChaosMode is true.
     func rollDiceChaos() {
+        isDiceRollInProgress = true
+
         // Pool: all absurd units across ALL categories
         func chaosPool() -> [UnitDefinition] {
             UnitCategory.allCases.flatMap { cat in
@@ -527,7 +545,10 @@ final class ConverterViewModel: ObservableObject {
         }
 
         let pool = chaosPool()
-        guard pool.count >= 2 else { return }
+        guard pool.count >= 2 else {
+            isDiceRollInProgress = false
+            return
+        }
 
         diceRollToken = UUID()
         let token = diceRollToken
@@ -556,6 +577,7 @@ final class ConverterViewModel: ObservableObject {
                     self.slotMachineFromName = nil
                     self.slotMachineToName = nil
                     self.isDiceRolling = false
+                    self.isDiceRollInProgress = false
                     return
                 }
 
@@ -583,6 +605,7 @@ final class ConverterViewModel: ObservableObject {
                     self.slotMachineFromName = nil
                     self.slotMachineToName = nil
                     self.isDiceRolling = false
+                    self.isDiceRollInProgress = false
                     return
                 }
 
@@ -606,6 +629,7 @@ final class ConverterViewModel: ObservableObject {
                 // pollute the normal-mode badge with the chaos-format string.
                 guard self.isChaosMode else {
                     self.isDiceRolling = false
+                    self.isDiceRollInProgress = false
                     return
                 }
 
@@ -618,6 +642,7 @@ final class ConverterViewModel: ObservableObject {
                     self.showDiceSubtitle = true
                 }
                 self.isDiceRolling = false
+                self.isDiceRollInProgress = false
 
                 let impact = UIImpactFeedbackGenerator(style: .medium)
                 impact.impactOccurred()
