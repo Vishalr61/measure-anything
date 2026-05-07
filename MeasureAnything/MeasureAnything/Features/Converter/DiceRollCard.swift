@@ -22,6 +22,10 @@ struct DiceRollCard: View {
     @State private var pendingResultTransitionOut: Bool = false
     @State private var resultOpacity: Double = 1
     @State private var resultOffsetY: CGFloat = 0
+    /// Independent opacity/offset for the TO half of the badge so a
+    /// normal single tap can fade only TO (FROM never changes on single).
+    @State private var resultToOpacity: Double = 1.0
+    @State private var resultToOffsetY: CGFloat = 0
 
     @State private var lastRollKind: RollKind = .single
     @State private var toShakeOffsetX: CGFloat = 0
@@ -180,17 +184,19 @@ struct DiceRollCard: View {
             rollHintLine
 
             // Slot machine renders independently of vm.showDiceSubtitle so
-            // its 0.8s prelude is actually visible (subtitleRow's opacity
-            // gate would otherwise hide it). Once the cycle ends, fall
-            // back to the regular subtitleRow which gates on showDiceSubtitle
-            // for the result badge fade-in.
-            if isSlotMachineRunning {
-                slotMachineRow
-                    .padding(.top, 4)
-            } else {
-                subtitleRow
-                    .padding(.top, 4)
+            // its prelude is actually visible (subtitleRow's opacity gate
+            // would otherwise hide it). Crossfaded with subtitleRow so the
+            // handoff is smooth instead of a hard snap.
+            Group {
+                if isSlotMachineRunning {
+                    slotMachineRow
+                        .padding(.top, 4)
+                } else {
+                    subtitleRow
+                        .padding(.top, 4)
+                }
             }
+            .animation(.easeInOut(duration: 0.15), value: isSlotMachineRunning)
         }
     }
 
@@ -428,23 +434,72 @@ struct DiceRollCard: View {
                 .animation(.easeInOut(duration: 0.15), value: resultOffsetY)
 
             } else {
-                // Normal mode badge — unchanged.
-                Text("\(fromName) \(lastRollKind == .dual ? "⇄" : "→") \(toName)")
-                    .font(.system(size: 11, weight: .semibold, design: .rounded))
-                    .foregroundStyle(.white)
-                    .lineLimit(2)
-                    .multilineTextAlignment(.leading)
-                    .fixedSize(horizontal: true, vertical: false)
-                    .scaleEffect(lastRollKind == .dual ? fromPulseScale : 1)
-                    .offset(x: lastRollKind == .single ? toShakeOffsetX : 0)
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 4)
-                    .background(Color.white.opacity(0.12), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
-                    .opacity(resultOpacity)
-                    .offset(y: resultOffsetY)
-                    .scaleEffect(resultLandingScale, anchor: .leading)
-                    .animation(.easeInOut(duration: 0.15), value: resultOpacity)
-                    .animation(.easeInOut(duration: 0.15), value: resultOffsetY)
+                // Normal mode badge — split layout so FROM and TO can
+                // transition independently. On a single tap FROM stays
+                // visible while TO fades + slides; on a dual roll both
+                // halves share `resultOpacity` / `resultOffsetY` for the
+                // existing full-fade behaviour.
+                HStack(spacing: 0) {
+                    Text(fromName)
+                        .font(.system(size: 11, weight: .semibold, design: .rounded))
+                        .foregroundStyle(.white)
+                        .lineLimit(1)
+                        .opacity(lastRollKind == .single ? 1.0 : resultOpacity)
+
+                    Text(lastRollKind == .dual ? " ⇄ " : " → ")
+                        .font(.system(size: 11, weight: .regular, design: .rounded))
+                        .foregroundStyle(Color.white.opacity(0.5))
+                        .opacity(lastRollKind == .single ? 1.0 : resultOpacity)
+
+                    // TO half — split into "live during slot machine"
+                    // (always visible, mirrors cycling name) vs "post-roll"
+                    // (uses resultToOpacity / Y so the fade-in lands cleanly).
+                    // The else branch falls back to vm.slotMachineToName ??
+                    // toName so the brief window between slot-end (1.30s)
+                    // and real-value-land (1.40s) keeps showing the last
+                    // cycled name — never the previous unit's stale name.
+                    Group {
+                        if isSlotMachineRunning && lastRollKind == .single {
+                            Text(vm.slotMachineToName ?? toName)
+                                .font(.system(size: 11, weight: .semibold, design: .rounded))
+                                .foregroundStyle(.white)
+                                .lineLimit(1)
+                                .id(vm.slotMachineToName ?? toName)
+                                .contentTransition(.opacity)
+                                .opacity(1.0)
+                                .animation(.easeInOut(duration: 0.12),
+                                           value: vm.slotMachineToName)
+                        } else {
+                            Text(vm.slotMachineToName ?? toName)
+                                .font(.system(size: 11, weight: .semibold, design: .rounded))
+                                .foregroundStyle(.white)
+                                .lineLimit(1)
+                                .id(vm.slotMachineToName ?? toName)
+                                .contentTransition(.opacity)
+                                .opacity(lastRollKind == .single
+                                    ? resultToOpacity
+                                    : resultOpacity)
+                                .offset(y: lastRollKind == .single
+                                    ? resultToOffsetY
+                                    : resultOffsetY)
+                                .animation(.easeInOut(duration: 0.2),
+                                           value: vm.slotMachineToName ?? toName)
+                        }
+                    }
+                }
+                .padding(.horizontal, 10)
+                .padding(.vertical, 4)
+                .background(Color.white.opacity(0.12),
+                            in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+                // Pill itself stays opaque — only contents animate.
+                .scaleEffect(lastRollKind == .dual ? resultLandingScale : 1.0,
+                             anchor: .leading)
+                .scaleEffect(lastRollKind == .dual ? fromPulseScale : 1)
+                .offset(x: lastRollKind == .single ? toShakeOffsetX : 0)
+                .animation(.easeInOut(duration: 0.12), value: resultToOpacity)
+                .animation(.easeInOut(duration: 0.12), value: resultToOffsetY)
+                .animation(.easeInOut(duration: 0.15), value: resultOpacity)
+                .animation(.easeInOut(duration: 0.15), value: resultOffsetY)
             }
 
             Spacer(minLength: 0)
@@ -520,7 +575,8 @@ struct DiceRollCard: View {
 
     /// Slot-machine prelude for a normal single tap (TO-only). Pulls
     /// names from the *current* category's absurd pool; FROM stays
-    /// untouched. Aligns with `rollDice`'s 1.4s landing.
+    /// untouched. Decelerating schedule mirrors a physical reel
+    /// slowing into rest. Aligns with `rollDice`'s 1.4s landing.
     private func runSlotMachineNormalSingle() {
         let pool: [String] = vm.exploreUnitDefinitions(for: vm.selectedCategory)
             .filter { $0.kind == .absurd }
@@ -528,31 +584,41 @@ struct DiceRollCard: View {
             .shuffled()
 
         guard pool.count >= 2 else { return }
-
         isSlotMachineRunning = true
 
-        // 3 cycles × 0.37s = 1.11s; rollDice lands at 1.4s → ~0.29s gap
-        let cycleDuration: Double = 0.37
-        let totalCycles = 3
+        // Decelerating schedule — names slow as they approach landing.
+        // Gaps: 0.18 / 0.18 / 0.22 / 0.24 / 0.26 — last name lingers
+        // ~0.32s before rollDice lands at 1.40s.
+        let schedule: [Double] = [
+            0.00,   // name 1 — fast
+            0.18,   // name 2
+            0.36,   // name 3
+            0.58,   // name 4 — starts slowing
+            0.82,   // name 5
+            1.08    // name 6 — slow, near stop
+        ]
 
-        for i in 0..<totalCycles {
-            let cycleStart = Double(i) * cycleDuration
+        for (i, startTime) in schedule.enumerated() {
             let name = pool[i % pool.count]
-            DispatchQueue.main.asyncAfter(deadline: .now() + cycleStart) {
+            DispatchQueue.main.asyncAfter(deadline: .now() + startTime) {
                 withAnimation(.easeInOut(duration: 0.12)) {
                     vm.slotMachineToName = name
                 }
             }
         }
 
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.11) {
+        // End slot machine — last name stays visible until
+        // rollDice() lands at 1.40s.
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.30) {
             isSlotMachineRunning = false
         }
     }
 
     /// Slot-machine prelude for a normal dual roll (long press / shake).
-    /// Both FROM and TO cycle, drawn from the current category's absurd pool.
-    /// Aligns with `rollDiceDual`'s 1.6s landing.
+    /// Both FROM and TO cycle on independent decelerating schedules
+    /// (TO offset 0.12s for an asynchronous feel). Drawn from the
+    /// current category's absurd pool. Aligns with `rollDiceDual`'s
+    /// 1.6s landing.
     private func runSlotMachineNormalDual() {
         let pool: [String] = vm.exploreUnitDefinitions(for: vm.selectedCategory)
             .filter { $0.kind == .absurd }
@@ -560,36 +626,40 @@ struct DiceRollCard: View {
             .shuffled()
 
         guard pool.count >= 4 else { return }
-
         isSlotMachineRunning = true
 
-        // FROM 4×0.37s = 1.48s; TO offset 0.18s ends at 1.66s.
-        // rollDiceDual lands at 1.6s — small overlap on TO is fine since
-        // the landing block clears overrides atomically with the unit IDs.
-        let cycleDuration: Double = 0.37
-        let totalCycles = 4
+        // FROM schedule — starts immediately, decelerates into rest.
+        let fromSchedule: [Double] = [
+            0.00, 0.18, 0.36, 0.58, 0.84, 1.12
+        ]
 
-        for i in 0..<totalCycles {
-            let cycleStart = Double(i) * cycleDuration
+        // TO schedule — offset 0.12s so FROM and TO never tick in lockstep.
+        let toSchedule: [Double] = [
+            0.12, 0.30, 0.50, 0.72, 0.98, 1.26
+        ]
+
+        for (i, startTime) in fromSchedule.enumerated() {
             let name = pool[i % pool.count]
-            DispatchQueue.main.asyncAfter(deadline: .now() + cycleStart) {
+            DispatchQueue.main.asyncAfter(deadline: .now() + startTime) {
                 withAnimation(.easeInOut(duration: 0.12)) {
                     vm.slotMachineFromName = name
                 }
             }
         }
 
-        for i in 0..<totalCycles {
-            let cycleStart = 0.18 + Double(i) * cycleDuration
-            let name = pool[(i + totalCycles) % pool.count]
-            DispatchQueue.main.asyncAfter(deadline: .now() + cycleStart) {
+        // Pull TO names from the second half of the pool so FROM and TO
+        // never display the same name simultaneously.
+        for (i, startTime) in toSchedule.enumerated() {
+            let name = pool[(i + pool.count / 2) % pool.count]
+            DispatchQueue.main.asyncAfter(deadline: .now() + startTime) {
                 withAnimation(.easeInOut(duration: 0.12)) {
                     vm.slotMachineToName = name
                 }
             }
         }
 
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.55) {
+        // End at 1.36s — rollDiceDual lands at 1.60s → ~0.24s linger.
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.36) {
             isSlotMachineRunning = false
         }
     }
@@ -870,7 +940,9 @@ struct DiceRollCard: View {
 
         hasRolledOnce = true
         lastRollKind = .single
-        animateResultTransitionOut()
+        // Single roll: only TO needs to transition out. FROM stays put,
+        // so use the split-opacity helper instead of fading the entire badge.
+        animateSingleRollTransitionOut()
         runSlotMachineNormalSingle()
         animateDecorativeRollSingle()
         pulsePattern(multiplier: 2, settle: 0.4)
@@ -986,16 +1058,26 @@ struct DiceRollCard: View {
     }
 
     private func animateResultTransitionIn() {
-        guard pendingResultTransitionOut else { return }
-        // If the slot machine is still cycling (e.g. an unusually fast
-        // chaos completion), defer briefly so the two animations don't
-        // collide on the same badge.
+        // Slot-machine collision guard: defer briefly if a prelude is
+        // still in flight so the two animations don't compete.
         guard !isSlotMachineRunning else {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
                 animateResultTransitionIn()
             }
             return
         }
+
+        // Single roll uses the split-opacity path — FROM never moved on
+        // tap-out, so we only need to bring TO back in. No reliance on
+        // `pendingResultTransitionOut` since `animateResultTransitionOut`
+        // wasn't called.
+        if lastRollKind == .single {
+            animateSingleRollTransitionIn()
+            return
+        }
+
+        // Dual / chaos: full-badge fade-in (existing behaviour).
+        guard pendingResultTransitionOut else { return }
         pendingResultTransitionOut = false
         resultOpacity = 0
         resultOffsetY = 4
@@ -1010,6 +1092,25 @@ struct DiceRollCard: View {
                        damping: 13, initialVelocity: 6)) {
             resultLandingScale = 1.0
         }
+    }
+
+    /// Single-roll-specific transition out. The slot machine keeps the TO
+    /// half visible by switching the badge to the `vm.slotMachineToName`
+    /// branch, so we don't fade `resultToOpacity` here — that would create
+    /// a frame of invisible-TO before the cycle starts. We only flag the
+    /// transition as pending in case anything else observes it.
+    private func animateSingleRollTransitionOut() {
+        pendingResultTransitionOut = true
+        // Intentionally no-op on resultToOpacity / resultToOffsetY.
+    }
+
+    /// Counterpart that finalises TO state once the real value has
+    /// landed. No opacity zeroing — the actual name swap is handled
+    /// by `.contentTransition(.opacity)` + `.id()` on the Text view,
+    /// so we only need to make sure resultTo* are at their resting state.
+    private func animateSingleRollTransitionIn() {
+        resultToOffsetY = 0
+        resultToOpacity = 1.0
     }
 
     private func shakeToPill() {

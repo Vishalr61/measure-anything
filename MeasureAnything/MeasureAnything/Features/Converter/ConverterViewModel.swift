@@ -397,9 +397,14 @@ final class ConverterViewModel: ObservableObject {
                     self.diceLandedUnitName = ""
                 }
 
-                // Clear TO override so the real TO name snaps in atomically
-                // with the unit ID assignment (no stale slot-machine name).
-                self.slotMachineToName = nil
+                // Defer the override clear by one runloop so SwiftUI renders
+                // the real TO name first, THEN drops the slot override —
+                // avoids a one-frame "slot name → blank → real name" flash
+                // and lets the pill's vertical slot transition crossfade
+                // smoothly from the last cycled name to the landed name.
+                DispatchQueue.main.async {
+                    self.slotMachineToName = nil
+                }
 
                 withAnimation(.easeIn(duration: 0.25)) {
                     self.showDiceSubtitle = (self.diceLandedUnitName.isEmpty == false)
@@ -492,10 +497,13 @@ final class ConverterViewModel: ObservableObject {
                     self.diceSubtitleIsDualFormat = false
                 }
 
-                // Clear FROM/TO overrides so the real names snap in
-                // atomically with the unit ID assignment.
-                self.slotMachineFromName = nil
-                self.slotMachineToName = nil
+                // Defer override clears by one runloop so the pills get
+                // the real FROM/TO names rendered first, then the slot
+                // overrides drop — smooth crossfade, no blank flash.
+                DispatchQueue.main.async {
+                    self.slotMachineFromName = nil
+                    self.slotMachineToName = nil
+                }
 
                 withAnimation(.easeIn(duration: 0.25)) {
                     self.showDiceSubtitle = !self.diceLandedUnitName.isEmpty
