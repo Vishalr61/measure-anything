@@ -57,6 +57,11 @@ struct DiceRollCard: View {
     @State private var dotsPulseBrightness: Double = 0
     @State private var dotsPulseLoopRunning: Bool = false
 
+    /// One-shot lateral shake that demonstrates the device-shake roll
+    /// mechanic on first launch. Persisted so returning users never see it.
+    @AppStorage("hasSeenShakeHint") private var hasSeenShakeHint: Bool = false
+    @State private var selfShakeOffset: CGFloat = 0
+
     private enum RollKind {
         case single
         case dual
@@ -82,12 +87,14 @@ struct DiceRollCard: View {
             .overlay(innerBorder)
             .scaleEffect((isPressed ? 0.92 : 1.0) * cardLandingScale)
             .offset(x: swipeDragOffset)
+            .offset(x: selfShakeOffset)
             .animation(.spring(response: 0.3, dampingFraction: 0.6), value: isPressed)
             .animation(.spring(response: 0.22, dampingFraction: 0.55), value: cardLandingScale)
             .gesture(unifiedGesture)
             .onAppear {
                 chaosBledAmount = vm.isChaosMode ? 1.0 : 0.0
                 startDotsPulseLoop()
+                performSelfShakeHint()
             }
             .onChange(of: vm.isChaosMode) { _, isChaos in
                 // First time the user enters chaos: mark discovered so
@@ -768,6 +775,46 @@ struct DiceRollCard: View {
         withAnimation(.easeOut(duration: 0.3)) {
             dotsPulseScale = 1.0
             dotsPulseBrightness = 0
+        }
+    }
+
+    /// One-shot self-shake hint — the card jiggles laterally a few seconds
+    /// after first appear to demonstrate the shake-to-roll gesture. Only
+    /// fires once per user (AppStorage), and skips if the user has already
+    /// rolled — no point hinting at a mechanic they've discovered.
+    private func performSelfShakeHint() {
+        guard !hasSeenShakeHint else { return }
+        guard !hasRolledOnce else { return }
+        hasSeenShakeHint = true
+
+        // Delay so the card's entrance + idle breath have settled and
+        // the dots pulse (which starts ~1.0s in) has already drawn the
+        // user's eye. Two discovery hints — dots first, shake second.
+        DispatchQueue.main.asyncAfter(deadline: .now() + 3.5) {
+            // Bail if the user has rolled in the meantime.
+            guard !hasRolledOnce else { return }
+
+            // Gentle lateral oscillation — feels like a nudge, not a
+            // roll animation. No haptic; we don't want to confuse the
+            // user into thinking they triggered something.
+            let steps: [(CGFloat, Double)] = [
+                ( 5,  0.08),   // right
+                (-8,  0.10),   // left
+                ( 6,  0.09),   // right
+                (-4,  0.09),   // left
+                ( 2,  0.08),   // right
+                ( 0,  0.10),   // settle
+            ]
+
+            var cumulativeDelay: Double = 0
+            for (offset, duration) in steps {
+                DispatchQueue.main.asyncAfter(deadline: .now() + cumulativeDelay) {
+                    withAnimation(.easeInOut(duration: duration)) {
+                        selfShakeOffset = offset
+                    }
+                }
+                cumulativeDelay += duration
+            }
         }
     }
 
