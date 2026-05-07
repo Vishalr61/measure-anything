@@ -48,6 +48,15 @@ struct DiceRollCard: View {
     @State private var slotTextOpacity: Double = 0
     @State private var slotTextOffsetY: CGFloat = 0
 
+    // Slow heartbeat pulse on the chaos page-indicator dots that runs
+    // until the user discovers chaos mode (enters it for the first time).
+    // Persisted via AppStorage so returning users who already discovered
+    // never see the pulse again.
+    @AppStorage("hasDiscoveredChaos") private var hasDiscoveredChaos: Bool = false
+    @State private var dotsPulseScale: CGFloat = 1.0
+    @State private var dotsPulseBrightness: Double = 0
+    @State private var dotsPulseLoopRunning: Bool = false
+
     private enum RollKind {
         case single
         case dual
@@ -78,6 +87,16 @@ struct DiceRollCard: View {
             .gesture(unifiedGesture)
             .onAppear {
                 chaosBledAmount = vm.isChaosMode ? 1.0 : 0.0
+                startDotsPulseLoop()
+            }
+            .onChange(of: vm.isChaosMode) { _, isChaos in
+                // First time the user enters chaos: mark discovered so
+                // the heartbeat pulse retires (and never re-shows on
+                // future launches).
+                if isChaos && !hasDiscoveredChaos {
+                    hasDiscoveredChaos = true
+                    stopDotsPulseLoop()
+                }
             }
             .onChange(of: vm.diceLandedUnitName) { _, newValue in
                 guard !newValue.isEmpty else { return }
@@ -692,8 +711,64 @@ struct DiceRollCard: View {
                 .frame(width: 6, height: 6)
                 .animation(.easeInOut(duration: 0.3), value: vm.isChaosMode)
         }
+        .brightness(dotsPulseBrightness)
+        .scaleEffect(dotsPulseScale)
         .padding(.top, 6)
         .frame(maxWidth: .infinity, alignment: .center)
+    }
+
+    /// Slow heartbeat pulse on the chaos dots — runs from card appear
+    /// until the user discovers chaos mode (toggles isChaosMode = true).
+    /// Self-terminating recursion so we can stop cleanly mid-cycle when
+    /// `hasDiscoveredChaos` flips to true.
+    private func startDotsPulseLoop() {
+        guard !hasDiscoveredChaos, !dotsPulseLoopRunning else { return }
+        dotsPulseLoopRunning = true
+
+        // Brief settle delay so the card's entrance + idle breath start first.
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+            runDotsPulseCycle()
+        }
+    }
+
+    /// One up-down beat (0.9s up, 0.9s down, 0.4s rest) then recurses.
+    /// Total ~2.2s per cycle — slow, breath-like, not flickery.
+    private func runDotsPulseCycle() {
+        guard !hasDiscoveredChaos else {
+            stopDotsPulseLoop()
+            return
+        }
+
+        // Upstroke: scale up + tint brighter together. Brightness is
+        // applied to the dots HStack, so the active (left) dot — filled
+        // with the category accent — visibly glows in its category colour.
+        withAnimation(.easeInOut(duration: 0.9)) {
+            dotsPulseScale = 1.30
+            dotsPulseBrightness = 0.22
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.9) {
+            guard !hasDiscoveredChaos else {
+                stopDotsPulseLoop()
+                return
+            }
+            // Downstroke
+            withAnimation(.easeInOut(duration: 0.9)) {
+                dotsPulseScale = 1.0
+                dotsPulseBrightness = 0
+            }
+            // 0.9s downstroke + 0.4s rest before the next beat.
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.3) {
+                runDotsPulseCycle()
+            }
+        }
+    }
+
+    private func stopDotsPulseLoop() {
+        dotsPulseLoopRunning = false
+        withAnimation(.easeOut(duration: 0.3)) {
+            dotsPulseScale = 1.0
+            dotsPulseBrightness = 0
+        }
     }
 
     private var pressGesture: some Gesture {
