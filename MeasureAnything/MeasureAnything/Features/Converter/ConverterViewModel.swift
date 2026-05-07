@@ -436,7 +436,6 @@ final class ConverterViewModel: ObservableObject {
         showDiceSubtitle = false
         diceLandedUnitName = ""
         diceSubtitleIsDualFormat = false
-        inputText = "1"
 
         let newFace = Int.random(in: 1...6)
         let pickedFrom: UnitDefinition? = Self.weightedRandomUnit(from: pool)
@@ -539,7 +538,6 @@ final class ConverterViewModel: ObservableObject {
         showDiceSubtitle = false
         diceLandedUnitName = ""
         diceSubtitleIsDualFormat = false
-        inputText = "1"
 
         // Pre-select outcome before animation
         let pickedFrom = Self.weightedRandomUnit(from: pool)
