@@ -1,4 +1,5 @@
 import SwiftUI
+import MeasureAnythingCore
 
 // MARK: – Preference key for pointer target anchoring
 
@@ -9,9 +10,35 @@ struct PointerTargetKey: PreferenceKey {
     }
 }
 
+/// Secondary pointer anchor key — used by slides that need more than one
+/// pointer (e.g. the dice slide). Independent reduce path so multiple
+/// `pointerTarget*` modifiers in the same hierarchy don't fight over a
+/// single key.
+struct PointerTargetKey2: PreferenceKey {
+    static var defaultValue: Anchor<CGRect>? = nil
+    static func reduce(value: inout Anchor<CGRect>?, nextValue: () -> Anchor<CGRect>?) {
+        value = value ?? nextValue()
+    }
+}
+
+struct PointerTargetKey3: PreferenceKey {
+    static var defaultValue: Anchor<CGRect>? = nil
+    static func reduce(value: inout Anchor<CGRect>?, nextValue: () -> Anchor<CGRect>?) {
+        value = value ?? nextValue()
+    }
+}
+
 extension View {
     func pointerTarget() -> some View {
         self.anchorPreference(key: PointerTargetKey.self, value: .bounds) { $0 }
+    }
+
+    func pointerTarget2() -> some View {
+        self.anchorPreference(key: PointerTargetKey2.self, value: .bounds) { $0 }
+    }
+
+    func pointerTarget3() -> some View {
+        self.anchorPreference(key: PointerTargetKey3.self, value: .bounds) { $0 }
     }
 
     @ViewBuilder
@@ -223,6 +250,7 @@ struct OnboardingSlide {
     static var all: [OnboardingSlide] {[
         unitConversionSlide,
         categoriesSlide,
+        diceSlide,
         customModeSlide,
         exploreSlide,
     ]}
@@ -261,7 +289,26 @@ struct OnboardingSlide {
         )
     }
 
-    // MARK: – Slide 3: Custom mode
+    // MARK: – Slide 3: Dice (tap / shake / long-press / chaos)
+
+    static var diceSlide: OnboardingSlide {
+        OnboardingSlide(
+            headline: "Roll the dice.",
+            body: "Tap for a random unit. Long press or shake to randomise both. Swipe left for chaos.",
+            accentColor: Color(hex: "#AF7D2A"),
+            // The dice slide draws its own three-pointer overlay inside
+            // `DiceMockup`, so the slideView's single-anchor system is
+            // intentionally bypassed here.
+            pointerAnchor: nil,
+            pointerXOffset: 0,
+            pointerYOffset: 0,
+            mockup: { appear in
+                AnyView(DiceMockup(appear: appear))
+            }
+        )
+    }
+
+    // MARK: – Slide 4: Custom units
 
     static var customModeSlide: OnboardingSlide {
         OnboardingSlide(
@@ -277,7 +324,7 @@ struct OnboardingSlide {
         )
     }
 
-    // MARK: – Slide 4: Explore
+    // MARK: – Slide 5: Explore
 
     static var exploreSlide: OnboardingSlide {
         OnboardingSlide(
@@ -659,6 +706,347 @@ private struct ExploreMockup: View {
             .background(isSelected ? accentColor.opacity(0.07) : Color.clear)
         }
         .buttonStyle(.plain)
+    }
+}
+
+// MARK: – Slide 3 mockup: dice card with chaos demo
+
+private struct DiceMockup: View {
+    let appear: Bool
+    private let accent = Color(hex: "#AF7D2A")
+
+    @State private var showChaos: Bool = false
+    @State private var pointerBounceLocal: CGFloat = 0
+
+    var body: some View {
+        VStack(spacing: 0) {
+            // ── Pointers above card: tap (left) + shake (right). Both
+            // pointers swap from amber to chaos purple in chaos mode.
+            HStack(alignment: .bottom) {
+                pointerColumnDown(
+                    label: "tap",
+                    color: showChaos ? Color(hex: "#8B5CF6") : accent
+                )
+                .offset(y: pointerBounceLocal)
+                .animation(
+                    .easeInOut(duration: 0.8).repeatForever(autoreverses: true),
+                    value: pointerBounceLocal
+                )
+                .animation(.easeInOut(duration: 0.35), value: showChaos)
+
+                Spacer()
+
+                pointerColumnDown(
+                    label: "shake",
+                    color: showChaos ? Color(hex: "#8B5CF6") : accent
+                )
+                .offset(y: pointerBounceLocal)
+                .animation(
+                    .easeInOut(duration: 0.8).repeatForever(autoreverses: true).delay(0.15),
+                    value: pointerBounceLocal
+                )
+                .animation(.easeInOut(duration: 0.35), value: showChaos)
+            }
+            .frame(height: 62)
+            .padding(.horizontal, 28)
+
+            // ── Dice card (cross-fade between normal and chaos) ──
+            ZStack {
+                normalCard
+                    .opacity(showChaos ? 0 : 1)
+                    .offset(x: showChaos ? -20 : 0)
+
+                chaosCard
+                    .opacity(showChaos ? 1 : 0)
+                    .offset(x: showChaos ? 0 : 20)
+            }
+            .animation(.spring(response: 0.45, dampingFraction: 0.75), value: showChaos)
+            .opacity(appear ? 1 : 0)
+            .offset(y: appear ? 0 : 12)
+            .animation(.easeOut(duration: 0.4).delay(0.1), value: appear)
+
+            // ── Page indicator dots ──
+            HStack(spacing: 6) {
+                Circle()
+                    .fill(showChaos ? Color.clear : accent)
+                    .overlay(
+                        Circle().strokeBorder(
+                            showChaos ? Color(UIColor.tertiaryLabel) : Color.clear,
+                            lineWidth: 0.5
+                        )
+                    )
+                    .frame(width: 6, height: 6)
+                    .animation(.easeInOut(duration: 0.3), value: showChaos)
+
+                Circle()
+                    .fill(showChaos ? Color(hex: "#8B5CF6") : Color.clear)
+                    .overlay(
+                        Circle().strokeBorder(
+                            showChaos ? Color.clear : Color(UIColor.tertiaryLabel),
+                            lineWidth: 0.5
+                        )
+                    )
+                    .frame(width: 6, height: 6)
+                    .animation(.easeInOut(duration: 0.3), value: showChaos)
+            }
+            .padding(.top, 8)
+
+            // ── Pointer below card (long press / chaos). Follows the
+            // same amber → purple colour swap as the tap and shake
+            // pointers above so all three transition in lockstep.
+            let bottomPointerColor: Color = showChaos
+                ? Color(hex: "#8B5CF6")
+                : accent
+            VStack(spacing: 0) {
+                Triangle()
+                    .fill(bottomPointerColor)
+                    .frame(width: 8, height: 6)
+                    .rotationEffect(.degrees(180))
+                Rectangle()
+                    .fill(bottomPointerColor)
+                    .frame(width: 1.5, height: 18)
+                Text(showChaos ? "swipe left for chaos" : "long press")
+                    .font(.system(size: 11, weight: .semibold))
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 5)
+                    .background(Capsule().fill(bottomPointerColor))
+                    .animation(.easeInOut(duration: 0.2), value: showChaos)
+            }
+            .frame(height: 54)
+            // Match tap/shake's bounce direction so all three pointers
+            // bob in unison; 0.3s delay creates a subtle wave around
+            // the card (tap → shake → bottom).
+            .offset(y: pointerBounceLocal)
+            .animation(
+                .easeInOut(duration: 0.8).repeatForever(autoreverses: true).delay(0.3),
+                value: pointerBounceLocal
+            )
+            .animation(.easeInOut(duration: 0.35), value: showChaos)
+        }
+        .onChange(of: appear) { _, newVal in
+            if newVal {
+                showChaos = false
+                pointerBounceLocal = 0
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    withAnimation(.easeInOut(duration: 0.8).repeatForever(autoreverses: true)) {
+                        pointerBounceLocal = -6
+                    }
+                }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
+                    startChaosLoop()
+                }
+            } else {
+                showChaos = false
+                pointerBounceLocal = 0
+            }
+        }
+    }
+
+    /// Continuously alternates the dice mockup between normal and chaos
+    /// states (3s in each) while the slide is visible. Self-terminates
+    /// when `appear` flips to false — every nested dispatch re-checks the
+    /// guard so no orphaned animations run after the slide leaves.
+    private func startChaosLoop() {
+        guard appear else { return }
+
+        withAnimation(.spring(response: 0.45, dampingFraction: 0.75)) {
+            showChaos = true
+        }
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
+            guard appear else { return }
+            withAnimation(.spring(response: 0.45, dampingFraction: 0.75)) {
+                showChaos = false
+            }
+
+            DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
+                guard appear else { return }
+                startChaosLoop()
+            }
+        }
+    }
+
+    // ── Pointer-column helpers (label → vertical line → arrowhead) ──
+
+    private func pointerColumnDown(label: String, color: Color) -> some View {
+        VStack(spacing: 0) {
+            Text(label)
+                .font(.system(size: 11, weight: .semibold))
+                .foregroundStyle(.white)
+                .padding(.horizontal, 10)
+                .padding(.vertical, 5)
+                .background(Capsule().fill(color))
+            Rectangle()
+                .fill(color)
+                .frame(width: 1.5, height: 18)
+            Triangle()
+                .fill(color)
+                .frame(width: 8, height: 6)
+        }
+    }
+
+    // ── Normal card ──
+
+    private var normalCard: some View {
+        HStack(alignment: .center, spacing: 14) {
+            VStack(alignment: .leading, spacing: 4) {
+                Text("Roll the dice")
+                    .font(.system(size: 18, weight: .semibold, design: .rounded))
+                    .foregroundStyle(.white)
+                Text("Normal mode")
+                    .font(.system(size: 11, weight: .regular, design: .rounded))
+                    .foregroundStyle(.white.opacity(0.65))
+                HStack(spacing: 4) {
+                    Text("Liter → Teardrop")
+                        .font(.system(size: 9, weight: .semibold, design: .rounded))
+                        .foregroundStyle(.white)
+                }
+                .padding(.horizontal, 10)
+                .padding(.vertical, 4)
+                .background(
+                    Color.white.opacity(0.12),
+                    in: RoundedRectangle(cornerRadius: 8, style: .continuous)
+                )
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            Spacer()
+            diceFaceView(isPurple: false)
+        }
+        .padding(20)
+        .background(cardBackground(isChaos: false))
+        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .strokeBorder(Color.white.opacity(0.10), lineWidth: 0.5)
+        )
+        .frame(maxWidth: .infinity)
+    }
+
+    // ── Chaos card ──
+
+    private var chaosCard: some View {
+        HStack(alignment: .center, spacing: 14) {
+            VStack(alignment: .leading, spacing: 4) {
+                HStack(spacing: 7) {
+                    Text("Roll the dice")
+                        .font(.system(size: 18, weight: .semibold, design: .rounded))
+                        .foregroundStyle(.white)
+                    Text("CHAOS")
+                        .font(.system(size: 10, weight: .bold, design: .rounded))
+                        .foregroundStyle(Color(hex: "#C4B5FD"))
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 2)
+                        .background(
+                            Capsule()
+                                .fill(Color(hex: "#8B5CF6").opacity(0.25))
+                                .overlay(
+                                    Capsule().strokeBorder(
+                                        Color(hex: "#8B5CF6").opacity(0.45),
+                                        lineWidth: 0.5
+                                    )
+                                )
+                        )
+                }
+                Text("The universe decides.")
+                    .font(.system(size: 11, weight: .regular, design: .rounded))
+                    .foregroundStyle(Color(hex: "#C4B5FD").opacity(0.8))
+                HStack(spacing: 4) {
+                    Text("Volume")
+                        .font(.system(size: 9, weight: .bold, design: .rounded))
+                        .foregroundStyle(Color(hex: "#C4B5FD"))
+                    Text("·")
+                        .font(.system(size: 9, weight: .regular, design: .rounded))
+                        .foregroundStyle(Color.white.opacity(0.4))
+                    Text("Liter ⇄ Teardrop")
+                        .font(.system(size: 9, weight: .semibold, design: .rounded))
+                        .foregroundStyle(.white)
+                }
+                .padding(.horizontal, 10)
+                .padding(.vertical, 4)
+                .background(
+                    Color.white.opacity(0.12),
+                    in: RoundedRectangle(cornerRadius: 8, style: .continuous)
+                )
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            Spacer()
+            diceFaceView(isPurple: true)
+        }
+        .padding(20)
+        .background(cardBackground(isChaos: true))
+        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .strokeBorder(Color(hex: "#8B5CF6").opacity(0.3), lineWidth: 0.5)
+        )
+        .frame(maxWidth: .infinity)
+    }
+
+    // ── Card background: accent + volume sine pattern + spotlight ──
+
+    private func cardBackground(isChaos: Bool) -> some View {
+        ZStack {
+            if isChaos {
+                Color(hex: "#0D0D1A")
+            } else {
+                accent
+            }
+            CategoryTilePattern(
+                category: .volume,
+                color: .white,
+                patternOpacity: isChaos ? 0.06 : 0.14
+            )
+            // Spotlight vignette: always uses the amber accent so the
+            // gradient remains visible against both the amber base and
+            // the chaos-dark background.
+            RadialGradient(
+                colors: [
+                    Color.clear,
+                    accent.opacity(isChaos ? 0.85 : 0.60)
+                ],
+                center: UnitPoint(x: 0.82, y: 0.50),
+                startRadius: 18,
+                endRadius: 240
+            )
+        }
+    }
+
+    // ── Die face (5-pip) ──
+
+    private func diceFaceView(isPurple: Bool) -> some View {
+        let pipColor: Color = isPurple
+            ? Color(hex: "#C4B5FD")
+            : .white.opacity(0.85)
+        let bgColor: Color = isPurple
+            ? Color(hex: "#8B5CF6").opacity(0.2)
+            : .white.opacity(0.18)
+        let borderColor: Color = isPurple
+            ? Color(hex: "#8B5CF6").opacity(0.4)
+            : .clear
+
+        return ZStack {
+            RoundedRectangle(cornerRadius: 11, style: .continuous)
+                .fill(bgColor)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 11, style: .continuous)
+                        .strokeBorder(borderColor, lineWidth: 0.5)
+                )
+                .frame(width: 52, height: 52)
+
+            VStack(spacing: 4) {
+                HStack(spacing: 4) { pip(pipColor); pip(.clear); pip(pipColor) }
+                HStack(spacing: 4) { pip(.clear); pip(pipColor); pip(.clear) }
+                HStack(spacing: 4) { pip(pipColor); pip(.clear); pip(pipColor) }
+            }
+        }
+        .frame(width: 52, height: 52)
+    }
+
+    private func pip(_ color: Color) -> some View {
+        Circle()
+            .fill(color)
+            .frame(width: 6, height: 6)
     }
 }
 

@@ -199,9 +199,15 @@ struct AppFeaturesView: View {
                 )
                 featureRow(
                     icon: "dice.fill",
-                    color: Color(hex: "#3D6B4A"),
-                    title: "Random conversions",
-                    description: "Shake your phone to get a surprise conversion in the current category."
+                    color: Color(hex: "#AF7D2A"),
+                    title: "Roll the dice",
+                    description: "Tap the dice card for a random unit. Long press or shake to randomise both FROM and TO. Works within the current category."
+                )
+                featureRow(
+                    icon: "bolt.fill",
+                    color: Color(hex: "#8B5CF6"),
+                    title: "Chaos mode",
+                    description: "Swipe the dice card left to enter chaos mode. Rolls pull from every category at once — anything goes."
                 )
             } header: {
                 sectionHeader("Extras")

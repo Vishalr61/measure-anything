@@ -29,9 +29,13 @@ struct ConverterWorkspaceBody: View {
     @FocusState private var valueFieldFocused: Bool
     @State private var amountSnapshotBeforeEditing: String?
     @State private var swapRotation: Double = 0
+    @State private var fromCardScale: CGFloat = 1.0
     @State private var swapPillScale: CGFloat = 1
     @State private var isSwapPillAnimating: Bool = false
     @State private var showFromPicker = false
+    /// Snapshot of suggestion pill IDs frozen at the start of a roll so
+    /// the pills don't update mid-animation while FROM/TO are mutating.
+    @State private var frozenSuggestions: [String] = []
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -65,7 +69,8 @@ struct ConverterWorkspaceBody: View {
             vm.sync(customUnits: customUnits)
         }
         .onShake {
-            vm.requestSingleRollFromShake()
+            // Shake now fires the dual-roll path — both FROM and TO change.
+            vm.requestDualRollFromShake()
         }
         .onAppear {
             if amountSnapshotBeforeEditing == nil {
@@ -80,6 +85,23 @@ struct ConverterWorkspaceBody: View {
             } else {
                 vm.clearInputEditSnapshot()
                 amountSnapshotBeforeEditing = nil
+            }
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                fromCardScale = isFocused ? 1.02 : 1.0
+            }
+        }
+        // Snapshot suggestion pills at the start of every roll so they
+        // don't churn while units cycle. Refresh once the roll lands.
+        .onChange(of: vm.isDiceRollInProgress) { _, isRolling in
+            if isRolling {
+                let raw = ConversionHistory.shared.suggestions(
+                    for: vm.selectedFromUnitID, limit: 12)
+                frozenSuggestions = raw.filter { $0 != vm.selectedToUnitID }
+            } else {
+                // Snap to new suggestions immediately — no delay, no animation.
+                let raw = ConversionHistory.shared.suggestions(
+                    for: vm.selectedFromUnitID, limit: 12)
+                frozenSuggestions = raw.filter { $0 != vm.selectedToUnitID }
             }
         }
         // Limit the input to 9 numeric digits + one decimal point (10 chars max).
@@ -295,7 +317,9 @@ struct ConverterWorkspaceBody: View {
     }
 
     private var expandedToCard: some View {
-        let toName = vm.toUnit?.name ?? "—"
+        // Slot-machine override takes precedence during a chaos roll so the
+        // TO pill cycles random names; falls back to real unit name when nil.
+        let toName = vm.slotMachineToName ?? vm.toUnit?.name ?? "—"
         return ToCard(
             toUnitName: toName,
             resultText: toRowDisplayString,
@@ -344,15 +368,25 @@ struct ConverterWorkspaceBody: View {
             }
 
             if ConversionHistory.shared.totalRecordedConversions >= 2 {
-                let raw         = ConversionHistory.shared.suggestions(for: vm.selectedFromUnitID, limit: 12)
-                let suggestions = raw.filter { $0 != vm.selectedToUnitID }
-                if !suggestions.isEmpty {
+                // Use frozenSuggestions during a roll to prevent pills
+                // from updating mid-animation; live suggestions resume
+                // once the roll lands and the onChange observer below
+                // refreshes the snapshot.
+                let displaySuggestions: [String] = vm.isDiceRollInProgress
+                    ? frozenSuggestions
+                    : {
+                        let raw = ConversionHistory.shared.suggestions(
+                            for: vm.selectedFromUnitID, limit: 12)
+                        return raw.filter { $0 != vm.selectedToUnitID }
+                    }()
+
+                if !displaySuggestions.isEmpty {
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 6) {
                             Text("→")
                                 .font(.system(size: 10))
                                 .foregroundStyle(Color(hex: "#B4B2A9"))
-                            ForEach(Array(suggestions.prefix(3)), id: \.self) { unitId in
+                            ForEach(Array(displaySuggestions.prefix(3)), id: \.self) { unitId in
                                 if let unit = vm.availableUnits.first(where: { $0.id == unitId }) {
                                     Button {
                                         Haptics.tap()
@@ -372,6 +406,7 @@ struct ConverterWorkspaceBody: View {
                         }
                         .padding(.top, 6)
                     }
+                    .opacity(1.0)
                 }
             }
         }
@@ -385,6 +420,7 @@ struct ConverterWorkspaceBody: View {
             x: 0, y: ConverterLayout.referenceCardShadowY
         )
         .contentShape(Rectangle())
+        .scaleEffect(fromCardScale)
         // Tapping anywhere on the card focuses the text field.
         .onTapGesture {
             valueFieldFocused = true
@@ -392,7 +428,11 @@ struct ConverterWorkspaceBody: View {
     }
 
     private func unitMenuPill(selection: Binding<UnitDefinition.ID>) -> some View {
-        let name = vm.fromUnit?.name ?? "—"
+        // Slot-machine override takes precedence during a chaos roll so the
+        // pill cycles through random unit names where the user is already
+        // looking; falls back to the real unit name when nil. The vertical
+        // slot-reel transition lives inside UnitPickerPillButton.
+        let name = vm.slotMachineFromName ?? vm.fromUnit?.name ?? "—"
         return UnitPickerPillButton(name: name, accent: categoryAccent) {
             prepareUnitPickerPresentation()
             DispatchQueue.main.async { showFromPicker = true }

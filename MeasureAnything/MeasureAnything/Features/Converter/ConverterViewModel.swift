@@ -103,7 +103,19 @@ final class ConverterViewModel: ObservableObject {
 
     // MARK: - Dice roll (random TO unit; long-press randomises both absurd units)
 
+    @Published var isChaosMode: Bool = false
+    /// Slot machine display overrides — set by `DiceRollCard.runSlotMachine()`
+    /// during a chaos roll, cleared by `rollDiceChaos()` when the real result
+    /// lands. UI views (FROM pill, TO pill, category chip) prefer these
+    /// override values when non-nil so the cycling names appear in their
+    /// usual locations rather than only in the dice card badge.
+    @Published var slotMachineFromName: String? = nil
+    @Published var slotMachineToName: String? = nil
     @Published var isDiceRolling: Bool = false
+    /// True from roll-trigger to landing (regardless of which roll path).
+    /// Views can observe this to freeze derived UI (suggestion pills,
+    /// fact cards, etc.) so they don't update mid-animation.
+    @Published var isDiceRollInProgress: Bool = false
     @Published var diceDisplayFace: Int = 5
     @Published var diceRotationDegrees: Double = UnitCategory.length.converterDiceRestDegrees
     @Published var showDiceSubtitle: Bool = false
@@ -113,6 +125,10 @@ final class ConverterViewModel: ObservableObject {
     // Long-press discoverability hint is driven by `DiceRollCard` + UserDefaults.
     /// Incremented when the user shakes the device so `DiceRollCard` can run the same path as a single tap (animations + `rollDice()`).
     @Published private(set) var shakeSingleRollRequest: UInt = 0
+    /// Increments when shake-detection wants the card to fire its dual-roll
+    /// path (both FROM and TO change). Decoupled from `shakeSingleRollRequest`
+    /// so existing callers/observers of the single-roll variant stay intact.
+    @Published private(set) var shakeDualRollRequest: UInt = 0
 
     private var diceFlashTimer: Timer?
     private var diceLongPressHintDismissWorkItem: DispatchWorkItem?
@@ -315,7 +331,17 @@ final class ConverterViewModel: ObservableObject {
         shakeSingleRollRequest &+= 1
     }
 
+    /// Called when the user shakes the device on the converter and the card
+    /// should fire its dual-roll path (both FROM and TO randomise).
+    func requestDualRollFromShake() {
+        shakeDualRollRequest &+= 1
+    }
+
     func rollDice() {
+        // Mark a roll as in progress so derived UI (suggestion pills,
+        // fact card, etc.) can freeze until the result lands.
+        isDiceRollInProgress = true
+
         // Make dice roll interruptible so the user can spam taps.
         diceRollToken = UUID()
         let token = diceRollToken
@@ -347,8 +373,10 @@ final class ConverterViewModel: ObservableObject {
         // Keep dice resting tilt stable; the dice face animation is decorative and handled in `DiceRollCard`.
         syncDiceTiltToCategory(animated: true)
 
-        // Land.
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.72) {
+        // Land — extended to 1.4s so the in-card slot-machine prelude
+        // (3 cycles × 0.37s ≈ 1.11s) gets a clean ~0.29s settle before
+        // the real TO unit snaps in.
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.4) {
             MainActor.assumeIsolated {
                 guard self.diceRollToken == token else { return }
                 self.diceDisplayFace = newFace
@@ -377,16 +405,28 @@ final class ConverterViewModel: ObservableObject {
                     self.diceLandedUnitName = ""
                 }
 
+                // Defer the override clear by one runloop so SwiftUI renders
+                // the real TO name first, THEN drops the slot override —
+                // avoids a one-frame "slot name → blank → real name" flash
+                // and lets the pill's vertical slot transition crossfade
+                // smoothly from the last cycled name to the landed name.
+                DispatchQueue.main.async {
+                    self.slotMachineToName = nil
+                }
+
                 withAnimation(.easeIn(duration: 0.25)) {
                     self.showDiceSubtitle = (self.diceLandedUnitName.isEmpty == false)
                 }
                 self.isDiceRolling = false
+                self.isDiceRollInProgress = false
             }
         }
     }
 
     /// Long-press (~0.25s `minimumDuration` on `DiceRollCard`): randomises both FROM and TO to distinct absurd units in the current category.
     func rollDiceDual() {
+        isDiceRollInProgress = true
+
         func absurdPoolForDual() -> [UnitDefinition] {
             registry.units(in: selectedCategory, includeKinds: [.absurd])
                 .filter { $0.category == selectedCategory }
@@ -394,7 +434,10 @@ final class ConverterViewModel: ObservableObject {
 
         let pool = absurdPoolForDual()
         // Silent no-op: must not cancel an in-flight single roll or invalidate timers.
-        guard pool.count >= 2 else { return }
+        guard pool.count >= 2 else {
+            isDiceRollInProgress = false
+            return
+        }
 
         diceRollToken = UUID()
         let token = diceRollToken
@@ -407,7 +450,6 @@ final class ConverterViewModel: ObservableObject {
         showDiceSubtitle = false
         diceLandedUnitName = ""
         diceSubtitleIsDualFormat = false
-        inputText = "1"
 
         let newFace = Int.random(in: 1...6)
         let pickedFrom: UnitDefinition? = Self.weightedRandomUnit(from: pool)
@@ -420,14 +462,20 @@ final class ConverterViewModel: ObservableObject {
         // Keep dice resting tilt stable; the dice face animation is decorative and handled in `DiceRollCard`.
         syncDiceTiltToCategory(animated: true)
 
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+        // Land — extended to 1.6s so the in-card slot-machine prelude
+        // (FROM 4×0.37s = 1.48s, TO offset 0.18s = 1.66s) lines up with
+        // the real units snapping in.
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.6) {
             MainActor.assumeIsolated {
                 guard self.diceRollToken == token else { return }
                 self.diceDisplayFace = newFace
 
                 let allowedAbsurd = absurdPoolForDual()
                 guard allowedAbsurd.count >= 2 else {
+                    self.slotMachineFromName = nil
+                    self.slotMachineToName = nil
                     self.isDiceRolling = false
+                    self.isDiceRollInProgress = false
                     return
                 }
 
@@ -463,10 +511,141 @@ final class ConverterViewModel: ObservableObject {
                     self.diceSubtitleIsDualFormat = false
                 }
 
+                // Defer override clears by one runloop so the pills get
+                // the real FROM/TO names rendered first, then the slot
+                // overrides drop — smooth crossfade, no blank flash.
+                DispatchQueue.main.async {
+                    self.slotMachineFromName = nil
+                    self.slotMachineToName = nil
+                }
+
                 withAnimation(.easeIn(duration: 0.25)) {
                     self.showDiceSubtitle = !self.diceLandedUnitName.isEmpty
                 }
                 self.isDiceRolling = false
+                self.isDiceRollInProgress = false
+            }
+        }
+    }
+
+    // MARK: – Chaos roll
+    //
+    // Pulls absurd units from EVERY category, picks a random FROM and TO,
+    // switches the converter's selectedCategory to match, and labels the
+    // result with a "CATEGORY · fromName ⇄ toName" subtitle. Used by the
+    // dice card when isChaosMode is true.
+    func rollDiceChaos() {
+        isDiceRollInProgress = true
+
+        // Pool: all absurd units across ALL categories
+        func chaosPool() -> [UnitDefinition] {
+            UnitCategory.allCases.flatMap { cat in
+                registry.units(in: cat, includeKinds: [.absurd])
+            }
+        }
+
+        let pool = chaosPool()
+        guard pool.count >= 2 else {
+            isDiceRollInProgress = false
+            return
+        }
+
+        diceRollToken = UUID()
+        let token = diceRollToken
+        diceFlashTimer?.invalidate()
+        diceFlashTimer = nil
+
+        isDiceRolling = true
+        showDiceSubtitle = false
+        diceLandedUnitName = ""
+        diceSubtitleIsDualFormat = false
+
+        // Pre-select outcome before animation
+        let pickedFrom = Self.weightedRandomUnit(from: pool)
+        let pickedTo: UnitDefinition? = {
+            guard let f = pickedFrom else { return nil }
+            let rest = pool.filter { $0.id != f.id }
+            return Self.weightedRandomUnit(from: rest)
+        }()
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+            MainActor.assumeIsolated {
+                guard self.diceRollToken == token else { return }
+
+                let freshPool = chaosPool()
+                guard freshPool.count >= 2 else {
+                    self.slotMachineFromName = nil
+                    self.slotMachineToName = nil
+                    self.isDiceRolling = false
+                    self.isDiceRollInProgress = false
+                    return
+                }
+
+                let resolvedFrom: UnitDefinition? = {
+                    if let f = pickedFrom,
+                       freshPool.contains(where: { $0.id == f.id }) {
+                        return f
+                    }
+                    return Self.weightedRandomUnit(from: freshPool)
+                }()
+
+                let resolvedTo: UnitDefinition? = {
+                    guard let from = resolvedFrom else { return nil }
+                    let candidates = freshPool.filter { $0.id != from.id }
+                    if let t = pickedTo,
+                       candidates.contains(where: { $0.id == t.id }) {
+                        return t
+                    }
+                    return Self.weightedRandomUnit(from: candidates)
+                }()
+
+                guard let from = resolvedFrom,
+                      let to = resolvedTo,
+                      from.id != to.id else {
+                    self.slotMachineFromName = nil
+                    self.slotMachineToName = nil
+                    self.isDiceRolling = false
+                    self.isDiceRollInProgress = false
+                    return
+                }
+
+                // Switch category to match the landed FROM unit. Wrap with
+                // isApplyingFavoriteRestore guard so the published-property
+                // didSet observers don't fire reactive recompute mid-update.
+                self.isApplyingFavoriteRestore = true
+                self.selectedCategory = from.category
+                self.selectedFromUnitID = from.id
+                self.selectedToUnitID = to.id
+                self.isApplyingFavoriteRestore = false
+                self.syncDiceTiltToCategory(animated: true)
+                self.recompute()
+
+                // Clear slot-machine overrides so UI snaps to the real
+                // landed unit names atomically with the category switch.
+                self.slotMachineFromName = nil
+                self.slotMachineToName = nil
+
+                // Edge case 8: if the user exited chaos mid-roll, don't
+                // pollute the normal-mode badge with the chaos-format string.
+                guard self.isChaosMode else {
+                    self.isDiceRolling = false
+                    self.isDiceRollInProgress = false
+                    return
+                }
+
+                // Build result label: "TEMP·Surface of Venus⇄Baked bread"
+                let categoryPrefix = from.category.displayName.uppercased()
+                self.diceLandedUnitName = "\(categoryPrefix)·\(from.name)⇄\(to.name)"
+                self.diceSubtitleIsDualFormat = true
+
+                withAnimation(.easeIn(duration: 0.25)) {
+                    self.showDiceSubtitle = true
+                }
+                self.isDiceRolling = false
+                self.isDiceRollInProgress = false
+
+                let impact = UIImpactFeedbackGenerator(style: .medium)
+                impact.impactOccurred()
             }
         }
     }

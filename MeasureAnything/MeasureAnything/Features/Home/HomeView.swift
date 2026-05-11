@@ -1,4 +1,5 @@
 import Photos
+import StoreKit
 import SwiftData
 import SwiftUI
 import UIKit
@@ -25,6 +26,14 @@ struct HomeView: View {
     @State private var factCardSheetItem: FactCardSheetItem?
     @State private var factCardSheetDetent: PresentationDetent = .large
     @State private var isSharePreviewVisible = false
+
+    /// SwiftUI rating-prompt action (iOS 16+). Already used in
+    /// `SettingsTabView` for the manual "Rate on App Store" button;
+    /// here it's invoked automatically at conversion-count milestones.
+    /// iOS rate-limits to 3 prompts per 365 days per user — additional
+    /// calls silently no-op, so we don't need our own cooldown.
+    @Environment(\.requestReview) private var requestReview
+    @AppStorage("lastReviewPromptThreshold") private var lastReviewPromptThreshold: Int = 0
 
     private var categoryAccent: Color {
         ConverterCategoryAccent.accent(for: vm.selectedCategory)
@@ -88,6 +97,28 @@ struct HomeView: View {
         scrollToConverterToken &+= 1
     }
 
+    /// Fires `requestReview()` when the user crosses a conversion-count
+    /// milestone (10, 50, 150). Each tier is gated by `@AppStorage` so a
+    /// rapid burst of conversions (e.g. spam-tapping the dice card) only
+    /// triggers one prompt per tier. iOS itself caps to 3 prompts/365d.
+    private func checkAndRequestReviewIfNeeded() {
+        let count = ConversionHistory.shared.totalRecordedConversions
+        let thresholds = [10, 50, 150]
+
+        guard let nextThreshold = thresholds.first(where: { $0 > lastReviewPromptThreshold }) else { return }
+        guard count >= nextThreshold else { return }
+
+        // Bump the stored threshold first so a rapid follow-up call
+        // (e.g. another conversion in the same frame) can't double-fire.
+        lastReviewPromptThreshold = nextThreshold
+
+        // Slight delay so the prompt doesn't slam onto a roll-landing
+        // animation or result transition.
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+            requestReview()
+        }
+    }
+
     var body: some View {
         ZStack {
             VStack(spacing: 0) {
@@ -136,6 +167,13 @@ struct HomeView: View {
                     for: nil
                 )
             }
+        }
+        // Each successful conversion result feeds the review-prompt
+        // milestone gate. Only successful (non-nil) results — empty/invalid
+        // input is a no-op.
+        .onChange(of: vm.conversionResult) { _, newResult in
+            guard newResult != nil else { return }
+            checkAndRequestReviewIfNeeded()
         }
         .sheet(isPresented: $showFavorites) {
             FavoritesListView(registry: vm.currentRegistry, accent: categoryAccent) { fav in

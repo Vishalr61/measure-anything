@@ -19,18 +19,35 @@ struct UnitPickerPillButton: View {
         .accessibilityHint("Choose a unit")
     }
 
+    /// Slot-machine vertical reel transition: new name slides in from the
+    /// bottom while the old name slides out the top, both with opacity. The
+    /// surrounding ZStack + .clipped() keep the pill's bounds stable.
+    private var slotTransition: AnyTransition {
+        .asymmetric(
+            insertion: .move(edge: .bottom).combined(with: .opacity),
+            removal: .move(edge: .top).combined(with: .opacity)
+        )
+    }
+
     @ViewBuilder
     private var content: some View {
         switch style {
         case .capsule:
             HStack(spacing: 8) {
-                Text(name)
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(accent.opacity(0.92))
-                    .lineLimit(2)
-                    .minimumScaleFactor(0.6)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .multilineTextAlignment(.trailing)
+                ZStack {
+                    Text(name)
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(accent.opacity(0.92))
+                        .lineLimit(2)
+                        .minimumScaleFactor(0.6)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .multilineTextAlignment(.trailing)
+                        .id(name)
+                        .transition(slotTransition)
+                }
+                .clipped()
+                .animation(.easeInOut(duration: 0.12), value: name)
+
                 Image(systemName: "chevron.down")
                     .font(.caption.weight(.bold))
                     .foregroundStyle(accent.opacity(0.65))
@@ -49,12 +66,19 @@ struct UnitPickerPillButton: View {
 
         case .inline:
             HStack(spacing: 3) {
-                Text(name)
-                    .font(.system(size: 12, weight: .semibold))
-                    .lineLimit(2)
-                    .minimumScaleFactor(0.6)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .multilineTextAlignment(.trailing)
+                ZStack {
+                    Text(name)
+                        .font(.system(size: 12, weight: .semibold))
+                        .lineLimit(2)
+                        .minimumScaleFactor(0.6)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .multilineTextAlignment(.trailing)
+                        .id(name)
+                        .transition(slotTransition)
+                }
+                .clipped()
+                .animation(.easeInOut(duration: 0.12), value: name)
+
                 Image(systemName: "chevron.up.chevron.down")
                     .font(.system(size: 9))
             }
