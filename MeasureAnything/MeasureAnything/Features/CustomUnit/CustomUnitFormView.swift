@@ -26,7 +26,6 @@ struct CustomUnitFormView: View {
     @State private var previewLine1: String = ""
     @State private var previewLine2: String = ""
     @State private var previewTask: Task<Void, Never>?
-    @State private var showTemperatureAlert = false
     @State private var valueEditSession = ValueEditSession()
 
     @FocusState private var valueFieldFocused: Bool
@@ -233,40 +232,9 @@ struct CustomUnitFormView: View {
                     .accessibilityAddTraits(selected ? .isSelected : [])
                 }
 
-                temperatureComingSoonChip
             }
             .padding(.vertical, 4)
         }
-        .alert("Temperature support coming soon", isPresented: $showTemperatureAlert) {
-            Button("Got it", role: .cancel) {}
-        } message: {
-            Text("Temperature uses non-linear conversions (offsets, not just multipliers). Custom temperature units are on the roadmap for a future update.")
-        }
-    }
-
-    private var temperatureComingSoonChip: some View {
-        Button {
-            Haptics.tap()
-            showTemperatureAlert = true
-        } label: {
-            HStack(spacing: 6) {
-                Text("Temperature")
-                    .font(.subheadline.weight(.semibold))
-                Text("SOON")
-                    .font(.system(size: 8, weight: .bold))
-                    .padding(.horizontal, 5)
-                    .padding(.vertical, 2)
-                    .background(Capsule().fill(Color(.systemGray3)))
-                    .foregroundStyle(.white)
-            }
-            .padding(.horizontal, 14)
-            .padding(.vertical, 8)
-            .background(Capsule().fill(Color(.systemGray5).opacity(0.6)))
-            .foregroundStyle(Color(.systemGray3))
-        }
-        .buttonStyle(.plain)
-        .accessibilityLabel("Temperature, coming soon")
-        .accessibilityHint("Double-tap to learn more")
     }
 
     private var referenceUnitPill: some View {

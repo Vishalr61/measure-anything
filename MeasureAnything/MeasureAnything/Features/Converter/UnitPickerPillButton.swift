@@ -11,7 +11,10 @@ struct UnitPickerPillButton: View {
     let onTap: () -> Void
 
     var body: some View {
-        Button(action: onTap) {
+        Button {
+            Haptics.tap()
+            onTap()
+        } label: {
             content
         }
         .buttonStyle(.plain)
