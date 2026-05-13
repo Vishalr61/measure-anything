@@ -98,7 +98,7 @@ struct SettingsTabView: View {
     }
 
     private func sendFeedback() {
-        let email = "feedback@measureanything.app"
+        let email = "vishalr6887@gmail.com"
         var components = URLComponents()
         components.scheme = "mailto"
         components.path = email

@@ -200,6 +200,7 @@ struct GlobalUnitSearchBody: View {
                 if isExpanded {
                     ToolbarItem(placement: .topBarLeading) {
                         Button {
+                            Haptics.tap()
                             withAnimation(.easeInOut(duration: 0.2)) {
                                 activeCategory = nil
                                 showAllUnits = false
@@ -207,6 +208,8 @@ struct GlobalUnitSearchBody: View {
                         } label: {
                             Image(systemName: "chevron.left")
                                 .font(.system(size: 14, weight: .semibold))
+                                .frame(width: 44, height: 44)
+                                .contentShape(Rectangle())
                         }
                     }
                 }

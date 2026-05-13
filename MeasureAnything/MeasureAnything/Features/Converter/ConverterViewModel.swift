@@ -419,6 +419,9 @@ final class ConverterViewModel: ObservableObject {
                 }
                 self.isDiceRolling = false
                 self.isDiceRollInProgress = false
+
+                let landImpact = UIImpactFeedbackGenerator(style: .medium)
+                landImpact.impactOccurred()
             }
         }
     }
@@ -524,6 +527,9 @@ final class ConverterViewModel: ObservableObject {
                 }
                 self.isDiceRolling = false
                 self.isDiceRollInProgress = false
+
+                let landImpact = UIImpactFeedbackGenerator(style: .medium)
+                landImpact.impactOccurred()
             }
         }
     }
@@ -554,6 +560,9 @@ final class ConverterViewModel: ObservableObject {
         let token = diceRollToken
         diceFlashTimer?.invalidate()
         diceFlashTimer = nil
+
+        let impact = UIImpactFeedbackGenerator(style: .light)
+        impact.impactOccurred()
 
         isDiceRolling = true
         showDiceSubtitle = false

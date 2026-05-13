@@ -157,6 +157,10 @@ struct HomeView: View {
         .animation(.easeInOut(duration: 0.2), value: isSharePreviewVisible)
         .background(homeRootBackground)
         .onChange(of: homeTab) { old, new in
+            // Light haptic on every tab switch.
+            if old != new {
+                Haptics.tap()
+            }
             // Ensure keyboard state is fully reset before tab transitions.
             if old == .explore && new != .explore {
                 exploreResetToken &+= 1
