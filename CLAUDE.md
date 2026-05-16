@@ -85,8 +85,9 @@ measure-anything/
 │       │   └── FactCardStore.swift
 │       ├── Models/
 │       │   └── FactCardContent.swift
+│       ├── ContentView.swift                      # Unused Xcode boilerplate stub — do not reference
 │       └── MeasureAnythingApp.swift
-├── MeasureAnythingApp/                            # Swift package: conversion engine
+├── MeasureAnythingApp/                            # Swift package: MeasureAnythingCore + MeasureAnythingTaxonomy
 │   └── Core/
 │       ├── Conversion/
 │       │   ├── ConverterEngine.swift              # PROTECTED — do not touch
@@ -105,8 +106,10 @@ measure-anything/
 │           ├── TaxonomyModels.swift
 │           ├── TaxonomyRegistry.swift
 │           └── TaxonomySearch.swift
+├── content-pipeline/                              # PROTECTED — Python Airtable data pipeline
 ├── scripts/                                       # PROTECTED — Airtable pipeline
 ├── taxonomy/                                      # PROTECTED — Node.js taxonomy tooling
+├── Docs/                                          # Reference docs (absurd-unit-sources.md etc.)
 └── Tests/
 ├── MeasureAnythingCoreTests/
 └── MeasureAnythingTaxonomyTests/
@@ -168,7 +171,8 @@ Always resolve through `ConverterCategoryAccent.swift`.
 - Both the nav bar star and the TO card SAVE button toggle the pair
 - Filled star + "SAVED" = favourited (accent colour)
 - Empty star + "SAVE" = unfavourited (default colour)
-- `isCurrentPairFavourited` recomputes automatically when fromUnit or toUnit changes
+- `isCurrentPairAlreadyFavorite` (HomeView) recomputes via `@Query` live favourites array when fromUnit or toUnit changes
+- `canSaveCurrentPairAsFavorite` (ViewModel) is the guard used to enable/disable the save action
 
 **Did You Know card:**
 - Actively renders `unit.funFact` in v1 via `DidYouKnowCard`
@@ -203,7 +207,7 @@ Always resolve through `ConverterCategoryAccent.swift`.
 - `UnitScaleGroups.swift`
 - `AppTaxonomyStore.swift`
 - `MeasureAnythingApp.swift`
-- Anything in `scripts/` or `taxonomy/`
+- Anything in `scripts/`, `taxonomy/`, or `content-pipeline/`
 
 ---
 
